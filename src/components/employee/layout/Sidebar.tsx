@@ -1,0 +1,155 @@
+"use client";
+import { useState } from "react";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  BarChart3,
+  TrendingUp,
+  BookOpen,
+  Menu,
+  X,
+  Moon,
+  Sun,
+} from "lucide-react";
+// import { NavLink, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+// import { useTheme } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const navigation = [
+  {
+    name: "Dashboard",
+    href: "/employee-dashboard",
+    icon: LayoutDashboard,
+    description: "Overview and recent activity",
+  },
+  {
+    name: "Assessment",
+    href: "/employee-dashboard/assessment",
+    icon: ClipboardList,
+    description: "Take career assessments",
+  },
+  {
+    name: "Results",
+    href: "/employee-dashboard/results",
+    icon: BarChart3,
+    description: "View your Genius Factor profile",
+  },
+  {
+    name: "Career Pathways",
+    href: "/employee-dashboard/career-Pathways",
+    icon: TrendingUp,
+    description: "Explore career recommendations",
+  },
+  {
+    name: "Development",
+    href: "/employee-dashboard/development",
+    icon: BookOpen,
+    description: "Skill development roadmap",
+  },
+];
+
+export function AppSidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = usePathname();
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col h-screen bg-card border-r border-border transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        {!isCollapsed && (
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-lg">TalentIQ</span>
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="ml-auto"
+        >
+          {isCollapsed ? (
+            <Menu className="w-4 h-4" />
+          ) : (
+            <X className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
+        {navigation.map((item) => {
+          const isActive = location === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <item.icon
+                className={cn(
+                  "w-5 h-5 flex-shrink-0",
+                  isActive
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground group-hover:text-accent-foreground"
+                )}
+              />
+              {!isCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium">{item.name}</div>
+                  {!isActive && (
+                    <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                      {item.description}
+                    </div>
+                  )}
+                </div>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-border">
+        <Button
+          variant="ghost"
+          size={isCollapsed ? "icon" : "default"}
+          onClick={toggleTheme}
+          className="w-full justify-start"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
+          {!isCollapsed && (
+            <span className="ml-2">
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </span>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+}
