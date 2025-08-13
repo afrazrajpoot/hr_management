@@ -78,7 +78,6 @@ const SignUpPage = () => {
   // Handle redirection based on session.redirectTo
   useEffect(() => {
     if (status === "authenticated" && (session as any).redirectTo) {
-      // console.log("Redirecting to:", (session as any).redirectTo);
       router.push((session as any).redirectTo);
     }
   }, [status, session, router]);

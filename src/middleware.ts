@@ -7,7 +7,7 @@ function redirectToSignIn(req: Request) {
 
 export default withAuth((req) => {
   const token: any = (req as any).nextauth?.token;
-  console.log("Token:", token);
+ 
   if (!token) return redirectToSignIn(req);
 
   const now = Math.floor(Date.now() / 1000);

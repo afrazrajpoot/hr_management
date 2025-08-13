@@ -33,11 +33,6 @@ dns.lookup = function (hostname: string, options: any, callback?: any) {
   return originalLookup.call(this, hostname, options, callback);
 };
 
-console.log('🔧 Environment Check:');
-console.log('GOOGLE_CLIENT_ID exists:', !!process.env.GOOGLE_CLIENT_ID);
-console.log('GOOGLE_CLIENT_SECRET exists:', !!process.env.GOOGLE_CLIENT_SECRET);
-console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
-console.log('🌐 Network optimizations applied for Pakistan ISPs');
 
 export const authOptions: any = {
   adapter: PrismaAdapter(prisma),
@@ -169,9 +164,7 @@ export const authOptions: any = {
   callbacks: {
     async jwt({ token, user, account, profile }: any) {
       // Add network status logging
-      if (account?.provider === 'google') {
-        console.log('🎯 Google OAuth attempt started at:', new Date().toISOString());
-      }
+ 
 
       // Credentials users
       if (user && account?.provider === 'credentials') {
@@ -194,7 +187,7 @@ export const authOptions: any = {
 
       // Google users
       if (account?.provider === 'google' && profile) {
-        console.log('🎉 Google OAuth SUCCESS at:', new Date().toISOString());
+    
 
         let userInDb = await prisma.user.findUnique({
           where: { email: profile.email },
