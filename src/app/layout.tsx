@@ -2,6 +2,7 @@ import React from "react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Genius Factor - HR Analytics Platform",
@@ -17,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Toaster />
+          {children}
+        </Providers>
       </body>
     </html>
   );

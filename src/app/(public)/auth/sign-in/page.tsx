@@ -6,6 +6,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner"; // Import sonner
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,18 +53,19 @@ const SignInPage = () => {
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
-      setError(
+      const errorMessage =
         errorParam === "Callback"
           ? "Authentication failed. Please try again."
-          : errorParam
-      );
+          : errorParam;
+      setError(errorMessage);
+      toast.error(errorMessage); // Show error toast
     }
   }, [searchParams]);
 
   // Handle redirection based on session.redirectTo
   useEffect(() => {
     if (status === "authenticated" && (session as any).redirectTo) {
-  
+      toast.success("Sign-in successful! Redirecting..."); // Show success toast
       router.push((session as any).redirectTo);
     }
   }, [status, session, router]);
@@ -97,11 +99,14 @@ const SignInPage = () => {
 
       if (result?.error) {
         setError("Invalid credentials. Please try again.");
+        toast.error("Invalid credentials. Please try again."); // Show error toast
       } else {
-        // Session will be handled by useSession effect
+        toast.success("Sign-in successful!"); // Show success toast
       }
     } catch (error) {
-      setError("An error occurred. Please try again.");
+      const errorMessage = "An error occurred. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage); // Show error toast
     } finally {
       setIsLoading(false);
     }
@@ -113,8 +118,11 @@ const SignInPage = () => {
       const callbackUrl =
         searchParams.get("callbackUrl") || "/employee-dashboard";
       await signIn(provider, { callbackUrl });
+      toast.success(`Signing in with ${provider}...`); // Show OAuth sign-in toast
     } catch (error) {
-      setError("Authentication failed. Please try again.");
+      const errorMessage = "Authentication failed. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage); // Show error toast
     } finally {
       setIsLoading(false);
     }

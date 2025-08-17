@@ -34,20 +34,20 @@ const mainNavItems = [
   { title: "Employees", url: "/dashboard/employees", icon: Users },
   {
     title: "Assessments",
-    url: "/hr-dashboard/assessments",
+    url: "/dashboard/assessments",
     icon: ClipboardList,
   },
   {
     title: "Risk Analysis",
-    url: "/hr-dashboard/risk-analysis",
+    url: "/dashboard/risk-analysis",
     icon: TrendingDown,
   },
-  { title: "Mobility", url: "/hr-dashboard/mobility", icon: ArrowUpDown },
+  { title: "Mobility", url: "/dashboard/mobility", icon: ArrowUpDown },
 ];
 
 const accountItems = [
-  { title: "Profile", url: "/hr-dashboard/profile", icon: User },
-  { title: "Settings", url: "/hr-dashboard/settings", icon: Settings },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 export function HRSidebar() {

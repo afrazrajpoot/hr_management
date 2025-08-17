@@ -1,5 +1,5 @@
 "use client";
-// import { AppLayout } from "@/components/layout/AppLayout";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -12,81 +12,80 @@ import {
   BookOpen,
   ArrowRight,
   Trophy,
-  Clock,
   ClipboardList,
 } from "lucide-react";
-// import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
-// Mock data
-const recentAssessments = [
-  {
-    id: 1,
-    name: "Career Aptitude Test",
-    date: "2025-08-01",
-    status: "Completed",
-    score: 85,
-    type: "Primary",
-  },
-  {
-    id: 2,
-    name: "Leadership Potential",
-    date: "2025-08-08",
-    status: "In Progress",
-    score: null,
-    type: "Secondary",
-  },
-  {
-    id: 3,
-    name: "Technical Skills Assessment",
-    date: "2025-07-25",
-    status: "Completed",
-    score: 92,
-    type: "Skills",
-  },
-];
+interface Assessment {
+  id: string;
+  name: string;
+  status: string;
+  date: string;
+  score?: number;
+}
 
-const assessmentProgress = {
-  current: 42,
-  total: 68,
-  percentage: 62,
-};
+interface Recommendation {
+  title: string;
+  industry: string;
+  matchScore: number;
+  trending?: boolean;
+}
 
-const recentRecommendations = [
-  {
-    title: "Data Analyst Role",
-    matchScore: 88,
-    industry: "Technology",
-    link: "/career-pathways",
-    trending: true,
-  },
-  {
-    title: "Product Manager",
-    matchScore: 75,
-    industry: "Business",
-    link: "/career-pathways",
-    trending: false,
-  },
-  {
-    title: "UX Designer",
-    matchScore: 82,
-    industry: "Design",
-    link: "/career-pathways",
-    trending: true,
-  },
-];
-
-const monthlyStats = [
-  { month: "Jan", completed: 3 },
-  { month: "Feb", completed: 4 },
-  { month: "Mar", completed: 2 },
-  { month: "Apr", completed: 5 },
-  { month: "May", completed: 3 },
-  { month: "Jun", completed: 6 },
-];
+interface DashboardData {
+  recentAssessments: Assessment[];
+  assessmentProgress: {
+    current: number;
+    total: number;
+    percentage: number;
+  };
+  completedAssessments: number;
+  averageScore: number;
+  careerMatches: number;
+  recentRecommendations: Recommendation[];
+  monthlyStats: any[]; // Adjust based on actual API data
+  aiRecommendation: string;
+}
 
 export default function Dashboard() {
+  const { data: session } = useSession();
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    recentAssessments: [],
+    assessmentProgress: { current: 0, total: 68, percentage: 0 },
+    completedAssessments: 0,
+    averageScore: 0,
+    careerMatches: 0,
+    recentRecommendations: [],
+    monthlyStats: [],
+    aiRecommendation: "",
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (session?.user?.id) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(
+            `http://localhost:8000/employee_dashboard?userId=${session.user.id}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch dashboard data");
+          }
+          const data = await response.json();
+          setDashboardData(data);
+        } catch (error) {
+          console.error("Error fetching dashboard data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDashboardData();
+  }, [session?.user?.id]);
+
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -94,13 +93,19 @@ export default function Dashboard() {
     day: "numeric",
   });
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Welcome back, Sarah</h1>
+            <h1 className="text-3xl font-bold">
+              Welcome back, {session?.user?.name || "User"}
+            </h1>
             <p className="text-muted-foreground mt-1">{currentDate}</p>
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
@@ -115,7 +120,7 @@ export default function Dashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Assessment Progress
@@ -124,20 +129,20 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {assessmentProgress.percentage}%
+                {dashboardData.assessmentProgress.percentage.toFixed(0)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                {assessmentProgress.current} of {assessmentProgress.total}{" "}
-                questions
+                {dashboardData.assessmentProgress.current} of{" "}
+                {dashboardData.assessmentProgress.total} questions
               </p>
               <Progress
-                value={assessmentProgress.percentage}
+                value={dashboardData.assessmentProgress.percentage}
                 className="mt-3"
               />
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Completed Assessments
@@ -145,14 +150,18 @@ export default function Dashboard() {
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.completedAssessments}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +3 from last month
+                {dashboardData.completedAssessments > 0
+                  ? "+3 from last month"
+                  : "No assessments yet"}
               </p>
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Average Score
@@ -160,12 +169,18 @@ export default function Dashboard() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">84%</div>
-              <p className="text-xs text-success">+5% improvement</p>
+              <div className="text-2xl font-bold">
+                {dashboardData.averageScore}%
+              </div>
+              <p className="text-xs text-success">
+                {dashboardData.averageScore > 0
+                  ? "+5% improvement"
+                  : "No scores yet"}
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Career Matches
@@ -173,13 +188,32 @@ export default function Dashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.careerMatches}
+              </div>
               <p className="text-xs text-muted-foreground">
-                New recommendations available
+                {dashboardData.careerMatches > 0
+                  ? "New recommendations available"
+                  : "Complete an assessment"}
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* AI Career Recommendation */}
+        <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BookOpen className="w-5 h-5 mr-2" />
+              AI Career Recommendation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {dashboardData.aiRecommendation}
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Assessments */}
@@ -191,42 +225,48 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentAssessments.map((assessment) => (
-                <div
-                  key={assessment.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-accent/5 hover:bg-accent/10 transition-colors"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-medium">{assessment.name}</h4>
-                      <Badge
-                        variant={
-                          assessment.status === "Completed"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {assessment.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {new Date(assessment.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {assessment.score && (
-                      <div className="text-lg font-semibold text-primary">
-                        {assessment.score}%
+              {dashboardData.recentAssessments.length > 0 ? (
+                dashboardData.recentAssessments.map((assessment) => (
+                  <div
+                    key={assessment.id}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-medium">{assessment.name}</h4>
+                        <Badge
+                          variant={
+                            assessment.status === "Completed"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {assessment.status}
+                        </Badge>
                       </div>
-                    )}
-                    {assessment.status === "In Progress" && (
-                      <Button size="sm" variant="outline" asChild>
-                        <Link href="/assessment">Continue</Link>
-                      </Button>
-                    )}
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {new Date(assessment.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {assessment.score && (
+                        <div className="text-lg font-semibold text-primary">
+                          {assessment.score}%
+                        </div>
+                      )}
+                      {assessment.status === "In Progress" && (
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href="/assessment">Continue</Link>
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No assessments completed yet.
+                </p>
+              )}
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/results">
                   View All Results
@@ -245,32 +285,41 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentRecommendations.map((rec, index) => (
-                <div key={index} className="card-interactive p-4 rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium">{rec.title}</h4>
-                        {rec.trending && (
-                          <Badge variant="secondary" className="text-xs">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            Trending
-                          </Badge>
-                        )}
+              {dashboardData.recentRecommendations.length > 0 ? (
+                dashboardData.recentRecommendations.map((rec, index) => (
+                  <div
+                    key={index}
+                    className="card-interactive p-4 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium">{rec.title}</h4>
+                          {rec.trending && (
+                            <Badge variant="secondary" className="text-xs">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Trending
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {rec.industry}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {rec.industry}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-semibold text-primary">
-                        {rec.matchScore}%
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-primary">
+                          {rec.matchScore}%
+                        </div>
+                        <p className="text-xs text-muted-foreground">Match</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Match</p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No recommendations available yet.
+                </p>
+              )}
               <Button variant="outline" className="w-full" asChild>
                 <Link href="/career-pathways">
                   Explore All Pathways
@@ -282,7 +331,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="card-elevated">
+        <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />

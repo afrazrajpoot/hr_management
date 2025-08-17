@@ -45,7 +45,7 @@ export const authOptions: any = {
         name: { label: 'Name', type: 'text' },
         role: { label: 'Role', type: 'text' },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<any> {
         if (!credentials?.email || !credentials?.password) {
           console.error('Missing credentials:', credentials);
           throw new Error('Missing credentials');
