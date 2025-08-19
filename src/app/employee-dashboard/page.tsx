@@ -120,7 +120,7 @@ export default function Dashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Card className="card-elevated ">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Assessment Progress
@@ -142,7 +142,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Card className="card-elevated ">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Completed Assessments
@@ -161,7 +161,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Card className="card-elevated">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Average Score
@@ -180,7 +180,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Card className="card-elevated ">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Career Matches
@@ -201,7 +201,7 @@ export default function Dashboard() {
         </div>
 
         {/* AI Career Recommendation */}
-        <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+        <Card className="card-elevated ">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />
@@ -229,7 +229,7 @@ export default function Dashboard() {
                 dashboardData.recentAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className="flex items-center justify-between p-3 rounded-lg border bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg border  transition-colors"
                   >
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
@@ -289,7 +289,7 @@ export default function Dashboard() {
                 dashboardData.recentRecommendations.map((rec, index) => (
                   <div
                     key={index}
-                    className="card-interactive p-4 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                    className="card-interactive p-4 rounded-lg  transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -331,7 +331,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+        <Card className="card-elevated ">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />
@@ -345,7 +345,7 @@ export default function Dashboard() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/assessment">
+                <Link href="/employee-dashboard/assessment">
                   <ClipboardList className="w-6 h-6" />
                   <span>Take Assessment</span>
                 </Link>
@@ -355,7 +355,7 @@ export default function Dashboard() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/results">
+                <Link href="/employee-dashboard/results">
                   <TrendingUp className="w-6 h-6" />
                   <span>View Results</span>
                 </Link>
@@ -365,7 +365,7 @@ export default function Dashboard() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/career-pathways">
+                <Link href="/employee-dashboard/career-Pathways">
                   <Users className="w-6 h-6" />
                   <span>Career Paths</span>
                 </Link>
@@ -375,7 +375,7 @@ export default function Dashboard() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/development">
+                <Link href="/employee-dashboard/development">
                   <BookOpen className="w-6 h-6" />
                   <span>Development</span>
                 </Link>

@@ -113,7 +113,7 @@ export default function HROverview() {
             }
             trend={{ value: 12, label: "vs last month", isPositive: true }}
             onClick={() => router.push("/hr-dashboard/companies")}
-            className="bg-white dark:bg-[#1a1a1a] text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
           />
           <StatCard
             title="Total Employees"
@@ -124,7 +124,7 @@ export default function HROverview() {
             }
             trend={{ value: 8, label: "vs last month", isPositive: true }}
             onClick={() => router.push("/hr-dashboard/employees")}
-            className="bg-white dark:bg-[#1a1a1a] text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
           />
           <StatCard
             title="Assessments Completed"
@@ -135,7 +135,7 @@ export default function HROverview() {
             }
             trend={{ value: 23, label: "vs last month", isPositive: true }}
             onClick={() => router.push("/hr-dashboard/assessments")}
-            className="bg-white dark:bg-[#1a1a1a] text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
           />
           <StatCard
             title="Average Risk Level"
@@ -146,12 +146,12 @@ export default function HROverview() {
             }
             trend={{ value: 3, label: "vs last month", isPositive: false }}
             onClick={() => router.push("/hr-dashboard/risk-analysis")}
-            className="bg-white dark:bg-[#1a1a1a] text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
           />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-white dark:bg-[#1a1a1a] shadow-card">
+          <Card className=" shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-[#2563eb] text-[#2563eb]">
                 <Building2 className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
@@ -201,7 +201,7 @@ export default function HROverview() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#1a1a1a] shadow-card">
+          <Card className=" shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-[#dc2626] text-[#dc2626]">
                 <TrendingDown className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
@@ -255,7 +255,7 @@ export default function HROverview() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#1a1a1a] shadow-card">
+          <Card className=" shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-[#2563eb] text-[#2563eb]">
                 <ClipboardList className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
@@ -291,7 +291,7 @@ export default function HROverview() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#1a1a1a] shadow-card">
+          <Card className=" shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 dark:text-[#059669] text-[#059669]">
                 <ArrowUp className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />

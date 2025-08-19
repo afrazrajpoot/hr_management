@@ -10,45 +10,40 @@ import {
   X,
   Moon,
   Sun,
+  LogOut,
 } from "lucide-react";
-// import { NavLink, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-// import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 const navigation = [
   {
     name: "Dashboard",
     href: "/employee-dashboard",
     icon: LayoutDashboard,
-    description: "Overview and recent activity",
   },
   {
     name: "Assessment",
     href: "/employee-dashboard/assessment",
     icon: ClipboardList,
-    description: "Take career assessments",
   },
   {
     name: "Results",
     href: "/employee-dashboard/results",
     icon: BarChart3,
-    description: "View your Genius Factor profile",
   },
   {
     name: "Career Pathways",
     href: "/employee-dashboard/career-Pathways",
     icon: TrendingUp,
-    description: "Explore career recommendations",
   },
   {
     name: "Development",
     href: "/employee-dashboard/development",
     icon: BookOpen,
-    description: "Skill development roadmap",
   },
 ];
 
@@ -118,11 +113,6 @@ export function AppSidebar() {
               {!isCollapsed && (
                 <div className="min-w-0 flex-1">
                   <div className="font-medium">{item.name}</div>
-                  {!isActive && (
-                    <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                      {item.description}
-                    </div>
-                  )}
                 </div>
               )}
             </Link>
@@ -131,7 +121,8 @@ export function AppSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-2">
+        {/* Theme Toggle */}
         <Button
           variant="ghost"
           size={isCollapsed ? "icon" : "default"}
@@ -148,6 +139,17 @@ export function AppSidebar() {
               {theme === "dark" ? "Light mode" : "Dark mode"}
             </span>
           )}
+        </Button>
+
+        {/* Sign Out */}
+        <Button
+          variant="ghost"
+          size={isCollapsed ? "icon" : "default"}
+          onClick={() => signOut()}
+          className="w-full justify-start text-destructive hover:bg-destructive/10"
+        >
+          <LogOut className="w-4 h-4" />
+          {!isCollapsed && <span className="ml-2">Sign out</span>}
         </Button>
       </div>
     </div>

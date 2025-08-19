@@ -135,7 +135,7 @@ export default function Assessment() {
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto">
         {analysisResults ? (
-          <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Card className="card-elevated ">
             <CardHeader>
               <CardTitle className="text-2xl">Assessment Analysis</CardTitle>
             </CardHeader>
@@ -217,7 +217,7 @@ export default function Assessment() {
             )}
 
             {/* Current Part Card */}
-            <Card className="card-elevated mb-6 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            <Card className="card-elevated mb-6">
               <CardHeader>
                 <CardTitle className="text-xl">{currentPart.part}</CardTitle>
               </CardHeader>

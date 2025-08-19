@@ -260,7 +260,8 @@ export default function RiskAnalysis() {
                 />
                 <Bar
                   dataKey="riskPercentage"
-                  fill="hsl(var(--hr-risk-medium))"
+                  fill="#ef4444" // 🔴 red-500 from Tailwind
+                  stroke="#b91c1c" // 🔴 darker red for border (optional)
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>

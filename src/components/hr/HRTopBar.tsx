@@ -1,4 +1,6 @@
-import { Search, Bell, User, ChevronDown } from "lucide-react";
+"use client";
+
+import { Search, Bell, User, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { signOut } from "next-auth/react"; // ✅ import signOut
 
 interface HRTopBarProps {
   title: string;
@@ -84,7 +87,12 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                 <span>Notifications</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              {/* ✅ Sign Out */}
+              <DropdownMenuItem
+                className="text-destructive cursor-pointer"
+                onClick={() => signOut({ callbackUrl: "/auth/sign-in" })} // redirect to /login after logout
+              >
+                <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

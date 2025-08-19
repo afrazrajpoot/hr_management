@@ -36,10 +36,10 @@ export default function Page() {
           </p>
           <Button
             size="lg"
-            className="bg-white text-hr-primary hover:bg-white/90 text-lg px-8 py-3"
-            onClick={() => router.push("/hr-dashboard")}
+            className=" text-hr-primary text-lg px-8 py-3"
+            onClick={() => router.push("/auth/sign-in")}
           >
-            Access HR Dashboard
+            Get Startetd
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
@@ -174,14 +174,14 @@ export default function Page() {
             Join forward-thinking organizations using Genius Factor to optimize
             their human capital and drive business success.
           </p>
-          <Button
+          {/* <Button
             size="lg"
             className="bg-white text-hr-primary hover:bg-white/90 text-lg px-8 py-3"
             onClick={() => router.push("/hr-dashboard")}
           >
             Start Your Analytics Journey
             <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>
