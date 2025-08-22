@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { questions } from "../../../../question";
+import FileUploader from "@/components/FileUploader";
 
 // Group questions by part
 const questionsByPart = questions.map((part) => ({
@@ -326,6 +327,7 @@ export default function Assessment() {
           </>
         )}
       </div>
+      <FileUploader />
     </AppLayout>
   );
 }

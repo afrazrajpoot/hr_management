@@ -53,7 +53,7 @@ const departments = [
   "Product R&D",
 ];
 
-const departmentData = {
+const departmentData: any = {
   Finance: {
     employeeCount: 24,
     completion: 85,
@@ -188,7 +188,7 @@ const departmentData = {
   },
 };
 
-const MetricCard = ({ title, value, icon: Icon, color = "primary" }) => (
+const MetricCard = ({ title, value, icon: Icon, color = "primary" }: any) => (
   <Card className="hr-card">
     <CardContent className="p-4">
       <div className="flex items-center justify-between">
@@ -206,7 +206,7 @@ export default function Departments() {
   const [selectedDepartment, setSelectedDepartment] = useState("Finance");
   const deptData = departmentData[selectedDepartment];
 
-  const getRiskColor = (risk) => {
+  const getRiskColor = (risk: any) => {
     switch (risk) {
       case "Low":
         return "bg-success text-success-foreground";
@@ -390,7 +390,7 @@ export default function Departments() {
                   </tr>
                 </thead>
                 <tbody>
-                  {deptData.employees.map((employee) => (
+                  {deptData.employees.map((employee: any) => (
                     <tr
                       key={employee.id}
                       className="border-b border-border last:border-0 hover:bg-muted/50"

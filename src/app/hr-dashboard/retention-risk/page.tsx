@@ -134,7 +134,7 @@ const RiskStatCard = ({
   icon: Icon,
   trend = "neutral",
   color = "primary",
-}) => (
+}:any) => (
   <Card className="hr-card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
@@ -173,8 +173,8 @@ const RiskStatCard = ({
   </Card>
 );
 
-const InterventionCard = ({ intervention }) => {
-  const getImpactColor = (impact) => {
+const InterventionCard = ({ intervention }:any) => {
+  const getImpactColor = (impact:any) => {
     switch (impact) {
       case "High":
         return "bg-success text-success-foreground";
@@ -187,7 +187,7 @@ const InterventionCard = ({ intervention }) => {
     }
   };
 
-  const getCostColor = (cost) => {
+  const getCostColor = (cost:any) => {
     switch (cost) {
       case "High":
         return "bg-destructive text-destructive-foreground";

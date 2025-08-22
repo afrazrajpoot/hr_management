@@ -1,15 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { api } from './api';
+import { employeeApi } from './employe-api';
 import counterReducer from './features/counterSlice';
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    [api.reducerPath]: api.reducer,
+    [employeeApi.reducerPath]: employeeApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware().concat(employeeApi.middleware),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors

@@ -112,8 +112,8 @@ const assessmentData = [
   },
 ];
 
-const AssessmentCard = ({ assessment, onViewDetails }) => {
-  const getStatusColor = (status) => {
+const AssessmentCard = ({ assessment, onViewDetails }:any) => {
+  const getStatusColor = (status:any) => {
     switch (status) {
       case "Completed":
         return "bg-success text-success-foreground";
@@ -126,7 +126,7 @@ const AssessmentCard = ({ assessment, onViewDetails }) => {
     }
   };
 
-  const getScoreColor = (score) => {
+  const getScoreColor = (score:any) => {
     if (score >= 85) return "text-success";
     if (score >= 70) return "text-warning";
     return "text-destructive";
@@ -206,7 +206,7 @@ const AssessmentCard = ({ assessment, onViewDetails }) => {
   );
 };
 
-const AssessmentDetailsModal = ({ assessment, isOpen, onClose }) => {
+const AssessmentDetailsModal = ({ assessment, isOpen, onClose }:any) => {
   if (!assessment) return null;
 
   return (
@@ -378,7 +378,7 @@ export default function Assessments() {
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
-  const handleViewDetails = (assessment) => {
+  const handleViewDetails = (assessment:any) => {
     setSelectedAssessment(assessment);
     setShowDetailsModal(true);
   };

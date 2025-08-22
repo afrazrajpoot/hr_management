@@ -41,6 +41,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
+import { Employee } from "../../../../types/profileTypes";
 
 // Mock employee data
 const employees = [
@@ -174,7 +175,7 @@ const assessmentStatuses = [
   "Not Started",
 ];
 
-const getRiskColor = (risk) => {
+const getRiskColor = (risk: any) => {
   switch (risk) {
     case "Low":
       return "bg-success text-success-foreground";
@@ -187,7 +188,7 @@ const getRiskColor = (risk) => {
   }
 };
 
-const getStatusColor = (status) => {
+const getStatusColor = (status: any) => {
   switch (status) {
     case "Completed":
       return "bg-success text-success-foreground";
@@ -202,7 +203,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const EmployeeModal = ({ employee, isOpen, onClose }) => {
+const EmployeeModal = ({ employee, isOpen, onClose }: any) => {
   if (!employee) return null;
 
   return (
@@ -215,7 +216,7 @@ const EmployeeModal = ({ employee, isOpen, onClose }) => {
               <AvatarFallback>
                 {employee.name
                   .split(" ")
-                  .map((n) => n[0])
+                  .map((n: any) => n[0])
                   .join("")}
               </AvatarFallback>
             </Avatar>
@@ -367,7 +368,7 @@ export default function Employees() {
     return matchesSearch && matchesDepartment && matchesRisk && matchesStatus;
   });
 
-  const handleViewEmployee = (employee) => {
+  const handleViewEmployee = (employee: any) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
   };

@@ -250,7 +250,7 @@ const MobilityStatCard = ({
   change,
   icon: Icon,
   description,
-}) => (
+}: any) => (
   <Card className="hr-card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between mb-2">
@@ -270,8 +270,8 @@ const MobilityStatCard = ({
   </Card>
 );
 
-const TransitionCard = ({ transition }) => {
-  const getTypeColor = (type) => {
+const TransitionCard = ({ transition }: any) => {
+  const getTypeColor = (type: any) => {
     return type === "Promotion"
       ? "bg-success text-success-foreground"
       : "bg-primary text-primary-foreground";
@@ -329,7 +329,7 @@ const TransitionCard = ({ transition }) => {
   );
 };
 
-const CareerTimelineCard = ({ progression }) => {
+const CareerTimelineCard = ({ progression }: any) => {
   return (
     <Card className="hr-card">
       <CardHeader className="pb-3">
@@ -347,7 +347,7 @@ const CareerTimelineCard = ({ progression }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {progression.timeline.map((step, index) => (
+          {progression.timeline.map((step: any, index: any) => (
             <div key={index} className="flex items-center gap-4">
               <div className="flex flex-col items-center">
                 <div
