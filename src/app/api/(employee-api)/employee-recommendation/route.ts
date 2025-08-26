@@ -23,7 +23,7 @@ async function getCachedRecommendations(employee: any, companies: any[]) {
   }
 
   // Call FastAPI if no cache or cache expired
-  const fastApiUrl = "http://127.0.0.1:8000/employee_dashboard/recommend-companies";
+  const fastApiUrl = `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/recommend-companies`;
   
   const response = await fetch(fastApiUrl, {
     method: "POST",
@@ -69,48 +69,63 @@ export async function GET(req: NextRequest) {
 
   // Parse query parameters - only page and limit for server-side
   const { searchParams } = new URL(req.url);
-  const filters: FilterParams = {
-    page: searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1,
-    limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10,
+  const filters = {
+    page: searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1,
+    limit: searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : 10,
   };
 
   try {
-    // 1. Get employee from DB
-    const employee = await prisma.employee.findUnique({
+    // 1. Try to get employee from DB
+    let employee = await prisma.employee.findUnique({
       where: { employeeId: session.user.id },
     });
 
+    // 2. If no employee, try to get user instead
+    let user = null;
     if (!employee) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+      user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+      });
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "Employee or User not found" },
+          { status: 404 }
+        );
+      }
     }
 
-    // 2. Get companies (limit to 50 to save tokens)
+    // 3. Get companies (limit to 50 to save tokens)
     const companies = await prisma.company.findMany({ take: 50 });
 
-    // 3. Get recommendations (cached or from Python API)
+    // 4. Get recommendations (pass employee or user)
     let recommendations;
     try {
-      recommendations = await getCachedRecommendations(employee, companies);
+      recommendations = await getCachedRecommendations(employee ?? user, companies);
+   
     } catch (error) {
       console.error("Failed to get recommendations:", error);
-      return NextResponse.json({ error: "Failed to get recommendations" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to get recommendations" },
+        { status: 500 }
+      );
     }
 
-    // 4. Server-side pagination only (no filtering/sorting)
-    const startIndex = (filters.page! - 1) * filters.limit!;
-    const endIndex = startIndex + filters.limit!;
+    // 5. Server-side pagination
+    const startIndex = (filters.page - 1) * filters.limit;
+    const endIndex = startIndex + filters.limit;
     const paginatedRecommendations = recommendations.slice(startIndex, endIndex);
 
     return NextResponse.json({
       recommendations: paginatedRecommendations,
-      total: recommendations.length, // Return total count for client-side filtering
+      total: recommendations.length,
       page: filters.page,
       limit: filters.limit,
-      hasMore: endIndex < recommendations.length
+      hasMore: endIndex < recommendations.length,
     });
-
   } catch (err) {
     console.error("Error in recommendations API:", err);
+
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import HRTopBar from "@/components/hr/HRTopBar";
 import { AppSidebar } from "./Sidebar";
 
 interface AppLayoutProps {

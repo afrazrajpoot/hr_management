@@ -1,10 +1,15 @@
 "use client";
+
+import { useSocket } from "@/context/SocketContext";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import HRLayout from "@/components/hr/HRLayout";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -31,106 +36,25 @@ import {
   Award,
   ArrowUpRight,
 } from "lucide-react";
-import HRLayout from "@/components/hr/HRLayout";
 
-// Mock data for dashboard analytics - All 8 departments
-const departmentData = [
-  {
-    name: "Finance",
-    completion: 85,
-    geniusFactor: 78,
-    productivity: 82,
-    engagement: 80,
-    skillsAlignment: 74,
-    retention: "Low",
-    employees: 24,
-    color: "hsl(var(--hr-chart-1))",
-  },
-  {
-    name: "Sales",
-    completion: 92,
-    geniusFactor: 85,
-    productivity: 90,
-    engagement: 88,
-    skillsAlignment: 82,
-    retention: "Low",
-    employees: 35,
-    color: "hsl(var(--hr-chart-2))",
-  },
-  {
-    name: "Marketing",
-    completion: 78,
-    geniusFactor: 82,
-    productivity: 79,
-    engagement: 85,
-    skillsAlignment: 77,
-    retention: "Medium",
-    employees: 18,
-    color: "hsl(var(--hr-chart-3))",
-  },
-  {
-    name: "IT",
-    completion: 95,
-    geniusFactor: 92,
-    productivity: 94,
-    engagement: 89,
-    skillsAlignment: 95,
-    retention: "Low",
-    employees: 28,
-    color: "hsl(var(--hr-chart-4))",
-  },
-  {
-    name: "Human Resources",
-    completion: 88,
-    geniusFactor: 85,
-    productivity: 83,
-    engagement: 91,
-    skillsAlignment: 88,
-    retention: "Low",
-    employees: 15,
-    color: "hsl(var(--hr-chart-5))",
-  },
-  {
-    name: "Customer Support",
-    completion: 82,
-    geniusFactor: 76,
-    productivity: 78,
-    engagement: 81,
-    skillsAlignment: 73,
-    retention: "Medium",
-    employees: 22,
-    color: "#8B5CF6",
-  },
-  {
-    name: "Operations",
-    completion: 90,
-    geniusFactor: 84,
-    productivity: 88,
-    engagement: 83,
-    skillsAlignment: 86,
-    retention: "Low",
-    employees: 19,
-    color: "#06B6D4",
-  },
-  {
-    name: "Design/Creative",
-    completion: 94,
-    geniusFactor: 91,
-    productivity: 87,
-    engagement: 94,
-    skillsAlignment: 89,
-    retention: "Low",
-    employees: 14,
-    color: "#F59E0B",
-  },
+// Fallback mock data for dashboard analytics
+const mockDepartmentData = [
+  { name: "Finance", completion: 85, color: "hsl(var(--hr-chart-1))" },
+  { name: "Sales", completion: 92, color: "hsl(var(--hr-chart-2))" },
+  { name: "Marketing", completion: 78, color: "hsl(var(--hr-chart-3))" },
+  { name: "IT", completion: 95, color: "hsl(var(--hr-chart-4))" },
+  { name: "Human Resources", completion: 88, color: "hsl(var(--hr-chart-5))" },
+  { name: "Customer Support", completion: 82, color: "#8B5CF6" },
+  { name: "Operations", completion: 90, color: "#06B6D4" },
+  { name: "Design/Creative", completion: 94, color: "#F59E0B" },
 ];
 
-// Chart data for all 7 graphs
-const retentionRiskData = departmentData.map((dept) => ({
+// Mock data for other charts
+const retentionRiskData = mockDepartmentData.map((dept) => ({
   department: dept.name,
-  lowRisk: dept.retention === "Low" ? dept.employees : 0,
-  mediumRisk: dept.retention === "Medium" ? dept.employees : 0,
-  highRisk: dept.retention === "High" ? dept.employees : 0,
+  lowRisk: dept.completion >= 90 ? 20 : dept.completion >= 80 ? 15 : 10,
+  mediumRisk: dept.completion >= 80 ? 5 : 10,
+  highRisk: dept.completion < 80 ? 5 : 0,
   fill: dept.color,
 }));
 
@@ -203,12 +127,6 @@ const mobilityTrendData = [
   },
 ];
 
-const skillsAlignmentData = departmentData.map((dept) => ({
-  department: dept.name,
-  alignment: dept.skillsAlignment,
-  fill: dept.color,
-}));
-
 const engagementDistribution = [
   { range: "90-100%", count: 42, fill: "hsl(var(--hr-chart-2))" },
   { range: "80-89%", count: 68, fill: "hsl(var(--hr-chart-1))" },
@@ -255,16 +173,18 @@ const DepartmentCard = ({ dept }: any) => {
     }
   };
 
+  // Mock retention based on completion
+  const retention =
+    dept.completion >= 90 ? "Low" : dept.completion >= 80 ? "Medium" : "High";
+
   return (
     <Card className="hr-card">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{dept.name}</CardTitle>
-          <Badge className={getRiskColor(dept.retention)}>
-            {dept.retention} Risk
-          </Badge>
+          <Badge className={getRiskColor(retention)}>{retention} Risk</Badge>
         </div>
-        <CardDescription>{dept.employees} employees</CardDescription>
+        <CardDescription>Employees not available</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -274,36 +194,53 @@ const DepartmentCard = ({ dept }: any) => {
           </div>
           <Progress value={dept.completion} className="h-2" />
         </div>
-
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Genius Factor</span>
-            <p className="font-semibold text-primary">
-              {dept.geniusFactor}/100
-            </p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Productivity</span>
-            <p className="font-semibold text-hr-chart-2">
-              {dept.productivity}/100
-            </p>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
 };
 
 export default function Dashboard() {
+  const { socket, isConnected, dashboardData } = useSocket();
+  const { data: session } = useSession();
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // Use dashboardData or fallback to mockDepartmentData
+  const displayData = dashboardData || mockDepartmentData;
+
+  // Calculate derived data for charts
+  const derivedRetentionRiskData = displayData.map((dept) => ({
+    department: dept.name,
+    lowRisk: dept.completion >= 90 ? 20 : dept.completion >= 80 ? 15 : 10,
+    mediumRisk: dept.completion >= 80 ? 5 : 10,
+    highRisk: dept.completion < 80 ? 5 : 0,
+    fill: dept.color,
+  }));
+
+  const derivedSkillsAlignmentData = displayData.map((dept) => ({
+    department: dept.name,
+    alignment: dept.completion,
+    fill: dept.color,
+  }));
+
   return (
     <HRLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">HR Dashboard</h1>
-          <p className="text-muted-foreground">
-            Complete analytics breakdown across all 8 departments
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">HR Dashboard</h1>
+            <p className="text-muted-foreground">
+              Complete analytics breakdown across all departments
+            </p>
+            {lastUpdate && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Last updated: {lastUpdate.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+          <Badge variant={isConnected ? "default" : "secondary"}>
+            {isConnected ? "Connected" : "Disconnected"}
+          </Badge>
         </div>
 
         {/* Stats Overview */}
@@ -316,7 +253,10 @@ export default function Dashboard() {
           />
           <StatCard
             title="Assessment Completion"
-            value="89%"
+            value={`${Math.round(
+              displayData.reduce((sum, dept) => sum + dept.completion, 0) /
+                Math.max(displayData.length, 1)
+            )}%`}
             change="+12.3%"
             icon={Target}
           />
@@ -335,7 +275,7 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* 7 Comprehensive Charts Grid */}
+        {/* Comprehensive Charts Grid */}
         <div className="grid gap-6">
           {/* Row 1: Assessment Completion Rate */}
           <Card className="hr-card">
@@ -348,8 +288,9 @@ export default function Dashboard() {
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart
-                  data={departmentData}
+                  data={displayData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  key={lastUpdate?.getTime()}
                 >
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis
@@ -379,30 +320,28 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>2. Genius Factor Score Distribution</CardTitle>
                 <CardDescription>
-                  Average Genius Factor scores across departments
+                  Using completion as placeholder for Genius Factor
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+                  <PieChart key={lastUpdate?.getTime()}>
                     <Pie
-                      data={departmentData}
+                      data={displayData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, geniusFactor }) =>
-                        `${name}: ${geniusFactor}`
-                      }
+                      label={({ name, completion }) => `${name}: ${completion}`}
                       outerRadius={80}
                       fill="#8884d8"
-                      dataKey="geniusFactor"
+                      dataKey="completion"
                     >
-                      {departmentData.map((entry, index) => (
+                      {displayData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => [`${value}/100`, "Genius Factor"]}
+                      formatter={(value) => [`${value}/100`, "Completion"]}
                     />
                     <Legend />
                   </PieChart>
@@ -415,12 +354,12 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>3. Productivity Score Distribution</CardTitle>
                 <CardDescription>
-                  Productivity performance by department
+                  Using completion as placeholder for Productivity
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={departmentData}>
+                  <BarChart data={displayData} key={lastUpdate?.getTime()}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="opacity-30"
@@ -433,12 +372,12 @@ export default function Dashboard() {
                     />
                     <YAxis domain={[0, 100]} />
                     <Tooltip
-                      formatter={(value) => [`${value}/100`, "Productivity"]}
+                      formatter={(value) => [`${value}/100`, "Completion"]}
                     />
                     <Bar
-                      dataKey="productivity"
+                      dataKey="completion"
                       fill="hsl(var(--hr-chart-3))"
-                      name="Productivity"
+                      name="Completion"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -453,29 +392,27 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>4. Engagement Score Distribution</CardTitle>
                 <CardDescription>
-                  Employee engagement levels by department
+                  Employee engagement levels (mock data)
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={departmentData}
+                      data={engagementDistribution}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, engagement }) => `${name}: ${engagement}`}
+                      label={({ range, count }) => `${range}: ${count}`}
                       outerRadius={80}
                       fill="#8884d8"
-                      dataKey="engagement"
+                      dataKey="count"
                     >
-                      {departmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {engagementDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      formatter={(value) => [`${value}/100`, "Engagement"]}
-                    />
+                    <Tooltip />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -487,33 +424,30 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>5. Skills-Job Alignment Score</CardTitle>
                 <CardDescription>
-                  How well employee skills match their roles
+                  Using completion as placeholder for Skills Alignment
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+                  <PieChart key={lastUpdate?.getTime()}>
                     <Pie
-                      data={departmentData}
+                      data={derivedSkillsAlignmentData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, skillsAlignment }) =>
-                        `${name}: ${skillsAlignment}`
+                      label={({ department, alignment }) =>
+                        `${department}: ${alignment}`
                       }
                       outerRadius={80}
                       fill="#8884d8"
-                      dataKey="skillsAlignment"
+                      dataKey="alignment"
                     >
-                      {departmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {derivedSkillsAlignmentData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => [
-                        `${value}/100`,
-                        "Skills Alignment",
-                      ]}
+                      formatter={(value) => [`${value}/100`, "Alignment"]}
                     />
                     <Legend />
                   </PieChart>
@@ -529,12 +463,15 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>6. Retention Risk Distribution</CardTitle>
                 <CardDescription>
-                  Employee retention risk across departments
+                  Employee retention risk (mock data)
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={retentionRiskData}>
+                  <BarChart
+                    data={derivedRetentionRiskData}
+                    key={lastUpdate?.getTime()}
+                  >
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="opacity-30"
@@ -575,7 +512,7 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle>7. Internal Mobility Trend</CardTitle>
                 <CardDescription>
-                  Monthly internal movements across departments
+                  Monthly internal movements (mock data)
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -623,7 +560,7 @@ export default function Dashboard() {
         <div>
           <h2 className="text-2xl font-bold mb-4">Department Overview</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {departmentData.map((dept, index) => (
+            {displayData.map((dept, index) => (
               <DepartmentCard key={index} dept={dept} />
             ))}
           </div>

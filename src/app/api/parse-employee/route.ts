@@ -1,9 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/auth';
 
 export async function POST(req: NextRequest) {
+   
   try {
+      const session: any = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     const formData = await req.formData();
     const files = formData.getAll('files') as File[];
 
@@ -12,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call the external parsing API
-    const res = await fetch('http://127.0.0.1:8000/parse/companies', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
       method: 'POST',
       body: formData,
     });
@@ -54,11 +61,16 @@ export async function POST(req: NextRequest) {
         // Create new user
         const user = await prisma.user.create({
           data: {
-            name: employee.Name,
-            email: employee.Email,
+            firstName: employee.firstName|| employee.Name ||'Not provide',
+            lastName: employee.lastName||'Not provide',
+            email: employee.Email || 'Not provide',
             password: hashedPassword,
             role: 'Employee',
+            salary: employee.Salary || 0,
+            phoneNumber: employee.Phone || 'Not provide',
+            department: employee.Department || 'Not provide',
             createdAt: new Date(),
+            hrId: session.user.id,
             // Optional fields: emailVerified and image are left as null
             // accounts and sessions are managed by NextAuth, not set here
           },

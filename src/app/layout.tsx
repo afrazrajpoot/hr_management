@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
+import { SocketProvider } from "@/context/SocketContext";
 
 export const metadata: Metadata = {
   title: "Genius Factor - HR Analytics Platform",
@@ -19,8 +20,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
-          <Toaster />
-          {children}
+          <SocketProvider>
+            <Toaster />
+            {children}
+          </SocketProvider>
         </Providers>
       </body>
     </html>

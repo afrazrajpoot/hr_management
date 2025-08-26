@@ -33,8 +33,7 @@ dns.lookup = function (hostname: string, options: any, callback?: any) {
   return originalLookup.call(this, hostname, options, callback);
 };
 
-
-export const authOptions: any = {
+export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -42,7 +41,9 @@ export const authOptions: any = {
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
-        name: { label: 'Name', type: 'text' },
+        firstName: { label: 'First Name', type: 'text' },
+        lastName: { label: 'Last Name', type: 'text' },
+        phoneNumber: { label: 'Phone Number', type: 'text' },
         role: { label: 'Role', type: 'text' },
       },
       async authorize(credentials): Promise<any> {
@@ -68,10 +69,19 @@ export const authOptions: any = {
 
         if (!user) {
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
+          console.log('Creating user with data:', {
+            email: credentials.email,
+            firstName: credentials.firstName,
+            lastName: credentials.lastName,
+            phoneNumber: credentials.phoneNumber,
+            role,
+          });
           user = await prisma.user.create({
             data: {
               email: credentials.email,
-              name: credentials.name || credentials.email.split('@')[0],
+              firstName: credentials.firstName || credentials.email.split('@')[0],
+              lastName: credentials.lastName || '',
+              phoneNumber: credentials.phoneNumber || '',
               password: hashedPassword,
               role,
             },
@@ -86,6 +96,24 @@ export const authOptions: any = {
           if (!isValid) {
             console.error('Invalid password for email:', credentials.email);
             throw new Error('Invalid credentials');
+          }
+
+          // Update user fields if provided
+          if (credentials.firstName || credentials.lastName || credentials.phoneNumber) {
+            console.log('Updating user with data:', {
+              email: credentials.email,
+              firstName: credentials.firstName,
+              lastName: credentials.lastName,
+              phoneNumber: credentials.phoneNumber,
+            });
+            user = await prisma.user.update({
+              where: { email: credentials.email },
+              data: {
+                firstName: credentials.firstName || user.firstName,
+                lastName: credentials.lastName || user.lastName,
+                phoneNumber: credentials.phoneNumber || user.phoneNumber,
+              },
+            });
           }
         }
 
@@ -127,9 +155,13 @@ export const authOptions: any = {
 
         return {
           id: user.id.toString(),
-          name: user.name,
+          name: user.firstName,
           email: user.email,
           role: user.role,
+          hrId: user.hrId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          image: user.image,
         };
       },
     }),
@@ -152,7 +184,7 @@ export const authOptions: any = {
       },
       token: 'https://oauth2.googleapis.com/token',
       userinfo: 'https://www.googleapis.com/oauth2/v2/userinfo',
-    } as any),
+    }),
   ],
   pages: {
     signIn: '/auth/sign-in',
@@ -163,10 +195,6 @@ export const authOptions: any = {
   },
   callbacks: {
     async jwt({ token, user, account, profile }: any) {
-      // Add network status logging
- 
-
-      // Credentials users
       if (user && account?.provider === 'credentials') {
         const dbAccount = await prisma.account.findUnique({
           where: {
@@ -182,34 +210,35 @@ export const authOptions: any = {
           token.userId = user.id;
           token.role = user.role;
           token.accessToken = dbAccount.access_token;
+          token.hrId = user.hrId;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
+          token.image = user.image;
         }
       }
 
-      // Google users
       if (account?.provider === 'google' && profile) {
-    
-
         let userInDb = await prisma.user.findUnique({
           where: { email: profile.email },
         });
 
         if (!userInDb) {
-          // Generate a random password for Google OAuth users
           const randomPassword = crypto.randomBytes(16).toString('hex');
           const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
           userInDb = await prisma.user.create({
             data: {
               email: profile.email,
-              name: profile.name || profile.email.split('@')[0],
+              firstName: profile.name || profile.email.split('@')[0],
+              lastName: '',
+              phoneNumber: '',
               password: hashedPassword,
-              role: 'Employee', // Statically set role to Employee
+              role: 'Employee',
               image: profile.picture,
               emailVerified: null,
             },
           });
         } else {
-          // Ensure the user's role is Employee for Google OAuth
           if (userInDb.role !== 'Employee') {
             userInDb = await prisma.user.update({
               where: { id: userInDb.id },
@@ -218,7 +247,6 @@ export const authOptions: any = {
           }
         }
 
-        // Use upsert to avoid duplicate Account entries
         await prisma.account.upsert({
           where: {
             provider_providerAccountId: {
@@ -239,7 +267,7 @@ export const authOptions: any = {
         });
 
         token.userId = userInDb.id;
-        token.name = userInDb.name;
+        token.firstName = userInDb.firstName;
         token.email = userInDb.email;
         token.picture = profile.picture;
         token.role = userInDb.role;
@@ -252,12 +280,14 @@ export const authOptions: any = {
       session.refreshExpiresAt = token.refreshExpiresAt;
       session.user.id = token.userId;
       session.user.role = token.role;
-      session.user.name = token.name || session.user.name;
+      session.user.name = token.firstName || session.user.firstName;
       session.user.email = token.email || session.user.email;
-      session.user.image = token.picture || session.user.image;
+      session.user.image = token.picture || token.image || session.user.image;
+      session.user.hrId = token.hrId;
+      session.user.firstName = token.firstName;
+      session.user.lastName = token.lastName;
       session.accessToken = token.accessToken;
 
-      // Set redirectTo based on user role
       switch (token.role) {
         case 'Employee':
           session.redirectTo = '/employee-dashboard';
@@ -269,7 +299,7 @@ export const authOptions: any = {
           session.redirectTo = '/hr-dashboard';
           break;
         default:
-          session.redirectTo = '/auth/sign-in'; // Fallback for undefined roles
+          session.redirectTo = '/auth/sign-in';
       }
 
       if (token.userId && session.user.email && !token.picture) {

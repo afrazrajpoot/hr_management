@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call the external parsing API
-    const res = await fetch('http://127.0.0.1:8000/parse/companies', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
       method: 'POST',
       body: formData,
     });

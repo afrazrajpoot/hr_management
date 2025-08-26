@@ -18,6 +18,8 @@ import {
 import Link from "next/link";
 import { questions } from "../../../../question";
 import FileUploader from "@/components/FileUploader";
+import { useSession } from "next-auth/react";
+import { useSocket } from "@/context/SocketContext";
 
 // Group questions by part
 const questionsByPart = questions.map((part) => ({
@@ -30,7 +32,7 @@ const questionsByPart = questions.map((part) => ({
   ),
 }));
 
-const API_URL = "http://127.0.0.1:8000/analyze/assessment";
+const API_URL = `http://127.0.0.1:8000/analyze/assessment`;
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);
@@ -43,12 +45,13 @@ export default function Assessment() {
     maxCount: number;
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const { socket, isConnected } = useSocket();
   const currentPart = questionsByPart[currentPartIndex];
   const currentPartQuestions = currentPart.questions;
   const totalQuestionsInPart = currentPartQuestions.length;
   const currentQ = currentPartQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100;
+  const { data: session } = useSession();
 
   // Timer effect
   useEffect(() => {
@@ -87,7 +90,7 @@ export default function Assessment() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ data: partsData }),
+        body: JSON.stringify({ data: partsData, userId: session?.user.id }),
       });
 
       if (!response.ok) {
@@ -97,6 +100,12 @@ export default function Assessment() {
       const result = await response.json();
       setAnalysisResults(result.results);
       setError(null);
+
+      // EMIT DASHBOARD UPDATE EVENT - Trigger real-time update
+      if (socket && isConnected && session?.user?.hrId) {
+        console.log("📊 Emitting dashboard update after assessment completion");
+        socket.emit("hr_dashboard", { hrId: session.user.hrId });
+      }
     } catch (err: any) {
       setError(`Failed to analyze assessment: ${err.message}`);
       setAnalysisResults(null);

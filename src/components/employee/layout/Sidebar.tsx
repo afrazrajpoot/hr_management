@@ -18,6 +18,9 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useSocket } from "@/context/SocketContext";
+import { NotificationPopover } from "@/components/NotificationPopover";
+// import { NotificationPopover } from "./NotificationPopover"; // Import the new component
 
 const navigation = [
   {
@@ -48,11 +51,12 @@ const navigation = [
 ];
 
 export function AppSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const location = usePathname();
   const { theme, setTheme } = useTheme();
+  const { isConnected, notifications, clearNotifications } = useSocket();
 
-  const toggleTheme = () => {
+  const toggleTheme = (): void => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
@@ -119,6 +123,16 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      {/* Notification Section - Replace the old notification code with this */}
+      <div className="p-4 border-t border-border">
+        <NotificationPopover
+          notifications={notifications}
+          isConnected={isConnected}
+          clearNotifications={clearNotifications}
+          isCollapsed={isCollapsed}
+        />
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-border space-y-2">

@@ -6,7 +6,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { toast } from "sonner"; // Import sonner
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,10 +28,12 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, User, Chrome } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Chrome, Phone } from "lucide-react";
 
 type FormData = {
-  name: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   email: string;
   password: string;
   role: string;
@@ -55,7 +57,9 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
       email: "",
       password: "",
       role: "Employee",
@@ -64,7 +68,6 @@ const SignUpPage = () => {
 
   const password = watch("password");
 
-  // Handle query parameter errors
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
@@ -73,14 +76,13 @@ const SignUpPage = () => {
           ? "Authentication failed. Please try again."
           : errorParam;
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     }
   }, [searchParams]);
 
-  // Handle redirection based on session.redirectTo
   useEffect(() => {
     if (status === "authenticated" && (session as any).redirectTo) {
-      toast.success("Sign-up successful! Redirecting..."); // Show success toast
+      toast.success("Sign-up successful! Redirecting...");
       router.push((session as any).redirectTo);
     }
   }, [status, session, router]);
@@ -115,14 +117,16 @@ const SignUpPage = () => {
 
     if (!acceptTerms) {
       setError("Please accept the terms and conditions");
-      toast.error("Please accept the terms and conditions"); // Show error toast
+      toast.error("Please accept the terms and conditions");
       setIsLoading(false);
       return;
     }
 
     try {
       const result = await signIn("credentials", {
-        name: data.name,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
         email: data.email,
         password: data.password,
         role: data.role,
@@ -132,14 +136,14 @@ const SignUpPage = () => {
 
       if (result?.error) {
         setError(result.error);
-        toast.error(result.error); // Show error toast
+        toast.error(result.error);
       } else {
-        toast.success("Account created successfully!"); // Show success toast
+        toast.success("Account created successfully!");
       }
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -151,11 +155,11 @@ const SignUpPage = () => {
       const callbackUrl =
         searchParams.get("callbackUrl") || "/employee-dashboard";
       await signIn(provider, { callbackUrl });
-      toast.success(`Signing in with ${provider}...`); // Show OAuth sign-in toast
+      toast.success(`Signing in with ${provider}...`);
     } catch (error) {
       const errorMessage = "Authentication failed. Please try again.";
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -185,18 +189,50 @@ const SignUpPage = () => {
 
   const formFields = [
     {
-      id: "name",
-      label: "Full Name",
+      id: "firstName",
+      label: "First Name",
       type: "text",
-      placeholder: "Enter your full name",
+      placeholder: "Enter your first name",
       icon: (
         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
       ),
       registerOptions: {
-        required: "Full name is required",
+        required: "First name is required",
         minLength: {
           value: 2,
-          message: "Name must be at least 2 characters",
+          message: "First name must be at least 2 characters",
+        },
+      },
+    },
+    {
+      id: "lastName",
+      label: "Last Name",
+      type: "text",
+      placeholder: "Enter your last name",
+      icon: (
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      ),
+      registerOptions: {
+        required: "Last name is required",
+        minLength: {
+          value: 2,
+          message: "Last name must be at least 2 characters",
+        },
+      },
+    },
+    {
+      id: "phoneNumber",
+      label: "Phone Number",
+      type: "tel",
+      placeholder: "Enter your phone number",
+      icon: (
+        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+      ),
+      registerOptions: {
+        required: "Phone number is required",
+        pattern: {
+          value: /^\+?[\d\s-]{8,}$/,
+          message: "Invalid phone number",
         },
       },
     },
@@ -384,7 +420,7 @@ const SignUpPage = () => {
                       {getPasswordStrengthText()}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <motion.div
                       className={`h-full ${getPasswordStrengthColor()}`}
                       initial={{ width: 0 }}

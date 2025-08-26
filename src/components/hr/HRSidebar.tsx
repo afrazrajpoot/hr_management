@@ -52,6 +52,11 @@ const navigation = [
     href: "/hr-dashboard/internal-mobility",
     icon: TrendingUp,
   },
+  {
+    name: "Upload Employee",
+    href: "/hr-dashboard/upload-employee",
+    icon: FileText,
+  },
 ];
 
 const bottomNavigation = [

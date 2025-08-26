@@ -14,7 +14,7 @@ export default function UploadPage() {
       formData.append("files", file);
     });
 
-    const res = await fetch("/api/parse", {
+    const res = await fetch("/api/parse-employee", {
       method: "POST",
       body: formData,
     });
