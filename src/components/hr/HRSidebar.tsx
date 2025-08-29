@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,49 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const navigation = [
-  { name: "Dashboard", href: "/hr-dashboard", icon: LayoutDashboard },
-  {
-    name: "Departments",
-    href: "/hr-dashboard/departments",
-    icon: Building2,
-    badge: "6",
-  },
-  {
-    name: "Employees",
-    href: "/hr-dashboard/employees",
-    icon: Users,
-    badge: "139",
-  },
-  {
-    name: "Assessments",
-    href: "/hr-dashboard/assessments",
-    icon: FileText,
-    badge: "24",
-  },
-  {
-    name: "Retention Risk",
-    href: "/hr-dashboard/retention-risk",
-    icon: AlertTriangle,
-    badge: "31",
-  },
-  {
-    name: "Internal Mobility",
-    href: "/hr-dashboard/internal-mobility",
-    icon: TrendingUp,
-  },
-  {
-    name: "Upload Employee",
-    href: "/hr-dashboard/upload-employee",
-    icon: FileText,
-  },
-  {
-    name: "Upload Jobs",
-    href: "/hr-dashboard/upload-jobs",
-    icon: FileText,
-  },
-];
+import { useSocket } from "@/context/SocketContext";
 
 const bottomNavigation = [
   { name: "Profile", href: "/hr-dashboard/profile", icon: User },
@@ -83,6 +40,71 @@ export default function HRSidebar({
   onToggleDarkMode,
 }: HRSidebarProps) {
   const pathname = usePathname();
+  const { dashboardData, totalEmployees } = useSocket();
+
+  // Calculate totals across all departments
+
+  const completedAssessments =
+    dashboardData && Array.isArray(dashboardData)
+      ? dashboardData.reduce(
+          (sum, dept) => sum + (dept.completed_assessments || 0),
+          0
+        )
+      : 0;
+
+  const departmentCount =
+    dashboardData && Array.isArray(dashboardData) ? dashboardData.length : 0;
+
+  // Warn if dashboardData is not in expected format
+  if (!dashboardData || !Array.isArray(dashboardData)) {
+    console.warn(
+      "dashboardData is null, undefined, or not an array:",
+      dashboardData
+    );
+  }
+
+  const navigation = [
+    { name: "Dashboard", href: "/hr-dashboard", icon: LayoutDashboard },
+    {
+      name: "Departments",
+      href: "/hr-dashboard/departments",
+      icon: Building2,
+      badge: departmentCount > 0 ? departmentCount : undefined,
+    },
+    {
+      name: "Employees",
+      href: "/hr-dashboard/employees",
+      icon: Users,
+      badge: totalEmployees > 0 ? totalEmployees : undefined,
+    },
+    {
+      name: "Assessments",
+      href: "/hr-dashboard/assessments",
+      icon: FileText,
+      badge: completedAssessments > 0 ? completedAssessments : undefined,
+    },
+    {
+      name: "Retention Risk",
+      href: "/hr-dashboard/retention-risk",
+      icon: AlertTriangle,
+      badge: "31",
+    },
+    {
+      name: "Internal Mobility",
+      href: "/hr-dashboard/internal-mobility",
+      icon: TrendingUp,
+    },
+    {
+      name: "Upload Employee",
+      href: "/hr-dashboard/upload-employee",
+      icon: FileText,
+    },
+    {
+      name: "Upload Jobs",
+      href: "/hr-dashboard/upload-jobs",
+      icon: FileText,
+    },
+  ];
 
   const isActive = (path: string) => {
     if (path === "/hr-dashboard") return pathname === path;

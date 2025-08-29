@@ -36,6 +36,7 @@ interface DashboardData {
   completion: number;
   color: string;
   completed_assessments: number;
+  total_employees: number;
 }
 
 interface SocketContextType {
@@ -54,6 +55,7 @@ interface SocketContextType {
   isRinging: boolean;
   dashboardData: DashboardData[] | null;
   roomsData: any;
+  totalEmployees: number;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -69,6 +71,7 @@ const SocketContext = createContext<SocketContextType>({
   isRinging: false,
   dashboardData: null,
   roomsData: null,
+  totalEmployees: 0,
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -91,7 +94,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: session } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  const [totalEmployees, setTotalmployee] = useState(0);
   // Initialize audio with your custom sound file
   useEffect(() => {
     audioRef.current = new Audio("/mixkit-cartoon-door-melodic-bell-110.wav");
@@ -279,6 +282,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log("📊 Dashboard data received:", data);
       if (data.dashboardData && Array.isArray(data.dashboardData)) {
         setDashboardData(data.dashboardData);
+        setTotalmployee(data.total_employees);
       } else if (data.error) {
         console.error("❌ HR Dashboard error:", data.error);
       }
@@ -317,6 +321,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         isRinging,
         dashboardData,
         roomsData,
+        totalEmployees,
       }}
     >
       {children}

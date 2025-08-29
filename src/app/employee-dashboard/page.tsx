@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   TrendingUp,
   Calendar,
   Target,
@@ -107,6 +115,8 @@ export default function Dashboard() {
     monthlyStats: [],
     aiRecommendation: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const assessmentsPerPage = 5;
 
   if (data && !isLoading) {
     const mappedData = mapJsonToDashboardData(data);
@@ -114,6 +124,24 @@ export default function Dashboard() {
       setDashboardData(mappedData);
     }
   }
+
+  // Pagination logic
+  const totalPages = Math.ceil(
+    dashboardData.recentAssessments.length / assessmentsPerPage
+  );
+  const paginatedAssessments = dashboardData.recentAssessments.slice(
+    (currentPage - 1) * assessmentsPerPage,
+    currentPage * assessmentsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of Recent Assessments section
+    const assessmentsSection = document.getElementById("recent-assessments");
+    if (assessmentsSection) {
+      assessmentsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -123,7 +151,17 @@ export default function Dashboard() {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <AppLayout>
+        <div className="p-6">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
   }
 
   return (
@@ -285,7 +323,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Assessments */}
-          <Card className="card-elevated">
+          <Card className="card-elevated" id="recent-assessments">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
@@ -293,8 +331,8 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {dashboardData.recentAssessments.length > 0 ? (
-                dashboardData.recentAssessments.map((assessment) => (
+              {paginatedAssessments.length > 0 ? (
+                paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
                     className="flex items-center justify-between p-3 rounded-lg border transition-colors"
@@ -324,7 +362,9 @@ export default function Dashboard() {
                       )}
                       {assessment.status === "In Progress" && (
                         <Button size="sm" variant="outline" asChild>
-                          <Link href="/assessment">Continue</Link>
+                          <Link href="/employee-dashboard/assessment">
+                            Continue
+                          </Link>
                         </Button>
                       )}
                     </div>
@@ -335,8 +375,58 @@ export default function Dashboard() {
                   No assessments completed yet.
                 </p>
               )}
+              {totalPages > 1 && (
+                <Pagination className="mt-6">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from(
+                      { length: totalPages },
+                      (_, index) => index + 1
+                    ).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={currentPage === page}
+                          className={
+                            currentPage === page
+                              ? "bg-primary text-primary-foreground"
+                              : "cursor-pointer"
+                          }
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(totalPages, currentPage + 1)
+                          )
+                        }
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/results">
+                <Link href="/employee-dashboard/results">
                   View All Results
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
@@ -389,7 +479,7 @@ export default function Dashboard() {
                 </p>
               )}
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/career-pathways">
+                <Link href="/employee-dashboard/career-Pathways">
                   Explore All Pathways
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
@@ -433,7 +523,7 @@ export default function Dashboard() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/employee-dashboard/career-Pathways">
+                <Link href="/employee-dashboard/career-pathways">
                   <Users className="w-6 h-6" />
                   <span>Career Paths</span>
                 </Link>

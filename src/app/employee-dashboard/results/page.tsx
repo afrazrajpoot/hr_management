@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Download,
   Share2,
   TrendingUp,
@@ -47,14 +55,15 @@ interface CurrentRoleAlignmentAnalysis {
 }
 
 interface CareerPathways {
-  long_term: string;
-  short_term: string;
+  [key: string]: string;
 }
 
 interface TransitionTimeline {
   "1_year": string;
-  "2_year": string;
-  "6_month": string;
+  "2_years"?: string;
+  "6_months"?: string;
+  "2_year"?: string;
+  "6_month"?: string;
 }
 
 interface InternalCareerOpportunities {
@@ -113,10 +122,11 @@ interface Assessment {
 export default function Results() {
   const { data: session, status } = useSession();
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
-
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const assessmentsPerPage = 5;
 
   useEffect(() => {
     if (data) {
@@ -134,6 +144,7 @@ export default function Results() {
 
       setAssessments(sortedAssessments);
       setSelectedAssessment(sortedAssessments[0] || null);
+      setCurrentPage(1); // Reset to first page on data load
     } else if (error) {
       console.error("Error from RTK Query:", error);
       setAssessments([]);
@@ -141,21 +152,73 @@ export default function Results() {
     }
   }, [data, error]);
 
+  const handleAssessmentClick = (assessment: Assessment) => {
+    setSelectedAssessment(assessment);
+    // Scroll to the top of the results section
+    const resultsHeader = document.getElementById("results-header");
+    if (resultsHeader) {
+      resultsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(assessments.length / assessmentsPerPage);
+  const paginatedAssessments = assessments.slice(
+    (currentPage - 1) * assessmentsPerPage,
+    currentPage * assessmentsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of assessment history section
+    const historySection = document.getElementById("assessment-history");
+    if (historySection) {
+      historySection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <AppLayout>
+        <div className="p-6">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
   }
 
   if (error) {
-    return <div>Error loading assessments. Please try again later.</div>;
+    return (
+      <AppLayout>
+        <div className="p-6">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                Error loading assessments. Please try again later.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
   }
 
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div
+          id="results-header"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+        >
           <div>
-            <h1 className="text-3xl font-bold">Your Genius Factor Profile</h1>
+            <h1 className="text-3xl font-bold text-black dark:text-white">
+              Your Genius Factor Profile
+            </h1>
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
@@ -183,7 +246,7 @@ export default function Results() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold mb-2">
+                    <h2 className="text-2xl font-bold mb-2 text-black dark:text-white">
                       Overall Genius Score
                     </h2>
                     <div className="text-4xl font-bold text-primary mb-2">
@@ -211,21 +274,24 @@ export default function Results() {
               {/* Genius Factors Breakdown */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <BarChart3 className="w-5 h-5 mr-2" />
                     Genius Factor Breakdown
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div className="space-y-2">
+                    <h3 className="text-xl font-semibold text-black dark:text-white">
+                      Primary Genius Factor
+                    </h3>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">
+                      <span className="font-medium text-black dark:text-white leading-6">
                         {
                           selectedAssessment.geniusFactorProfileJson
                             .primary_genius_factor
                         }
                       </span>
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm font-semibold text-black dark:text-white">
                         {selectedAssessment.geniusFactorScore}/100
                       </span>
                     </div>
@@ -233,8 +299,28 @@ export default function Results() {
                       value={selectedAssessment.geniusFactorScore}
                       className="h-2"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-black dark:text-white leading-relaxed">
                       {selectedAssessment.geniusFactorProfileJson.description}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-semibold text-black dark:text-white">
+                      Secondary Genius Factor
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-black dark:text-white leading-6">
+                        {
+                          selectedAssessment.geniusFactorProfileJson
+                            .secondary_genius_factor
+                        }
+                      </span>
+                      {/* <span className="text-sm font-semibold text-black dark:text-white">N/A</span> */}
+                    </div>
+                    <p className="text-sm text-black dark:text-white leading-relaxed">
+                      {
+                        selectedAssessment.geniusFactorProfileJson
+                          .secondary_description
+                      }
                     </p>
                   </div>
                 </CardContent>
@@ -244,7 +330,7 @@ export default function Results() {
               <div className="space-y-6">
                 <Card className="card-elevated">
                   <CardHeader>
-                    <CardTitle className="flex items-center">
+                    <CardTitle className="flex items-center text-black dark:text-white">
                       <Award className="w-5 h-5 mr-2" />
                       Key Strengths
                     </CardTitle>
@@ -257,7 +343,7 @@ export default function Results() {
                             key={index}
                             className="flex items-center p-2 rounded-lg bg-green-50/50 dark:bg-green-900/50 border border-green-200 dark:border-green-800"
                           >
-                            <Target className="w-4 h-4 text-success mr-2" />
+                            <Target className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
                             <span className="text-sm">{strength}</span>
                           </div>
                         )
@@ -268,7 +354,7 @@ export default function Results() {
 
                 <Card className="card-elevated">
                   <CardHeader>
-                    <CardTitle className="flex items-center">
+                    <CardTitle className="flex items-center text-black dark:text-white">
                       <TrendingUp className="w-5 h-5 mr-2" />
                       Growth Opportunities
                     </CardTitle>
@@ -281,7 +367,7 @@ export default function Results() {
                             key={index}
                             className="flex items-center p-2 rounded-lg bg-amber-50/50 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800"
                           >
-                            <Lightbulb className="w-4 h-4 text-warning mr-2" />
+                            <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2" />
                             <span className="text-sm">{area}</span>
                           </div>
                         )
@@ -297,13 +383,13 @@ export default function Results() {
               {/* Executive Summary */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
                     Executive Summary
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">
+                  <p className=" font-medium text-black dark:text-white leading-6">
                     {selectedAssessment.executiveSummary}
                   </p>
                 </CardContent>
@@ -312,7 +398,7 @@ export default function Results() {
               {/* Department and HR Info */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <Users className="w-5 h-5 mr-2" />
                     Department and HR Details
                   </CardTitle>
@@ -326,13 +412,31 @@ export default function Results() {
                     <Users className="w-4 h-4 mr-2" />
                     <span>HR ID: {selectedAssessment.hrId}</span>
                   </div>
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>
+                      Created:{" "}
+                      {new Date(selectedAssessment.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>
+                      Updated:{" "}
+                      {new Date(selectedAssessment.updatedAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="w-4 h-4 mr-2" />
+                    <span>User ID: {selectedAssessment.userId}</span>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Energy Sources */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <Sparkles className="w-5 h-5 mr-2" />
                     Energy Sources
                   </CardTitle>
@@ -353,13 +457,13 @@ export default function Results() {
               {/* Current Role Alignment Analysis */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <AlertCircle className="w-5 h-5 mr-2" />
                     Current Role Alignment Analysis
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p>
+                  <p className="text-sm">
                     {
                       selectedAssessment.currentRoleAlignmentAnalysisJson
                         .assessment
@@ -376,7 +480,9 @@ export default function Results() {
                     </span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Strengths Utilized:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Strengths Utilized:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized.map(
                         (strength, index) => (
@@ -397,42 +503,46 @@ export default function Results() {
                       }
                     </span>
                   </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Underutilized Talents:
+                    </h4>
+                    <ul className="list-disc pl-5 space-y-2">
+                      {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents.map(
+                        (talent, index) => (
+                          <li key={index} className="text-sm">
+                            {talent}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Internal Career Opportunities */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <Globe className="w-5 h-5 mr-2" />
                     Internal Career Opportunities
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Career Pathways:</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <ArrowRight className="w-4 h-4 mr-2" />
-                        <span>
-                          Short Term:{" "}
-                          {
-                            selectedAssessment.internalCareerOpportunitiesJson
-                              .career_pathways.short_term
-                          }
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <ArrowRight className="w-4 h-4 mr-2" />
-                        <span>
-                          Long Term:{" "}
-                          {
-                            selectedAssessment.internalCareerOpportunitiesJson
-                              .career_pathways.long_term
-                          }
-                        </span>
-                      </div>
-                    </div>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Career Pathways:
+                    </h4>
+                    <ul className="list-disc pl-5 space-y-2">
+                      {Object.entries(
+                        selectedAssessment.internalCareerOpportunitiesJson
+                          .career_pathways
+                      ).map(([track, path], index) => (
+                        <li key={index} className="text-sm">
+                          <strong>{track}:</strong> {path}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                   <div className="flex items-center">
                     <Globe className="w-4 h-4 mr-2" />
@@ -455,33 +565,22 @@ export default function Results() {
                     </span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Transition Timeline:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Transition Timeline:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
-                      <li>
-                        6 Months:{" "}
-                        {
-                          selectedAssessment.internalCareerOpportunitiesJson
-                            .transition_timeline["6_month"]
-                        }
-                      </li>
-                      <li>
-                        1 Year:{" "}
-                        {
-                          selectedAssessment.internalCareerOpportunitiesJson
-                            .transition_timeline["1_year"]
-                        }
-                      </li>
-                      <li>
-                        2 Years:{" "}
-                        {
-                          selectedAssessment.internalCareerOpportunitiesJson
-                            .transition_timeline["2_year"]
-                        }
-                      </li>
+                      {Object.entries(
+                        selectedAssessment.internalCareerOpportunitiesJson
+                          .transition_timeline
+                      ).map(([key, value], index) => (
+                        <li key={index} className="text-sm">
+                          {key.replace("_", " ")}: {value}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Recommended Departments:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -495,7 +594,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Specific Role Suggestions:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -509,7 +608,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Required Skill Development:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -528,14 +627,16 @@ export default function Results() {
               {/* Retention and Mobility Strategies */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <CheckCircle className="w-5 h-5 mr-2" />
                     Retention and Mobility Strategies
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Development Support:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Development Support:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.retentionAndMobilityStrategiesJson.development_support.map(
                         (item, index) => (
@@ -547,7 +648,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Retention Strategies:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -561,7 +662,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Internal Mobility Recommendations:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -580,14 +681,16 @@ export default function Results() {
               {/* Development Action Plan */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <Calendar className="w-5 h-5 mr-2" />
                     Development Action Plan
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">30-Day Goals:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      30-Day Goals:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.developmentActionPlanJson.thirty_day_goals.map(
                         (goal, index) => (
@@ -599,7 +702,9 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">90-Day Goals:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      90-Day Goals:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.developmentActionPlanJson.ninety_day_goals.map(
                         (goal, index) => (
@@ -611,7 +716,9 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">6-Month Goals:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      6-Month Goals:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.developmentActionPlanJson.six_month_goals.map(
                         (goal, index) => (
@@ -623,7 +730,9 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Networking Strategy:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Networking Strategy:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.developmentActionPlanJson.networking_strategy.map(
                         (strategy, index) => (
@@ -640,14 +749,16 @@ export default function Results() {
               {/* Personalized Resources */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
                     Personalized Resources
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Affirmations:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Affirmations:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.personalizedResourcesJson.affirmations.map(
                         (affirmation, index) => (
@@ -659,7 +770,9 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Learning Resources:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Learning Resources:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.personalizedResourcesJson.learning_resources.map(
                         (resource, index) => (
@@ -671,7 +784,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Reflection Questions:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -685,7 +798,7 @@ export default function Results() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
                       Mindfulness Practices:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
@@ -704,20 +817,22 @@ export default function Results() {
               {/* Data Sources and Methodology */}
               <Card className="card-elevated">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-black dark:text-white">
                     <MapPin className="w-5 h-5 mr-2" />
                     Data Sources and Methodology
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p>
+                  <p className="text-sm">
                     {
                       selectedAssessment.dataSourcesAndMethodologyJson
                         .methodology
                     }
                   </p>
                   <div>
-                    <h4 className="font-semibold mb-2">Data Sources:</h4>
+                    <h4 className="font-semibold mb-2 text-black dark:text-white">
+                      Data Sources:
+                    </h4>
                     <ul className="list-disc pl-5 space-y-2">
                       {selectedAssessment.dataSourcesAndMethodologyJson.data_sources.map(
                         (source, index) => (
@@ -746,14 +861,16 @@ export default function Results() {
         )}
 
         {/* Assessment History */}
-        <Card className="card-elevated">
+        <Card className="card-elevated" id="assessment-history">
           <CardHeader>
-            <CardTitle>Assessment History</CardTitle>
+            <CardTitle className="text-black dark:text-white">
+              Assessment History
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {assessments.length > 0 ? (
-                assessments.map((assessment) => (
+              {paginatedAssessments.length > 0 ? (
+                paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
                     className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -761,11 +878,11 @@ export default function Results() {
                         ? "bg-primary/10 border-primary"
                         : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
-                    onClick={() => setSelectedAssessment(assessment)}
+                    onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>
                       <div className="font-medium">
-                        Assessment ID: {assessment.id}
+                        Assessment Result: {assessment.id}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(assessment.createdAt).toLocaleDateString()}
@@ -793,13 +910,63 @@ export default function Results() {
                 </p>
               )}
             </div>
+            {totalPages > 1 && (
+              <Pagination className="mt-6">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        handlePageChange(Math.max(1, currentPage - 1))
+                      }
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1
+                  ).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(page)}
+                        isActive={currentPage === page}
+                        className={
+                          currentPage === page
+                            ? "bg-primary text-primary-foreground"
+                            : "cursor-pointer"
+                        }
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        handlePageChange(Math.min(totalPages, currentPage + 1))
+                      }
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </CardContent>
         </Card>
 
         {/* Action Items */}
         <Card className="card-elevated">
           <CardHeader>
-            <CardTitle>Recommended Next Steps</CardTitle>
+            <CardTitle className="text-black dark:text-white">
+              Recommended Next Steps
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -808,7 +975,7 @@ export default function Results() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/career-pathways">
+                <Link href="/employee-dashboard/career-pathways">
                   <TrendingUp className="w-6 h-6" />
                   <span>Explore Career Paths</span>
                   <span className="text-xs text-muted-foreground">
@@ -821,7 +988,7 @@ export default function Results() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/development">
+                <Link href="/employee-dashboard/development">
                   <Target className="w-6 h-6" />
                   <span>Skill Development</span>
                   <span className="text-xs text-muted-foreground">
@@ -834,7 +1001,7 @@ export default function Results() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/assessment">
+                <Link href="/employee-dashboard/assessment">
                   <Brain className="w-6 h-6" />
                   <span>Retake Assessment</span>
                   <span className="text-xs text-muted-foreground">

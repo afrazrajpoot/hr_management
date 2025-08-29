@@ -11,6 +11,7 @@ import {
   Moon,
   Sun,
   LogOut,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,11 @@ const navigation = [
     name: "Development",
     href: "/employee-dashboard/development",
     icon: BookOpen,
+  },
+  {
+    name: "Profile",
+    href: "/employee-dashboard/profile",
+    icon: User,
   },
 ];
 

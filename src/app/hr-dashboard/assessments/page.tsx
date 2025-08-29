@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,13 +17,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Calendar, FileText } from "lucide-react";
+import { Search, Calendar, FileText, Eye } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import AssessmentDetailsModal from "@/components/hr/AssessmentDetailsModal";
 
 const AssessmentCard = ({ employee, onViewDetails }: any) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const reportsPerPage = 3;
+
   const getStatusColor = (status: any) => {
     switch (status) {
       case "Completed":
@@ -55,6 +67,134 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
         )
       : 0;
   const completionRate = employee.reports.length > 0 ? 100 : 0;
+
+  // Pagination logic for reports
+  const totalReportPages = Math.ceil(employee.reports.length / reportsPerPage);
+  const paginatedReports = employee.reports.slice(
+    (currentPage - 1) * reportsPerPage,
+    currentPage * reportsPerPage
+  );
+
+  const handleReportPageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleViewReport = (assessment: any) => {
+    onViewDetails(assessment);
+    // Scroll to top of the page
+    const header = document.getElementById("assessments-header");
+    if (header) {
+      header.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Generate pagination items with ellipsis
+  const getPaginationItems = () => {
+    const items: JSX.Element[] = [];
+    const maxVisiblePages = 5; // Show up to 5 page numbers (adjustable)
+
+    if (totalReportPages <= maxVisiblePages) {
+      // Show all pages if total pages are less than or equal to maxVisiblePages
+      for (let page = 1; page <= totalReportPages; page++) {
+        items.push(
+          <PaginationItem key={page}>
+            <PaginationLink
+              onClick={() => handleReportPageChange(page)}
+              isActive={currentPage === page}
+              className={
+                currentPage === page
+                  ? "bg-primary text-primary-foreground"
+                  : "cursor-pointer"
+              }
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Show first page, last page, current page, and ellipses
+      const startPages = Math.min(2, totalReportPages);
+      const endPages = Math.max(totalReportPages - 1, startPages + 1);
+
+      // Add first page
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            onClick={() => handleReportPageChange(1)}
+            isActive={currentPage === 1}
+            className={
+              currentPage === 1
+                ? "bg-primary text-primary-foreground"
+                : "cursor-pointer"
+            }
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      // Add ellipsis after first page if needed
+      if (currentPage > 3) {
+        items.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Add pages around the current page
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalReportPages - 1, currentPage + 1);
+      for (let page = start; page <= end; page++) {
+        items.push(
+          <PaginationItem key={page}>
+            <PaginationLink
+              onClick={() => handleReportPageChange(page)}
+              isActive={currentPage === page}
+              className={
+                currentPage === page
+                  ? "bg-primary text-primary-foreground"
+                  : "cursor-pointer"
+              }
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      // Add ellipsis before last page if needed
+      if (currentPage < totalReportPages - 2) {
+        items.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      // Add last page
+      if (totalReportPages > 1) {
+        items.push(
+          <PaginationItem key={totalReportPages}>
+            <PaginationLink
+              onClick={() => handleReportPageChange(totalReportPages)}
+              isActive={currentPage === totalReportPages}
+              className={
+                currentPage === totalReportPages
+                  ? "bg-primary text-primary-foreground"
+                  : "cursor-pointer"
+              }
+            >
+              {totalReportPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    return items;
+  };
 
   return (
     <Card className="hr-card hover:shadow-lg transition-all duration-200">
@@ -125,47 +265,84 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
         </div>
 
         {employee.reports.length > 0 && (
-          <div className="space-y-2">
-            {employee.reports.map((report: any, index: number) => (
-              <Button
-                key={report.id}
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() =>
-                  onViewDetails({
-                    id: report.id,
-                    title: "Genius Factor Career Assessment",
-                    employee: employee.name,
-                    department: report.departement,
-                    position: employee.position,
-                    dateCompleted: report.createdAt
-                      ? new Date(report.createdAt).toISOString().split("T")[0]
-                      : "Unknown",
-                    status: "Completed",
-                    geniusScore: parseInt(
-                      report.geniusFactorProfileJson.primary_genius_factor.match(
-                        /\d+/
-                      )?.[0] || "0"
-                    ),
-                    completionRate: 100,
-                    avatar: employee.avatar,
-                    executiveSummary: report.executiveSummary,
-                    geniusFactorProfile: report.geniusFactorProfileJson,
-                    currentRoleAlignment:
-                      report.currentRoleAlignmentAnalysisJson,
-                    careerOpportunities: report.internalCareerOpportunitiesJson,
-                    retentionStrategies:
-                      report.retentionAndMobilityStrategiesJson,
-                    developmentPlan: report.developmentActionPlanJson,
-                    personalizedResources: report.personalizedResourcesJson,
-                    dataSources: report.dataSourcesAndMethodologyJson,
-                  })
-                }
-              >
-                View Report #{index + 1}
-              </Button>
-            ))}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              {paginatedReports.map((report: any, index: number) => (
+                <Button
+                  key={report.id}
+                  variant="default"
+                  size="sm"
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
+                  onClick={() =>
+                    handleViewReport({
+                      id: report.id,
+                      title: "Genius Factor Career Assessment",
+                      employee: employee.name,
+                      department: report.departement,
+                      position: employee.position,
+                      dateCompleted: report.createdAt
+                        ? new Date(report.createdAt).toISOString().split("T")[0]
+                        : "Unknown",
+                      status: "Completed",
+                      geniusScore: parseInt(
+                        report.geniusFactorProfileJson.primary_genius_factor.match(
+                          /\d+/
+                        )?.[0] || "0"
+                      ),
+                      completionRate: 100,
+                      avatar: employee.avatar,
+                      executiveSummary: report.executiveSummary,
+                      geniusFactorProfile: report.geniusFactorProfileJson,
+                      currentRoleAlignment:
+                        report.currentRoleAlignmentAnalysisJson,
+                      careerOpportunities:
+                        report.internalCareerOpportunitiesJson,
+                      retentionStrategies:
+                        report.retentionAndMobilityStrategiesJson,
+                      developmentPlan: report.developmentActionPlanJson,
+                      personalizedResources: report.personalizedResourcesJson,
+                      dataSources: report.dataSourcesAndMethodologyJson,
+                    })
+                  }
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Report #{(currentPage - 1) * reportsPerPage + index + 1}
+                </Button>
+              ))}
+            </div>
+            {totalReportPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        handleReportPageChange(Math.max(1, currentPage - 1))
+                      }
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                  {getPaginationItems()}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        handleReportPageChange(
+                          Math.min(totalReportPages, currentPage + 1)
+                        )
+                      }
+                      className={
+                        currentPage === totalReportPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         )}
       </CardContent>
@@ -260,7 +437,13 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <p>Loading assessments...</p>
+          <Card className="hr-card">
+            <CardContent className="pt-6">
+              <p className="text-sm text-muted-foreground">
+                Loading assessments...
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </HRLayout>
     );
@@ -270,7 +453,11 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <p className="text-destructive">Error loading assessments</p>
+          <Card className="hr-card">
+            <CardContent className="pt-6">
+              <p className="text-destructive">Error loading assessments</p>
+            </CardContent>
+          </Card>
         </div>
       </HRLayout>
     );
@@ -280,7 +467,7 @@ export default function Assessments() {
     <HRLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
-        <div>
+        <div id="assessments-header">
           <h1 className="text-3xl font-bold tracking-tight">Assessments</h1>
           <p className="text-muted-foreground">
             Manage and review all career assessments

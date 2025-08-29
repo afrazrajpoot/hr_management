@@ -200,15 +200,15 @@ const DepartmentCard = ({ dept }: any) => {
 };
 
 export default function Dashboard() {
-  const { socket, isConnected, dashboardData } = useSocket();
+  const { socket, isConnected, dashboardData, totalEmployees } = useSocket();
   const { data: session } = useSession();
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // Use dashboardData or fallback to mockDepartmentData
-  const displayData = dashboardData || mockDepartmentData;
+  const displayData: any = dashboardData || mockDepartmentData;
 
   // Calculate derived data for charts
-  const derivedRetentionRiskData = displayData.map((dept) => ({
+  const derivedRetentionRiskData = displayData.map((dept: any) => ({
     department: dept.name,
     lowRisk: dept.completion >= 90 ? 20 : dept.completion >= 80 ? 15 : 10,
     mediumRisk: dept.completion >= 80 ? 5 : 10,
@@ -216,7 +216,7 @@ export default function Dashboard() {
     fill: dept.color,
   }));
 
-  const derivedSkillsAlignmentData = displayData.map((dept) => ({
+  const derivedSkillsAlignmentData = displayData.map((dept: any) => ({
     department: dept.name,
     alignment: dept.completion,
     fill: dept.color,
@@ -247,29 +247,31 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Employees"
-            value="177"
+            value={displayData[0]?.total_employees || totalEmployees}
             change="+5.2%"
             icon={Users}
           />
           <StatCard
             title="Assessment Completion"
             value={`${Math.round(
-              displayData.reduce((sum, dept) => sum + dept.completion, 0) /
-                Math.max(displayData.length, 1)
+              displayData.reduce(
+                (sum: any, dept: any) => sum + dept.completion,
+                0
+              ) / Math.max(displayData.length, 1)
             )}%`}
-            change="+12.3%"
+            change="0"
             icon={Target}
           />
           <StatCard
             title="Avg Genius Factor"
-            value="84.2"
-            change="+3.1%"
+            value="0"
+            change="0"
             icon={Award}
           />
           <StatCard
             title="Retention Risk"
-            value="24%"
-            change="-8.4%"
+            value="0"
+            change="0"
             icon={AlertTriangle}
             trend="down"
           />
@@ -336,7 +338,7 @@ export default function Dashboard() {
                       fill="#8884d8"
                       dataKey="completion"
                     >
-                      {displayData.map((entry, index) => (
+                      {displayData.map((entry: any, index: any) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -442,9 +444,11 @@ export default function Dashboard() {
                       fill="#8884d8"
                       dataKey="alignment"
                     >
-                      {derivedSkillsAlignmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
+                      {derivedSkillsAlignmentData.map(
+                        (entry: any, index: any) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        )
+                      )}
                     </Pie>
                     <Tooltip
                       formatter={(value) => [`${value}/100`, "Alignment"]}
@@ -553,16 +557,6 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </div>
-        </div>
-
-        {/* Department Cards Grid */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Department Overview</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {displayData.map((dept, index) => (
-              <DepartmentCard key={index} dept={dept} />
-            ))}
           </div>
         </div>
       </div>
