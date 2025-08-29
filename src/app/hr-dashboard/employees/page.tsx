@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -18,155 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import {
-  Search,
-  Filter,
-  Eye,
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Briefcase,
-  AlertTriangle,
-  Award,
-  TrendingUp,
-} from "lucide-react";
+import { Search, Filter, Eye } from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
-import { Employee } from "../../../../types/profileTypes";
+import { useGetHrEmployeeQuery } from "@/redux/hr-api";
+import EmployeeModal from "@/components/hr/EmployeeModal";
+import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
+// import EmployeeModal from "./EmployeeModal";
 
-// Mock employee data
-const employees = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@company.com",
-    phone: "+1 (555) 123-4567",
-    position: "HR Manager",
-    department: "Human Resources",
-    salary: "$85,000",
-    joinDate: "2021-03-15",
-    location: "New York, NY",
-    status: "Active",
-    assessmentStatus: "Completed",
-    riskLevel: "Low",
-    geniusFactor: 85,
-    productivity: 90,
-    engagement: 88,
-    avatar: "/api/placeholder/40/40",
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    email: "michael.chen@company.com",
-    phone: "+1 (555) 234-5678",
-    position: "Senior Developer",
-    department: "IT",
-    salary: "$95,000",
-    joinDate: "2020-07-22",
-    location: "San Francisco, CA",
-    status: "Active",
-    assessmentStatus: "Completed",
-    riskLevel: "Low",
-    geniusFactor: 92,
-    productivity: 94,
-    engagement: 89,
-    avatar: "/api/placeholder/40/40",
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    email: "emily.rodriguez@company.com",
-    phone: "+1 (555) 345-6789",
-    position: "Marketing Specialist",
-    department: "Marketing",
-    salary: "$62,000",
-    joinDate: "2022-01-10",
-    location: "Austin, TX",
-    status: "Active",
-    assessmentStatus: "Pending",
-    riskLevel: "Medium",
-    geniusFactor: 78,
-    productivity: 82,
-    engagement: 75,
-    avatar: "/api/placeholder/40/40",
-  },
-  {
-    id: 4,
-    name: "David Wilson",
-    email: "david.wilson@company.com",
-    phone: "+1 (555) 456-7890",
-    position: "Sales Manager",
-    department: "Sales",
-    salary: "$88,000",
-    joinDate: "2019-11-05",
-    location: "Chicago, IL",
-    status: "Active",
-    assessmentStatus: "Completed",
-    riskLevel: "Low",
-    geniusFactor: 87,
-    productivity: 91,
-    engagement: 86,
-    avatar: "/api/placeholder/40/40",
-  },
-  {
-    id: 5,
-    name: "Lisa Thompson",
-    email: "lisa.thompson@company.com",
-    phone: "+1 (555) 567-8901",
-    position: "UX Designer",
-    department: "Design/Creative",
-    salary: "$75,000",
-    joinDate: "2021-09-18",
-    location: "Seattle, WA",
-    status: "Active",
-    assessmentStatus: "Completed",
-    riskLevel: "Low",
-    geniusFactor: 89,
-    productivity: 87,
-    engagement: 92,
-    avatar: "/api/placeholder/40/40",
-  },
-  {
-    id: 6,
-    name: "James Anderson",
-    email: "james.anderson@company.com",
-    phone: "+1 (555) 678-9012",
-    position: "Financial Analyst",
-    department: "Finance",
-    salary: "$70,000",
-    joinDate: "2022-06-12",
-    location: "Boston, MA",
-    status: "Active",
-    assessmentStatus: "In Progress",
-    riskLevel: "Medium",
-    geniusFactor: 76,
-    productivity: 79,
-    engagement: 73,
-    avatar: "/api/placeholder/40/40",
-  },
-];
-
-const departments = [
-  "All Departments",
-  "Finance",
-  "Sales",
-  "Marketing",
-  "IT",
-  "Design/Creative",
-  "Customer Support",
-  "Operations",
-  "Human Resources",
-];
-const riskLevels = ["All Risk Levels", "Low", "Medium", "High"];
 const assessmentStatuses = [
   "All Statuses",
   "Completed",
@@ -175,20 +33,7 @@ const assessmentStatuses = [
   "Not Started",
 ];
 
-const getRiskColor = (risk: any) => {
-  switch (risk) {
-    case "Low":
-      return "bg-success text-success-foreground";
-    case "Medium":
-      return "bg-warning text-warning-foreground";
-    case "High":
-      return "bg-destructive text-destructive-foreground";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
-const getStatusColor = (status: any) => {
+const getStatusColor = (status: string) => {
   switch (status) {
     case "Completed":
       return "bg-success text-success-foreground";
@@ -203,143 +48,17 @@ const getStatusColor = (status: any) => {
   }
 };
 
-const EmployeeModal = ({ employee, isOpen, onClose }: any) => {
-  if (!employee) return null;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={employee.avatar} />
-              <AvatarFallback>
-                {employee.name
-                  .split(" ")
-                  .map((n: any) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="text-xl font-semibold">{employee.name}</h3>
-              <p className="text-muted-foreground">
-                {employee.position} • {employee.department}
-              </p>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Contact Info */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <h4 className="font-semibold flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Contact Information
-              </h4>
-              <div className="space-y-2 text-sm">
-                <p className="flex items-center gap-2">
-                  <Mail className="h-3 w-3 text-muted-foreground" />
-                  {employee.email}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Phone className="h-3 w-3 text-muted-foreground" />
-                  {employee.phone}
-                </p>
-                <p className="flex items-center gap-2">
-                  <MapPin className="h-3 w-3 text-muted-foreground" />
-                  {employee.location}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="font-semibold flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Employment Details
-              </h4>
-              <div className="space-y-2 text-sm">
-                <p className="flex items-center gap-2">
-                  <Calendar className="h-3 w-3 text-muted-foreground" />
-                  Joined: {new Date(employee.joinDate).toLocaleDateString()}
-                </p>
-                <p>
-                  Salary: <span className="font-medium">{employee.salary}</span>
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge className={getRiskColor(employee.riskLevel)}>
-                    {employee.riskLevel} Risk
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Performance Metrics */}
-          <div className="space-y-4">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Award className="h-4 w-4" />
-              Performance Metrics
-            </h4>
-
-            <div className="grid gap-4">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Genius Factor Score
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {employee.geniusFactor}/100
-                  </span>
-                </div>
-                <Progress value={employee.geniusFactor} className="h-2" />
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Productivity Score
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {employee.productivity}/100
-                  </span>
-                </div>
-                <Progress value={employee.productivity} className="h-2" />
-              </div>
-
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Engagement Score</span>
-                  <span className="text-sm text-muted-foreground">
-                    {employee.engagement}/100
-                  </span>
-                </div>
-                <Progress value={employee.engagement} className="h-2" />
-              </div>
-            </div>
-          </div>
-
-          {/* Assessment Status */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">Assessment Status</p>
-                <Badge className={getStatusColor(employee.assessmentStatus)}>
-                  {employee.assessmentStatus}
-                </Badge>
-              </div>
-            </div>
-            <Button variant="outline" size="sm">
-              View Assessments
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+const getRiskColor = (risk: string | undefined) => {
+  switch (risk) {
+    case "Low":
+      return "bg-success text-success-foreground";
+    case "Moderate":
+      return "bg-warning text-warning-foreground";
+    case "High":
+      return "bg-destructive text-destructive-foreground";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
 };
 
 export default function Employees() {
@@ -348,30 +67,66 @@ export default function Employees() {
     useState("All Departments");
   const [selectedRisk, setSelectedRisk] = useState("All Risk Levels");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
 
-  const filteredEmployees = employees.filter((employee) => {
-    const matchesSearch =
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment =
-      selectedDepartment === "All Departments" ||
-      employee.department === selectedDepartment;
-    const matchesRisk =
-      selectedRisk === "All Risk Levels" || employee.riskLevel === selectedRisk;
-    const matchesStatus =
-      selectedStatus === "All Statuses" ||
-      employee.assessmentStatus === selectedStatus;
+  const uniqueDepartments = useMemo(() => {
+    const depts = new Set<string>();
+    data?.employees?.forEach((emp: any) => {
+      const dept = emp.employee?.department || emp.reports[0]?.departement;
+      if (dept) depts.add(dept);
+    });
+    return ["All Departments", ...Array.from(depts)];
+  }, [data]);
 
-    return matchesSearch && matchesDepartment && matchesRisk && matchesStatus;
-  });
+  const uniqueRiskLevels = useMemo(() => {
+    const risks = new Set<string>();
+    data?.employees?.forEach((emp: any) => {
+      const risk =
+        emp.reports[0]?.currentRoleAlignmentAnalysisJson?.retention_risk_level;
+      if (risk) risks.add(risk);
+    });
+    return ["All Risk Levels", ...Array.from(risks)];
+  }, [data]);
+
+  const filteredEmployees = useMemo(() => {
+    if (!data?.employees) return [];
+
+    return data.employees.filter((employee: any) => {
+      const fullName = `${employee.firstName} ${
+        employee.lastName !== "Not provide" ? employee.lastName : ""
+      }`;
+      const matchesSearch =
+        fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (employee.employee?.position || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      const dept =
+        employee.employee?.department || employee.reports[0]?.departement;
+      const matchesDepartment =
+        selectedDepartment === "All Departments" || dept === selectedDepartment;
+      const risk =
+        employee.reports[0]?.currentRoleAlignmentAnalysisJson
+          .retention_risk_level;
+      const matchesRisk =
+        selectedRisk === "All Risk Levels" || risk === selectedRisk;
+      const status = employee.reports[0] ? "Completed" : "Not Started";
+      const matchesStatus =
+        selectedStatus === "All Statuses" || status === selectedStatus;
+
+      return matchesSearch && matchesDepartment && matchesRisk && matchesStatus;
+    });
+  }, [data, searchTerm, selectedDepartment, selectedRisk, selectedStatus]);
 
   const handleViewEmployee = (employee: any) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading employees</div>;
 
   return (
     <HRLayout>
@@ -415,7 +170,7 @@ export default function Employees() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((dept) => (
+                  {uniqueDepartments.map((dept) => (
                     <SelectItem key={dept} value={dept}>
                       {dept}
                     </SelectItem>
@@ -428,7 +183,7 @@ export default function Employees() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {riskLevels.map((risk) => (
+                  {uniqueRiskLevels.map((risk) => (
                     <SelectItem key={risk} value={risk}>
                       {risk}
                     </SelectItem>
@@ -475,7 +230,7 @@ export default function Employees() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmployees.map((employee) => (
+                  {filteredEmployees.map((employee: any) => (
                     <tr
                       key={employee.id}
                       className="border-b border-border last:border-0 hover:bg-muted/50"
@@ -483,16 +238,23 @@ export default function Employees() {
                       <td className="p-3">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={employee.avatar} />
+                            <AvatarImage src="/api/placeholder/40/40" />
                             <AvatarFallback>
-                              {employee.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                              {`${employee.firstName[0]}${
+                                employee.lastName !== "Not provide"
+                                  ? employee.lastName[0]
+                                  : ""
+                              }`}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{employee.name}</p>
+                            <p className="font-medium">{`${
+                              employee.firstName
+                            } ${
+                              employee.lastName !== "Not provide"
+                                ? employee.lastName
+                                : ""
+                            }`}</p>
                             <p className="text-sm text-muted-foreground">
                               {employee.email}
                             </p>
@@ -500,20 +262,35 @@ export default function Employees() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {employee.position}
+                        {employee.employee?.position || "N/A"}
                       </td>
-                      <td className="p-3">{employee.department}</td>
-                      <td className="p-3 font-medium">{employee.salary}</td>
+                      <td className="p-3">
+                        {employee.employee?.department ||
+                          employee.reports[0]?.departement ||
+                          "N/A"}
+                      </td>
+                      <td className="p-3 font-medium">
+                        ${employee.salary?.toLocaleString() || "N/A"}
+                      </td>
                       <td className="p-3">
                         <Badge
-                          className={getStatusColor(employee.assessmentStatus)}
+                          className={getStatusColor(
+                            employee.reports[0] ? "Completed" : "Not Started"
+                          )}
                         >
-                          {employee.assessmentStatus}
+                          {employee.reports[0] ? "Completed" : "Not Started"}
                         </Badge>
                       </td>
                       <td className="p-3">
-                        <Badge className={getRiskColor(employee.riskLevel)}>
-                          {employee.riskLevel}
+                        <Badge
+                          className={getRiskColor(
+                            employee.reports[0]
+                              ?.currentRoleAlignmentAnalysisJson
+                              .retention_risk_level
+                          )}
+                        >
+                          {employee.reports[0]?.currentRoleAlignmentAnalysisJson
+                            .retention_risk_level || "N/A"}
                         </Badge>
                       </td>
                       <td className="p-3">
@@ -536,7 +313,7 @@ export default function Employees() {
         </Card>
 
         {/* Employee Modal */}
-        <EmployeeModal
+        <EmployeeDetailModal
           employee={selectedEmployee}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

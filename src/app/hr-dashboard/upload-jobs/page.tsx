@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import HRLayout from "@/components/hr/HRLayout";
 import { useSession } from "next-auth/react";
 
-export default function UploadEmployeesPage() {
+export default function UploadJobsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadedJobs, setUploadedJobs] = useState<any[]>([]);
@@ -26,11 +26,11 @@ export default function UploadEmployeesPage() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("hr_id", session?.user.id); // replace dynamically if needed
+    formData.append("recruiter_id", session?.user.id); // replace dynamically if needed
 
     try {
       setLoading(true);
-      const res = await fetch("http://127.0.0.1:8000/employees/upload", {
+      const res = await fetch("http://127.0.0.1:8000/jobs/upload", {
         method: "POST",
         body: formData,
       });

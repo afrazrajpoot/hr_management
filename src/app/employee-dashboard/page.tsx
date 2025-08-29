@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +16,10 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useGetDashboardDataQuery } from "@/redux/employe-api";
+import ReactMarkdown from "react-markdown";
 
+// Define the DashboardData interface
 interface Assessment {
   id: string;
   name: string;
@@ -44,12 +46,57 @@ interface DashboardData {
   averageScore: number;
   careerMatches: number;
   recentRecommendations: Recommendation[];
-  monthlyStats: any[]; // Adjust based on actual API data
+  monthlyStats: any[];
   aiRecommendation: string;
 }
 
+// Function to map JSON data to DashboardData interface
+const mapJsonToDashboardData = (jsonData: any): DashboardData => {
+  const { data, assessmentReports } = jsonData;
+
+  // Map recent assessments from assessmentReports
+  const recentAssessments = assessmentReports.map((report: any) => ({
+    id: report.id.toString(),
+    name: `Genius Factor Assessment ${report.id}`,
+    status: report.geniusFactorScore ? "Completed" : "In Progress",
+    date: report.createdAt,
+    score: report.geniusFactorScore,
+  }));
+
+  // Map recent recommendations from internalCareerOpportunitiesJson
+  const recentRecommendations =
+    assessmentReports[0]?.internalCareerOpportunitiesJson?.specific_role_suggestions?.map(
+      (role: string, index: number) => ({
+        title: role.split(":")[0],
+        industry:
+          assessmentReports[0]?.internalCareerOpportunitiesJson
+            ?.primary_industry || "Unknown",
+        matchScore: 80 + index * 5,
+        trending: index === 0,
+      })
+    ) || [];
+
+  return {
+    recentAssessments,
+    assessmentProgress: {
+      current: parseInt(data.assessmentProgress) || 0,
+      total: 68,
+      percentage: parseInt(data.assessmentProgress) || 0,
+    },
+    completedAssessments: data.completedAssessments || 0,
+    averageScore: data.averageGeniusFactorScore || 0,
+    careerMatches:
+      assessmentReports[0]?.internalCareerOpportunitiesJson
+        ?.specific_role_suggestions?.length || 0,
+    recentRecommendations,
+    monthlyStats: [],
+    aiRecommendation:
+      data.careerRecommendation || "No recommendation available yet.",
+  };
+};
+
 export default function Dashboard() {
-  const { data: session } = useSession();
+  const { data, isLoading } = useGetDashboardDataQuery<any>();
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     recentAssessments: [],
     assessmentProgress: { current: 0, total: 68, percentage: 0 },
@@ -60,31 +107,13 @@ export default function Dashboard() {
     monthlyStats: [],
     aiRecommendation: "",
   });
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (session?.user?.id) {
-        setIsLoading(true);
-        try {
-          const response = await fetch(
-            `http://localhost:8000/employee_dashboard?userId=${session.user.id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch dashboard data");
-          }
-          const data = await response.json();
-          setDashboardData(data);
-        } catch (error) {
-          console.error("Error fetching dashboard data:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchDashboardData();
-  }, [session?.user?.id]);
+  if (data && !isLoading) {
+    const mappedData = mapJsonToDashboardData(data);
+    if (JSON.stringify(mappedData) !== JSON.stringify(dashboardData)) {
+      setDashboardData(mappedData);
+    }
+  }
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -104,7 +133,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">
-              Welcome back, {session?.user?.name || "User"}
+              Welcome back, {data?.data?.name || "User"}
             </h1>
             <p className="text-muted-foreground mt-1">{currentDate}</p>
           </div>
@@ -120,7 +149,7 @@ export default function Dashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-elevated ">
+          <Card className="card-elevated">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Assessment Progress
@@ -142,7 +171,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated ">
+          <Card className="card-elevated">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Completed Assessments
@@ -180,7 +209,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated ">
+          <Card className="card-elevated">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Career Matches
@@ -201,17 +230,56 @@ export default function Dashboard() {
         </div>
 
         {/* AI Career Recommendation */}
-        <Card className="card-elevated ">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BookOpen className="w-5 h-5 mr-2" />
+        <Card className="card-elevated bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              <BookOpen className="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-400" />
               AI Career Recommendation
             </CardTitle>
+            <div className="h-px bg-gray-200 dark:bg-gray-600 mt-2"></div>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {dashboardData.aiRecommendation}
-            </p>
+          <CardContent className="p-6">
+            <div className="prose prose-indigo dark:prose-invert max-w-none text-gray-700 dark:text-gray-200">
+              <ReactMarkdown
+                components={{
+                  h1: ({ node, ...props }) => (
+                    <h1
+                      className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+                      {...props}
+                    />
+                  ),
+                  h2: ({ node, ...props }) => (
+                    <h2
+                      className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3"
+                      {...props}
+                    />
+                  ),
+                  h3: ({ node, ...props }) => (
+                    <h3
+                      className="text-lg font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2"
+                      {...props}
+                    />
+                  ),
+                  p: ({ node, ...props }) => (
+                    <p
+                      className="text-base text-gray-600 dark:text-gray-400 leading-relaxed mb-4"
+                      {...props}
+                    />
+                  ),
+                  ul: ({ node, ...props }) => (
+                    <ul
+                      className="list-disc list-outside pl-5 mb-4 text-gray-600 dark:text-gray-400"
+                      {...props}
+                    />
+                  ),
+                  li: ({ node, ...props }) => (
+                    <li className="mb-2 text-base" {...props} />
+                  ),
+                }}
+              >
+                {dashboardData.aiRecommendation}
+              </ReactMarkdown>
+            </div>
           </CardContent>
         </Card>
 
@@ -229,7 +297,7 @@ export default function Dashboard() {
                 dashboardData.recentAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className="flex items-center justify-between p-3 rounded-lg border  transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg border transition-colors"
                   >
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
@@ -289,7 +357,7 @@ export default function Dashboard() {
                 dashboardData.recentRecommendations.map((rec, index) => (
                   <div
                     key={index}
-                    className="card-interactive p-4 rounded-lg  transition-colors"
+                    className="card-interactive p-4 rounded-lg transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -331,7 +399,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="card-elevated ">
+        <Card className="card-elevated">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />

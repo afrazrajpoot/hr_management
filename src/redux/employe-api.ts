@@ -88,7 +88,14 @@ export const employeeApi = createApi({
       }),
       invalidatesTags: ['Recommendations'],
     }),
+    getDashboardData: builder.query<void, void>({
+      query: () => '/employee-dashboard-data',
+    }),
+    getAssessmentResults: builder.query<void, void>({
+      query: () => '/assessment-results',
+    }),
   }),
+
 });
 
 export const { 
@@ -96,5 +103,7 @@ export const {
   useCreateOrUpdateEmployeeMutation, 
   useRecommendCompaniesQuery,
   useGetRecommendationsQuery,
-  useClearRecommendationsCacheMutation
+  useClearRecommendationsCacheMutation,
+  useGetDashboardDataQuery,
+  useGetAssessmentResultsQuery
 } = employeeApi;

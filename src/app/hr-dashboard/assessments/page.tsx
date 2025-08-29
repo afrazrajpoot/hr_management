@@ -8,8 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -17,103 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Search,
-  Calendar,
-  User,
-  FileText,
-  ChevronRight,
-  Filter,
-} from "lucide-react";
+import { Search, Calendar, FileText } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import HRLayout from "@/components/hr/HRLayout";
+import { useGetHrEmployeeQuery } from "@/redux/hr-api";
+import AssessmentDetailsModal from "@/components/hr/AssessmentDetailsModal";
 
-// Mock assessment data
-const assessmentData = [
-  {
-    id: 1,
-    title: "Genius Factor Career Assessment",
-    employee: "Sarah Johnson",
-    department: "Finance",
-    position: "Senior Analyst",
-    dateCompleted: "2024-01-15",
-    status: "Completed",
-    geniusScore: 85,
-    completionRate: 100,
-    avatar: "SJ",
-  },
-  {
-    id: 2,
-    title: "Genius Factor Career Assessment",
-    employee: "Michael Chen",
-    department: "IT",
-    position: "Software Engineer",
-    dateCompleted: "2024-01-12",
-    status: "Completed",
-    geniusScore: 92,
-    completionRate: 100,
-    avatar: "MC",
-  },
-  {
-    id: 3,
-    title: "Genius Factor Career Assessment",
-    employee: "Emily Rodriguez",
-    department: "Marketing",
-    position: "Marketing Manager",
-    dateCompleted: "2024-01-10",
-    status: "Completed",
-    geniusScore: 78,
-    completionRate: 100,
-    avatar: "ER",
-  },
-  {
-    id: 4,
-    title: "Genius Factor Career Assessment",
-    employee: "David Kim",
-    department: "Sales",
-    position: "Account Executive",
-    dateCompleted: "In Progress",
-    status: "In Progress",
-    geniusScore: 0,
-    completionRate: 45,
-    avatar: "DK",
-  },
-  {
-    id: 5,
-    title: "Genius Factor Career Assessment",
-    employee: "Lisa Wang",
-    department: "Design/Creative",
-    position: "UX Designer",
-    dateCompleted: "2024-01-08",
-    status: "Completed",
-    geniusScore: 89,
-    completionRate: 100,
-    avatar: "LW",
-  },
-  {
-    id: 6,
-    title: "Genius Factor Career Assessment",
-    employee: "James Wilson",
-    department: "Operations",
-    position: "Operations Manager",
-    dateCompleted: "2024-01-05",
-    status: "Completed",
-    geniusScore: 83,
-    completionRate: 100,
-    avatar: "JW",
-  },
-];
-
-const AssessmentCard = ({ assessment, onViewDetails }:any) => {
-  const getStatusColor = (status:any) => {
+const AssessmentCard = ({ employee, onViewDetails }: any) => {
+  const getStatusColor = (status: any) => {
     switch (status) {
       case "Completed":
         return "bg-success text-success-foreground";
@@ -126,44 +37,55 @@ const AssessmentCard = ({ assessment, onViewDetails }:any) => {
     }
   };
 
-  const getScoreColor = (score:any) => {
+  const getScoreColor = (score: any) => {
     if (score >= 85) return "text-success";
     if (score >= 70) return "text-warning";
     return "text-destructive";
   };
 
+  // Use the first report's status and score for display (if any)
+  const firstReport = employee.reports[0] || {};
+  const status = employee.reports.length > 0 ? "Completed" : "Not Started";
+  const geniusScore =
+    employee.reports.length > 0
+      ? parseInt(
+          firstReport.geniusFactorProfileJson?.primary_genius_factor?.match(
+            /\d+/
+          )?.[0] || "0"
+        )
+      : 0;
+  const completionRate = employee.reports.length > 0 ? 100 : 0;
+
   return (
-    <Card
-      className="hr-card hover:shadow-lg transition-all duration-200 cursor-pointer"
-      onClick={() => onViewDetails(assessment)}
-    >
+    <Card className="hr-card hover:shadow-lg transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               <span className="text-sm font-semibold text-primary">
-                {assessment.avatar}
+                {employee.avatar}
               </span>
             </div>
             <div>
-              <CardTitle className="text-lg">{assessment.employee}</CardTitle>
+              <CardTitle className="text-lg">{employee.name}</CardTitle>
               <CardDescription>
-                {assessment.position} • {assessment.department}
+                {employee.position} • {employee.department}
               </CardDescription>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{assessment.title}</span>
+            <span className="text-sm font-medium">
+              {employee.reports.length > 0
+                ? "Genius Factor Career Assessment"
+                : "No Assessments"}
+            </span>
           </div>
-          <Badge className={getStatusColor(assessment.status)}>
-            {assessment.status}
-          </Badge>
+          <Badge className={getStatusColor(status)}>{status}</Badge>
         </div>
 
         <div className="space-y-3">
@@ -171,24 +93,18 @@ const AssessmentCard = ({ assessment, onViewDetails }:any) => {
             <span className="text-sm text-muted-foreground">
               Completion Rate
             </span>
-            <span className="text-sm font-medium">
-              {assessment.completionRate}%
-            </span>
+            <span className="text-sm font-medium">{completionRate}%</span>
           </div>
-          <Progress value={assessment.completionRate} className="h-2" />
+          <Progress value={completionRate} className="h-2" />
         </div>
 
-        {assessment.status === "Completed" && (
+        {status === "Completed" && (
           <div className="flex justify-between items-center pt-2 border-t">
             <span className="text-sm text-muted-foreground">
               Genius Factor Score
             </span>
-            <span
-              className={`text-lg font-bold ${getScoreColor(
-                assessment.geniusScore
-              )}`}
-            >
-              {assessment.geniusScore}/100
+            <span className={`text-lg font-bold ${getScoreColor(geniusScore)}`}>
+              {geniusScore}/100
             </span>
           </div>
         )}
@@ -196,164 +112,64 @@ const AssessmentCard = ({ assessment, onViewDetails }:any) => {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />
           <span>
-            {assessment.status === "Completed"
-              ? `Completed: ${assessment.dateCompleted}`
-              : "In Progress"}
+            {status === "Completed"
+              ? `Completed: ${
+                  firstReport.createdAt
+                    ? new Date(firstReport.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : "Unknown"
+                }`
+              : "Not Started"}
           </span>
         </div>
+
+        {employee.reports.length > 0 && (
+          <div className="space-y-2">
+            {employee.reports.map((report: any, index: number) => (
+              <Button
+                key={report.id}
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() =>
+                  onViewDetails({
+                    id: report.id,
+                    title: "Genius Factor Career Assessment",
+                    employee: employee.name,
+                    department: report.departement,
+                    position: employee.position,
+                    dateCompleted: report.createdAt
+                      ? new Date(report.createdAt).toISOString().split("T")[0]
+                      : "Unknown",
+                    status: "Completed",
+                    geniusScore: parseInt(
+                      report.geniusFactorProfileJson.primary_genius_factor.match(
+                        /\d+/
+                      )?.[0] || "0"
+                    ),
+                    completionRate: 100,
+                    avatar: employee.avatar,
+                    executiveSummary: report.executiveSummary,
+                    geniusFactorProfile: report.geniusFactorProfileJson,
+                    currentRoleAlignment:
+                      report.currentRoleAlignmentAnalysisJson,
+                    careerOpportunities: report.internalCareerOpportunitiesJson,
+                    retentionStrategies:
+                      report.retentionAndMobilityStrategiesJson,
+                    developmentPlan: report.developmentActionPlanJson,
+                    personalizedResources: report.personalizedResourcesJson,
+                    dataSources: report.dataSourcesAndMethodologyJson,
+                  })
+                }
+              >
+                View Report #{index + 1}
+              </Button>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-};
-
-const AssessmentDetailsModal = ({ assessment, isOpen, onClose }:any) => {
-  if (!assessment) return null;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <span className="text-lg font-semibold text-primary">
-                {assessment.avatar}
-              </span>
-            </div>
-            <div>
-              <div className="text-xl">{assessment.employee}</div>
-              <div className="text-sm text-muted-foreground">
-                {assessment.position} • {assessment.department}
-              </div>
-            </div>
-          </DialogTitle>
-          <DialogDescription>
-            Complete assessment details and career recommendations
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-6 mt-6">
-          {/* Assessment Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Assessment Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <p className="font-semibold">{assessment.status}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">
-                    Completion Rate
-                  </span>
-                  <p className="font-semibold">{assessment.completionRate}%</p>
-                </div>
-                {assessment.status === "Completed" && (
-                  <>
-                    <div>
-                      <span className="text-sm text-muted-foreground">
-                        Genius Factor Score
-                      </span>
-                      <p className="font-semibold text-primary text-lg">
-                        {assessment.geniusScore}/100
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-sm text-muted-foreground">
-                        Date Completed
-                      </span>
-                      <p className="font-semibold">
-                        {assessment.dateCompleted}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 68-Question Results */}
-          {assessment.status === "Completed" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>68-Question Assessment Results</CardTitle>
-                <CardDescription>
-                  Detailed breakdown of assessment categories
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Analytical Thinking</span>
-                      <span className="text-sm font-medium">92/100</span>
-                    </div>
-                    <Progress value={92} className="h-2" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Creative Problem Solving</span>
-                      <span className="text-sm font-medium">78/100</span>
-                    </div>
-                    <Progress value={78} className="h-2" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Leadership Potential</span>
-                      <span className="text-sm font-medium">85/100</span>
-                    </div>
-                    <Progress value={85} className="h-2" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Communication Skills</span>
-                      <span className="text-sm font-medium">89/100</span>
-                    </div>
-                    <Progress value={89} className="h-2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* AI Career Recommendations */}
-          {assessment.status === "Completed" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>AI-Generated Career Recommendations</CardTitle>
-                <CardDescription>
-                  Personalized career path suggestions based on assessment
-                  results
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <h4 className="font-semibold text-primary mb-2">
-                    Recommended Career Path
-                  </h4>
-                  <p className="text-sm">
-                    Based on your high analytical thinking score and leadership
-                    potential, consider transitioning to a Senior Financial
-                    Analyst role with team leadership responsibilities.
-                  </p>
-                </div>
-                <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
-                  <h4 className="font-semibold text-accent mb-2">
-                    Skill Development Areas
-                  </h4>
-                  <ul className="text-sm space-y-1">
-                    <li>• Creative problem-solving workshops</li>
-                    <li>• Advanced data visualization techniques</li>
-                    <li>• Cross-functional collaboration training</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 };
 
@@ -363,27 +179,102 @@ export default function Assessments() {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
 
-  const filteredAssessments = assessmentData.filter((assessment) => {
+  // Transform API data into employee format with grouped reports
+  const employeeData =
+    data?.employees?.map((employee: any) => ({
+      id: employee.id,
+      name: `${employee.firstName} ${
+        employee.lastName !== "Not provide" ? employee.lastName : ""
+      }`.trim(),
+      department: employee.department || "Unknown",
+      position: employee.position || "Unknown",
+      reports: employee.reports || [],
+      avatar: `${employee.firstName[0]}${
+        employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+      }`,
+    })) || [];
+
+  const filteredEmployees = employeeData.filter((employee: any) => {
     const matchesSearch =
-      assessment.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assessment.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assessment.position.toLowerCase().includes(searchTerm.toLowerCase());
+      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
-      statusFilter === "all" || assessment.status === statusFilter;
+      statusFilter === "all" ||
+      (statusFilter === "Completed" && employee.reports.length > 0) ||
+      (statusFilter === "Not Started" && employee.reports.length === 0);
+
     const matchesDepartment =
-      departmentFilter === "all" || assessment.department === departmentFilter;
+      departmentFilter === "all" || employee.department === departmentFilter;
 
     return matchesSearch && matchesStatus && matchesDepartment;
   });
 
-  const handleViewDetails = (assessment:any) => {
+  const handleViewDetails = (assessment: any) => {
     setSelectedAssessment(assessment);
     setShowDetailsModal(true);
   };
 
-  const departments = [...new Set(assessmentData.map((a) => a.department))];
+  // Extract all departments from employee data
+  const departments: any = [
+    ...new Set(
+      data?.employees?.map((emp: any) => emp.department).filter(Boolean)
+    ),
+    "all",
+  ];
+
+  // Calculate stats based on reports
+  const assessmentCount = employeeData.reduce(
+    (sum: number, emp: any) => sum + emp.reports.length,
+    0
+  );
+  const completedCount = employeeData.reduce(
+    (sum: number, emp: any) => sum + emp.reports.length,
+    0
+  );
+  const inProgressCount = 0; // No in-progress reports in data
+  const avgScore = completedCount
+    ? Math.round(
+        employeeData.reduce(
+          (sum: number, emp: any) =>
+            sum +
+            emp.reports.reduce(
+              (rSum: number, report: any) =>
+                rSum +
+                parseInt(
+                  report.geniusFactorProfileJson.primary_genius_factor.match(
+                    /\d+/
+                  )?.[0] || "0"
+                ),
+              0
+            ),
+          0
+        ) / completedCount
+      )
+    : 0;
+
+  if (isLoading) {
+    return (
+      <HRLayout>
+        <div className="p-6 text-center">
+          <p>Loading assessments...</p>
+        </div>
+      </HRLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <HRLayout>
+        <div className="p-6 text-center">
+          <p className="text-destructive">Error loading assessments</p>
+        </div>
+      </HRLayout>
+    );
+  }
 
   return (
     <HRLayout>
@@ -430,10 +321,9 @@ export default function Assessments() {
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {departments.map((dept) => (
+                  {departments.map((dept: string) => (
                     <SelectItem key={dept} value={dept}>
-                      {dept}
+                      {dept === "all" ? "All Departments" : dept}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -451,7 +341,7 @@ export default function Assessments() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Total Assessments
                   </p>
-                  <p className="text-2xl font-bold">{assessmentData.length}</p>
+                  <p className="text-2xl font-bold">{assessmentCount}</p>
                 </div>
                 <FileText className="h-8 w-8 text-primary" />
               </div>
@@ -465,10 +355,7 @@ export default function Assessments() {
                     Completed
                   </p>
                   <p className="text-2xl font-bold text-success">
-                    {
-                      assessmentData.filter((a) => a.status === "Completed")
-                        .length
-                    }
+                    {completedCount}
                   </p>
                 </div>
                 <div className="h-8 w-8 bg-success/10 rounded-lg flex items-center justify-center">
@@ -485,10 +372,7 @@ export default function Assessments() {
                     In Progress
                   </p>
                   <p className="text-2xl font-bold text-warning">
-                    {
-                      assessmentData.filter((a) => a.status === "In Progress")
-                        .length
-                    }
+                    {inProgressCount}
                   </p>
                 </div>
                 <div className="h-8 w-8 bg-warning/10 rounded-lg flex items-center justify-center">
@@ -504,7 +388,7 @@ export default function Assessments() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Avg Score
                   </p>
-                  <p className="text-2xl font-bold text-primary">85.4</p>
+                  <p className="text-2xl font-bold text-primary">{avgScore}</p>
                 </div>
                 <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
                   <span className="text-xs font-bold text-primary">★</span>
@@ -514,25 +398,23 @@ export default function Assessments() {
           </Card>
         </div>
 
-        {/* Assessment Grid */}
+        {/* Employee Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredAssessments.map((assessment) => (
+          {filteredEmployees.map((employee: any) => (
             <AssessmentCard
-              key={assessment.id}
-              assessment={assessment}
+              key={employee.id}
+              employee={employee}
               onViewDetails={handleViewDetails}
             />
           ))}
         </div>
 
         {/* No results */}
-        {filteredAssessments.length === 0 && (
+        {filteredEmployees.length === 0 && (
           <Card className="hr-card">
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                No assessments found
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">No employees found</h3>
               <p className="text-muted-foreground">
                 Try adjusting your search criteria.
               </p>

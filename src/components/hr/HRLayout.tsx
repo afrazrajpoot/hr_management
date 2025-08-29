@@ -38,6 +38,10 @@ const pageConfig: any = {
     title: "Settings",
     subtitle: "System preferences and configurations",
   },
+  "/hr-dashboard/upload-jobs": {
+    title: "Upload Jobs",
+    subtitle: "System preferences and configurations",
+  },
 };
 
 export default function HRLayout({ children, segment }: any) {

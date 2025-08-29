@@ -58,6 +58,9 @@ const EmployeeProfilePage: React.FC = () => {
     defaultValues: employee,
   });
 
+  // Debug log for control
+  console.log("EmployeeProfilePage control:", control);
+
   const handleSave = useCallback(
     async (data: Employee): Promise<void> => {
       try {

@@ -57,6 +57,11 @@ const navigation = [
     href: "/hr-dashboard/upload-employee",
     icon: FileText,
   },
+  {
+    name: "Upload Jobs",
+    href: "/hr-dashboard/upload-jobs",
+    icon: FileText,
+  },
 ];
 
 const bottomNavigation = [

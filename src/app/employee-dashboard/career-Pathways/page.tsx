@@ -1,4 +1,3 @@
-// app/career-pathways/page.tsx
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import {
   Search,
-  TrendingUp,
   DollarSign,
   MapPin,
   Filter,
@@ -25,74 +23,70 @@ import {
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useGetRecommendationsQuery } from "@/redux/employe-api";
 import { useDebounce } from "@/custom-hooks/useDebounce";
-// import { useDebounce } from "@/hooks/use-debounce";
+import JobDetailsModal from "@/components/employee/JobDetailsModal";
 
 // Map API data to match the expected career recommendation structure
 const mapApiToCareerData = (apiData: any) => {
   if (!apiData?.recommendations) return [];
 
-  return apiData.recommendations.map((company: any, index: number) => ({
-    id: `${company.name}-${index}`,
-    title: company.name,
-    industry: inferIndustry(company.name),
-    matchScore: company.score,
-    salaryRange: "Varies",
-    location: "Not specified",
-    experience: "Varies",
-    trending: company.score > 45,
+  return apiData.recommendations.map((job: any) => ({
+    id: job.id,
+    title: job.title || "Untitled Job",
+    industry: inferIndustry(job.title, job.description),
+    matchScore: job.match_score || 0, // Use the API's match_score field
+    salaryRange: job.salary
+      ? `$${job.salary.toLocaleString()}`
+      : "Not specified",
+    location: job.location || "Not specified",
+    type: job.type || "Not specified",
+    status: job.status || "Unknown",
     saved: false,
-    description: company.reason,
-    skills: inferSkills(company.name, company.reason),
-    companies: [company.name],
+    description: job.description || "No description available",
+    companies: [
+      job.recruiter
+        ? `${job.recruiter.firstName} ${job.recruiter.lastName}`
+        : "Unknown Recruiter",
+    ],
   }));
 };
 
-// Helper function to infer industry based on company name
-const inferIndustry = (companyName: string) => {
-  if (companyName.includes("Energy")) return "Energy";
-  if (companyName.includes("Capital")) return "Finance";
-  if (companyName.includes("Tech") || companyName.includes("Solutions"))
+// Helper function to infer industry based on job title and description
+const inferIndustry = (title: string, description: string) => {
+  const lowerTitle = title.toLowerCase();
+  const lowerDescription = description.toLowerCase();
+  if (
+    lowerTitle.includes("developer") ||
+    lowerDescription.includes("react") ||
+    lowerDescription.includes("api")
+  )
     return "Technology";
-  if (companyName.includes("MediCare")) return "Healthcare";
-  if (companyName.includes("Edu")) return "Education";
+  if (
+    lowerTitle.includes("analyst") ||
+    lowerDescription.includes("data") ||
+    lowerDescription.includes("business")
+  )
+    return "Finance";
+  if (
+    lowerTitle.includes("ux") ||
+    lowerTitle.includes("designer") ||
+    lowerDescription.includes("user interface")
+  )
+    return "Design";
   return "General";
 };
 
-// Helper function to infer skills based on company name and reason
-const inferSkills = (companyName: string, reason: string) => {
-  if (companyName.includes("Energy"))
-    return ["Renewable Energy", "Project Management"];
-  if (companyName.includes("Capital"))
-    return ["Financial Analysis", "Business Analytics"];
-  if (companyName.includes("Tech") || companyName.includes("Solutions"))
-    return ["Software Development", "Problem Solving"];
-  if (companyName.includes("MediCare"))
-    return ["Healthcare IT", "Data Management"];
-  if (companyName.includes("Edu")) return ["EdTech", "Content Development"];
-  return ["General Skills"];
-};
-
-const industries = [
-  "All",
-  "Technology",
-  "Finance",
-  "Energy",
-  "Healthcare",
-  "Education",
-  "General",
-];
-const experienceLevels = ["All", "Entry Level", "Mid Level", "Senior Level"];
+const industries = ["All", "Technology", "Finance", "Design", "General"];
+const jobTypes = ["All", "FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"];
 const sortOptions = [
   { value: "score-desc", label: "Match Score" },
   { value: "salary-desc", label: "Salary" },
-  { value: "trending-desc", label: "Trending" },
 ];
 
 export default function CareerPathways() {
   const [filters, setFilters] = useState<any>({
     search: "",
     industry: "All",
-    experience: "All",
+    type: "All",
     minScore: 0,
     maxScore: 100,
     sortBy: "score",
@@ -101,12 +95,13 @@ export default function CareerPathways() {
 
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const limit = 6;
 
   // Debounce search term
   const debouncedSearch = useDebounce(filters.search, 500);
 
-  // Fetch data with pagination only
+  // Fetch data with pagination
   const { data, isLoading, isError, isFetching } = useGetRecommendationsQuery({
     page,
     limit,
@@ -115,36 +110,21 @@ export default function CareerPathways() {
   // Transform and cache all recommendations
   const allRecommendations = useMemo(() => {
     if (!data?.recommendations) return [];
-    return data.recommendations.map((company: any, index: number) => ({
-      id: `${company.name}-${index}-${page}`,
-      title: company.name,
-      industry: inferIndustry(company.name),
-      matchScore: company.score,
-      salaryRange: "Varies",
-      location: "Not specified",
-      experience: "Varies",
-      trending: company.score > 45,
-      saved: false,
-      description: company.reason,
-      skills: inferSkills(company.name, company.reason),
-      companies: [company.name],
-    }));
-  }, [data?.recommendations, page]);
+    return mapApiToCareerData(data);
+  }, [data?.recommendations]);
 
   // Client-side filtering and sorting
   const filteredAndSortedRecommendations = useMemo(() => {
     if (!allRecommendations.length) return [];
 
-    let filtered = allRecommendations.filter((career) => {
+    let filtered = allRecommendations.filter((career: any) => {
       if (
         debouncedSearch &&
         !career.title.toLowerCase().includes(debouncedSearch.toLowerCase()) &&
         !career.industry
           .toLowerCase()
           .includes(debouncedSearch.toLowerCase()) &&
-        !career.skills.some((skill: string) =>
-          skill.toLowerCase().includes(debouncedSearch.toLowerCase())
-        )
+        !career.location.toLowerCase().includes(debouncedSearch.toLowerCase())
       ) {
         return false;
       }
@@ -154,11 +134,8 @@ export default function CareerPathways() {
         return false;
       }
 
-      // Experience filter
-      if (
-        filters.experience !== "All" &&
-        career.experience !== filters.experience
-      ) {
+      // Type filter
+      if (filters.type !== "All" && career.type !== filters.type) {
         return false;
       }
 
@@ -174,7 +151,7 @@ export default function CareerPathways() {
     });
 
     // Sorting
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       let comparison = 0;
 
       switch (filters.sortBy) {
@@ -182,10 +159,16 @@ export default function CareerPathways() {
           comparison = a.matchScore - b.matchScore;
           break;
         case "salary":
-          comparison = a.salaryRange.localeCompare(b.salaryRange);
-          break;
-        case "trending":
-          comparison = a.trending === b.trending ? 0 : a.trending ? -1 : 1;
+          // Handle cases where salary is "Not specified"
+          const salaryA =
+            a.salaryRange === "Not specified"
+              ? 0
+              : parseFloat(a.salaryRange.replace("$", "").replace(",", ""));
+          const salaryB =
+            b.salaryRange === "Not specified"
+              ? 0
+              : parseFloat(b.salaryRange.replace("$", "").replace(",", ""));
+          comparison = salaryA - salaryB;
           break;
         default:
           comparison = a.matchScore - b.matchScore;
@@ -210,7 +193,7 @@ export default function CareerPathways() {
   }, [
     debouncedSearch,
     filters.industry,
-    filters.experience,
+    filters.type,
     filters.minScore,
     filters.maxScore,
     filters.sortBy,
@@ -255,6 +238,14 @@ export default function CareerPathways() {
     }));
   };
 
+  const openJobDetails = (job: any) => {
+    setSelectedJob(job);
+  };
+
+  const closeJobDetails = () => {
+    setSelectedJob(null);
+  };
+
   if (isLoading && page === 1) {
     return (
       <AppLayout>
@@ -279,7 +270,7 @@ export default function CareerPathways() {
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
-        {/* Header - Keeping your original design */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Career Pathways</h1>
@@ -296,7 +287,7 @@ export default function CareerPathways() {
           </div>
         </div>
 
-        {/* Search and Filters - Keeping your original design */}
+        {/* Search and Filters */}
         <Card className="card-elevated">
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -304,7 +295,7 @@ export default function CareerPathways() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Search career titles, companies, or skills..."
+                    placeholder="Search career titles, industries, or locations..."
                     value={filters.search}
                     onChange={(e) =>
                       handleFilterChange("search", e.target.value)
@@ -329,18 +320,16 @@ export default function CareerPathways() {
                 </SelectContent>
               </Select>
               <Select
-                value={filters.experience}
-                onValueChange={(value) =>
-                  handleFilterChange("experience", value)
-                }
+                value={filters.type}
+                onValueChange={(value) => handleFilterChange("type", value)}
               >
                 <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="Experience Level" />
+                  <SelectValue placeholder="Job Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {experienceLevels.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
+                  {jobTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.replace("_", " ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -349,7 +338,7 @@ export default function CareerPathways() {
           </CardContent>
         </Card>
 
-        {/* Results Summary - Keeping your original design */}
+        {/* Results Summary */}
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground">
             Showing {filteredAndSortedRecommendations.length} career matches
@@ -375,26 +364,20 @@ export default function CareerPathways() {
           </div>
         </div>
 
-        {/* Career Cards - Keeping your original design */}
+        {/* Career Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredAndSortedRecommendations.map((career) => (
+          {filteredAndSortedRecommendations.map((career: any) => (
             <Card key={career.id} className="card-interactive group">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-2">
                       <CardTitle className="text-xl">{career.title}</CardTitle>
-                      {career.trending && (
-                        <Badge variant="secondary" className="text-xs">
-                          <TrendingUp className="w-3 h-3 mr-1" />
-                          Trending
-                        </Badge>
-                      )}
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <span>{career.industry}</span>
                       <span>•</span>
-                      <span>{career.experience}</span>
+                      <span>{career.type.replace("_", " ")}</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -425,7 +408,6 @@ export default function CareerPathways() {
                 <p className="text-sm text-muted-foreground">
                   {career.description}
                 </p>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center">
                     <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -436,20 +418,8 @@ export default function CareerPathways() {
                     <span>{career.location}</span>
                   </div>
                 </div>
-
                 <div className="space-y-2">
-                  <div className="text-sm font-medium">Key Skills:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {career.skills.map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">Top Companies:</div>
+                  <div className="text-sm font-medium">Recruiter:</div>
                   <div className="flex flex-wrap gap-2">
                     {career.companies
                       .slice(0, 3)
@@ -469,9 +439,12 @@ export default function CareerPathways() {
                     )}
                   </div>
                 </div>
-
                 <div className="flex items-center justify-between pt-4 border-t">
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openJobDetails(career)}
+                  >
                     View Details
                     <ExternalLink className="w-3 h-3 ml-2" />
                   </Button>
@@ -483,6 +456,9 @@ export default function CareerPathways() {
             </Card>
           ))}
         </div>
+
+        {/* Job Details Modal */}
+        <JobDetailsModal job={selectedJob} onClose={closeJobDetails} />
 
         {/* Loading More Indicator */}
         {isFetching && (
@@ -505,7 +481,7 @@ export default function CareerPathways() {
           </div>
         )}
 
-        {/* Load More Button (alternative to infinite scroll) */}
+        {/* Load More Button */}
         {data?.hasMore && !isFetching && (
           <div className="text-center">
             <Button onClick={loadMore} variant="outline" size="lg">

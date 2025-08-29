@@ -57,25 +57,53 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Database configuration error' }, { status: 500 });
     }
 
+    // Get employee with related user data
     const employee = await prisma.employee.findFirst({
       where: { employeeId: session.user.id },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            position: true,
+            department: true,
+            salary: true
+          }
+        }
+      }
     });
 
     if (!employee) {
+      // If no employee exists, try to get user data
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          phoneNumber: true,
+          position: true,
+          department: true,
+          salary: true
+        }
+      });
+
       return NextResponse.json({
         id: '',
-        employeeId: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
+        employeeId: session.user.id,
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phoneNumber || '',
         address: '',
         dateOfBirth: '',
         hireDate: '',
-        department: '',
-        position: '',
+        department: user?.department || '',
+        position: user?.position || '',
         manager: '',
-        salary: '',
+        salary: user?.salary || '',
         bio: '',
         avatar: '',
         skills: [],
@@ -85,20 +113,21 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Merge data from both employee and user models
     return NextResponse.json({
       id: employee.id,
       employeeId: employee.employeeId,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      email: employee.email,
-      phone: employee.phone || '',
+      firstName: employee.user?.firstName || employee.firstName,
+      lastName: employee.user?.lastName || employee.lastName,
+      email: employee.user?.email || employee.email,
+      phone: employee.user?.phoneNumber || employee.phone || '',
       address: employee.address || '',
       dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',
       hireDate: employee.hireDate?.toISOString().split('T')[0] || '',
-      department: employee.department || '',
-      position: employee.position || '',
+      department: employee.user?.department || employee.department || '',
+      position: employee.user?.position || employee.position || '',
       manager: employee.manager || '',
-      salary: employee.salary || '',
+      salary: employee.user?.salary || employee.salary || '',
       bio: employee.bio || '',
       avatar: employee.avatar || '',
       skills: employee.skills,
@@ -112,6 +141,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// POST: Create or update employee data
+// POST: Create or update employee data
+// POST: Create or update employee data
 // POST: Create or update employee data
 export async function POST(req: NextRequest) {
   try {
@@ -138,80 +170,88 @@ export async function POST(req: NextRequest) {
 
     const existingEmployee = await prisma.employee.findFirst({
       where: { employeeId: session.user.id },
+      include: { user: true }
     });
 
     let employee;
-    if (existingEmployee) {
-      employee = await prisma.employee.update({
-        where: { id: existingEmployee.id },
+    
+    // Start a transaction to update both Employee and User
+    const result = await prisma.$transaction(async (tx:any) => {
+      // First update the User model with user-specific fields
+      const updatedUser = await tx.user.update({
+        where: { id: session.user.id },
         data: {
-          employeeId: existingEmployee.employeeId,
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
-          phone: data.phone || null,
-          address: data.address || null,
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-          hireDate: data.hireDate ? new Date(data.hireDate) : null,
-          department: data.department || null,
-          position: data.position || null,
-          manager: data.manager || null,
-          salary: data.salary || null,
-          bio: data.bio || null,
-          avatar: data.avatar || null,
-          skills: data.skills || [],
-          education: data.education || [],
-          experience: data.experience || [],
-          resume: data.resume || null,
-          user: {
-            connect: { id: session.user.id }, // ✅ Connect existing User
-          },
-     
-        },
+          phoneNumber: data.phone,
+          position: data.position,
+          department: data.department,
+          salary: data.salary
+        }
       });
-    } else {
-      employee = await prisma.employee.create({
-        data: {
-          employeeId: session.user.id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone || null,
-          address: data.address || null,
-          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-          hireDate: data.hireDate ? new Date(data.hireDate) : null,
-          department: data.department || null,
-          position: data.position || null,
-          manager: data.manager || null,
-          salary: data.salary || null,
-          bio: data.bio || null,
-          avatar: data.avatar || null,
-          skills: data.skills || [],
-          education: data.education || [],
-          experience: data.experience || [],
-          resume: data.resume || null,
-          user: {
-            connect: { id: session.user.id }, // ✅ Connect existing User
+
+      // Prepare employee data (only fields that exist in Employee model)
+      const employeeData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        address: data.address || null,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        hireDate: data.hireDate ? new Date(data.hireDate) : null,
+        bio: data.bio || null,
+        avatar: data.avatar || null,
+        skills: data.skills || [],
+        education: data.education || [],
+        experience: data.experience || [],
+        resume: data.resume || null,
+      };
+
+      if (existingEmployee) {
+        // Update existing employee
+        employee = await tx.employee.update({
+          where: { id: existingEmployee.id },
+          data: employeeData
+        });
+      } else {
+        // Create new employee
+        employee = await tx.employee.create({
+          data: {
+            employeeId: session.user.id,
+            ...employeeData,
+            user: {
+              connect: { id: session.user.id },
+            },
           },
-        },
-      });
-      
-    }
+        });
+
+        // Update the user with the employeeId reference
+        await tx.user.update({
+          where: { id: session.user.id },
+          data: {
+            employeeId: employee.id
+          }
+        });
+      }
+
+      return { employee, user: updatedUser };
+    });
+
+    employee = result.employee;
+    const user = result.user;
 
     return NextResponse.json({
       id: employee.id,
       employeeId: employee.employeeId,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      email: employee.email,
-      phone: employee.phone || '',
+      firstName: user.firstName || employee.firstName,
+      lastName: user.lastName || employee.lastName,
+      email: user.email || '',
+      phone: user.phoneNumber || '',
       address: employee.address || '',
       dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',
       hireDate: employee.hireDate?.toISOString().split('T')[0] || '',
-      department: employee.department || '',
-      position: employee.position || '',
-      manager: employee.manager || '',
-      salary: employee.salary || '',
+      department: user.department || '',
+      position: user.position || '',
+      salary: user.salary || '',
       bio: employee.bio || '',
       avatar: employee.avatar || '',
       skills: employee.skills,

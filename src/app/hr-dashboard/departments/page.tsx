@@ -18,18 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
+  ResponsiveContainer,
 } from "recharts";
 import {
   Building2,
@@ -40,153 +34,8 @@ import {
   Eye,
 } from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
-
-const departments = [
-  "Finance",
-  "Sales",
-  "Marketing",
-  "IT",
-  "Design/Creative",
-  "Customer Support",
-  "Operations",
-  "Human Resources",
-  "Product R&D",
-];
-
-const departmentData: any = {
-  Finance: {
-    employeeCount: 24,
-    completion: 85,
-    geniusFactor: 78,
-    productivity: 82,
-    engagement: 80,
-    skillsAlignment: 85,
-    retentionRisk: "Low",
-    mobilityScore: 72,
-    radarData: [
-      { subject: "Leadership", score: 78, fullMark: 100 },
-      { subject: "Analytics", score: 92, fullMark: 100 },
-      { subject: "Communication", score: 75, fullMark: 100 },
-      { subject: "Innovation", score: 68, fullMark: 100 },
-      { subject: "Collaboration", score: 80, fullMark: 100 },
-      { subject: "Technical", score: 85, fullMark: 100 },
-    ],
-    employees: [
-      {
-        id: 1,
-        name: "John Smith",
-        position: "Financial Analyst",
-        salary: "$75,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 2,
-        name: "Emily Davis",
-        position: "Senior Accountant",
-        salary: "$68,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 3,
-        name: "Michael Brown",
-        position: "Finance Manager",
-        salary: "$95,000",
-        status: "Pending",
-        risk: "Medium",
-      },
-    ],
-  },
-  Sales: {
-    employeeCount: 35,
-    completion: 92,
-    geniusFactor: 85,
-    productivity: 90,
-    engagement: 88,
-    skillsAlignment: 89,
-    retentionRisk: "Low",
-    mobilityScore: 85,
-    radarData: [
-      { subject: "Leadership", score: 85, fullMark: 100 },
-      { subject: "Analytics", score: 78, fullMark: 100 },
-      { subject: "Communication", score: 95, fullMark: 100 },
-      { subject: "Innovation", score: 82, fullMark: 100 },
-      { subject: "Collaboration", score: 88, fullMark: 100 },
-      { subject: "Technical", score: 70, fullMark: 100 },
-    ],
-    employees: [
-      {
-        id: 4,
-        name: "Sarah Wilson",
-        position: "Sales Manager",
-        salary: "$85,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 5,
-        name: "David Johnson",
-        position: "Account Executive",
-        salary: "$70,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 6,
-        name: "Lisa Garcia",
-        position: "Sales Rep",
-        salary: "$55,000",
-        status: "Completed",
-        risk: "Medium",
-      },
-    ],
-  },
-  IT: {
-    employeeCount: 28,
-    completion: 95,
-    geniusFactor: 92,
-    productivity: 94,
-    engagement: 89,
-    skillsAlignment: 96,
-    retentionRisk: "Low",
-    mobilityScore: 88,
-    radarData: [
-      { subject: "Leadership", score: 82, fullMark: 100 },
-      { subject: "Analytics", score: 95, fullMark: 100 },
-      { subject: "Communication", score: 78, fullMark: 100 },
-      { subject: "Innovation", score: 98, fullMark: 100 },
-      { subject: "Collaboration", score: 85, fullMark: 100 },
-      { subject: "Technical", score: 98, fullMark: 100 },
-    ],
-    employees: [
-      {
-        id: 7,
-        name: "Alex Chen",
-        position: "Senior Developer",
-        salary: "$95,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 8,
-        name: "Maria Rodriguez",
-        position: "DevOps Engineer",
-        salary: "$88,000",
-        status: "Completed",
-        risk: "Low",
-      },
-      {
-        id: 9,
-        name: "James Wilson",
-        position: "Tech Lead",
-        salary: "$110,000",
-        status: "Completed",
-        risk: "Low",
-      },
-    ],
-  },
-};
+import { useGetHrEmployeeQuery } from "@/redux/hr-api";
+import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 
 const MetricCard = ({ title, value, icon: Icon, color = "primary" }: any) => (
   <Card className="hr-card">
@@ -203,14 +52,251 @@ const MetricCard = ({ title, value, icon: Icon, color = "primary" }: any) => (
 );
 
 export default function Departments() {
-  const [selectedDepartment, setSelectedDepartment] = useState("Finance");
-  const deptData = departmentData[selectedDepartment];
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Process API data to extract departments
+  const departments = Array.from(
+    new Set(data?.employees?.map((emp: any) => emp.department).filter(Boolean))
+  ).concat("All"); // Add "All" option for department selector
+
+  const getAllEmployeesData = () => {
+    const employeesWithReports =
+      data?.employees?.filter((emp: any) => emp.reports?.length > 0) || [];
+
+    const employeeCount = data?.employees?.length || 0;
+    const completedAssessments = employeesWithReports.length;
+    const completion = employeeCount
+      ? Math.round((completedAssessments / employeeCount) * 100)
+      : 0;
+
+    // Aggregate genius factor scores across all reports
+    const geniusFactorScores = employeesWithReports
+      .flatMap((emp: any) =>
+        emp.reports.map((report: any) =>
+          parseFloat(
+            report?.geniusFactorProfileJson?.primary_genius_factor?.match(
+              /(\d+)%/
+            )?.[1] || "0"
+          )
+        )
+      )
+      .filter((score: number) => score > 0);
+    const geniusFactor = geniusFactorScores.length
+      ? Math.round(
+          geniusFactorScores.reduce(
+            (sum: number, score: number) => sum + score,
+            0
+          ) / geniusFactorScores.length
+        )
+      : 0;
+
+    // Aggregate alignment scores across all reports
+    const alignmentScores = employeesWithReports
+      .flatMap((emp: any) =>
+        emp.reports.map((report: any) =>
+          parseFloat(
+            report?.currentRoleAlignmentAnalysisJson?.alignment_score?.split(
+              "/"
+            )[0] || "0"
+          )
+        )
+      )
+      .filter((score: number) => score > 0);
+    const skillsAlignment = alignmentScores.length
+      ? Math.round(
+          alignmentScores.reduce(
+            (sum: number, score: number) => sum + score,
+            0
+          ) / alignmentScores.length
+        )
+      : 0;
+
+    // Determine retention risk (highest risk level across all reports)
+    const retentionRisks = employeesWithReports.flatMap((emp: any) =>
+      emp.reports.map(
+        (report: any) =>
+          report?.currentRoleAlignmentAnalysisJson?.retention_risk_level
+      )
+    );
+    const retentionRisk = retentionRisks.includes("High")
+      ? "High"
+      : retentionRisks.includes("Moderate")
+      ? "Moderate"
+      : "Low";
+
+    // Radar data for all employees with reports
+    const radarData = [
+      { subject: "Empathy", score: geniusFactor, fullMark: 100 },
+      { subject: "Leadership", score: skillsAlignment, fullMark: 100 },
+      {
+        subject: "Communication",
+        score: Math.min(geniusFactor + 10, 100),
+        fullMark: 100,
+      },
+      {
+        subject: "Purpose-Driven",
+        score: Math.min(geniusFactor + 5, 100),
+        fullMark: 100,
+      },
+    ];
+
+    return {
+      employeeCount,
+      completion,
+      geniusFactor,
+      productivity: Math.round((geniusFactor + skillsAlignment) / 2),
+      engagement: Math.round((geniusFactor + skillsAlignment) / 2 + 5),
+      skillsAlignment,
+      retentionRisk,
+      mobilityScore: Math.round(skillsAlignment * 0.9),
+      radarData,
+      employees: data?.employees?.map((emp: any) => ({
+        id: emp.id,
+        firstName: emp.firstName,
+        lastName: emp.lastName,
+        email: emp.email,
+        salary: emp.salary,
+        employee: emp.employee,
+        reports: emp.reports,
+        name: `${emp.firstName} ${
+          emp.lastName === "Not provide" ? "" : emp.lastName
+        }`,
+        position: emp.employee?.position || emp.position || "N/A",
+        department: emp.employee?.department || emp.department || "N/A",
+        salaryFormatted: emp.salary ? `$${emp.salary.toLocaleString()}` : "N/A",
+        status: emp.reports?.length ? "Completed" : "Pending",
+        risk:
+          emp.reports?.[0]?.currentRoleAlignmentAnalysisJson
+            ?.retention_risk_level || "Unknown",
+      })),
+    };
+  };
+
+  const getDepartmentData = (dept: string) => {
+    const deptEmployees =
+      data?.employees?.filter((emp: any) => emp.department === dept) || [];
+
+    const employeeCount = deptEmployees.length;
+    const employeesWithReports = deptEmployees.filter(
+      (emp: any) => emp.reports?.length > 0
+    );
+    const completedAssessments = employeesWithReports.length;
+    const completion = employeeCount
+      ? Math.round((completedAssessments / employeeCount) * 100)
+      : 0;
+
+    const geniusFactorScores = employeesWithReports
+      .flatMap((emp: any) =>
+        emp.reports.map((report: any) =>
+          parseFloat(
+            report?.geniusFactorProfileJson?.primary_genius_factor?.match(
+              /(\d+)%/
+            )?.[1] || "0"
+          )
+        )
+      )
+      .filter((score: number) => score > 0);
+    const geniusFactor = geniusFactorScores.length
+      ? Math.round(
+          geniusFactorScores.reduce(
+            (sum: number, score: number) => sum + score,
+            0
+          ) / geniusFactorScores.length
+        )
+      : 0;
+
+    const alignmentScores = employeesWithReports
+      .flatMap((emp: any) =>
+        emp.reports.map((report: any) =>
+          parseFloat(
+            report?.currentRoleAlignmentAnalysisJson?.alignment_score?.split(
+              "/"
+            )[0] || "0"
+          )
+        )
+      )
+      .filter((score: number) => score > 0);
+    const skillsAlignment = alignmentScores.length
+      ? Math.round(
+          alignmentScores.reduce(
+            (sum: number, score: number) => sum + score,
+            0
+          ) / alignmentScores.length
+        )
+      : 0;
+
+    const retentionRisks = employeesWithReports.flatMap((emp: any) =>
+      emp.reports.map(
+        (report: any) =>
+          report?.currentRoleAlignmentAnalysisJson?.retention_risk_level
+      )
+    );
+    const retentionRisk = retentionRisks.includes("High")
+      ? "High"
+      : retentionRisks.includes("Moderate")
+      ? "Moderate"
+      : "Low";
+
+    const radarData = [
+      { subject: "Empathy", score: geniusFactor, fullMark: 100 },
+      { subject: "Leadership", score: skillsAlignment, fullMark: 100 },
+      {
+        subject: "Communication",
+        score: Math.min(geniusFactor + 10, 100),
+        fullMark: 100,
+      },
+      {
+        subject: "Purpose-Driven",
+        score: Math.min(geniusFactor + 5, 100),
+        fullMark: 100,
+      },
+    ];
+
+    return {
+      employeeCount,
+      completion,
+      geniusFactor,
+      productivity: Math.round((geniusFactor + skillsAlignment) / 2),
+      engagement: Math.round((geniusFactor + skillsAlignment) / 2 + 5),
+      skillsAlignment,
+      retentionRisk,
+      mobilityScore: Math.round(skillsAlignment * 0.9),
+      radarData,
+      employees: deptEmployees.map((emp: any) => ({
+        id: emp.id,
+        firstName: emp.firstName,
+        lastName: emp.lastName,
+        email: emp.email,
+        salary: emp.salary,
+        employee: emp.employee,
+        reports: emp.reports,
+        name: `${emp.firstName} ${
+          emp.lastName === "Not provide" ? "" : emp.lastName
+        }`,
+        position: emp.employee?.position || emp.position || "N/A",
+        department: emp.employee?.department || emp.department || "N/A",
+        salaryFormatted: emp.salary ? `$${emp.salary.toLocaleString()}` : "N/A",
+        status: emp.reports?.length ? "Completed" : "Pending",
+        risk:
+          emp.reports?.[0]?.currentRoleAlignmentAnalysisJson
+            ?.retention_risk_level || "Unknown",
+      })),
+    };
+  };
+
+  const deptData: any =
+    selectedDepartment === "All"
+      ? getAllEmployeesData()
+      : getDepartmentData(selectedDepartment);
 
   const getRiskColor = (risk: any) => {
     switch (risk) {
       case "Low":
         return "bg-success text-success-foreground";
-      case "Medium":
+      case "Moderate":
         return "bg-warning text-warning-foreground";
       case "High":
         return "bg-destructive text-destructive-foreground";
@@ -218,6 +304,14 @@ export default function Departments() {
         return "bg-muted text-muted-foreground";
     }
   };
+
+  const handleViewDetails = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsModalOpen(true);
+  };
+
+  if (isLoading) return <HRLayout>Loading...</HRLayout>;
+  if (isError) return <HRLayout>Error loading data</HRLayout>;
 
   return (
     <HRLayout>
@@ -227,7 +321,8 @@ export default function Departments() {
           <div>
             <h2 className="text-2xl font-bold">Department Analytics</h2>
             <p className="text-muted-foreground">
-              Select a department to view detailed insights
+              Select a department to view detailed insights or "All" for
+              company-wide metrics
             </p>
           </div>
           <Select
@@ -238,9 +333,9 @@ export default function Departments() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {departments.map((dept) => (
-                <SelectItem key={dept} value={dept}>
-                  {dept}
+              {departments.map((dept: any) => (
+                <SelectItem key={dept.toString()} value={dept.toString()}>
+                  {dept.toString()}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -251,25 +346,25 @@ export default function Departments() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="Total Employees"
-            value={deptData.employeeCount}
+            value={deptData.employeeCount || 0}
             icon={Users}
             color="primary"
           />
           <MetricCard
             title="Assessment Completion"
-            value={`${deptData.completion}%`}
+            value={`${deptData.completion || 0}%`}
             icon={Award}
             color="hr-chart-2"
           />
           <MetricCard
             title="Genius Factor Score"
-            value={deptData.geniusFactor}
+            value={deptData.geniusFactor || 0}
             icon={TrendingUp}
             color="hr-chart-1"
           />
           <MetricCard
             title="Retention Risk"
-            value={deptData.retentionRisk}
+            value={deptData.retentionRisk || "Unknown"}
             icon={AlertTriangle}
             color={
               deptData.retentionRisk === "Low" ? "hr-chart-2" : "hr-chart-3"
@@ -282,14 +377,17 @@ export default function Departments() {
           {/* Skills Radar Chart */}
           <Card className="hr-card">
             <CardHeader>
-              <CardTitle>Department Skills Profile</CardTitle>
+              <CardTitle>Skills Profile</CardTitle>
               <CardDescription>
-                Core competency assessment for {selectedDepartment}
+                Core competency assessment for{" "}
+                {selectedDepartment === "All"
+                  ? "all employees"
+                  : selectedDepartment}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={deptData.radarData}>
+                <RadarChart data={deptData.radarData || []}>
                   <PolarGrid />
                   <PolarAngleAxis dataKey="subject" />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} />
@@ -310,7 +408,10 @@ export default function Departments() {
             <CardHeader>
               <CardTitle>Performance Metrics</CardTitle>
               <CardDescription>
-                Key performance indicators for {selectedDepartment}
+                Key performance indicators for{" "}
+                {selectedDepartment === "All"
+                  ? "all employees"
+                  : selectedDepartment}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -320,20 +421,20 @@ export default function Departments() {
                     Productivity Score
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {deptData.productivity}/100
+                    {deptData.productivity || 0}/100
                   </span>
                 </div>
-                <Progress value={deptData.productivity} className="h-2" />
+                <Progress value={deptData.productivity || 0} className="h-2" />
               </div>
 
               <div>
                 <div className="flex justify-between mb-2">
                   <span className="text-sm font-medium">Engagement Score</span>
                   <span className="text-sm text-muted-foreground">
-                    {deptData.engagement}/100
+                    {deptData.engagement || 0}/100
                   </span>
                 </div>
-                <Progress value={deptData.engagement} className="h-2" />
+                <Progress value={deptData.engagement || 0} className="h-2" />
               </div>
 
               <div>
@@ -342,10 +443,13 @@ export default function Departments() {
                     Skills-Job Alignment
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {deptData.skillsAlignment}/100
+                    {deptData.skillsAlignment || 0}/100
                   </span>
                 </div>
-                <Progress value={deptData.skillsAlignment} className="h-2" />
+                <Progress
+                  value={deptData.skillsAlignment || 0}
+                  className="h-2"
+                />
               </div>
 
               <div>
@@ -354,10 +458,10 @@ export default function Departments() {
                     Internal Mobility Score
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    {deptData.mobilityScore}/100
+                    {deptData.mobilityScore || 0}/100
                   </span>
                 </div>
-                <Progress value={deptData.mobilityScore} className="h-2" />
+                <Progress value={deptData.mobilityScore || 0} className="h-2" />
               </div>
             </CardContent>
           </Card>
@@ -368,7 +472,9 @@ export default function Departments() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              {selectedDepartment} Employees
+              {selectedDepartment === "All"
+                ? "All Employees"
+                : `${selectedDepartment} Employees`}
             </CardTitle>
             <CardDescription>
               Employee details and assessment status
@@ -390,7 +496,7 @@ export default function Departments() {
                   </tr>
                 </thead>
                 <tbody>
-                  {deptData.employees.map((employee: any) => (
+                  {deptData.employees?.map((employee: any) => (
                     <tr
                       key={employee.id}
                       className="border-b border-border last:border-0 hover:bg-muted/50"
@@ -399,7 +505,7 @@ export default function Departments() {
                       <td className="p-3 text-muted-foreground">
                         {employee.position}
                       </td>
-                      <td className="p-3">{employee.salary}</td>
+                      <td className="p-3">{employee.salaryFormatted}</td>
                       <td className="p-3">
                         <Badge
                           variant={
@@ -417,7 +523,12 @@ export default function Departments() {
                         </Badge>
                       </td>
                       <td className="p-3">
-                        <Button variant="outline" size="sm" className="gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleViewDetails(employee)}
+                        >
                           <Eye className="h-4 w-4" />
                           View Details
                         </Button>
@@ -430,6 +541,13 @@ export default function Departments() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Employee Detail Modal */}
+      <EmployeeDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        employee={selectedEmployee}
+      />
     </HRLayout>
   );
 }
