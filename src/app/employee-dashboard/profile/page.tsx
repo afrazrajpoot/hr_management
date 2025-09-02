@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, ChangeEvent, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import {
   useCreateOrUpdateEmployeeMutation,
@@ -18,15 +17,21 @@ import SkillsTab from "@/components/profileComponants/SkillsTab";
 import ExperienceTab from "@/components/profileComponants/ExperienceTab";
 import EducationTab from "@/components/profileComponants/EducationTab";
 import ResumeTab from "@/components/profileComponants/ResumeTab";
+import { toast, Toaster } from "sonner";
 
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [showAlert, setShowAlert] = useState<boolean>(false);
-  const [alertMessage, setAlertMessage] = useState<string>("");
 
-  const { data: employeeData, isLoading, error } = useGetEmployeeQuery();
-  const [createOrUpdateEmployee] = useCreateOrUpdateEmployeeMutation();
+  const {
+    data: employeeData,
+    isLoading: isFetching,
+    error: fetchError,
+  } = useGetEmployeeQuery();
+  const [
+    createOrUpdateEmployee,
+    { isLoading: isMutating, error: mutationError },
+  ] = useCreateOrUpdateEmployeeMutation();
 
   const [employee, setEmployee] = useState<Employee>(
     employeeData || {
@@ -45,6 +50,7 @@ const EmployeeProfilePage: React.FC = () => {
       salary: "",
       bio: "",
       avatar: "",
+      password: "",
       skills: [],
       education: [],
       experience: [],
@@ -58,11 +64,9 @@ const EmployeeProfilePage: React.FC = () => {
     defaultValues: employee,
   });
 
-  // Debug log for control
-  console.log("EmployeeProfilePage control:", control);
-
   const handleSave = useCallback(
     async (data: Employee): Promise<void> => {
+      const toastId = toast.loading("Saving profile...");
       try {
         const saveData: any = {
           ...formData,
@@ -76,14 +80,12 @@ const EmployeeProfilePage: React.FC = () => {
         setFormData(updatedEmployee);
         reset(updatedEmployee);
         setIsEditing(false);
-        setAlertMessage("Profile updated successfully!");
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000);
+        toast.success("Profile updated successfully!", { id: toastId });
       } catch (error) {
         console.error("Error saving employee:", error);
-        setAlertMessage("Failed to save employee data");
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000);
+        const errorMessage =
+          (error as any)?.data?.error || "Failed to save employee data";
+        toast.error(errorMessage, { id: toastId, duration: 5000 });
       }
     },
     [createOrUpdateEmployee, formData, reset]
@@ -107,6 +109,7 @@ const EmployeeProfilePage: React.FC = () => {
               avatar: e.target.result as string,
             }));
             setValue("avatar", e.target.result as string);
+            toast.success("Avatar uploaded successfully!", { duration: 3000 });
           }
         };
         reader.readAsDataURL(file);
@@ -127,9 +130,7 @@ const EmployeeProfilePage: React.FC = () => {
         };
         setFormData((prev) => ({ ...prev, resume: resumeFile }));
         setValue("resume", resumeFile);
-        setAlertMessage("Resume uploaded successfully!");
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000);
+        toast.success("Resume uploaded successfully!", { duration: 3000 });
       }
     },
     [setValue]
@@ -141,22 +142,24 @@ const EmployeeProfilePage: React.FC = () => {
       setFormData(employeeData);
       reset(employeeData);
     }
-    if (error) {
-      setAlertMessage("Failed to load employee data");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+    if (fetchError) {
+      const errorMessage =
+        (fetchError as any)?.data?.error || "Failed to load employee data";
+      toast.error(errorMessage, { duration: 5000 });
     }
-  }, [employeeData, error, reset]);
+  }, [employeeData, fetchError, reset]);
 
-  if (status === "loading" || isLoading) {
+  if (status === "loading" || isFetching || isMutating) {
     return (
       <AppLayout>
         <div className="min-h-screen flex items-center justify-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-          ></motion.div>
+          <div className="bg-white/30 dark:bg-black/30 backdrop-blur-md rounded-lg p-6 shadow-lg">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+            ></motion.div>
+          </div>
         </div>
       </AppLayout>
     );
@@ -168,23 +171,16 @@ const EmployeeProfilePage: React.FC = () => {
 
   return (
     <AppLayout>
+      <Toaster
+        theme="system"
+        position="top-right"
+        richColors
+        toastOptions={{
+          duration: 3000, // Default duration for success toasts
+        }}
+      />
       <div className="min-h-screen p-4">
         <div className="max-w-6xl mx-auto space-y-6">
-          <AnimatePresence>
-            {showAlert && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Alert>
-                  <AlertDescription>{alertMessage}</AlertDescription>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           <ProfileHeader
             employee={employee}
             formData={formData}

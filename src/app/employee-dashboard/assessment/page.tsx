@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import {
   Table,
@@ -20,6 +20,7 @@ import { questions } from "../../../../question";
 import FileUploader from "@/components/FileUploader";
 import { useSession } from "next-auth/react";
 import { useSocket } from "@/context/SocketContext";
+import { toast } from "sonner";
 
 // Group questions by part
 const questionsByPart = questions.map((part) => ({
@@ -45,6 +46,7 @@ export default function Assessment() {
     maxCount: number;
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for loading
   const { socket, isConnected } = useSocket();
   const currentPart = questionsByPart[currentPartIndex];
   const currentPartQuestions = currentPart.questions;
@@ -69,13 +71,14 @@ export default function Assessment() {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true); // Start loading
     try {
       // Prepare assessment data for API
       const partsData = questionsByPart.map((part) => {
         const optionCounts: Record<string, number> = {};
         part.questions.forEach((q) => {
           if (answers[q.id]) {
-            const optionLetter = answers[q.id].charAt(0); // Get the option letter (A, B, C, etc.)
+            const optionLetter = answers[q.id].charAt(0);
             optionCounts[optionLetter] = (optionCounts[optionLetter] || 0) + 1;
           }
         });
@@ -101,7 +104,12 @@ export default function Assessment() {
       setAnalysisResults(result.results);
       setError(null);
 
-      // EMIT DASHBOARD UPDATE EVENT - Trigger real-time update
+      // Show success toast
+      toast.success("Assessment submitted successfully!", {
+        description: "Your results have been analyzed.",
+      });
+
+      // EMIT DASHBOARD UPDATE EVENT
       if (socket && isConnected && session?.user?.hrId) {
         console.log("📊 Emitting dashboard update after assessment completion");
         socket.emit("hr_dashboard", { hrId: session.user.hrId });
@@ -109,6 +117,12 @@ export default function Assessment() {
     } catch (err: any) {
       setError(`Failed to analyze assessment: ${err.message}`);
       setAnalysisResults(null);
+      // Show error toast
+      toast.error("Failed to submit assessment", {
+        description: err.message,
+      });
+    } finally {
+      setIsSubmitting(false); // Stop loading
     }
   };
 
@@ -145,7 +159,7 @@ export default function Assessment() {
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto">
         {analysisResults ? (
-          <Card className="card-elevated ">
+          <Card className="card-elevated">
             <CardHeader>
               <CardTitle className="text-2xl">Assessment Analysis</CardTitle>
             </CardHeader>
@@ -255,7 +269,7 @@ export default function Assessment() {
                     {currentQ.options.map((option, index) => (
                       <div
                         key={index}
-                        className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+                        className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
                       >
                         <RadioGroupItem
                           value={option}
@@ -293,11 +307,20 @@ export default function Assessment() {
                 {isLastQuestionInPart && isLastPart ? (
                   <Button
                     onClick={handleSubmit}
-                    disabled={!isAllComplete}
+                    disabled={!isAllComplete || isSubmitting}
                     className="btn-gradient"
                   >
-                    Submit Assessment
-                    <ChevronRight className="w-4 h-4 ml-2" />
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        Submit Assessment
+                        <ChevronRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
                   </Button>
                 ) : (
                   <Button

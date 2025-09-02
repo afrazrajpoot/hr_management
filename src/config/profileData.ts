@@ -11,6 +11,7 @@ export const personalInfoFields: InputFieldConfig[] = [
   { label: "Date of Birth", icon: Calendar, field: "dateOfBirth", type: "date" },
   { label: "Address", icon: MapPin, field: "address" },
   { label: "Bio", icon: User, field: "bio", isTextarea: true },
+  {label:'Password',icon:User,field:'password',type:'password'}
 ];
 
 export const employmentFields: InputFieldConfig[] = [

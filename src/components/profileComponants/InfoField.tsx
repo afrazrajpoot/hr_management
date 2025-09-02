@@ -11,6 +11,7 @@ interface InfoFieldProps extends InputFieldConfig {
   isEditing: boolean;
   control: any;
   defaultValue: string;
+  disabled?: boolean;
 }
 
 const fadeIn = {

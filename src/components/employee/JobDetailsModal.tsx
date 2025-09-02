@@ -6,6 +6,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  MapPin,
+  Building2,
+  DollarSign,
+  Clock,
+  Star,
+  Briefcase,
+  Users,
+} from "lucide-react";
 
 interface JobDetailsModalProps {
   job: any | null;
@@ -13,68 +23,176 @@ interface JobDetailsModalProps {
 }
 
 const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
-  // Define displayable fields with their labels
-  const fieldLabels: { [key: string]: string } = {
-    title: "Job Title",
-    description: "Description",
-    industry: "Industry",
-    type: "Job Type",
-    status: "Status",
-    matchScore: "Match Score",
-    salaryRange: "Salary Range",
-    location: "Location",
-    companies: "Recruiter",
+  // Define displayable fields with their labels and icons
+  const fieldConfig: {
+    [key: string]: {
+      label: string;
+      icon: React.ComponentType<any>;
+      priority: number;
+    };
+  } = {
+    industry: { label: "Industry", icon: Building2, priority: 1 },
+    type: { label: "Job Type", icon: Briefcase, priority: 2 },
+    location: { label: "Location", icon: MapPin, priority: 3 },
+    salaryRange: { label: "Salary Range", icon: DollarSign, priority: 4 },
+    companies: { label: "Recruiter", icon: Users, priority: 5 },
+    status: { label: "Status", icon: Clock, priority: 6 },
+    matchScore: { label: "Match Score", icon: Star, priority: 7 },
   };
-
-  // Fields to display in the modal
-  const displayFields = [
-    "title",
-    "description",
-    "industry",
-    "type",
-    "status",
-    "matchScore",
-    "salaryRange",
-    "location",
-    "companies",
-  ];
 
   if (!job) return null;
 
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+      case "open":
+        return "default";
+      case "closed":
+      case "expired":
+        return "secondary";
+      case "urgent":
+        return "destructive";
+      default:
+        return "outline";
+    }
+  };
+
+  const getMatchScoreColor = (score: number) => {
+    if (score >= 80)
+      return "text-green-400 bg-green-500/10 border border-green-500/20";
+    if (score >= 60)
+      return "text-yellow-400 bg-yellow-500/10 border border-yellow-500/20";
+    return "text-red-400 bg-red-500/10 border border-red-500/20";
+  };
+
+  // Sort fields by priority for better display order
+  const sortedFields = Object.keys(fieldConfig).sort(
+    (a, b) => fieldConfig[a].priority - fieldConfig[b].priority
+  );
+
+  const formatFieldValue = (field: string, value: any) => {
+    switch (field) {
+      case "type":
+        return value
+          ?.replace("_", " ")
+          .replace(/\b\w/g, (l: string) => l.toUpperCase());
+      case "companies":
+        return Array.isArray(value) ? value.join(", ") : value;
+      case "matchScore":
+        return `${value}%`;
+      default:
+        return value;
+    }
+  };
+
   return (
     <Dialog open={!!job} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{job.title}</DialogTitle>
-          <DialogDescription>Job Details</DialogDescription>
+      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl font-bold leading-tight">
+                {job.title}
+              </DialogTitle>
+              <DialogDescription className="text-base mt-2">
+                Complete job information and requirements
+              </DialogDescription>
+            </div>
+            {job.matchScore && (
+              <div
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${getMatchScoreColor(
+                  job.matchScore
+                )}`}
+              >
+                <Star className="w-4 h-4 inline mr-1" />
+                {job.matchScore}% Match
+              </div>
+            )}
+          </div>
         </DialogHeader>
-        <div className="space-y-4">
-          {displayFields.map((field) => {
-            if (job[field] !== undefined && job[field] !== null) {
-              const value =
-                field === "type"
-                  ? job[field].replace("_", " ")
-                  : field === "companies"
-                  ? job[field].join(", ")
-                  : field === "matchScore"
-                  ? `${job[field]}%`
-                  : job[field];
-              return (
-                <div key={field}>
-                  <h4 className="text-sm font-medium">{fieldLabels[field]}</h4>
-                  <p className="text-sm text-muted-foreground">{value}</p>
-                </div>
-              );
-            }
-            return null;
-          })}
+
+        <div className="space-y-6 mt-6">
+          {/* Job Description - Featured prominently */}
+          {job.description && (
+            <div className="bg-card rounded-lg p-6 border border-border">
+              <h4 className="text-lg font-semibold mb-3 flex items-center">
+                <Briefcase className="w-5 h-5 mr-2 text-primary" />
+                Description
+              </h4>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {job.description}
+              </p>
+            </div>
+          )}
+
+          {/* Quick Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sortedFields.map((field) => {
+              if (
+                job[field] !== undefined &&
+                job[field] !== null &&
+                field !== "description"
+              ) {
+                const config = fieldConfig[field];
+                const IconComponent = config.icon;
+                const value = formatFieldValue(field, job[field]);
+
+                return (
+                  <div
+                    key={field}
+                    className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-shrink-0">
+                        <IconComponent className="w-5 h-5 text-primary group-hover:text-primary/80 transition-colors" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                          {config.label}
+                        </h4>
+                        <div className="mt-1">
+                          {field === "status" ? (
+                            <Badge
+                              variant={getStatusBadgeVariant(value)}
+                              className="text-sm"
+                            >
+                              {value}
+                            </Badge>
+                          ) : field === "matchScore" ? (
+                            <div
+                              className={`inline-flex items-center px-2 py-1 rounded-md text-sm font-medium ${getMatchScoreColor(
+                                parseInt(value)
+                              )}`}
+                            >
+                              {value}
+                            </div>
+                          ) : (
+                            <p className="text-base font-semibold">{value}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+
+          {/* Additional Details */}
         </div>
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onClose}>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-6 border-t border-border">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="flex-1 sm:flex-none"
+          >
             Close
           </Button>
           <Button
-            className="btn-gradient"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8 flex-1 sm:flex-none transition-all duration-200"
             onClick={() => alert("Apply functionality not implemented")}
           >
             Apply Now

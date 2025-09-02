@@ -49,23 +49,12 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
     }
   };
 
-  const getScoreColor = (score: any) => {
-    if (score >= 85) return "text-success";
-    if (score >= 70) return "text-warning";
-    return "text-destructive";
-  };
-
   // Use the first report's status and score for display (if any)
   const firstReport = employee.reports[0] || {};
+
   const status = employee.reports.length > 0 ? "Completed" : "Not Started";
   const geniusScore =
-    employee.reports.length > 0
-      ? parseInt(
-          firstReport.geniusFactorProfileJson?.primary_genius_factor?.match(
-            /\d+/
-          )?.[0] || "0"
-        )
-      : 0;
+    firstReport.currentAllignmentAnalysisJson?.alignment_score;
   const completionRate = employee.reports.length > 0 ? 100 : 0;
 
   // Pagination logic for reports
@@ -238,7 +227,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           <Progress value={completionRate} className="h-2" />
         </div>
 
-        {status === "Completed" && (
+        {/* {status === "Completed" && (
           <div className="flex justify-between items-center pt-2 border-t">
             <span className="text-sm text-muted-foreground">
               Genius Factor Score
@@ -247,7 +236,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               {geniusScore}/100
             </span>
           </div>
-        )}
+        )} */}
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />

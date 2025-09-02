@@ -45,6 +45,7 @@ export interface Employee {
   education: Education[];
   experience: Experience[];
   resume: ResumeFile | null;
+  password: string;
 }
 
 export interface InputFieldConfig {

@@ -159,46 +159,6 @@ const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
   </Card>
 );
 
-const DepartmentCard = ({ dept }: any) => {
-  const getRiskColor = (risk: any) => {
-    switch (risk) {
-      case "Low":
-        return "bg-success text-success-foreground";
-      case "Medium":
-        return "bg-warning text-warning-foreground";
-      case "High":
-        return "bg-destructive text-destructive-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  // Mock retention based on completion
-  const retention =
-    dept.completion >= 90 ? "Low" : dept.completion >= 80 ? "Medium" : "High";
-
-  return (
-    <Card className="hr-card">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{dept.name}</CardTitle>
-          <Badge className={getRiskColor(retention)}>{retention} Risk</Badge>
-        </div>
-        <CardDescription>Employees not available</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Assessment Completion</span>
-            <span className="font-medium">{dept.completion}%</span>
-          </div>
-          <Progress value={dept.completion} className="h-2" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
 export default function Dashboard() {
   const { socket, isConnected, dashboardData, totalEmployees } = useSocket();
   const { data: session } = useSession();
