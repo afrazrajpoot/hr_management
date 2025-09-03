@@ -16,7 +16,8 @@ export async function POST(req: Request) {
       development_action_plan,
       personalized_resources,
       data_sources_and_methodology,
-      genius_factor_score
+      genius_factor_score,
+      
     } = body?.report || {};
     const user = await prisma.user.findUnique({
       where: {
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
         personalizedResourcesJson: personalized_resources,
         dataSourcesAndMethodologyJson: data_sources_and_methodology,
         geniusFactorScore: genius_factor_score,
+        risk_analysis: body.risk_analysis || {}
       },
     });
 

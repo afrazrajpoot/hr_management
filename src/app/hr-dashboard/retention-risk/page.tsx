@@ -16,6 +16,7 @@ import {
   Users,
   Target,
   Lightbulb,
+  Loader2,
 } from "lucide-react";
 import {
   BarChart,
@@ -25,107 +26,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
 import HRLayout from "@/components/hr/HRLayout";
-
-// Mock retention risk data
-const riskDistributionData = [
-  {
-    level: "Low Risk",
-    count: 127,
-    percentage: 72,
-    color: "hsl(var(--hr-chart-2))",
-  },
-  {
-    level: "Medium Risk",
-    count: 35,
-    percentage: 20,
-    color: "hsl(var(--hr-chart-3))",
-  },
-  {
-    level: "High Risk",
-    count: 15,
-    percentage: 8,
-    color: "hsl(var(--hr-chart-5))",
-  },
-];
-
-const riskTrendData = [
-  { month: "Jan", low: 120, medium: 45, high: 22 },
-  { month: "Feb", low: 118, medium: 42, high: 18 },
-  { month: "Mar", low: 125, medium: 38, high: 16 },
-  { month: "Apr", low: 123, medium: 41, high: 19 },
-  { month: "May", low: 129, medium: 36, high: 14 },
-  { month: "Jun", low: 127, medium: 35, high: 15 },
-];
-
-const departmentRiskData = [
-  { department: "Finance", low: 18, medium: 4, high: 2, total: 24 },
-  { department: "Sales", low: 28, medium: 5, high: 2, total: 35 },
-  { department: "Marketing", low: 12, medium: 4, high: 2, total: 18 },
-  { department: "IT", low: 22, medium: 4, high: 2, total: 28 },
-  { department: "HR", low: 12, medium: 2, high: 1, total: 15 },
-  { department: "Support", low: 16, medium: 4, high: 2, total: 22 },
-  { department: "Operations", low: 14, medium: 3, high: 2, total: 19 },
-  { department: "Design", low: 10, medium: 2, high: 2, total: 14 },
-];
-
-const riskFactorsData = [
-  { factor: "Low Engagement", impact: 85, frequency: 45 },
-  { factor: "Skills Misalignment", impact: 78, frequency: 32 },
-  { factor: "Career Stagnation", impact: 92, frequency: 28 },
-  { factor: "Work-Life Balance", impact: 73, frequency: 38 },
-  { factor: "Compensation Issues", impact: 88, frequency: 22 },
-  { factor: "Manager Relationship", impact: 81, frequency: 35 },
-];
-
-const interventionData = [
-  {
-    title: "Career Development Program",
-    description:
-      "Personalized career path planning and skill development opportunities",
-    targetRisk: "Medium to High",
-    impact: "High",
-    timeline: "3-6 months",
-    cost: "Medium",
-    successRate: 78,
-  },
-  {
-    title: "Manager Training Initiative",
-    description:
-      "Enhanced leadership training focused on employee engagement and retention",
-    targetRisk: "All Levels",
-    impact: "Medium",
-    timeline: "2-4 months",
-    cost: "Low",
-    successRate: 65,
-  },
-  {
-    title: "Flexible Work Arrangements",
-    description:
-      "Remote work options and flexible schedules to improve work-life balance",
-    targetRisk: "Medium",
-    impact: "Medium",
-    timeline: "1-2 months",
-    cost: "Low",
-    successRate: 82,
-  },
-  {
-    title: "Compensation Review",
-    description:
-      "Market-rate analysis and salary adjustments for key retention risks",
-    targetRisk: "High",
-    impact: "High",
-    timeline: "1-3 months",
-    cost: "High",
-    successRate: 91,
-  },
-];
+import { useSocket } from "@/context/SocketContext";
+import { useEffect, useState } from "react";
 
 const RiskStatCard = ({
   title,
@@ -134,7 +41,7 @@ const RiskStatCard = ({
   icon: Icon,
   trend = "neutral",
   color = "primary",
-}:any) => (
+}: any) => (
   <Card className="hr-card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
@@ -163,18 +70,16 @@ const RiskStatCard = ({
             )}
           </div>
         </div>
-        <div
-          className={`h-12 w-12 rounded-lg bg-${color}/10 flex items-center justify-center`}
-        >
-          <Icon className={`h-6 w-6 text-${color}`} />
+        <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="h-6 w-6 text-primary" />
         </div>
       </div>
     </CardContent>
   </Card>
 );
 
-const InterventionCard = ({ intervention }:any) => {
-  const getImpactColor = (impact:any) => {
+const InterventionCard = ({ intervention }: any) => {
+  const getImpactColor = (impact: any) => {
     switch (impact) {
       case "High":
         return "bg-success text-success-foreground";
@@ -187,7 +92,7 @@ const InterventionCard = ({ intervention }:any) => {
     }
   };
 
-  const getCostColor = (cost:any) => {
+  const getCostColor = (cost: any) => {
     switch (cost) {
       case "High":
         return "bg-destructive text-destructive-foreground";
@@ -247,6 +152,145 @@ const InterventionCard = ({ intervention }:any) => {
 };
 
 export default function RetentionRisk() {
+  const { dashboardData } = useSocket();
+  const [riskData, setRiskData] = useState<any>(null);
+
+  useEffect(() => {
+    if (dashboardData) {
+      processRiskData();
+    }
+  }, [dashboardData]);
+
+  const processRiskData = () => {
+    const departmentData = dashboardData || [];
+
+    // Calculate risk distribution
+    let lowRisk = 0;
+    let mediumRisk = 0;
+    let highRisk = 0;
+    let totalEmployees = 0;
+    let totalRiskScore = 0;
+
+    departmentData.forEach((dept: any) => {
+      const riskDist = dept.metrics?.retention_risk_distribution || {};
+      lowRisk += riskDist["Low (0-30)"] || 0;
+      mediumRisk += riskDist["Medium (31-60)"] || 0;
+      highRisk += riskDist["High (61-100)"] || 0;
+      totalEmployees += dept.employee_count || 0;
+      totalRiskScore += dept.metrics?.avg_scores?.retention_risk_score || 0;
+    });
+
+    const totalAtRisk = mediumRisk + highRisk;
+    const avgRiskScore = totalRiskScore / (departmentData.length || 1);
+    const retentionRate = Math.round(
+      ((totalEmployees - totalAtRisk) / totalEmployees) * 100
+    );
+
+    const riskDistributionData = [
+      {
+        level: "Low Risk",
+        count: lowRisk,
+        percentage: Math.round((lowRisk / totalEmployees) * 100),
+        color: "hsl(var(--hr-chart-2))",
+      },
+      {
+        level: "Medium Risk",
+        count: mediumRisk,
+        percentage: Math.round((mediumRisk / totalEmployees) * 100),
+        color: "hsl(var(--hr-chart-3))",
+      },
+      {
+        level: "High Risk",
+        count: highRisk,
+        percentage: Math.round((highRisk / totalEmployees) * 100),
+        color: "hsl(var(--hr-chart-5))",
+      },
+    ];
+
+    // Prepare department risk data
+    const departmentRiskData = departmentData.map((dept: any) => {
+      const riskDist = dept.metrics?.retention_risk_distribution || {};
+      return {
+        department: dept.name,
+        low: riskDist["Low (0-30)"] || 0,
+        medium: riskDist["Medium (31-60)"] || 0,
+        high: riskDist["High (61-100)"] || 0,
+        total: dept.employee_count || 0,
+        color: dept.color,
+      };
+    });
+
+    setRiskData({
+      riskDistributionData,
+      departmentRiskData,
+      totalAtRisk,
+      highRisk,
+      totalEmployees,
+      avgRiskScore: avgRiskScore.toFixed(1),
+      retentionRate,
+      departmentCount: departmentData.length,
+    });
+  };
+
+  if (!dashboardData || !riskData) {
+    return (
+      <HRLayout>
+        <div className="space-y-6 p-6">
+          <div className="flex justify-center items-center h-96">
+            <div className="text-center">
+              <Loader2 className="h-12 w-12 text-muted-foreground animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-medium">Loading retention data...</h3>
+              <p className="text-muted-foreground">
+                Analyzing retention risk metrics from your dashboard
+              </p>
+            </div>
+          </div>
+        </div>
+      </HRLayout>
+    );
+  }
+
+  const interventionData = [
+    {
+      title: "Career Development Program",
+      description: "Personalized career path planning for high-risk employees",
+      targetRisk: "Medium to High",
+      impact: riskData.highRisk > 5 ? "High" : "Medium",
+      timeline: "3-6 months",
+      cost: "Medium",
+      successRate: Math.min(85, 100 - riskData.avgRiskScore),
+    },
+    {
+      title: "Manager Training Initiative",
+      description:
+        "Enhanced leadership training focused on retention strategies",
+      targetRisk: "All Levels",
+      impact: "Medium",
+      timeline: "2-4 months",
+      cost: "Low",
+      successRate: 65,
+    },
+    {
+      title: "Flexible Work Arrangements",
+      description:
+        "Remote options and flexible schedules for better work-life balance",
+      targetRisk: riskData.avgRiskScore > 40 ? "High" : "Medium",
+      impact: "High",
+      timeline: "1-2 months",
+      cost: "Low",
+      successRate: 82,
+    },
+    {
+      title: "Targeted Retention Strategy",
+      description: "Customized retention plans for critical at-risk roles",
+      targetRisk: "High",
+      impact: "High",
+      timeline: "1-3 months",
+      cost: "High",
+      successRate: Math.min(95, 100 - riskData.avgRiskScore + 10),
+    },
+  ];
+
   return (
     <HRLayout>
       <div className="space-y-6 p-6">
@@ -256,7 +300,8 @@ export default function RetentionRisk() {
             Retention Risk Insights
           </h1>
           <p className="text-muted-foreground">
-            Analyze retention risks and implement targeted interventions
+            Analyze retention risks across {riskData.departmentCount}{" "}
+            departments and {riskData.totalEmployees} employees
           </p>
         </div>
 
@@ -264,39 +309,39 @@ export default function RetentionRisk() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <RiskStatCard
             title="Total At Risk"
-            value="50"
-            change="-8.2%"
+            value={riskData.totalAtRisk}
+            change={`${Math.round(
+              (riskData.totalAtRisk / riskData.totalEmployees) * 100
+            )}% of workforce`}
             icon={AlertTriangle}
-            trend="down"
-            color="destructive"
+            trend="neutral"
           />
           <RiskStatCard
             title="High Risk"
-            value="15"
-            change="-3.1%"
+            value={riskData.highRisk}
+            change={`${Math.round(
+              (riskData.highRisk / riskData.totalEmployees) * 100
+            )}% critical`}
             icon={AlertTriangle}
-            trend="down"
-            color="destructive"
+            trend="neutral"
           />
           <RiskStatCard
             title="Retention Rate"
-            value="92%"
-            change="+2.3%"
+            value={`${riskData.retentionRate}%`}
+            change={`${100 - riskData.retentionRate}% at risk`}
             icon={Users}
-            trend="down"
-            color="success"
+            trend={riskData.retentionRate > 90 ? "up" : "down"}
           />
           <RiskStatCard
             title="Avg Risk Score"
-            value="24.5"
-            change="-5.7%"
+            value={riskData.avgRiskScore}
+            change={`/100 scale`}
             icon={Target}
-            trend="down"
-            color="warning"
+            trend={riskData.avgRiskScore < 30 ? "down" : "up"}
           />
         </div>
 
-        {/* Risk Distribution & Trend */}
+        {/* Risk Distribution & Department Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Risk Distribution Pie Chart */}
           <Card className="hr-card">
@@ -310,174 +355,101 @@ export default function RetentionRisk() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={riskDistributionData}
+                    data={riskData.riskDistributionData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={120}
                     paddingAngle={5}
                     dataKey="count"
+                    label={({ percentage }) => `${percentage}%`}
                   >
-                    {riskDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                    {riskData.riskDistributionData.map(
+                      (entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      )
+                    )}
                   </Pie>
                   <Tooltip
-                    formatter={(value, name) => [`${value} employees`, name]}
+                    formatter={(value: number, name: string, props: any) => [
+                      `${value} employees (${props.payload.percentage}%)`,
+                      name,
+                    ]}
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-6 mt-4">
-                {riskDistributionData.map((item, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-sm">{item.level}</span>
-                    <span className="text-sm font-medium">({item.count})</span>
-                  </div>
-                ))}
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {riskData.riskDistributionData.map(
+                  (item: any, index: number) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm">{item.level}</span>
+                      <span className="text-sm font-medium">
+                        ({item.count})
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Risk Trend Over Time */}
+          {/* Department Risk Breakdown */}
           <Card className="hr-card">
             <CardHeader>
-              <CardTitle>Risk Trend Analysis</CardTitle>
+              <CardTitle>Risk by Department</CardTitle>
               <CardDescription>
-                6-month retention risk trends by level
+                Retention risk levels across departments
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={riskTrendData}>
+                <BarChart
+                  data={riskData.departmentRiskData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="month" />
+                  <XAxis
+                    dataKey="department"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
                   <YAxis />
                   <Tooltip />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="low"
-                    stroke="hsl(var(--hr-chart-2))"
-                    strokeWidth={2}
+                    stackId="a"
+                    fill="hsl(var(--hr-chart-2))"
                     name="Low Risk"
                   />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="medium"
-                    stroke="hsl(var(--hr-chart-3))"
-                    strokeWidth={2}
+                    stackId="a"
+                    fill="hsl(var(--hr-chart-3))"
                     name="Medium Risk"
                   />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="high"
-                    stroke="hsl(var(--hr-chart-5))"
-                    strokeWidth={2}
+                    stackId="a"
+                    fill="hsl(var(--hr-chart-5))"
                     name="High Risk"
                   />
-                </LineChart>
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
 
-        {/* Department Risk Breakdown */}
-        <Card className="hr-card">
-          <CardHeader>
-            <CardTitle>Risk Distribution by Department</CardTitle>
-            <CardDescription>
-              Retention risk levels across all departments
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart
-                data={departmentRiskData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis
-                  dataKey="department"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey="low"
-                  stackId="a"
-                  fill="hsl(var(--hr-chart-2))"
-                  name="Low Risk"
-                />
-                <Bar
-                  dataKey="medium"
-                  stackId="a"
-                  fill="hsl(var(--hr-chart-3))"
-                  name="Medium Risk"
-                />
-                <Bar
-                  dataKey="high"
-                  stackId="a"
-                  fill="hsl(var(--hr-chart-5))"
-                  name="High Risk"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Risk Factors Analysis */}
-        <Card className="hr-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-              Key Risk Factors
-            </CardTitle>
-            <CardDescription>
-              Impact vs frequency analysis of retention risk factors
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {riskFactorsData.map((factor, index) => (
-                <Card key={index} className="border-2">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold mb-3">{factor.factor}</h4>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Impact Severity</span>
-                          <span className="font-medium">{factor.impact}%</span>
-                        </div>
-                        <Progress value={factor.impact} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Frequency</span>
-                          <span className="font-medium">
-                            {factor.frequency}%
-                          </span>
-                        </div>
-                        <Progress
-                          value={factor.frequency}
-                          className="h-2 bg-muted"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Suggested Interventions */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Suggested Interventions</h2>
+          <p className="text-muted-foreground mb-6">
+            Based on your current retention risk profile
+          </p>
           <div className="grid gap-6 md:grid-cols-2">
             {interventionData.map((intervention, index) => (
               <InterventionCard key={index} intervention={intervention} />

@@ -1,8 +1,4 @@
-// redux/employe-api.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-
-
 
 export const hrApi = createApi({
   reducerPath: 'hrApi',
@@ -12,15 +8,21 @@ export const hrApi = createApi({
       return headers;
     },
   }),
-
   endpoints: (builder) => ({
-  getHrEmployee: builder.query<void, void>({
-    query: () => '/hr-api/hr-employee',
-  })
-
+    getHrEmployee: builder.query<void, void>({
+      query: () => '/hr-api/hr-employee',
+    }),
+    updateEmployee: builder.mutation<
+      { message: string; department: any; user: { salary: number } },
+      { department: string; position: string; salary: string;userId:string }
+    >({
+      query: (body) => ({
+        url: '/hr-api/update-mobility',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { 
-useGetHrEmployeeQuery
-} = hrApi;
+export const { useGetHrEmployeeQuery, useUpdateEmployeeMutation } = hrApi;

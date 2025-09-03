@@ -12,7 +12,6 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   BarChart,
   Bar,
@@ -37,103 +36,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-// Fallback mock data for dashboard analytics
-const mockDepartmentData = [
-  { name: "Finance", completion: 85, color: "hsl(var(--hr-chart-1))" },
-  { name: "Sales", completion: 92, color: "hsl(var(--hr-chart-2))" },
-  { name: "Marketing", completion: 78, color: "hsl(var(--hr-chart-3))" },
-  { name: "IT", completion: 95, color: "hsl(var(--hr-chart-4))" },
-  { name: "Human Resources", completion: 88, color: "hsl(var(--hr-chart-5))" },
-  { name: "Customer Support", completion: 82, color: "#8B5CF6" },
-  { name: "Operations", completion: 90, color: "#06B6D4" },
-  { name: "Design/Creative", completion: 94, color: "#F59E0B" },
-];
-
-// Mock data for other charts
-const retentionRiskData = mockDepartmentData.map((dept) => ({
-  department: dept.name,
-  lowRisk: dept.completion >= 90 ? 20 : dept.completion >= 80 ? 15 : 10,
-  mediumRisk: dept.completion >= 80 ? 5 : 10,
-  highRisk: dept.completion < 80 ? 5 : 0,
-  fill: dept.color,
-}));
-
-const mobilityTrendData = [
-  {
-    month: "Jan",
-    Finance: 2,
-    Sales: 3,
-    Marketing: 1,
-    IT: 2,
-    "Human Resources": 1,
-    "Customer Support": 2,
-    Operations: 1,
-    "Design/Creative": 1,
-  },
-  {
-    month: "Feb",
-    Finance: 1,
-    Sales: 4,
-    Marketing: 2,
-    IT: 1,
-    "Human Resources": 0,
-    "Customer Support": 1,
-    Operations: 2,
-    "Design/Creative": 1,
-  },
-  {
-    month: "Mar",
-    Finance: 3,
-    Sales: 5,
-    Marketing: 1,
-    IT: 3,
-    "Human Resources": 2,
-    "Customer Support": 3,
-    Operations: 2,
-    "Design/Creative": 2,
-  },
-  {
-    month: "Apr",
-    Finance: 2,
-    Sales: 3,
-    Marketing: 3,
-    IT: 2,
-    "Human Resources": 1,
-    "Customer Support": 2,
-    Operations: 1,
-    "Design/Creative": 1,
-  },
-  {
-    month: "May",
-    Finance: 4,
-    Sales: 6,
-    Marketing: 2,
-    IT: 4,
-    "Human Resources": 1,
-    "Customer Support": 3,
-    Operations: 3,
-    "Design/Creative": 2,
-  },
-  {
-    month: "Jun",
-    Finance: 3,
-    Sales: 7,
-    Marketing: 3,
-    IT: 5,
-    "Human Resources": 2,
-    "Customer Support": 4,
-    Operations: 2,
-    "Design/Creative": 3,
-  },
-];
-
-const engagementDistribution = [
-  { range: "90-100%", count: 42, fill: "hsl(var(--hr-chart-2))" },
-  { range: "80-89%", count: 68, fill: "hsl(var(--hr-chart-1))" },
-  { range: "70-79%", count: 25, fill: "hsl(var(--hr-chart-3))" },
-  { range: "60-69%", count: 4, fill: "hsl(var(--hr-chart-5))" },
-];
-
 const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
   <Card className="hr-card">
     <CardContent className="p-6">
@@ -142,13 +44,15 @@ const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-2xl font-bold">{value}</span>
-            <Badge
-              variant={trend === "up" ? "default" : "secondary"}
-              className="gap-1"
-            >
-              <ArrowUpRight className="h-3 w-3" />
-              {change}
-            </Badge>
+            {change && (
+              <Badge
+                variant={trend === "up" ? "default" : "secondary"}
+                className="gap-1"
+              >
+                <ArrowUpRight className="h-3 w-3" />
+                {change}
+              </Badge>
+            )}
           </div>
         </div>
         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -159,28 +63,143 @@ const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
   </Card>
 );
 
+// Custom Tooltip for Mobility Trend
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-4 border rounded-md shadow-md">
+        <p className="font-bold">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }}>
+            {entry.dataKey}: {entry.value} ({entry.payload.department})
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function Dashboard() {
-  const { socket, isConnected, dashboardData, totalEmployees } = useSocket();
+  const { socket, isConnected, dashboardData } = useSocket();
+  console.log("Dashboard Data:", dashboardData);
   const { data: session } = useSession();
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Use dashboardData or fallback to mockDepartmentData
-  const displayData: any = dashboardData || mockDepartmentData;
+  // Extract data from dashboardData - FIX THE DATA MAPPING
+  const departmentData: any = dashboardData || []; // Use dashboardData directly as it's already an array
 
-  // Calculate derived data for charts
-  const derivedRetentionRiskData = displayData.map((dept: any) => ({
-    department: dept.name,
-    lowRisk: dept.completion >= 90 ? 20 : dept.completion >= 80 ? 15 : 10,
-    mediumRisk: dept.completion >= 80 ? 5 : 10,
-    highRisk: dept.completion < 80 ? 5 : 0,
-    fill: dept.color,
+  // Calculate overall metrics from the actual data structure
+  const totalEmployees = departmentData.reduce(
+    (sum: number, dept: any) => sum + (dept.employee_count || 0),
+    0
+  );
+  const avgGeniusFactor =
+    departmentData.length > 0
+      ? Math.round(
+          departmentData.reduce(
+            (sum: number, dept: any) =>
+              sum + (dept.metrics?.avg_scores?.genius_factor_score || 0),
+            0
+          ) / departmentData.length
+        )
+      : 0;
+  const avgRetentionRisk =
+    departmentData.length > 0
+      ? Math.round(
+          departmentData.reduce(
+            (sum: number, dept: any) =>
+              sum + (dept.metrics?.avg_scores?.retention_risk_score || 0),
+            0
+          ) / departmentData.length
+        )
+      : 0;
+
+  // Prepare data for charts using your existing structure
+  const completionData = departmentData.map((dept: any) => ({
+    name: dept.name,
+    completion: dept.completion,
+    color: dept.color,
+    employee_count: dept.employee_count,
   }));
 
-  const derivedSkillsAlignmentData = displayData.map((dept: any) => ({
+  // Fix genius factor data mapping
+  const geniusFactorData = [];
+  for (const dept of departmentData) {
+    const distribution: any = dept.metrics?.genius_factor_distribution || {};
+    for (const [range, count] of Object.entries(distribution)) {
+      if (count > 0) {
+        geniusFactorData.push({
+          department: dept.name,
+          range,
+          count,
+          color: dept.color,
+        });
+      }
+    }
+  }
+
+  // Fix retention risk data mapping
+  const retentionRiskData = [];
+  for (const dept of departmentData) {
+    const distribution = dept.metrics?.retention_risk_distribution || {};
+    for (const [range, count] of Object.entries(distribution)) {
+      if (count > 0) {
+        retentionRiskData.push({
+          department: dept.name,
+          range,
+          count,
+          color: dept.color,
+        });
+      }
+    }
+  }
+
+  // Fix mobility trend data - restructure to show by department
+  const mobilityTrendData: any[] = [];
+  const allMonths = new Set<string>();
+
+  // First, collect all months from all departments
+  for (const dept of departmentData) {
+    const trend = dept.metrics?.mobility_trend || {};
+    for (const month of Object.keys(trend)) {
+      allMonths.add(month);
+    }
+  }
+
+  // Create data structure for each month with department counts
+  for (const month of Array.from(allMonths).sort()) {
+    const monthData: any = { month };
+
+    for (const dept of departmentData) {
+      const count = dept.metrics?.mobility_trend?.[month] || 0;
+      if (count > 0) {
+        monthData[dept.name] = count;
+        monthData[`${dept.name}_department`] = dept.name; // Store department name for tooltip
+      }
+    }
+
+    mobilityTrendData.push(monthData);
+  }
+
+  // Fix department averages mapping
+  const departmentAverages = departmentData.map((dept: any) => ({
     department: dept.name,
-    alignment: dept.completion,
-    fill: dept.color,
+    genius_factor_score: dept.metrics?.avg_scores?.genius_factor_score || 0,
+    retention_risk_score: dept.metrics?.avg_scores?.retention_risk_score || 0,
+    mobility_opportunity_score:
+      dept.metrics?.avg_scores?.mobility_opportunity_score || 0,
+    productivity_score: dept.metrics?.avg_scores?.productivity_score || 0,
+    engagement_score: dept.metrics?.avg_scores?.engagement_score || 0,
+    skills_alignment_score:
+      dept.metrics?.avg_scores?.skills_alignment_score || 0,
   }));
+
+  // Define colors for each department
+  const departmentColors = departmentData.reduce((acc: any, dept: any) => {
+    acc[dept.name] = dept.color || "#8884d8"; // Default color if not provided
+    return acc;
+  }, {});
 
   return (
     <HRLayout>
@@ -207,53 +226,40 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Employees"
-            value={displayData[0]?.total_employees || totalEmployees}
-            change="+5.2%"
+            value={totalEmployees}
             icon={Users}
           />
           <StatCard
-            title="Assessment Completion"
-            value={`${Math.round(
-              displayData.reduce(
-                (sum: any, dept: any) => sum + dept.completion,
-                0
-              ) / Math.max(displayData.length, 1)
-            )}%`}
-            change="0"
-            icon={Target}
-          />
-          <StatCard
             title="Avg Genius Factor"
-            value="0"
-            change="0"
+            value={avgGeniusFactor}
             icon={Award}
           />
           <StatCard
-            title="Retention Risk"
-            value="0"
-            change="0"
+            title="Avg Retention Risk"
+            value={avgRetentionRisk}
             icon={AlertTriangle}
             trend="down"
+          />
+          <StatCard
+            title="Total Departments"
+            value={departmentData.length}
+            icon={Target}
           />
         </div>
 
         {/* Comprehensive Charts Grid */}
         <div className="grid gap-6">
-          {/* Row 1: Assessment Completion Rate */}
+          {/* Assessment Completion Rate */}
           <Card className="hr-card">
             <CardHeader>
-              <CardTitle>1. Assessment Completion Rate by Department</CardTitle>
+              <CardTitle>Assessment Completion by Department</CardTitle>
               <CardDescription>
-                Percentage of employees who completed their career assessments
+                Number of completed assessments per department
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart
-                  data={displayData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  key={lastUpdate?.getTime()}
-                >
+                <BarChart data={completionData}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis
                     dataKey="name"
@@ -261,14 +267,12 @@ export default function Dashboard() {
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip
-                    formatter={(value) => [`${value}%`, "Completion Rate"]}
-                  />
+                  <YAxis />
+                  <Tooltip />
                   <Bar
                     dataKey="completion"
                     fill="hsl(var(--hr-chart-1))"
-                    name="Completion Rate"
+                    name="Completed Assessments"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -280,66 +284,53 @@ export default function Dashboard() {
             {/* Genius Factor Distribution */}
             <Card className="hr-card">
               <CardHeader>
-                <CardTitle>2. Genius Factor Score Distribution</CardTitle>
+                <CardTitle>Genius Factor Score Distribution</CardTitle>
                 <CardDescription>
-                  Using completion as placeholder for Genius Factor
+                  Distribution of genius factor scores across departments
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart key={lastUpdate?.getTime()}>
-                    <Pie
-                      data={displayData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, completion }) => `${name}: ${completion}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="completion"
-                    >
-                      {displayData.map((entry: any, index: any) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => [`${value}/100`, "Completion"]}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Productivity Distribution */}
-            <Card className="hr-card">
-              <CardHeader>
-                <CardTitle>3. Productivity Score Distribution</CardTitle>
-                <CardDescription>
-                  Using completion as placeholder for Productivity
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={displayData} key={lastUpdate?.getTime()}>
+                  <BarChart data={geniusFactorData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="opacity-30"
                     />
-                    <XAxis
-                      dataKey="name"
-                      angle={-45}
-                      textAnchor="end"
-                      height={60}
-                    />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip
-                      formatter={(value) => [`${value}/100`, "Completion"]}
-                    />
+                    <XAxis dataKey="range" />
+                    <YAxis />
+                    <Tooltip />
                     <Bar
-                      dataKey="completion"
+                      dataKey="count"
+                      fill="hsl(var(--hr-chart-2))"
+                      name="Employees"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Retention Risk Distribution */}
+            <Card className="hr-card">
+              <CardHeader>
+                <CardTitle>Retention Risk Distribution</CardTitle>
+                <CardDescription>
+                  Employee retention risk levels by department
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={retentionRiskData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="opacity-30"
+                    />
+                    <XAxis dataKey="range" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar
+                      dataKey="count"
                       fill="hsl(var(--hr-chart-3))"
-                      name="Completion"
+                      name="Employees"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -349,93 +340,17 @@ export default function Dashboard() {
 
           {/* Row 3: Two charts side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Engagement Distribution */}
+            {/* Department Averages */}
             <Card className="hr-card">
               <CardHeader>
-                <CardTitle>4. Engagement Score Distribution</CardTitle>
+                <CardTitle>Department Score Averages</CardTitle>
                 <CardDescription>
-                  Employee engagement levels (mock data)
+                  Average scores across all departments
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={engagementDistribution}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ range, count }) => `${range}: ${count}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="count"
-                    >
-                      {engagementDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Skills-Job Alignment */}
-            <Card className="hr-card">
-              <CardHeader>
-                <CardTitle>5. Skills-Job Alignment Score</CardTitle>
-                <CardDescription>
-                  Using completion as placeholder for Skills Alignment
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart key={lastUpdate?.getTime()}>
-                    <Pie
-                      data={derivedSkillsAlignmentData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ department, alignment }) =>
-                        `${department}: ${alignment}`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="alignment"
-                    >
-                      {derivedSkillsAlignmentData.map(
-                        (entry: any, index: any) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        )
-                      )}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => [`${value}/100`, "Alignment"]}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Row 4: Two charts side by side */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Retention Risk Distribution */}
-            <Card className="hr-card">
-              <CardHeader>
-                <CardTitle>6. Retention Risk Distribution</CardTitle>
-                <CardDescription>
-                  Employee retention risk (mock data)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={derivedRetentionRiskData}
-                    key={lastUpdate?.getTime()}
-                  >
+                  <BarChart data={departmentAverages}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="opacity-30"
@@ -446,25 +361,22 @@ export default function Dashboard() {
                       textAnchor="end"
                       height={60}
                     />
-                    <YAxis />
+                    <YAxis domain={[0, 100]} />
                     <Tooltip />
                     <Bar
-                      dataKey="lowRisk"
-                      stackId="a"
-                      fill="hsl(var(--hr-chart-2))"
-                      name="Low Risk"
+                      dataKey="genius_factor_score"
+                      fill="hsl(var(--hr-chart-1))"
+                      name="Genius Factor"
                     />
                     <Bar
-                      dataKey="mediumRisk"
-                      stackId="a"
+                      dataKey="retention_risk_score"
                       fill="hsl(var(--hr-chart-3))"
-                      name="Medium Risk"
+                      name="Retention Risk"
                     />
                     <Bar
-                      dataKey="highRisk"
-                      stackId="a"
-                      fill="hsl(var(--hr-chart-5))"
-                      name="High Risk"
+                      dataKey="mobility_opportunity_score"
+                      fill="hsl(var(--hr-chart-2))"
+                      name="Mobility Opportunity"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -474,9 +386,9 @@ export default function Dashboard() {
             {/* Internal Mobility Trend */}
             <Card className="hr-card">
               <CardHeader>
-                <CardTitle>7. Internal Mobility Trend</CardTitle>
+                <CardTitle>Internal Mobility Trend</CardTitle>
                 <CardDescription>
-                  Monthly internal movements (mock data)
+                  Monthly assessment completions by department
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -488,31 +400,18 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="Finance"
-                      stroke="hsl(var(--hr-chart-1))"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="Sales"
-                      stroke="hsl(var(--hr-chart-2))"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="Marketing"
-                      stroke="hsl(var(--hr-chart-3))"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="IT"
-                      stroke="hsl(var(--hr-chart-4))"
-                      strokeWidth={2}
-                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+                    {departmentData.map((dept: any) => (
+                      <Line
+                        key={dept.name}
+                        type="monotone"
+                        dataKey={dept.name}
+                        stroke={departmentColors[dept.name]}
+                        strokeWidth={2}
+                        name={dept.name}
+                      />
+                    ))}
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>

@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   X,
   Mail,
@@ -19,6 +20,9 @@ import {
   GraduationCap,
   Clock,
 } from "lucide-react";
+import { useState } from "react";
+import { useUpdateEmployeeMutation } from "@/redux/hr-api";
+import { toast } from "sonner";
 
 interface EmployeeDetailModalProps {
   isOpen: boolean;
@@ -31,7 +35,49 @@ export default function EmployeeDetailModal({
   onClose,
   employee,
 }: EmployeeDetailModalProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    department: employee?.department || "",
+    position: employee?.position || "",
+    salary: employee?.salary || "",
+  });
+  const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
+
   if (!employee) return null;
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateEmployee({
+        department: formData.department,
+        userId: employee.id,
+        position: formData.position,
+        salary: formData.salary,
+      }).unwrap();
+      toast.success("Employee data updated successfully");
+      setIsEditing(false);
+      onClose(); // Close modal after successful update
+    } catch (error: any) {
+      toast.error(error?.data?.error || "Failed to update employee data");
+    }
+  };
+
+  const toggleEdit = () => {
+    setIsEditing(!isEditing);
+    // Reset form data to original values when cancelling edit
+    if (isEditing) {
+      setFormData({
+        department: employee.department,
+        position: employee.position,
+        salary: employee.salary,
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -39,8 +85,8 @@ export default function EmployeeDetailModal({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>Employee Details</span>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
+            <Button onClick={toggleEdit} disabled={isLoading}>
+              {isEditing ? "Cancel" : "Update"}
             </Button>
           </DialogTitle>
         </DialogHeader>
@@ -71,24 +117,55 @@ export default function EmployeeDetailModal({
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Position</p>
-                <p className="font-medium flex items-center gap-1">
-                  <Briefcase className="h-4 w-4" />
-                  {employee.position}
-                </p>
+                {isEditing ? (
+                  <Input
+                    name="position"
+                    value={formData.position}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <p className="font-medium flex items-center gap-1">
+                    <Briefcase className="h-4 w-4" />
+                    {employee.position}
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Department</p>
-                <p className="font-medium flex items-center gap-1">
-                  <Building2 className="h-4 w-4" />
-                  {employee.department}
-                </p>
+                {isEditing ? (
+                  <Input
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <p className="font-medium flex items-center gap-1">
+                    <Building2 className="h-4 w-4" />
+                    {employee.department}
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Salary</p>
-                <p className="font-medium flex items-center gap-1">
-                  {employee.salary}
-                  <DollarSign className="h-4 w-4" />
-                </p>
+                {isEditing ? (
+                  <Input
+                    name="salary"
+                    type="number"
+                    value={formData.salary}
+                    onChange={handleInputChange}
+                    className="mt-1"
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <p className="font-medium flex items-center gap-1">
+                    {employee.salary}
+                    <DollarSign className="h-4 w-4" />
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Employee ID</p>
@@ -96,6 +173,14 @@ export default function EmployeeDetailModal({
               </div>
             </CardContent>
           </Card>
+
+          {isEditing && (
+            <div className="flex justify-end">
+              <Button onClick={handleSubmit} disabled={isLoading}>
+                {isLoading ? "Updating..." : "Submit Changes"}
+              </Button>
+            </div>
+          )}
 
           {/* Skills */}
           {employee.employee?.skills?.length > 0 && (

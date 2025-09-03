@@ -225,7 +225,7 @@ export default function Employees() {
                     <th className="text-left p-3 font-medium">Department</th>
                     <th className="text-left p-3 font-medium">Salary</th>
                     <th className="text-left p-3 font-medium">Assessment</th>
-                    <th className="text-left p-3 font-medium">Risk Level</th>
+                    {/* <th className="text-left p-3 font-medium">Risk Level</th> */}
                     <th className="text-left p-3 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -262,10 +262,10 @@ export default function Employees() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {employee.employee?.position || "N/A"}
+                        {employee?.position || "N/A"}
                       </td>
                       <td className="p-3">
-                        {employee.employee?.department ||
+                        {employee?.department ||
                           employee.reports[0]?.departement ||
                           "N/A"}
                       </td>
@@ -281,7 +281,7 @@ export default function Employees() {
                           {employee.reports[0] ? "Completed" : "Not Started"}
                         </Badge>
                       </td>
-                      <td className="p-3">
+                      {/* <td className="p-3">
                         <Badge
                           className={getRiskColor(
                             employee.reports[0]
@@ -292,7 +292,7 @@ export default function Employees() {
                           {employee.reports[0]?.currentRoleAlignmentAnalysisJson
                             .retention_risk_level || "N/A"}
                         </Badge>
-                      </td>
+                      </td> */}
                       <td className="p-3">
                         <Button
                           variant="outline"

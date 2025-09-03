@@ -27,7 +27,7 @@ export async function GET() {
         salary: true,
         department: true,
         position: true,
-        employeeId: true, // Included for debugging
+        employeeId: true,
         employee: {
           select: {
             id: true,
@@ -36,7 +36,7 @@ export async function GET() {
             lastName: true,
             skills: true,
             education: true,
-            experience: true
+            experience: true,
           },
         },
       },
@@ -49,7 +49,63 @@ export async function GET() {
       }
     });
 
-    // 4. Fetch all reports under this HR
+    // 4. Fetch all departments under this HR
+    const departments = await prisma.department.findMany({
+      where: { hrId: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        position: true,
+        hrId: true,
+        userId: true,
+      },
+    });
+
+    // 5. Group departments by userId and parse JSON fields
+    const grouped: Record<string, any> = {};
+    for (const emp of employees) {
+      grouped[emp.id] = { ...emp, departments: [], reports: [] }; // Initialize with empty arrays
+    }
+    for (const dept of departments) {
+      if (grouped[dept.userId]) {
+        // Parse JSON fields to ensure name and position are arrays
+        let parsedName: string[] = [];
+        let parsedPosition: string[] = [];
+
+        try {
+          // Handle name field
+          if (typeof dept.name === "string") {
+            parsedName = JSON.parse(dept.name); // Parse JSON string
+            // Flatten if nested array (e.g., [["IT"], "Data"] -> ["IT", "Data"])
+            parsedName = Array.isArray(parsedName) ? parsedName.flat() : [parsedName];
+          } else if (Array.isArray(dept.name)) {
+            parsedName = dept.name.flat(); // Handle case where name is already an array
+          }
+
+          // Handle position field
+          if (typeof dept.position === "string") {
+            parsedPosition = JSON.parse(dept.position); // Parse JSON string
+            // Flatten if nested array
+            parsedPosition = Array.isArray(parsedPosition) ? parsedPosition.flat() : [parsedPosition];
+          } else if (Array.isArray(dept.position)) {
+            parsedPosition = dept.position.flat(); // Handle case where position is already an array
+          }
+        } catch (e) {
+          console.warn(`Failed to parse JSON for department ${dept.id}:`, e);
+          parsedName = [dept.name as string]; // Fallback to string as array
+          parsedPosition = [dept.position as string]; // Fallback to string as array
+        }
+
+        // Add department with parsed fields
+        grouped[dept.userId].departments.push({
+          ...dept,
+          name: parsedName,
+          position: parsedPosition,
+        });
+      }
+    }
+
+    // 6. Fetch all reports under this HR
     const reports = await prisma.individualEmployeeReport.findMany({
       where: { hrId: session.user.id },
       select: {
@@ -70,21 +126,17 @@ export async function GET() {
       },
     });
 
-    // 5. Group reports by userId
-    const grouped: Record<string, any> = {};
-    for (const emp of employees) {
-      grouped[emp.id] = { ...emp, reports: [] };
-    }
+    // 7. Group reports by userId
     for (const report of reports) {
       if (grouped[report.userId]) {
         grouped[report.userId].reports.push(report);
       }
     }
 
-    // ✅ Removed filtering, now return all employees (even without reports)
+    // 8. Return all employees with their departments and reports
     const result = Object.values(grouped);
 
-    // 6. Return the response
+    // 9. Return the response
     return NextResponse.json({ employees: result }, { status: 200 });
   } catch (err: any) {
     console.error("Error in GET endpoint:", err);

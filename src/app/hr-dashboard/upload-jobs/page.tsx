@@ -54,7 +54,7 @@ export default function UploadJobsPage() {
     const formData = new FormData();
     formData.append("file", file);
     if (session?.user.id) {
-      formData.append("hr_id", session.user.id);
+      formData.append("recruiter_id", session.user.id);
     }
 
     try {
