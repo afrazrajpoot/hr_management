@@ -39,6 +39,33 @@ interface DashboardData {
   total_employees: number;
 }
 
+interface InternalMobilityData {
+  monthlyMobilityTrends: {
+    ingoing: { [month: string]: number };
+    outgoing: { [month: string]: number };
+    promotions: { [month: string]: number };
+  };
+  departmentMovementFlow: {
+    [department: string]: {
+      incoming: number;
+      outgoing: number;
+      net_movement: number;
+    };
+  };
+  metrics: {
+    total_promotions: number;
+    total_transfers: number;
+    total_movements: number;
+    retention_rate: number;
+    avg_retention_risk?: number;
+    overall_completion_rate?: number;
+  };
+  data_timeframe: {
+    start_date: string;
+    end_date: string;
+  };
+}
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
@@ -53,9 +80,11 @@ interface SocketContextType {
   unreadCount: number;
   markAsRead: (notificationId?: string) => void;
   isRinging: boolean;
-  dashboardData: DashboardData[] | null;
+  dashboardData: any;
   roomsData: any;
   totalEmployees: number;
+  internalMobility: InternalMobilityData | null;
+  isAdmin: boolean;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -72,6 +101,8 @@ const SocketContext = createContext<SocketContextType>({
   dashboardData: null,
   roomsData: null,
   totalEmployees: 0,
+  internalMobility: null,
+  isAdmin: false,
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -80,6 +111,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [internalMobility, setInternalMobility] =
+    useState<InternalMobilityData | null>(null);
   const [lastNotification, setLastNotification] = useState<Notification | null>(
     null
   );
@@ -87,14 +120,31 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     useState<string>("disconnected");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isRinging, setIsRinging] = useState(false);
-  const [dashboardData, setDashboardData] = useState<DashboardData[] | null>(
-    null
-  );
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [roomsData, setRoomsData] = useState<any>(null);
+  const [totalEmployees, setTotalEmployees] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { data: session } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [totalEmployees, setTotalmployee] = useState(0);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (session?.user?.role) {
+      const userRole = session.user.role;
+      setIsAdmin(
+        userRole === "admin" || userRole === "Admin" || userRole === "ADMIN"
+      );
+    }
+  }, [session]);
+
+  // Debug useEffect to track state changes
+  useEffect(() => {
+    console.log("📊 dashboardData state:", dashboardData);
+    console.log("👤 isAdmin:", isAdmin);
+    console.log("🔗 isConnected:", isConnected);
+  }, [dashboardData, isAdmin, isConnected]);
+
   // Initialize audio with your custom sound file
   useEffect(() => {
     audioRef.current = new Audio("/mixkit-cartoon-door-melodic-bell-110.wav");
@@ -136,7 +186,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const subscribeToNotifications = useCallback(
     (data: { user_id?: string; channel?: string }) => {
       if (socket && isConnected) {
-        console.log("📨 Emitting subscribe_notifications:", data);
+        // console.log("📨 Emitting subscribe_notifications:", data);
         socket.emit("subscribe_notifications", data);
         setSubscriptionStatus("subscribing");
       } else {
@@ -163,8 +213,39 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  // Function to emit appropriate dashboard events based on user role
+  const emitDashboardEvents = useCallback(
+    (socketInstance: Socket) => {
+      if (session?.user?.id) {
+        if (isAdmin) {
+          // Emit admin_dashboard event for admin users
+          // console.log(
+          //   "👑 Emitting admin_dashboard for admin user:",
+          //   session.user.id
+          // );
+          socketInstance.emit("admin_dashboard", { adminId: session.user.id });
+
+          // Admin doesn't need internal_mobility data (or you can create an admin version)
+          // console.log("⏭️  Skipping internal_mobility for admin user");
+        } else {
+          // Emit hr_dashboard event for HR users
+          // console.log("📊 Emitting hr_dashboard for hrId:", session.user.id);
+          socketInstance.emit("hr_dashboard", { hrId: session.user.id });
+
+          // Emit internal_mobility event for HR users
+          // console.log(
+          //   "🚶 Emitting internal_mobility for hrId:",
+          //   session.user.id
+          // );
+          socketInstance.emit("internal_mobility", { hrId: session.user.id });
+        }
+      }
+    },
+    [session, isAdmin]
+  );
+
   useEffect(() => {
-    console.log("🔌 Initializing Socket.IO connection...");
+    // console.log("🔌 Initializing Socket.IO connection...");
 
     const socketInstance = io(
       process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000",
@@ -194,9 +275,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         });
         setSubscriptionStatus("subscribing");
 
-        // Emit hr_dashboard event for dashboard data
-        console.log("📊 Emitting hr_dashboard for hrId:", session.user.id);
-        socketInstance.emit("hr_dashboard", { hrId: session.user.id });
+        // Emit appropriate dashboard events based on user role
+        emitDashboardEvents(socketInstance);
       }
     });
 
@@ -220,9 +300,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         });
         setSubscriptionStatus("subscribing");
 
-        // Re-emit hr_dashboard on reconnect
-        console.log("📊 Re-emitting hr_dashboard for hrId:", session.user.id);
-        socketInstance.emit("hr_dashboard", { hrId: session.user.id });
+        // Re-emit dashboard events on reconnect
+        emitDashboardEvents(socketInstance);
       }
     });
 
@@ -277,17 +356,97 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // Listen for dashboard data updates
+    // Listen for dashboard data updates (both hr_dashboard and admin_dashboard use 'reports_info')
     socketInstance.on("reports_info", (data) => {
       console.log("📊 Dashboard data received:", data);
-      if (data.dashboardData && Array.isArray(data.dashboardData)) {
-        setDashboardData(data.dashboardData);
-        setTotalmployee(data.total_employees);
+
+      // Handle both admin and HR dashboard data structures
+      if (data.overallMetrics) {
+        console.log("✅ Valid dashboard data structure detected");
+
+        if (isAdmin) {
+          // Admin dashboard data handling
+          console.log("👑 Processing admin dashboard data");
+
+          // For admin data, store the complete data structure
+          setDashboardData(data);
+
+          // Calculate total employees from department metrics
+          const totalEmps = data.departmentMetrics
+            ? Object.values(data.departmentMetrics).reduce(
+                (sum: number, metrics: any) =>
+                  sum + (metrics.employee_count || 0),
+                0
+              )
+            : 0;
+
+          setTotalEmployees(
+            totalEmps ||
+              data.overallMetrics?.total_employee_users ||
+              data.overallMetrics?.total_reports ||
+              0
+          );
+        } else {
+          // HR dashboard data handling
+          console.log("📊 Processing HR dashboard data");
+
+          if (data.dashboardData && Array.isArray(data.dashboardData)) {
+            setDashboardData(data.dashboardData);
+            setTotalEmployees(data.overallMetrics?.total_employees || 0);
+          } else {
+            // Fallback: if dashboardData is not an array, try to use departmentMetrics
+            const transformedData = data.departmentMetrics
+              ? Object.entries(data.departmentMetrics).map(
+                  ([name, metrics]: [string, any]) => ({
+                    name,
+                    completion: metrics.avg_retention_risk || 0,
+                    color: "#2563eb",
+                    completed_assessments: metrics.total_reports || 0,
+                    total_employees: metrics.employee_count || 0,
+                  })
+                )
+              : [];
+
+            setDashboardData(transformedData);
+            setTotalEmployees(data.overallMetrics?.total_employees || 0);
+          }
+        }
       } else if (data.error) {
-        console.error("❌ HR Dashboard error:", data.error);
+        console.error("❌ Dashboard error:", data.error);
+        // Set empty data to avoid infinite loading
+        setDashboardData({});
+      } else {
+        console.warn("⚠️ Unknown data structure received:", data);
+        // Set empty data to avoid infinite loading
+        setDashboardData({});
       }
+
       if (data.rooms) {
         setRoomsData(data.rooms);
+      }
+    });
+
+    // Listen for internal mobility data updates (only for HR users)
+    socketInstance.on("mobility_info", (data) => {
+      if (isAdmin) {
+        console.log("⏭️  Skipping mobility_info for admin user");
+        return;
+      }
+
+      console.log("🚶 Internal mobility data received:", data);
+      if (
+        data.monthlyMobilityTrends &&
+        data.departmentMovementFlow &&
+        data.metrics
+      ) {
+        setInternalMobility({
+          monthlyMobilityTrends: data.monthlyMobilityTrends,
+          departmentMovementFlow: data.departmentMovementFlow,
+          metrics: data.metrics,
+          data_timeframe: data.data_timeframe,
+        });
+      } else if (data.error) {
+        console.error("❌ Internal mobility error:", data.error);
       }
     });
 
@@ -304,7 +463,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
       socketInstance.disconnect();
     };
-  }, [session, triggerBellRing]);
+  }, [session, triggerBellRing, isAdmin, emitDashboardEvents]);
 
   return (
     <SocketContext.Provider
@@ -322,6 +481,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         dashboardData,
         roomsData,
         totalEmployees,
+        internalMobility,
+        isAdmin,
       }}
     >
       {children}

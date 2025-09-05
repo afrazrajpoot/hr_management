@@ -10,6 +10,7 @@ import {
   ClipboardList,
   TrendingDown,
   ArrowUp,
+  Loader2,
 } from "lucide-react";
 import {
   BarChart,
@@ -25,22 +26,163 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
-import {
-  mockCompanies,
-  mockEmployees,
-  mockAssessments,
-  companiesOverviewData,
-  retentionRiskData,
-  assessmentCompletionData,
-  mobilityData,
-} from "@/lib/mock-data";
 import { useEffect, useState } from "react";
+import { useSocket } from "@/context/SocketContext";
+// import { useSocket } from "@/context/socket-context";
+
+interface DashboardMetrics {
+  overallMetrics: {
+    total_reports: number;
+    total_hr_ids: number;
+    total_departments: number;
+    avg_retention_risk: number;
+    avg_mobility_score: number;
+    avg_genius_factor: number;
+    assessment_completion_by_department: {
+      [key: string]: {
+        total_employees: number;
+        completed_assessments: number;
+        completion_rate: number;
+      };
+    };
+    retention_risk_distribution: {
+      [key: string]: number;
+    };
+    genius_factor_distribution: {
+      [key: string]: number;
+    };
+    mobility_trends: {
+      monthly: { [key: string]: number };
+      quarterly: { [key: string]: number };
+    };
+  };
+  hrMetrics: {
+    [key: string]: any;
+  };
+  departmentMetrics: {
+    [key: string]: {
+      report_count: number;
+      employee_count: number;
+      avg_retention_risk: number;
+      avg_mobility_score: number;
+      avg_genius_factor: number;
+    };
+  };
+  chartData: {
+    [key: string]: any;
+  };
+}
 
 export default function HROverview() {
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const {
+    dashboardData,
+    internalMobility,
+    totalEmployees,
+    isConnected,
+    isAdmin,
+  } = useSocket();
+  const [loading, setLoading] = useState(true);
+
+  console.log("Socket Data:", {
+    dashboardData,
+    internalMobility,
+    totalEmployees,
+    isConnected,
+    isAdmin,
+  });
+
+  // Extract data from dashboardData or use empty defaults
+  const metrics = (dashboardData as any)?.overallMetrics || {};
+  const departmentMetrics = (dashboardData as any)?.departmentMetrics || {};
+  const chartData = (dashboardData as any)?.chartData || {};
+
+  // Calculate statistics
+  const totalCompanies = metrics.total_hr_ids || 0;
+  const totalAssessments = metrics.total_reports || 0;
+  const averageRisk = metrics.avg_retention_risk || 0;
+  const totalDepartments = metrics.total_departments || 0;
+  const avgMobilityScore = metrics.avg_mobility_score || 0;
+  const avgGeniusFactor = metrics.avg_genius_factor || 0;
+
+  // Transform department data for charts
+  const departmentData = Object.entries(departmentMetrics).map(
+    ([name, metrics]: [string, any]) => ({
+      name,
+      employees: metrics.employee_count || 0,
+      assessments: metrics.report_count || 0,
+      risk: metrics.avg_retention_risk || 0,
+      mobility: metrics.avg_mobility_score || 0,
+      genius: metrics.avg_genius_factor || 0,
+    })
+  );
+
+  // Transform risk distribution for pie chart
+  const riskDistribution = metrics.retention_risk_distribution || {};
+  const riskData = [
+    {
+      name: "Low Risk",
+      value: riskDistribution["Low (0-30)"] || 0,
+      color: "#059669",
+    },
+    {
+      name: "Medium Risk",
+      value: riskDistribution["Medium (31-60)"] || 0,
+      color: "#d97706",
+    },
+    {
+      name: "High Risk",
+      value: riskDistribution["High (61-100)"] || 0,
+      color: "#dc2626",
+    },
+  ];
+
+  // Transform genius factor distribution
+  const geniusDistribution = metrics.genius_factor_distribution || {};
+  const geniusData = [
+    {
+      name: "Poor (0-20)",
+      value: geniusDistribution["Poor (0-20)"] || 0,
+      color: "#dc2626",
+    },
+    {
+      name: "Fair (21-40)",
+      value: geniusDistribution["Fair (21-40)"] || 0,
+      color: "#d97706",
+    },
+    {
+      name: "Good (41-60)",
+      value: geniusDistribution["Good (41-60)"] || 0,
+      color: "#2563eb",
+    },
+    {
+      name: "Very Good (61-80)",
+      value: geniusDistribution["Very Good (61-80)"] || 0,
+      color: "#059669",
+    },
+    {
+      name: "Excellent (81-100)",
+      value: geniusDistribution["Excellent (81-100)"] || 0,
+      color: "#7c3aed",
+    },
+  ];
+
+  // Transform mobility trends
+  const mobilityTrends = metrics.mobility_trends?.monthly || {};
+  const mobilityChartData = Object.entries(mobilityTrends).map(
+    ([month, count]) => ({
+      month: month.substring(5), // Show only month part (e.g., "2024-01" -> "01")
+      movements: count,
+      fullMonth: month,
+    })
+  );
 
   useEffect(() => {
+    if (dashboardData) {
+      setLoading(false);
+    }
+
     const darkModeMediaQuery = window.matchMedia(
       "(prefers-color-scheme: dark)"
     );
@@ -48,18 +190,7 @@ export default function HROverview() {
     const handleChange = (e: any) => setIsDarkMode(e.matches);
     darkModeMediaQuery.addEventListener("change", handleChange);
     return () => darkModeMediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  const totalCompanies = mockCompanies.length;
-  const totalEmployees = mockCompanies.reduce(
-    (sum, company) => sum + company.employeeCount,
-    0
-  );
-  const totalAssessments = mockAssessments.length;
-  const averageRisk = Math.round(
-    mockCompanies.reduce((sum, company) => sum + company.retentionRisk, 0) /
-      mockCompanies.length
-  );
+  }, [dashboardData]);
 
   const customTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -76,19 +207,16 @@ export default function HROverview() {
             boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <p className="text-sm" style={{ color: textColor }}>
-            {label && `${label}:`}
+          <p className="text-sm font-medium" style={{ color: textColor }}>
+            {label}
           </p>
           {payload.map((entry: any, index: number) => (
             <p
               key={`item-${index}`}
               className="text-sm"
-              style={{
-                color: entry.color || textColor,
-                margin: "2px 0",
-              }}
+              style={{ color: entry.color || textColor }}
             >
-              {`${entry.name}: ${entry.value}${entry.unit || ""}`}
+              {`${entry.name}: ${entry.value}`}
             </p>
           ))}
         </div>
@@ -97,114 +225,137 @@ export default function HROverview() {
     return null;
   };
 
+  if (loading) {
+    return (
+      <HRLayout
+        title="Admin Dashboard Overview"
+        subtitle="Loading dashboard data..."
+      >
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              {isConnected
+                ? "Connected, waiting for data..."
+                : "Connecting to server..."}
+            </p>
+            {isAdmin && (
+              <p className="text-sm text-green-600 mt-2">Admin Mode</p>
+            )}
+          </div>
+        </div>
+      </HRLayout>
+    );
+  }
+
+  if (!dashboardData || Object.keys(metrics).length === 0) {
+    return (
+      <HRLayout title="Admin Dashboard Overview" subtitle="No data available">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              No Dashboard Data
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              {isConnected
+                ? "Waiting for data from server..."
+                : "Please check your connection and try again."}
+            </p>
+            {isAdmin && (
+              <p className="text-sm text-green-600 mt-2">Admin Mode</p>
+            )}
+          </div>
+        </div>
+      </HRLayout>
+    );
+  }
+
   return (
     <HRLayout
-      title="HR Dashboard Overview"
-      subtitle="Comprehensive analytics across all companies and employees"
+      title="Admin Dashboard Overview"
+      subtitle="Comprehensive analytics across all HR managers and departments"
     >
       <div className="space-y-6">
+        {isAdmin && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center">
+              <Building2 className="h-5 w-5 text-blue-600 mr-2" />
+              <span className="text-blue-800 dark:text-blue-200 font-medium">
+                Admin View: System-wide analytics
+              </span>
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Total Companies"
+            title="Total HR Managers"
             value={totalCompanies}
-            description="Connected organizations"
-            icon={
-              <Building2 className="h-4 w-4 dark:text-[#e5e7eb] text-[#1f2937]" />
-            }
+            description="Active HR accounts"
+            icon={<Building2 className="h-4 w-4" />}
             trend={{ value: 12, label: "vs last month", isPositive: true }}
-            onClick={() => router.push("/hr-dashboard/companies")}
-            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className="shadow-card"
           />
           <StatCard
             title="Total Employees"
             value={totalEmployees.toLocaleString()}
-            description="Across all companies"
-            icon={
-              <Users className="h-4 w-4 dark:text-[#e5e7eb] text-[#1f2937]" />
-            }
+            description="Across all departments"
+            icon={<Users className="h-4 w-4" />}
             trend={{ value: 8, label: "vs last month", isPositive: true }}
-            onClick={() => router.push("/hr-dashboard/employees")}
-            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className="shadow-card"
           />
           <StatCard
             title="Assessments Completed"
             value={totalAssessments}
-            description="This month"
-            icon={
-              <ClipboardList className="h-4 w-4 dark:text-[#e5e7eb] text-[#1f2937]" />
-            }
+            description="Total reports generated"
+            icon={<ClipboardList className="h-4 w-4" />}
             trend={{ value: 23, label: "vs last month", isPositive: true }}
-            onClick={() => router.push("/hr-dashboard/assessments")}
-            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className="shadow-card"
           />
           <StatCard
             title="Average Risk Level"
             value={`${averageRisk}%`}
-            description="Retention risk"
-            icon={
-              <TrendingDown className="h-4 w-4 dark:text-[#dc2626] text-[#dc2626]" />
-            }
+            description="Retention risk score"
+            icon={<TrendingDown className="h-4 w-4 text-red-600" />}
             trend={{ value: 3, label: "vs last month", isPositive: false }}
-            onClick={() => router.push("/hr-dashboard/risk-analysis")}
-            className=" text-[#1f2937] dark:text-[#e5e7eb] shadow-card"
+            className="shadow-card"
           />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className=" shadow-card">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {/* Department Performance Chart */}
+          <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-[#2563eb] text-[#2563eb]">
-                <Building2 className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
-                Companies & Employee Growth
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Department Performance Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={companiesOverviewData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                    opacity={0.3}
-                  />
-                  <XAxis
-                    dataKey="name"
-                    stroke={isDarkMode ? "#ffffff" : "#000000"}
-                    fontSize={12}
-                    tick={{ fill: isDarkMode ? "#ffffff" : "#000000" }}
-                  />
-                  <YAxis
-                    stroke={isDarkMode ? "#ffffff" : "#000000"}
-                    fontSize={12}
-                    tick={{ fill: isDarkMode ? "#ffffff" : "#000000" }}
-                  />
+                <BarChart data={departmentData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
                   <Tooltip content={customTooltip} />
-                  <Line
-                    type="monotone"
-                    dataKey="companies"
-                    stroke="#2563eb"
-                    strokeWidth={3}
-                    name="Companies"
-                    dot={{ fill: "#2563eb", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: "#2563eb" }}
+                  <Bar dataKey="employees" fill="#059669" name="Employees" />
+                  <Bar
+                    dataKey="assessments"
+                    fill="#2563eb"
+                    name="Assessments"
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="employees"
-                    stroke="#059669"
-                    strokeWidth={3}
-                    name="Employees"
-                    dot={{ fill: "#059669", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: "#059669" }}
-                  />
-                </LineChart>
+                  <Bar dataKey="risk" fill="#dc2626" name="Risk Score" />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card className=" shadow-card">
+          {/* Risk Distribution Chart */}
+          <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-[#dc2626] text-[#dc2626]">
-                <TrendingDown className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
+              <CardTitle className="flex items-center gap-2">
+                <TrendingDown className="h-5 w-5 text-red-600" />
                 Retention Risk Distribution
               </CardTitle>
             </CardHeader>
@@ -212,131 +363,135 @@ export default function HROverview() {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: "Low Risk", value: 45, color: "#059669" },
-                      { name: "Medium Risk", value: 35, color: "#d97706" },
-                      { name: "High Risk", value: 20, color: "#dc2626" },
-                    ]}
+                    data={riskData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
                     outerRadius={120}
                     paddingAngle={5}
                     dataKey="value"
-                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
                   >
-                    <Cell fill="#059669" />
-                    <Cell fill="#d97706" />
-                    <Cell fill="#dc2626" />
+                    {riskData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
                   </Pie>
                   <Tooltip content={customTooltip} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full dark:bg-[#059669] bg-[#059669]" />
-                  <span className="text-sm dark:text-[#e5e7eb] text-[#1f2937]">
-                    Low Risk
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full dark:bg-[#d97706] bg-[#d97706]" />
-                  <span className="text-sm dark:text-[#e5e7eb] text-[#1f2937]">
-                    Medium Risk
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full dark:bg-[#dc2626] bg-[#dc2626]" />
-                  <span className="text-sm dark:text-[#e5e7eb] text-[#1f2937]">
-                    High Risk
-                  </span>
-                </div>
+              <div className="flex justify-center gap-4 mt-4 flex-wrap">
+                {riskData.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card className=" shadow-card">
+          {/* Genius Factor Distribution */}
+          <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-[#2563eb] text-[#2563eb]">
-                <ClipboardList className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
-                Assessment Completion Rates
+              <CardTitle className="flex items-center gap-2">
+                <ArrowUp className="h-5 w-5 text-green-600" />
+                Genius Factor Distribution
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={assessmentCompletionData} layout="horizontal">
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                  />
-                  <XAxis
-                    type="number"
-                    stroke={isDarkMode ? "#ffffff" : "#000000"}
-                  />
-                  <YAxis
-                    dataKey="company"
-                    type="category"
-                    stroke={isDarkMode ? "#ffffff" : "#000000"}
-                    width={80}
-                  />
+                <BarChart data={geniusData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
                   <Tooltip content={customTooltip} />
-                  <Bar
-                    dataKey="total"
-                    fill="dark:#4b5563 #9ca3af"
-                    name="Total"
-                  />
-                  <Bar dataKey="completed" fill="#2563eb" name="Completed" />
+                  <Bar dataKey="value" fill="#2563eb" name="Employees" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card className=" shadow-card">
+          {/* Mobility Trends */}
+          <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-[#059669] text-[#059669]">
-                <ArrowUp className="h-5 w-5 dark:text-[#e5e7eb] text-[#1f2937]" />
-                Internal Mobility Trends
+              <CardTitle className="flex items-center gap-2">
+                <ArrowUp className="h-5 w-5 text-blue-600" />
+                Monthly Mobility Trends
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={mobilityData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                  />
-                  <XAxis
-                    dataKey="month"
-                    stroke={isDarkMode ? "#ffffff" : "#000000"}
-                  />
-                  <YAxis stroke={isDarkMode ? "#ffffff" : "#000000"} />
-                  <Tooltip content={customTooltip} />
-                  <Line
-                    type="monotone"
-                    dataKey="promotions"
-                    stroke="#059669"
-                    strokeWidth={2}
-                    name="Promotions"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="transfers"
-                    stroke="#d97706"
-                    strokeWidth={2}
-                    name="Transfers"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="exits"
-                    stroke="#dc2626"
-                    strokeWidth={2}
-                    name="Exits"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {mobilityChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={mobilityChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip content={customTooltip} />
+                    <Line
+                      type="monotone"
+                      dataKey="movements"
+                      stroke="#2563eb"
+                      strokeWidth={2}
+                      name="Movements"
+                      dot={{ fill: "#2563eb", strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, fill: "#2563eb" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No mobility data available
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Department Summary Cards */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Department Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {departmentData.map((dept) => (
+                <div key={dept.name} className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-lg mb-2">{dept.name}</h4>
+                  <div className="space-y-2 text-sm">
+                    <p>
+                      Employees:{" "}
+                      <span className="font-medium">{dept.employees}</span>
+                    </p>
+                    <p>
+                      Assessments:{" "}
+                      <span className="font-medium">{dept.assessments}</span>
+                    </p>
+                    <p>
+                      Risk Score:{" "}
+                      <span className="font-medium">{dept.risk}%</span>
+                    </p>
+                    <p>
+                      Mobility Score:{" "}
+                      <span className="font-medium">{dept.mobility}%</span>
+                    </p>
+                    <p>
+                      Genius Factor:{" "}
+                      <span className="font-medium">{dept.genius}%</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </HRLayout>
   );

@@ -11,92 +11,163 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-
-    const { department, position, salary ,userId} = await request.json();
+    const { department, position, salary, userId, transfer, promotion } = await request.json();
 
     // Validate input
-    if (!department || !position || !salary) {
+    if (!department || !position || !salary || !userId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Check if a department exists for the user
-    const existingDepartment = await prisma.department.findFirst({
-      where: { userId },
+    // Convert promotion to string or null
+    const validatedPromotion = typeof promotion === "boolean" ? promotion.toString() : promotion || null;
+
+    // Update User model with new department, position, and salary
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
     });
 
-    let updatedDepartment;
-
-    if (existingDepartment) {
-      // Safely parse existing JSON arrays or handle non-JSON data
-      let currentName: string[] = [];
-      let currentPosition: string[] = [];
-
-      if (existingDepartment.name) {
-        try {
-          // Try parsing as JSON
-          currentName = JSON.parse(existingDepartment.name as string);
-          // Ensure it's an array
-          if (!Array.isArray(currentName)) {
-            currentName = [existingDepartment.name as string];
-          }
-        } catch (e) {
-          // If parsing fails, treat as a string and convert to array
-          currentName = [existingDepartment.name as string];
-        }
-      }
-
-      if (existingDepartment.position) {
-        try {
-          // Try parsing as JSON
-          currentPosition = JSON.parse(existingDepartment.position as string);
-          // Ensure it's an array
-          if (!Array.isArray(currentPosition)) {
-            currentPosition = [existingDepartment.position as string];
-          }
-        } catch (e) {
-          // If parsing fails, treat as a string and convert to array
-          currentPosition = [existingDepartment.position as string];
-        }
-      }
-
-      // Append new values
-      const updatedName = [...currentName, department];
-      const updatedPosition = [...currentPosition, position];
-
-      // Update existing department
-      updatedDepartment = await prisma.department.update({
-        where: { id: existingDepartment.id },
-        data: {
-          name: JSON.stringify(updatedName), // Store as JSON array
-          position: JSON.stringify(updatedPosition), // Store as JSON array
-        },
-      });
-    } else {
-      // Create new department
-      updatedDepartment = await prisma.department.create({
-        data: {
-          id: crypto.randomUUID(),
-          name: JSON.stringify([department]), // Start with new JSON array
-          position: JSON.stringify([position]), // Start with new JSON array
-          hrId: userId, // Assuming hrId is same as userId; adjust if different
-          userId,
-        },
-      });
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    // Update User model (assuming salary is a field in User)
+    // Append department and position to user's arrays
+    const userDepartments = [...(existingUser.department || []), department];
+    const userPositions = [...(existingUser.position || []), position];
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { salary: salary }, // Ensure salary is a number
+      data: {
+        department: userDepartments,
+        position: userPositions,
+        salary,
+      },
     });
+
+    // Prepare ingoing and outgoing data
+    const currentTimestamp = new Date().toISOString();
+    const ingoingData = {
+      userId,
+      department,
+      timestamp: currentTimestamp,
+    };
+
+    // Get the last department from the user's department array for outgoing data
+    let outgoingData = null;
+    let sourceDepartmentName = null;
+    if (transfer === "outgoing" && existingUser.department && existingUser.department.length > 0) {
+      sourceDepartmentName = existingUser.department[existingUser.department.length - 1];
+      outgoingData = {
+        userId,
+        department: sourceDepartmentName,
+        timestamp: currentTimestamp,
+      };
+    }
+
+    // Find all departments for the HR
+    let departments = [];
+    try {
+      departments = await prisma.department.findMany({
+        where: {
+          hrId: session.user.id,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch departments" },
+        { status: 500 }
+      );
+    }
+
+    let updatedDepartments = [];
+
+    // Handle transfer logic: update ingoing and outgoing for relevant departments
+    if (transfer && sourceDepartmentName) {
+      // Find the target (new) department and source (old) department
+      const targetDepartment = departments.find((dept:any) => dept.name === department);
+      const sourceDepartment = departments.find((dept:any) => dept.name === sourceDepartmentName);
+
+      // Check if target department exists
+      if (!targetDepartment) {
+        return NextResponse.json(
+          { error: `Target department '${department}' not found` },
+          { status: 404 }
+        );
+      }
+
+      // Check if source department exists (if transfer is outgoing)
+      if (transfer === "outgoing" && !sourceDepartment) {
+        return NextResponse.json(
+          { error: `Source department '${sourceDepartmentName}' not found` },
+          { status: 404 }
+        );
+      }
+
+      // Update target department (append to ingoing)
+      const updatedTargetDept = await prisma.department.update({
+        where: { id: targetDepartment.id },
+        data: {
+          ingoing: {
+            push: ingoingData, // Append to ingoing array
+          },
+          promotion: validatedPromotion || targetDepartment.promotion,
+          transfer: transfer || targetDepartment.transfer,
+        },
+      });
+      updatedDepartments.push(updatedTargetDept);
+
+      // Update source department (append to outgoing) if it exists
+      if (sourceDepartment && outgoingData) {
+        const updatedSourceDept = await prisma.department.update({
+          where: { id: sourceDepartment.id },
+          data: {
+            outgoing: {
+              push: outgoingData, // Append to outgoing array
+            },
+            promotion: validatedPromotion || sourceDepartment.promotion,
+            transfer: transfer || sourceDepartment.transfer,
+          },
+        });
+        updatedDepartments.push(updatedSourceDept);
+      }
+    } else {
+      // No transfer, just update the target department
+      const targetDepartment = departments.find((dept:any) => dept.name === department);
+
+      if (!targetDepartment) {
+        return NextResponse.json(
+          { error: `Target department '${department}' not found` },
+          { status: 404 }
+        );
+      }
+
+      const updatedDept = await prisma.department.update({
+        where: { id: targetDepartment.id },
+        data: {
+          ingoing: {
+            push: ingoingData, // Append to ingoing array
+          },
+          promotion: validatedPromotion || targetDepartment.promotion,
+          transfer: transfer || targetDepartment.transfer,
+        },
+      });
+      updatedDepartments.push(updatedDept);
+    }
 
     return NextResponse.json({
       message: "Successfully updated employee data",
-      department: updatedDepartment,
-      user: { salary: updatedUser.salary },
+      departments: updatedDepartments,
+      user: {
+        department: updatedUser.department,
+        position: updatedUser.position,
+        salary: updatedUser.salary,
+      },
     });
   } catch (error) {
     console.error("Error updating employee data:", error);

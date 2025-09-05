@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       data: {
         userId: body.userId,
         hrId: user?.hrId,
-        departement: user?.department,
+        departement: user?.department?.at(-1) || "General",
         executiveSummary: executive_summary,
         geniusFactorProfileJson: genius_factor_profile,
         currentRoleAlignmentAnalysisJson: current_role_alignment_analysis,
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       },
     });
 
-
+  
     return NextResponse.json({ status: "success", report });
   } catch (error: any) {
     console.error("Error saving report:", error);

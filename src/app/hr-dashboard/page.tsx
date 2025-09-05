@@ -124,7 +124,7 @@ export default function Dashboard() {
   }));
 
   // Fix genius factor data mapping
-  const geniusFactorData = [];
+  const geniusFactorData: any = [];
   for (const dept of departmentData) {
     const distribution: any = dept.metrics?.genius_factor_distribution || {};
     for (const [range, count] of Object.entries(distribution)) {
@@ -302,7 +302,7 @@ export default function Dashboard() {
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-2))"
-                      name="Employees"
+                      name="Assessments"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -330,7 +330,7 @@ export default function Dashboard() {
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-3))"
-                      name="Employees"
+                      name="Assessments"
                     />
                   </BarChart>
                 </ResponsiveContainer>

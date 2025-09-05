@@ -14,7 +14,7 @@ export const hrApi = createApi({
     }),
     updateEmployee: builder.mutation<
       { message: string; department: any; user: { salary: number } },
-      { department: string; position: string; salary: string;userId:string }
+      { department: string; position: string; salary: string;userId:string;transfer:string;promotion:string }
     >({
       query: (body) => ({
         url: '/hr-api/update-mobility',

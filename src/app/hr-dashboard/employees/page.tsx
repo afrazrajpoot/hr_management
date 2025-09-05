@@ -70,7 +70,7 @@ export default function Employees() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
-
+  console.log(data, "my employees data");
   const uniqueDepartments = useMemo(() => {
     const depts = new Set<string>();
     data?.employees?.forEach((emp: any) => {
