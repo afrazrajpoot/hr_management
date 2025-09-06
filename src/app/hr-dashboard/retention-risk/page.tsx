@@ -151,18 +151,74 @@ const InterventionCard = ({ intervention }: any) => {
   );
 };
 
+// Fallback data structure
+const fallbackRiskData = {
+  riskDistributionData: [
+    {
+      level: "Low Risk",
+      count: 0,
+      percentage: 0,
+      color: "hsl(var(--hr-chart-2))",
+    },
+    {
+      level: "Medium Risk",
+      count: 0,
+      percentage: 0,
+      color: "hsl(var(--hr-chart-3))",
+    },
+    {
+      level: "High Risk",
+      count: 0,
+      percentage: 0,
+      color: "hsl(var(--hr-chart-5))",
+    },
+  ],
+  departmentRiskData: [
+    {
+      department: "No Data",
+      low: 0,
+      medium: 0,
+      high: 0,
+      total: 0,
+      color: "#8884d8",
+    },
+  ],
+  totalAtRisk: 0,
+  highRisk: 0,
+  totalEmployees: 0,
+  avgRiskScore: "0.0",
+  retentionRate: 100,
+  departmentCount: 0,
+};
+
 export default function RetentionRisk() {
   const { dashboardData } = useSocket();
-  const [riskData, setRiskData] = useState<any>(null);
+  console.log("Dashboard data in retention risk:", dashboardData);
+  const [riskData, setRiskData] = useState<any>(fallbackRiskData);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (dashboardData) {
-      processRiskData();
+    // Check if dashboardData exists and is an array
+    if (dashboardData && Array.isArray(dashboardData)) {
+      processRiskData(dashboardData);
+    } else {
+      // Use fallback data if no valid dashboard data
+      console.log("Using fallback data - dashboardData is not an array");
+      setRiskData(fallbackRiskData);
     }
+    setIsLoading(false);
   }, [dashboardData]);
 
-  const processRiskData = () => {
-    const departmentData = dashboardData || [];
+  const processRiskData = (departmentData: any[]) => {
+    // Ensure we're working with an array
+    if (!Array.isArray(departmentData)) {
+      console.error(
+        "processRiskData expected an array but got:",
+        departmentData
+      );
+      setRiskData(fallbackRiskData);
+      return;
+    }
 
     // Calculate risk distribution
     let lowRisk = 0;
@@ -181,44 +237,56 @@ export default function RetentionRisk() {
     });
 
     const totalAtRisk = mediumRisk + highRisk;
-    const avgRiskScore = totalRiskScore / (departmentData.length || 1);
-    const retentionRate = Math.round(
-      ((totalEmployees - totalAtRisk) / totalEmployees) * 100
-    );
+    const avgRiskScore =
+      departmentData.length > 0 ? totalRiskScore / departmentData.length : 0;
+    const retentionRate =
+      totalEmployees > 0
+        ? Math.round(((totalEmployees - totalAtRisk) / totalEmployees) * 100)
+        : 100;
 
     const riskDistributionData = [
       {
         level: "Low Risk",
         count: lowRisk,
-        percentage: Math.round((lowRisk / totalEmployees) * 100),
+        percentage:
+          totalEmployees > 0 ? Math.round((lowRisk / totalEmployees) * 100) : 0,
         color: "hsl(var(--hr-chart-2))",
       },
       {
         level: "Medium Risk",
         count: mediumRisk,
-        percentage: Math.round((mediumRisk / totalEmployees) * 100),
+        percentage:
+          totalEmployees > 0
+            ? Math.round((mediumRisk / totalEmployees) * 100)
+            : 0,
         color: "hsl(var(--hr-chart-3))",
       },
       {
         level: "High Risk",
         count: highRisk,
-        percentage: Math.round((highRisk / totalEmployees) * 100),
+        percentage:
+          totalEmployees > 0
+            ? Math.round((highRisk / totalEmployees) * 100)
+            : 0,
         color: "hsl(var(--hr-chart-5))",
       },
     ];
 
     // Prepare department risk data
-    const departmentRiskData = departmentData.map((dept: any) => {
-      const riskDist = dept.metrics?.retention_risk_distribution || {};
-      return {
-        department: dept.name,
-        low: riskDist["Low (0-30)"] || 0,
-        medium: riskDist["Medium (31-60)"] || 0,
-        high: riskDist["High (61-100)"] || 0,
-        total: dept.employee_count || 0,
-        color: dept.color,
-      };
-    });
+    const departmentRiskData =
+      departmentData.length > 0
+        ? departmentData.map((dept: any) => {
+            const riskDist = dept.metrics?.retention_risk_distribution || {};
+            return {
+              department: dept.name || "Unknown Department",
+              low: riskDist["Low (0-30)"] || 0,
+              medium: riskDist["Medium (31-60)"] || 0,
+              high: riskDist["High (61-100)"] || 0,
+              total: dept.employee_count || 0,
+              color: dept.color || "#8884d8",
+            };
+          })
+        : fallbackRiskData.departmentRiskData;
 
     setRiskData({
       riskDistributionData,
@@ -232,7 +300,7 @@ export default function RetentionRisk() {
     });
   };
 
-  if (!dashboardData || !riskData) {
+  if (isLoading) {
     return (
       <HRLayout>
         <div className="space-y-6 p-6">
@@ -258,7 +326,7 @@ export default function RetentionRisk() {
       impact: riskData.highRisk > 5 ? "High" : "Medium",
       timeline: "3-6 months",
       cost: "Medium",
-      successRate: Math.min(85, 100 - riskData.avgRiskScore),
+      successRate: Math.min(85, 100 - Number(riskData.avgRiskScore)),
     },
     {
       title: "Manager Training Initiative",
@@ -274,7 +342,7 @@ export default function RetentionRisk() {
       title: "Flexible Work Arrangements",
       description:
         "Remote options and flexible schedules for better work-life balance",
-      targetRisk: riskData.avgRiskScore > 40 ? "High" : "Medium",
+      targetRisk: Number(riskData.avgRiskScore) > 40 ? "High" : "Medium",
       impact: "High",
       timeline: "1-2 months",
       cost: "Low",
@@ -287,7 +355,7 @@ export default function RetentionRisk() {
       impact: "High",
       timeline: "1-3 months",
       cost: "High",
-      successRate: Math.min(95, 100 - riskData.avgRiskScore + 10),
+      successRate: Math.min(95, 100 - Number(riskData.avgRiskScore) + 10),
     },
   ];
 
@@ -300,8 +368,14 @@ export default function RetentionRisk() {
             Retention Risk Insights
           </h1>
           <p className="text-muted-foreground">
-            Analyze retention risks across {riskData.departmentCount}{" "}
-            departments and {riskData.totalEmployees} employees
+            {riskData.departmentCount > 0 ? (
+              <>
+                Analyze retention risks across {riskData.departmentCount}{" "}
+                departments and {riskData.totalEmployees} employees
+              </>
+            ) : (
+              "No data available. Showing demo metrics."
+            )}
           </p>
         </div>
 
@@ -310,18 +384,26 @@ export default function RetentionRisk() {
           <RiskStatCard
             title="Total At Risk"
             value={riskData.totalAtRisk}
-            change={`${Math.round(
-              (riskData.totalAtRisk / riskData.totalEmployees) * 100
-            )}% of workforce`}
+            change={
+              riskData.totalEmployees > 0
+                ? `${Math.round(
+                    (riskData.totalAtRisk / riskData.totalEmployees) * 100
+                  )}% of workforce`
+                : "0% of workforce"
+            }
             icon={AlertTriangle}
             trend="neutral"
           />
           <RiskStatCard
             title="High Risk"
             value={riskData.highRisk}
-            change={`${Math.round(
-              (riskData.highRisk / riskData.totalEmployees) * 100
-            )}% critical`}
+            change={
+              riskData.totalEmployees > 0
+                ? `${Math.round(
+                    (riskData.highRisk / riskData.totalEmployees) * 100
+                  )}% critical`
+                : "0% critical"
+            }
             icon={AlertTriangle}
             trend="neutral"
           />
@@ -337,7 +419,7 @@ export default function RetentionRisk() {
             value={riskData.avgRiskScore}
             change={`/100 scale`}
             icon={Target}
-            trend={riskData.avgRiskScore < 30 ? "down" : "up"}
+            trend={Number(riskData.avgRiskScore) < 30 ? "down" : "up"}
           />
         </div>
 

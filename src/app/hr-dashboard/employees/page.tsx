@@ -119,7 +119,7 @@ export default function Employees() {
       return matchesSearch && matchesDepartment && matchesRisk && matchesStatus;
     });
   }, [data, searchTerm, selectedDepartment, selectedRisk, selectedStatus]);
-
+  // console.log(filteredEmployees[0].department[0], "filtered employees");
   const handleViewEmployee = (employee: any) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
@@ -262,11 +262,11 @@ export default function Employees() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {employee?.position || "N/A"}
+                        {employee?.position.at(-1) || "N/A"}
                       </td>
                       <td className="p-3">
-                        {employee?.department ||
-                          employee.reports[0]?.departement ||
+                        {employee?.department.at(-1) ||
+                          employee?.departement[0] ||
                           "N/A"}
                       </td>
                       <td className="p-3 font-medium">

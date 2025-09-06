@@ -37,77 +37,124 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { useSocket } from "@/context/SocketContext";
+import { useState, useMemo } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Mobility() {
-  const mobilityTrendData = [
-    { month: "Jan", promotions: 12, transfers: 5, exits: 8 },
-    { month: "Feb", promotions: 15, transfers: 7, exits: 6 },
-    { month: "Mar", promotions: 18, transfers: 9, exits: 12 },
-    { month: "Apr", promotions: 14, transfers: 6, exits: 9 },
-    { month: "May", promotions: 20, transfers: 11, exits: 7 },
-  ];
+  const { mobilityAnalysis } = useSocket();
+  const [selectedHrId, setSelectedHrId] = useState<string>("all");
 
-  const departmentMobilityData = [
-    { department: "Engineering", internal: 15, external: 3, retention: 92 },
-    { department: "Product", internal: 8, external: 2, retention: 89 },
-    { department: "Finance", internal: 5, external: 4, retention: 85 },
-    { department: "Medical", internal: 12, external: 1, retention: 95 },
-    { department: "Education", internal: 7, external: 2, retention: 88 },
-  ];
+  // Use real data instead of static data
+  const hrStats = mobilityAnalysis?.hr_stats || {};
+  const overallTrends = mobilityAnalysis?.overall_monthly_trends || [];
+  const analysisPeriod = mobilityAnalysis?.analysis_period;
 
+  // Get all HR IDs for dropdown
+  const hrIds = useMemo(() => Object.keys(hrStats), [hrStats]);
+
+  // Filter data based on selected HR ID
+  const filteredHrStats = useMemo(() => {
+    if (selectedHrId === "all") {
+      return hrStats;
+    }
+    return { [selectedHrId]: hrStats[selectedHrId] };
+  }, [hrStats, selectedHrId]);
+
+  const filteredOverallTrends = useMemo(() => {
+    if (selectedHrId === "all") {
+      return overallTrends;
+    }
+    const hrData = hrStats[selectedHrId];
+    return hrData?.monthly_trends || [];
+  }, [overallTrends, hrStats, selectedHrId]);
+
+  // Calculate totals from filtered HR stats
+  const totalMovements: any = Object.values(filteredHrStats).reduce(
+    (sum: any, hr: any) => sum + (hr.total_movements || 0),
+    0
+  );
+  const totalPromotions: any = Object.values(filteredHrStats).reduce(
+    (sum: any, hr: any) => sum + (hr.promotions || 0),
+    0
+  );
+  const totalTransfers: any = Object.values(filteredHrStats).reduce(
+    (sum: any, hr: any) => sum + (hr.transfers || 0),
+    0
+  );
+
+  // Calculate percentages
+  const promotionPercentage =
+    totalMovements > 0
+      ? Math.round((totalPromotions / totalMovements) * 100)
+      : 0;
+  const transferPercentage =
+    totalMovements > 0
+      ? Math.round((totalTransfers / totalMovements) * 100)
+      : 0;
+
+  // Prepare department data for chart
+  const departmentMobilityData = Object.entries(filteredHrStats).flatMap(
+    ([hrId, hrData]: any) =>
+      Object.entries(hrData.departments || {}).map(
+        ([deptName, deptData]: any) => ({
+          department: deptName,
+          internal: (deptData.incoming || 0) + (deptData.outgoing || 0),
+          external: 0,
+          retention: 85,
+          hrId,
+        })
+      )
+  );
+
+  // Prepare mobility type data for pie chart
   const mobilityTypeData = [
-    { name: "Promotions", value: 45, color: "#10b981" },
-    { name: "Lateral Transfers", value: 25, color: "#3b82f6" },
-    { name: "Department Changes", value: 20, color: "#f59e0b" },
-    { name: "Role Changes", value: 10, color: "#8b5cf6" },
-  ];
+    { name: "Promotions", value: totalPromotions, color: "#10b981" },
+    { name: "Transfers", value: totalTransfers, color: "#3b82f6" },
+    {
+      name: "Other Movements",
+      value: Math.max(0, totalMovements - totalPromotions - totalTransfers),
+      color: "#f59e0b",
+    },
+  ].filter((item) => item.value > 0);
 
-  const recentMobility = [
-    {
-      id: "1",
-      employeeName: "Sarah Johnson",
-      fromPosition: "Software Engineer",
-      toPosition: "Senior Software Engineer",
-      fromDepartment: "Engineering",
-      toDepartment: "Engineering",
-      type: "promotion",
-      date: "2024-01-15",
-      company: "TechCorp Solutions",
-    },
-    {
-      id: "2",
-      employeeName: "Michael Chen",
-      fromPosition: "Product Manager",
-      toPosition: "Senior Product Manager",
-      fromDepartment: "Product",
-      toDepartment: "Product",
-      type: "promotion",
-      date: "2024-01-18",
-      company: "TechCorp Solutions",
-    },
-    {
-      id: "3",
-      employeeName: "Emily Rodriguez",
-      fromPosition: "Financial Analyst",
-      toPosition: "Financial Analyst",
-      fromDepartment: "Finance",
-      toDepartment: "Operations",
-      type: "transfer",
-      date: "2024-01-20",
-      company: "FinanceFirst Ltd",
-    },
-    {
-      id: "4",
-      employeeName: "David Kim",
-      fromPosition: "Nurse Practitioner",
-      toPosition: "Nursing Supervisor",
-      fromDepartment: "Medical",
-      toDepartment: "Medical",
-      type: "promotion",
-      date: "2024-01-22",
-      company: "HealthPlus Medical",
-    },
-  ];
+  // Prepare recent movements from the data
+  const recentMobility = Object.entries(filteredHrStats)
+    .flatMap(([hrId, hrData]: any) =>
+      Object.entries(hrData.departments || {}).flatMap(
+        ([deptName, deptData]: any) => [
+          ...(deptData.promotions > 0
+            ? [
+                {
+                  id: `${hrId}-${deptName}-promotion`,
+                  department: deptName,
+                  type: "promotion",
+                  count: deptData.promotions,
+                  hrId,
+                },
+              ]
+            : []),
+          ...(deptData.transfers > 0
+            ? [
+                {
+                  id: `${hrId}-${deptName}-transfer`,
+                  department: deptName,
+                  type: "transfer",
+                  count: deptData.transfers,
+                  hrId,
+                },
+              ]
+            : []),
+        ]
+      )
+    )
+    .slice(0, 4);
 
   const getMobilityIcon = (type: string) => {
     switch (type) {
@@ -115,8 +162,6 @@ export default function Mobility() {
         return <ArrowUp className="h-4 w-4 text-success" />;
       case "transfer":
         return <ArrowRight className="h-4 w-4 text-hr-secondary" />;
-      case "exit":
-        return <ArrowDown className="h-4 w-4 text-destructive" />;
       default:
         return <ArrowUpDown className="h-4 w-4" />;
     }
@@ -128,8 +173,6 @@ export default function Mobility() {
         return "default" as const;
       case "transfer":
         return "secondary" as const;
-      case "exit":
-        return "destructive" as const;
       default:
         return "outline" as const;
     }
@@ -138,51 +181,100 @@ export default function Mobility() {
   return (
     <HRLayout
       title="Internal Mobility Tracking"
-      subtitle="Monitor career movements and progression across all companies"
+      subtitle="Monitor career movements and progression across all departments"
     >
       <div className="space-y-6">
+        {/* HR Filter Dropdown */}
+        <Card className="bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-hr-primary" />
+                Filter by HR Manager
+              </div>
+              <Select value={selectedHrId} onValueChange={setSelectedHrId}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Select HR Manager" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All HR Managers</SelectItem>
+                  {hrIds.map((hrId) => (
+                    <SelectItem key={hrId} value={hrId}>
+                      HR Manager: {hrId.slice(0, 8)}...
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardTitle>
+          </CardHeader>
+        </Card>
+
+        {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
           <StatCard
             title="Total Movements"
-            value="147"
-            description="This year"
+            value={totalMovements.toString()}
+            description={`Last 6 months`}
             icon={<ArrowUpDown className="h-4 w-4" />}
-            trend={{ value: 23, label: "vs last year", isPositive: true }}
+            trend={{
+              value: 0,
+              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
+              isPositive: true,
+            }}
           />
           <StatCard
             title="Promotions"
-            value="79"
-            description="54% of movements"
+            value={totalPromotions.toString()}
+            description={`${promotionPercentage}% of movements`}
             icon={<ArrowUp className="h-4 w-4" />}
-            trend={{ value: 18, label: "vs last year", isPositive: true }}
+            trend={{
+              value: 0,
+              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
+              isPositive: true,
+            }}
           />
           <StatCard
-            title="Internal Transfers"
-            value="38"
-            description="26% of movements"
+            title="Transfers"
+            value={totalTransfers.toString()}
+            description={`${transferPercentage}% of movements`}
             icon={<ArrowRight className="h-4 w-4" />}
-            trend={{ value: 12, label: "vs last year", isPositive: true }}
+            trend={{
+              value: 0,
+              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
+              isPositive: true,
+            }}
           />
           <StatCard
-            title="Average Time to Promotion"
-            value="2.3 years"
-            description="Down from 2.8 years"
-            icon={<Calendar className="h-4 w-4" />}
-            trend={{ value: 18, label: "improvement", isPositive: true }}
+            title={selectedHrId === "all" ? "HR Managers" : "Departments"}
+            value={
+              selectedHrId === "all"
+                ? hrIds.length.toString()
+                : Object.keys(
+                    filteredHrStats[selectedHrId]?.departments || {}
+                  ).length.toString()
+            }
+            description={
+              selectedHrId === "all" ? "Active managers" : "Managed departments"
+            }
+            icon={<Building2 className="h-4 w-4" />}
+            trend={{ value: 0, label: "Active", isPositive: true }}
           />
         </div>
 
+        {/* Charts */}
         <div className="grid gap-6 md:grid-cols-2">
+          {/* Mobility Trends Chart */}
           <Card className="bg-gradient-card shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-hr-primary" />
-                Mobility Trends
+                {selectedHrId === "all" ? "Overall" : "HR Manager"} Mobility
+                Trends
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={mobilityTrendData}>
+                <LineChart data={filteredOverallTrends}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
@@ -201,35 +293,36 @@ export default function Mobility() {
                   />
                   <Line
                     type="monotone"
-                    dataKey="promotions"
+                    dataKey="incoming"
                     stroke="hsl(var(--success))"
                     strokeWidth={3}
-                    name="Promotions"
+                    name="Incoming"
                   />
                   <Line
                     type="monotone"
-                    dataKey="transfers"
+                    dataKey="outgoing"
                     stroke="hsl(var(--hr-secondary))"
                     strokeWidth={3}
-                    name="Transfers"
+                    name="Outgoing"
                   />
                   <Line
                     type="monotone"
-                    dataKey="exits"
-                    stroke="hsl(var(--destructive))"
+                    dataKey="total"
+                    stroke="hsl(var(--hr-primary))"
                     strokeWidth={3}
-                    name="Exits"
+                    name="Total"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
+          {/* Movement Types Pie Chart */}
           <Card className="bg-gradient-card shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ArrowUpDown className="h-5 w-5 text-hr-accent" />
-                Movement Types
+                Movement Types Distribution
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -249,7 +342,6 @@ export default function Mobility() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => ["" + value + "%", "of Movements"]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -266,7 +358,7 @@ export default function Mobility() {
                       style={{ backgroundColor: item.color }}
                     />
                     <span className="text-xs text-muted-foreground">
-                      {item.name}
+                      {item.name} ({item.value})
                     </span>
                   </div>
                 ))}
@@ -275,11 +367,15 @@ export default function Mobility() {
           </Card>
         </div>
 
+        {/* Department Mobility Chart */}
         <Card className="bg-gradient-card shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-hr-secondary" />
-              Mobility by Department
+              {selectedHrId === "all"
+                ? "All Departments"
+                : "Managed Departments"}{" "}
+              Mobility
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -307,195 +403,97 @@ export default function Mobility() {
                   name="Internal Moves"
                   radius={[2, 2, 0, 0]}
                 />
-                <Bar
-                  dataKey="external"
-                  fill="hsl(var(--destructive))"
-                  name="External Exits"
-                  radius={[2, 2, 0, 0]}
-                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
+        {/* Recent Movements Table */}
         <Card className="bg-gradient-card shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-hr-primary" />
-              Recent Movements
+              Recent Activity Summary
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Movement Type</TableHead>
+                  <TableHead>Count</TableHead>
+                  <TableHead>HR Manager</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentMobility.map((movement) => (
-                  <TableRow key={movement.id}>
-                    <TableCell className="font-medium">
-                      {movement.employeeName}
-                    </TableCell>
-                    <TableCell>{movement.company}</TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {movement.fromPosition}
+                {recentMobility.length > 0 ? (
+                  recentMobility.map((movement) => (
+                    <TableRow key={movement.id}>
+                      <TableCell className="font-medium">
+                        {movement.department}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getMobilityIcon(movement.type)}
+                          <Badge
+                            variant={getMobilityBadgeVariant(movement.type)}
+                          >
+                            {movement.type}
+                          </Badge>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {movement.fromDepartment}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{movement.toPosition}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {movement.toDepartment}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getMobilityIcon(movement.type)}
-                        <Badge variant={getMobilityBadgeVariant(movement.type)}>
-                          {movement.type}
+                      </TableCell>
+                      <TableCell>{movement.count}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {movement.hrId.slice(0, 8)}...
                         </Badge>
-                      </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-muted-foreground"
+                    >
+                      No recent mobility data available
                     </TableCell>
-                    <TableCell>{movement.date}</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-hr-accent" />
-              Popular Career Paths
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Engineering Track</h4>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Junior Engineer
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Software Engineer
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Senior Engineer
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">Tech Lead</span>
+        {/* Analysis Period Info */}
+        {analysisPeriod && (
+          <Card className="bg-gradient-card shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-hr-primary" />
+                Analysis Period
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="font-medium mb-2">Time Range</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {analysisPeriod.start} to {analysisPeriod.end}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Average progression time: 4-6 years
-                </p>
-              </div>
-
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Management Track</h4>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Team Member
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Senior Member
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">Team Lead</span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">Manager</span>
+                <div>
+                  <h4 className="font-medium mb-2">Data Coverage</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedHrId === "all" ? hrIds.length : 1} HR manager(s),{" "}
+                    {departmentMobilityData.length} department(s)
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Average progression time: 5-7 years
-                </p>
               </div>
-
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Specialist Track</h4>
-                <div className="flex items_center gap-2 text-sm">
-                  <span className="px-2 py-1 bg-muted rounded">Analyst</span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Senior Analyst
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Principal Analyst
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <span className="px-2 py-1 bg-muted rounded">
-                    Subject Expert
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Average progression time: 3-5 years
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-hr-primary" />
-              Key Mobility Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
-                <h4 className="font-medium text-success mb-2">
-                  High Mobility Departments
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Engineering: 18 internal moves</li>
-                  <li>• Product: 12 internal moves</li>
-                  <li>• Medical: 15 internal moves</li>
-                </ul>
-              </div>
-              <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-                <h4 className="font-medium text-warning mb-2">
-                  Promotion Bottlenecks
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Senior→Principal roles (6+ months)</li>
-                  <li>• Individual→Management (8+ months)</li>
-                  <li>• Cross-department moves (4+ months)</li>
-                </ul>
-              </div>
-              <div className="p-4 bg-hr-primary/10 border border-hr-primary/20 rounded-lg">
-                <h4 className="font-medium text-hr-primary mb-2">
-                  Retention Impact
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• 95% of promoted employees stay 2+ years</li>
-                  <li>• Internal moves reduce exit risk by 60%</li>
-                  <li>• Clear progression paths improve satisfaction</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </HRLayout>
   );

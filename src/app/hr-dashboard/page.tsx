@@ -80,16 +80,55 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// Fallback data structure
+const fallbackDepartmentData = [
+  {
+    name: "No Data",
+    completion: 0,
+    color: "#8884d8",
+    employee_count: 0,
+    metrics: {
+      avg_scores: {
+        genius_factor_score: 0,
+        retention_risk_score: 0,
+        mobility_opportunity_score: 0,
+        productivity_score: 0,
+        engagement_score: 0,
+        skills_alignment_score: 0,
+      },
+      genius_factor_distribution: {
+        "0-20": 0,
+        "21-40": 0,
+        "41-60": 0,
+        "61-80": 0,
+        "81-100": 0,
+      },
+      retention_risk_distribution: {
+        "0-20": 0,
+        "21-40": 0,
+        "41-60": 0,
+        "61-80": 0,
+        "81-100": 0,
+      },
+      mobility_trend: {},
+    },
+  },
+];
+
 export default function Dashboard() {
   const { socket, isConnected, dashboardData } = useSocket();
   console.log("Dashboard Data:", dashboardData);
   const { data: session } = useSession();
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  // Extract data from dashboardData - FIX THE DATA MAPPING
-  const departmentData: any = dashboardData || []; // Use dashboardData directly as it's already an array
+  // Use fallback data if no dashboard data
+  const hasData =
+    dashboardData && Array.isArray(dashboardData) && dashboardData.length > 0;
+  const departmentData: any[] = hasData
+    ? dashboardData
+    : fallbackDepartmentData;
 
-  // Calculate overall metrics from the actual data structure
+  // Calculate overall metrics from the data structure
   const totalEmployees = departmentData.reduce(
     (sum: number, dept: any) => sum + (dept.employee_count || 0),
     0
@@ -99,8 +138,7 @@ export default function Dashboard() {
       ? Math.round(
           departmentData.reduce(
             (sum: number, dept: any) =>
-              sum + (dept.metrics?.avg_scores?.genius_factor_score || 0),
-            0
+              sum + (dept.metrics?.avg_scores?.genius_factor_score || 0)
           ) / departmentData.length
         )
       : 0;
@@ -115,7 +153,7 @@ export default function Dashboard() {
         )
       : 0;
 
-  // Prepare data for charts using your existing structure
+  // Prepare data for charts
   const completionData = departmentData.map((dept: any) => ({
     name: dept.name,
     completion: dept.completion,
@@ -128,7 +166,7 @@ export default function Dashboard() {
   for (const dept of departmentData) {
     const distribution: any = dept.metrics?.genius_factor_distribution || {};
     for (const [range, count] of Object.entries(distribution)) {
-      if (count > 0) {
+      if (count > 0 || !hasData) {
         geniusFactorData.push({
           department: dept.name,
           range,
@@ -144,7 +182,7 @@ export default function Dashboard() {
   for (const dept of departmentData) {
     const distribution = dept.metrics?.retention_risk_distribution || {};
     for (const [range, count] of Object.entries(distribution)) {
-      if (count > 0) {
+      if (count > 0 || !hasData) {
         retentionRiskData.push({
           department: dept.name,
           range,
@@ -167,16 +205,21 @@ export default function Dashboard() {
     }
   }
 
+  // If no mobility data, create a default entry
+  if (allMonths.size === 0 && !hasData) {
+    allMonths.add("Jan");
+    allMonths.add("Feb");
+    allMonths.add("Mar");
+  }
+
   // Create data structure for each month with department counts
   for (const month of Array.from(allMonths).sort()) {
     const monthData: any = { month };
 
     for (const dept of departmentData) {
       const count = dept.metrics?.mobility_trend?.[month] || 0;
-      if (count > 0) {
-        monthData[dept.name] = count;
-        monthData[`${dept.name}_department`] = dept.name; // Store department name for tooltip
-      }
+      monthData[dept.name] = count;
+      monthData[`${dept.name}_department`] = dept.name; // Store department name for tooltip
     }
 
     mobilityTrendData.push(monthData);
@@ -217,9 +260,19 @@ export default function Dashboard() {
               </p>
             )}
           </div>
-          <Badge variant={isConnected ? "default" : "secondary"}>
-            {isConnected ? "Connected" : "Disconnected"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={isConnected ? "default" : "secondary"}>
+              {isConnected ? "Connected" : "Disconnected"}
+            </Badge>
+            {!hasData && (
+              <Badge
+                variant="outline"
+                className="bg-yellow-100 text-yellow-800"
+              >
+                Using Demo Data
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -242,7 +295,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Total Departments"
-            value={departmentData.length}
+            value={hasData ? departmentData.length : 0}
             icon={Target}
           />
         </div>

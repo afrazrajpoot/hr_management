@@ -37,41 +37,136 @@ import {
   Line,
   ResponsiveContainer,
 } from "recharts";
-import { mockEmployees, mockCompanies } from "@/lib/mock-data";
+import { useState, useMemo } from "react";
+import { useSocket } from "@/context/SocketContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function RiskAnalysis() {
-  const highRiskEmployees = mockEmployees.filter((e) => e.riskLevel === "high");
-  const mediumRiskEmployees = mockEmployees.filter(
-    (e) => e.riskLevel === "medium"
+  const {
+    dashboardData,
+
+    isAdmin,
+  } = useSocket();
+
+  const [selectedHR, setSelectedHR] = useState<string | null>(null);
+
+  // Extract data from dashboardData
+  const overallMetrics = dashboardData?.overallMetrics || {};
+  const riskAnalysisByHr = dashboardData?.chartData?.risk_analysis_by_hr || {};
+  const hrDepartmentChartData =
+    dashboardData?.chartData?.hr_department_chart_data || {};
+  const employeeRiskDetails = dashboardData?.employeeRiskDetails || [];
+  const departmentMetrics = dashboardData?.departmentMetrics || {};
+  const hrMetrics = dashboardData?.hrMetrics || {};
+
+  // Risk distribution based on selected HR
+  const riskDistribution =
+    selectedHR && riskAnalysisByHr?.[selectedHR]
+      ? riskAnalysisByHr[selectedHR].risk_distribution || {
+          "Low (0-30)": 0,
+          "Medium (31-60)": 0,
+          "High (61-100)": 0,
+        }
+      : overallMetrics.retention_risk_distribution || {
+          "Low (0-30)": 0,
+          "Medium (31-60)": 0,
+          "High (61-100)": 0,
+        };
+
+  // Calculate risk counts
+  const highRiskEmployeesCount = riskDistribution["High (61-100)"] || 0;
+  const mediumRiskEmployeesCount = riskDistribution["Medium (31-60)"] || 0;
+  const lowRiskEmployeesCount = riskDistribution["Low (0-30)"] || 0;
+
+  // Filter employees by risk level
+  const highRiskEmployees = employeeRiskDetails.filter(
+    (e: any) => e.risk_category === "High"
   );
-  const lowRiskEmployees = mockEmployees.filter((e) => e.riskLevel === "low");
+  const mediumRiskEmployees = employeeRiskDetails.filter(
+    (e: any) => e.risk_category === "Medium"
+  );
+  const lowRiskEmployees = employeeRiskDetails.filter(
+    (e: any) => e.risk_category === "Low"
+  );
 
+  // Prepare data for Risk Distribution PieChart
   const riskDistributionData = [
-    { name: "Low Risk", value: lowRiskEmployees.length, color: "#10b981" },
-    {
-      name: "Medium Risk",
-      value: mediumRiskEmployees.length,
-      color: "#f59e0b",
-    },
-    { name: "High Risk", value: highRiskEmployees.length, color: "#ef4444" },
+    { name: "Low Risk", value: lowRiskEmployeesCount, color: "#10b981" },
+    { name: "Medium Risk", value: mediumRiskEmployeesCount, color: "#f59e0b" },
+    { name: "High Risk", value: highRiskEmployeesCount, color: "#ef4444" },
   ];
 
-  const companyRiskData = mockCompanies.map((company) => ({
-    name: company.name,
-    riskPercentage: company.retentionRisk,
-    employeeCount: company.employeeCount,
-  }));
+  // Prepare data for Risk by Department BarChart
+  const departmentRiskData = useMemo(() => {
+    if (selectedHR && hrDepartmentChartData?.[selectedHR]?.departments) {
+      return Object.entries(hrDepartmentChartData[selectedHR].departments).map(
+        ([dept, metrics]: [string, any]) => ({
+          name: dept,
+          riskPercentage: metrics.avg_retention_risk || 0,
+          employeeCount: metrics.employee_count || 0,
+        })
+      );
+    } else if (!selectedHR && departmentMetrics) {
+      return Object.entries(departmentMetrics).map(
+        ([dept, metrics]: [string, any]) => ({
+          name: dept,
+          riskPercentage: metrics.avg_retention_risk || 0,
+          employeeCount: metrics.employee_count || 0,
+        })
+      );
+    }
+    return [];
+  }, [selectedHR, hrDepartmentChartData, departmentMetrics]);
 
-  const riskTrendData = [
-    { month: "Jan", high: 8, medium: 15, low: 77 },
-    { month: "Feb", high: 12, medium: 18, low: 70 },
-    { month: "Mar", high: 10, medium: 22, low: 68 },
-    { month: "Apr", high: 15, medium: 20, low: 65 },
-    { month: "May", high: 18, medium: 25, low: 57 },
-  ];
+  // Prepare data for Assessment Trends LineChart
+  const trendData = useMemo(() => {
+    const data: any[] = [];
+    Object.values(riskAnalysisByHr).forEach((hrData: any) => {
+      if (hrData.monthly_trend) {
+        Object.entries(hrData.monthly_trend).forEach(
+          ([month, count]: [string, any]) => {
+            const existingMonth = data.find((item) => item.month === month);
+            if (existingMonth) {
+              existingMonth.reports += count;
+            } else {
+              data.push({ month, reports: count });
+            }
+          }
+        );
+      }
+    });
+    return data.sort((a, b) => {
+      const [aYear, aMonth] = a.month.split("-").map(Number);
+      const [bYear, bMonth] = b.month.split("-").map(Number);
+      return aYear - bYear || aMonth - bMonth;
+    });
+  }, [riskAnalysisByHr]);
+
+  // HR list for selector
+  const hrList = Object.keys(riskAnalysisByHr || {});
+
+  // Auto-select first HR after data loads
+  useMemo(() => {
+    if (
+      dashboardData &&
+      riskAnalysisByHr &&
+      Object.keys(riskAnalysisByHr).length > 0
+    ) {
+      const firstHrId = Object.keys(riskAnalysisByHr)[0];
+      if (selectedHR === null) {
+        setSelectedHR(firstHrId);
+      }
+    }
+  }, [dashboardData, riskAnalysisByHr, selectedHR]);
 
   const getRiskBadgeVariant = (level: string) => {
-    switch (level) {
+    switch (level.toLowerCase()) {
       case "low":
         return "default" as const;
       case "medium":
@@ -83,43 +178,65 @@ export default function RiskAnalysis() {
     }
   };
 
-  const getCompanyName = (companyId: string) => {
-    return (
-      mockCompanies.find((c) => c.id === companyId)?.name || "Unknown Company"
-    );
-  };
-
   return (
     <HRLayout
       title="Retention Risk Analysis"
       subtitle="Identify and manage employee retention risks across all companies"
     >
       <div className="space-y-6">
+        {isAdmin && (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Building2 className="h-5 w-5 text-blue-600 mr-2" />
+                <span className="text-blue-800 font-medium">
+                  Admin View: Risk Analysis
+                </span>
+              </div>
+              <Select
+                value={selectedHR || "all"}
+                onValueChange={(value) =>
+                  setSelectedHR(value === "all" ? null : value)
+                }
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select HR" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All HRs</SelectItem>
+                  {hrList.map((hrId) => (
+                    <SelectItem key={hrId} value={hrId}>
+                      {hrId}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-4 md:grid-cols-4">
           <StatCard
             title="High Risk Employees"
-            value={highRiskEmployees.length}
+            value={highRiskEmployeesCount}
             description="Require immediate attention"
             icon={<AlertTriangle className="h-4 w-4" />}
           />
           <StatCard
             title="Medium Risk Employees"
-            value={mediumRiskEmployees.length}
+            value={mediumRiskEmployeesCount}
             description="Monitor closely"
             icon={<TrendingDown className="h-4 w-4" />}
           />
           <StatCard
             title="Low Risk Employees"
-            value={lowRiskEmployees.length}
+            value={lowRiskEmployeesCount}
             description="Stable retention"
             icon={<Shield className="h-4 w-4" />}
           />
           <StatCard
             title="Average Risk"
-            value={`${Math.round(
-              mockCompanies.reduce((sum, c) => sum + c.retentionRisk, 0) /
-                mockCompanies.length
-            )}%`}
+            value={`${overallMetrics.avg_retention_risk || 0}%`}
             description="Across all companies"
             icon={<Users className="h-4 w-4" />}
           />
@@ -150,7 +267,7 @@ export default function RiskAnalysis() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value) => ["" + value, "Employees"]}
+                    formatter={(value) => [`${value} employees`, ""]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -167,7 +284,7 @@ export default function RiskAnalysis() {
                       style={{ backgroundColor: item.color }}
                     />
                     <span className="text-sm text-muted-foreground">
-                      {item.name}
+                      {item.name} ({item.value})
                     </span>
                   </div>
                 ))}
@@ -179,12 +296,12 @@ export default function RiskAnalysis() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-hr-primary" />
-                Risk Trends Over Time
+                Assessment Trends Over Time
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={riskTrendData}>
+                <LineChart data={trendData}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
@@ -195,6 +312,7 @@ export default function RiskAnalysis() {
                   />
                   <YAxis stroke="hsl(var(--muted-foreground))" />
                   <Tooltip
+                    formatter={(value) => [`${value} reports`, ""]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -203,24 +321,10 @@ export default function RiskAnalysis() {
                   />
                   <Line
                     type="monotone"
-                    dataKey="high"
-                    stroke="#ef4444"
+                    dataKey="reports"
+                    stroke="#3b82f6"
                     strokeWidth={3}
-                    name="High Risk"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="medium"
-                    stroke="#f59e0b"
-                    strokeWidth={3}
-                    name="Medium Risk"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="low"
-                    stroke="#10b981"
-                    strokeWidth={3}
-                    name="Low Risk"
+                    name="Reports"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -232,40 +336,48 @@ export default function RiskAnalysis() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-hr-secondary" />
-              Risk by Company
+              Risk by Department
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={companyRiskData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                />
-                <XAxis
-                  dataKey="name"
-                  stroke="hsl(var(--muted-foreground))"
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip
-                  formatter={(value) => ["" + value + "%", "Risk Level"]}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Bar
-                  dataKey="riskPercentage"
-                  fill="#ef4444" // 🔴 red-500 from Tailwind
-                  stroke="#b91c1c" // 🔴 darker red for border (optional)
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {departmentRiskData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={departmentRiskData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                  />
+                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    formatter={(value) => [`${value}%`, "Risk Level"]}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <Bar
+                    dataKey="riskPercentage"
+                    fill="#ef4444"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-64">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No department risk data available for{" "}
+                  {selectedHR || "All HRs"}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -281,41 +393,55 @@ export default function RiskAnalysis() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Employee</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Position</TableHead>
                   <TableHead>Department</TableHead>
+                  <TableHead>HR Manager</TableHead>
+                  <TableHead>Risk Score</TableHead>
                   <TableHead>Risk Level</TableHead>
-                  <TableHead>Primary Risk Factors</TableHead>
+                  <TableHead>Risk Factors</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {highRiskEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
+                {highRiskEmployees.slice(0, 10).map((employee: any) => (
+                  <TableRow key={employee.employee_id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{employee.name}</div>
+                        <div className="font-medium">
+                          {employee.employee_id}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {employee.email}
+                          Created: {employee.created_at}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{getCompanyName(employee.companyId)}</TableCell>
-                    <TableCell>{employee.position}</TableCell>
                     <TableCell>{employee.department}</TableCell>
+                    <TableCell>{employee.hr_id}</TableCell>
+                    <TableCell>{employee.risk_score}%</TableCell>
                     <TableCell>
-                      <Badge variant={getRiskBadgeVariant(employee.riskLevel)}>
-                        {employee.riskLevel} risk
+                      <Badge
+                        variant={getRiskBadgeVariant(employee.risk_category)}
+                      >
+                        {employee.risk_category} risk
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        <Badge variant="outline" className="text-xs">
-                          Low Assessment
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          No Promotion
-                        </Badge>
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {employee.risk_factors
+                          ?.slice(0, 3)
+                          .map((factor: string, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {factor}
+                            </Badge>
+                          ))}
+                        {employee.risk_factors?.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{employee.risk_factors.length - 3} more
+                          </Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -339,7 +465,7 @@ export default function RiskAnalysis() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-hr-accent" />
-              Key Risk Factors
+              Common Risk Factors
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -349,11 +475,6 @@ export default function RiskAnalysis() {
                   factor: "Low Assessment Score",
                   weight: "High",
                   description: "Employees with scores below 70",
-                },
-                {
-                  factor: "Long Tenure Without Promotion",
-                  weight: "Medium",
-                  description: "3+ years in same position",
                 },
                 {
                   factor: "Skill-Role Mismatch",
@@ -369,6 +490,11 @@ export default function RiskAnalysis() {
                   factor: "Below Market Compensation",
                   weight: "High",
                   description: "Salary below industry average",
+                },
+                {
+                  factor: "Low Engagement",
+                  weight: "Medium",
+                  description: "Poor participation in company initiatives",
                 },
               ].map((factor, index) => (
                 <div

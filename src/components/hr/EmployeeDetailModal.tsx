@@ -11,13 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   X,
   Mail,
   DollarSign,
@@ -27,8 +20,15 @@ import {
   BookOpen,
   GraduationCap,
   Clock,
+  Edit3,
+  Save,
+  XCircle,
+  Award,
+  MapPin,
+  Phone,
+  Calendar,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUpdateEmployeeMutation } from "@/redux/hr-api";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
@@ -43,7 +43,7 @@ interface FormData {
   department: string;
   position: string;
   salary: string;
-  transfer: string; // Changed from boolean to string ("ingoing", "outgoing", or "")
+  transfer: boolean;
   promotion: boolean;
 }
 
@@ -54,7 +54,7 @@ export default function EmployeeDetailModal({
 }: EmployeeDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
-
+  console.log("Employee Data:", employee);
   const {
     control,
     handleSubmit,
@@ -62,18 +62,20 @@ export default function EmployeeDetailModal({
     reset,
     setError,
     clearErrors,
-    watch,
-  } = useForm<FormData>({
-    defaultValues: {
-      department: employee?.department || "",
-      position: employee?.position || "",
-      salary: employee?.salary || "",
-      transfer: "", // Empty string for no selection
-      promotion: false,
-    },
-  });
+  } = useForm<FormData>();
 
-  const transferValue = watch("transfer"); // Watch transfer field for validation
+  // Reset form with employee data when modal opens or employee changes
+  useEffect(() => {
+    if (employee) {
+      reset({
+        department: employee.department || "",
+        position: employee.position || "",
+        salary: employee.salary || "",
+        transfer: employee.transfer || false,
+        promotion: employee.promotion || false,
+      });
+    }
+  }, [employee, reset, isOpen]);
 
   if (!employee) return null;
 
@@ -87,333 +89,392 @@ export default function EmployeeDetailModal({
       return;
     }
 
-    // Validate transfer type if transfer is selected
-    if (data.transfer && !["ingoing", "outgoing"].includes(data.transfer)) {
-      setError("transfer", {
-        type: "manual",
-        message: "Please select a valid transfer type (ingoing or outgoing)",
-      });
-      return;
-    }
-
     try {
       await updateEmployee({
         department: data.department,
         userId: employee.id,
         position: data.position,
         salary: data.salary,
-        transfer: data.transfer || null, // Send null if no transfer type is selected
+        transfer: data.transfer,
         promotion: data.promotion,
       }).unwrap();
       toast.success("Employee data updated successfully");
       setIsEditing(false);
-      onClose(); // Close modal after successful update
+      onClose();
     } catch (error: any) {
       toast.error(error?.data?.error || "Failed to update employee data");
     }
   };
 
   const handleInputChange = () => {
-    // Clear the transfer/promotion error when either field is changed
     clearErrors(["promotion", "transfer"]);
   };
 
   const toggleEdit = () => {
-    setIsEditing(!isEditing);
-    // Reset form data to original values when cancelling edit
     if (isEditing) {
+      // Reset form to original employee data when canceling edit
       reset({
-        department: employee.department,
-        position: employee.position,
-        salary: employee.salary,
-        transfer: "",
-        promotion: false,
+        department: employee.department || "",
+        position: employee.position || "",
+        salary: employee.salary || "",
+        transfer: employee.transfer || false,
+        promotion: employee.promotion || false,
       });
     }
+    setIsEditing(!isEditing);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Employee Details</span>
-            <Button onClick={toggleEdit} disabled={isLoading}>
-              {isEditing ? "Cancel" : "Update"}
-            </Button>
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
+        <DialogHeader className="relative pb-6 border-b">
+          <div className="absolute inset-0 rounded-t-lg"></div>
+          <DialogTitle className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full flex items-center justify-center">
+                <User className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Employee Profile</h2>
+                <p className="text-sm">
+                  {employee.firstName}{" "}
+                  {employee.lastName !== "Not provide" ? employee.lastName : ""}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={toggleEdit}
+                disabled={isLoading}
+                variant={isEditing ? "outline" : "default"}
+                className="transition-all duration-200"
+              >
+                {isEditing ? (
+                  <>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit
+                  </>
+                )}
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-6">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Basic Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Full Name</p>
-                  <p className="font-medium">
-                    {employee.firstName}{" "}
-                    {employee.lastName !== "Not provide"
-                      ? employee.lastName
-                      : ""}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium flex items-center gap-1">
-                    <Mail className="h-4 w-4" />
-                    {employee.email}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Position</p>
-                  {isEditing ? (
-                    <Controller
-                      name="position"
-                      control={control}
-                      rules={{ required: "Position is required" }}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          className="mt-1"
-                          disabled={isLoading}
-                        />
-                      )}
-                    />
-                  ) : (
-                    <p className="font-medium flex items-center gap-1">
-                      <Briefcase className="h-4 w-4" />
-                      {employee.position}
-                    </p>
-                  )}
-                  {errors.position && (
-                    <p className="text-sm text-red-500">
-                      {errors.position.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Department</p>
-                  {isEditing ? (
-                    <Controller
-                      name="department"
-                      control={control}
-                      rules={{ required: "Department is required" }}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          className="mt-1"
-                          disabled={isLoading}
-                        />
-                      )}
-                    />
-                  ) : (
-                    <p className="font-medium flex items-center gap-1">
-                      <Building2 className="h-4 w-4" />
-                      {employee.department}
-                    </p>
-                  )}
-                  {errors.department && (
-                    <p className="text-sm text-red-500">
-                      {errors.department.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Salary</p>
-                  {isEditing ? (
-                    <Controller
-                      name="salary"
-                      control={control}
-                      rules={{ required: "Salary is required" }}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          type="number"
-                          className="mt-1"
-                          disabled={isLoading}
-                        />
-                      )}
-                    />
-                  ) : (
-                    <p className="font-medium flex items-center gap-1">
-                      {employee.salary}
-                      <DollarSign className="h-4 w-4" />
-                    </p>
-                  )}
-                  {errors.salary && (
-                    <p className="text-sm text-red-500">
-                      {errors.salary.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Employee ID</p>
-                  <p className="font-medium">
-                    {employee.employee?.id || "N/A"}
-                  </p>
-                </div>
-                {isEditing && (
-                  <div className="col-span-2 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Controller
-                        name="transfer"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              handleInputChange();
-                            }}
-                            value={field.value}
-                            disabled={isLoading}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select transfer type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ingoing">Ingoing</SelectItem>
-                              <SelectItem value="outgoing">Outgoing</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                      <label className="text-sm">Transfer Type</label>
+        <div className="overflow-y-auto max-h-[calc(95vh-8rem)] pr-2">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="space-y-6 p-1">
+              {/* Basic Information */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="border-b">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                      <User className="h-4 w-4" />
                     </div>
-                    {errors.transfer && (
-                      <p className="text-sm text-red-500">
-                        {errors.transfer.message}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Controller
-                        name="promotion"
-                        control={control}
-                        render={({ field }) => (
-                          <Checkbox
-                            id="promotion"
-                            checked={field.value}
-                            onCheckedChange={(checked) => {
-                              field.onChange(checked);
-                              handleInputChange();
-                            }}
-                            disabled={isLoading}
-                          />
-                        )}
-                      />
-                      <label htmlFor="promotion" className="text-sm">
-                        Promotion
-                      </label>
-                    </div>
-                    {errors.promotion && (
-                      <p className="text-sm text-red-500">
-                        {errors.promotion.message}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {isEditing && (
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Updating..." : "Submit Changes"}
-                </Button>
-              </div>
-            )}
-
-            {/* Skills */}
-            {employee.employee?.skills?.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Skills
+                    <span>Basic Information</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {employee.employee.skills.map(
-                      (skill: string, index: number) => (
-                        <Badge key={index} variant="secondary">
-                          {skill}
-                        </Badge>
-                      )
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="group">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Mail className="h-4 w-4" />
+                        <p className="text-sm font-medium">Email</p>
+                      </div>
+                      <p className="font-semibold px-3 py-2 rounded-lg">
+                        {employee.email}
+                      </p>
+                    </div>
 
-            {/* Education */}
-            {employee.employee?.education?.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <GraduationCap className="h-5 w-5" />
-                    Education
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {employee.employee.education.map(
-                    (edu: any, index: number) => (
-                      <div
-                        key={index}
-                        className="border-b pb-4 last:border-0 last:pb-0"
-                      >
-                        <p className="font-medium">{edu.degree}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {edu.institution}
+                    <div className="group">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Briefcase className="h-4 w-4" />
+                        <p className="text-sm font-medium">Position</p>
+                      </div>
+                      {isEditing ? (
+                        <Controller
+                          name="position"
+                          control={control}
+                          rules={{ required: "Position is required" }}
+                          render={({ field }) => (
+                            <Input {...field} disabled={isLoading} />
+                          )}
+                        />
+                      ) : (
+                        <p className="font-semibold px-3 py-2 rounded-lg">
+                          {employee.position}
                         </p>
-                        <div className="flex justify-between mt-1 text-sm">
-                          <span>Graduated: {edu.year}</span>
-                          <span>GPA: {edu.gpa}</span>
+                      )}
+                      {errors.position && (
+                        <p className="text-sm mt-1 flex items-center gap-1">
+                          <XCircle className="h-3 w-3" />
+                          {errors.position.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Building2 className="h-4 w-4" />
+                        <p className="text-sm font-medium">Department</p>
+                      </div>
+                      {isEditing ? (
+                        <Controller
+                          name="department"
+                          control={control}
+                          rules={{ required: "Department is required" }}
+                          render={({ field }) => (
+                            <Input {...field} disabled={isLoading} />
+                          )}
+                        />
+                      ) : (
+                        <p className="font-semibold px-3 py-2 rounded-lg">
+                          {employee.department}
+                        </p>
+                      )}
+                      {errors.department && (
+                        <p className="text-sm mt-1 flex items-center gap-1">
+                          <XCircle className="h-3 w-3" />
+                          {errors.department.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="h-4 w-4" />
+                        <p className="text-sm font-medium">Salary</p>
+                      </div>
+                      {isEditing ? (
+                        <Controller
+                          name="salary"
+                          control={control}
+                          rules={{ required: "Salary is required" }}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              type="number"
+                              disabled={isLoading}
+                            />
+                          )}
+                        />
+                      ) : (
+                        <p className="font-semibold px-3 py-2 rounded-lg">
+                          ${employee.salary}
+                        </p>
+                      )}
+                      {errors.salary && (
+                        <p className="text-sm mt-1 flex items-center gap-1">
+                          <XCircle className="h-3 w-3" />
+                          {errors.salary.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Award className="h-4 w-4" />
+                        <p className="text-sm font-medium">Employee ID</p>
+                      </div>
+                      <p className="font-semibold px-3 py-2 rounded-lg">
+                        {employee.employee?.id || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isEditing && (
+                    <div className="mt-6 p-4 rounded-xl border">
+                      <h4 className="font-semibold mb-4 flex items-center gap-2">
+                        <Edit3 className="h-4 w-4" />
+                        Action Required
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Controller
+                            name="transfer"
+                            control={control}
+                            render={({ field }) => (
+                              <Checkbox
+                                id="transfer"
+                                checked={field.value}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked);
+                                  handleInputChange();
+                                }}
+                                disabled={isLoading}
+                              />
+                            )}
+                          />
+                          <label
+                            htmlFor="transfer"
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            Transfer Request
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Controller
+                            name="promotion"
+                            control={control}
+                            render={({ field }) => (
+                              <Checkbox
+                                id="promotion"
+                                checked={field.value}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked);
+                                  handleInputChange();
+                                }}
+                                disabled={isLoading}
+                              />
+                            )}
+                          />
+                          <label
+                            htmlFor="promotion"
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            Promotion Request
+                          </label>
                         </div>
                       </div>
-                    )
+                      {errors.promotion && (
+                        <p className="text-sm mt-3 flex items-center gap-1 p-2 rounded-lg">
+                          <XCircle className="h-4 w-4" />
+                          {errors.promotion.message}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </CardContent>
               </Card>
-            )}
 
-            {/* Experience */}
-            {employee.employee?.experience?.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Work Experience
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {employee.employee.experience.map(
-                    (exp: any, index: number) => (
-                      <div
-                        key={index}
-                        className="border-b pb-4 last:border-0 last:pb-0"
-                      >
-                        <p className="font-medium">
-                          {exp.position} at {exp.company}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {exp.duration}
-                        </p>
-                        <p className="text-sm mt-2">{exp.description}</p>
+              {isEditing && (
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-8 py-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 mr-2"></div>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Skills */}
+              {employee.employee?.skills?.length > 0 && (
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="border-b">
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                        <BookOpen className="h-4 w-4" />
                       </div>
-                    )
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </form>
+                      <span>Skills & Expertise</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-wrap gap-3">
+                      {employee.employee.skills.map(
+                        (skill: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="px-3 py-1 text-sm font-medium"
+                          >
+                            {skill}
+                          </Badge>
+                        )
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Education */}
+              {employee.employee?.education?.length > 0 && (
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="border-b">
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                        <GraduationCap className="h-4 w-4" />
+                      </div>
+                      <span>Education</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      {employee.employee.education.map(
+                        (edu: any, index: number) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-xl border hover:shadow-md transition-shadow duration-200"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-semibold">{edu.degree}</h4>
+                              <Badge variant="outline">GPA: {edu.gpa}</Badge>
+                            </div>
+                            <p className="font-medium">{edu.institution}</p>
+                            <div className="flex items-center gap-2 mt-2 text-sm">
+                              <Calendar className="h-3 w-3" />
+                              <span>Graduated: {edu.year}</span>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Experience */}
+              {employee.employee?.experience?.length > 0 && (
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="border-b">
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <span>Work Experience</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      {employee.employee.experience.map(
+                        (exp: any, index: number) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-xl border hover:shadow-md transition-shadow duration-200"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-semibold">{exp.position}</h4>
+                              <Badge variant="outline">{exp.duration}</Badge>
+                            </div>
+                            <p className="font-medium mb-2">{exp.company}</p>
+                            <p className="text-sm leading-relaxed">
+                              {exp.description}
+                            </p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

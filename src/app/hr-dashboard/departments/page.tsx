@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useSocket } from "@/context/SocketContext";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,547 +8,460 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  ResponsiveContainer,
-} from "recharts";
-import {
-  Building2,
   Users,
   TrendingUp,
-  AlertTriangle,
-  Award,
-  Eye,
+  TrendingDown,
+  Building2,
+  Mail,
+  DollarSign,
 } from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  TooltipProps,
+} from "recharts";
 import HRLayout from "@/components/hr/HRLayout";
-import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 
-const MetricCard = ({ title, value, icon: Icon, color = "primary" }: any) => (
-  <Card className="hr-card">
-    <CardContent className="p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className={`text-2xl font-bold text-${color}`}>{value}</p>
-        </div>
-        <Icon className={`h-8 w-8 text-${color}`} />
-      </div>
-    </CardContent>
-  </Card>
-);
+// Define TypeScript interfaces
+interface Employee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  position: string;
+  salary: string;
+  employeeId: string;
+  department?: string; // Added department to Employee interface
+}
 
-export default function Departments() {
-  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
-  const [selectedDepartment, setSelectedDepartment] = useState("All");
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+interface Department {
+  department: string;
+  createdAt: string;
+  ingoing: number;
+  outgoing: number;
+  employeeCount: number;
+  employees: Employee[];
+}
+
+interface DepartmentCardData {
+  totalDepartments: number;
+  totalEmployees: number;
+  totalIngoing: number;
+  totalOutgoing: number;
+}
+
+interface CustomTooltipProps extends TooltipProps<number, string> {}
+
+const DepartmentDashboard = () => {
+  const { departmentCardData, departmentData } = useSocket();
+
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Process API data to extract departments
-  const departments = Array.from(
-    new Set(data?.employees?.map((emp: any) => emp.department).filter(Boolean))
-  ).concat("All"); // Add "All" option for department selector
-
-  const getAllEmployeesData = () => {
-    const employeesWithReports =
-      data?.employees?.filter((emp: any) => emp.reports?.length > 0) || [];
-
-    const employeeCount = data?.employees?.length || 0;
-    const completedAssessments = employeesWithReports.length;
-    const completion = employeeCount
-      ? Math.round((completedAssessments / employeeCount) * 100)
-      : 0;
-
-    // Aggregate genius factor scores across all reports
-    const geniusFactorScores = employeesWithReports
-      .flatMap((emp: any) =>
-        emp.reports.map((report: any) =>
-          parseFloat(
-            report?.geniusFactorProfileJson?.primary_genius_factor?.match(
-              /(\d+)%/
-            )?.[1] || "0"
-          )
-        )
-      )
-      .filter((score: number) => score > 0);
-    const geniusFactor = geniusFactorScores.length
-      ? Math.round(
-          geniusFactorScores.reduce(
-            (sum: number, score: number) => sum + score,
-            0
-          ) / geniusFactorScores.length
-        )
-      : 0;
-
-    // Aggregate alignment scores across all reports
-    const alignmentScores = employeesWithReports
-      .flatMap((emp: any) =>
-        emp.reports.map((report: any) =>
-          parseFloat(
-            report?.currentRoleAlignmentAnalysisJson?.alignment_score?.split(
-              "/"
-            )[0] || "0"
-          )
-        )
-      )
-      .filter((score: number) => score > 0);
-    const skillsAlignment = alignmentScores.length
-      ? Math.round(
-          alignmentScores.reduce(
-            (sum: number, score: number) => sum + score,
-            0
-          ) / alignmentScores.length
-        )
-      : 0;
-
-    // Determine retention risk (highest risk level across all reports)
-    const retentionRisks = employeesWithReports.flatMap((emp: any) =>
-      emp.reports.map(
-        (report: any) =>
-          report?.currentRoleAlignmentAnalysisJson?.retention_risk_level
-      )
-    );
-    const retentionRisk = retentionRisks.includes("High")
-      ? "High"
-      : retentionRisks.includes("Moderate")
-      ? "Moderate"
-      : "Low";
-
-    // Radar data for all employees with reports
-    const radarData = [
-      { subject: "Empathy", score: geniusFactor, fullMark: 100 },
-      { subject: "Leadership", score: skillsAlignment, fullMark: 100 },
-      {
-        subject: "Communication",
-        score: Math.min(geniusFactor + 10, 100),
-        fullMark: 100,
-      },
-      {
-        subject: "Purpose-Driven",
-        score: Math.min(geniusFactor + 5, 100),
-        fullMark: 100,
-      },
-    ];
-
-    return {
-      employeeCount,
-      completion,
-      geniusFactor,
-      productivity: Math.round((geniusFactor + skillsAlignment) / 2),
-      engagement: Math.round((geniusFactor + skillsAlignment) / 2 + 5),
-      skillsAlignment,
-      retentionRisk,
-      mobilityScore: Math.round(skillsAlignment * 0.9),
-      radarData,
-      employees: data?.employees?.map((emp: any) => ({
-        id: emp.id,
-        firstName: emp.firstName,
-        lastName: emp.lastName,
-        email: emp.email,
-        salary: emp.salary,
-        employee: emp.employee,
-        reports: emp.reports,
-        name: `${emp.firstName} ${
-          emp.lastName === "Not provide" ? "" : emp.lastName
-        }`,
-        position: emp.employee?.position || emp.position || "N/A",
-        department: emp.employee?.department || emp.department || "N/A",
-        salaryFormatted: emp.salary ? `$${emp.salary.toLocaleString()}` : "N/A",
-        status: emp.reports?.length ? "Completed" : "Pending",
-        risk:
-          emp.reports?.[0]?.currentRoleAlignmentAnalysisJson
-            ?.retention_risk_level || "Unknown",
-      })),
-    };
+  // Mock data for demonstration - replace with your actual data
+  const mockDepartmentCardData: DepartmentCardData = {
+    totalDepartments: 5,
+    totalEmployees: 9,
+    totalIngoing: 5,
+    totalOutgoing: 5,
   };
 
-  const getDepartmentData = (dept: string) => {
-    const deptEmployees =
-      data?.employees?.filter((emp: any) => emp.department === dept) || [];
+  const mockDepartmentData: Department[] = [
+    {
+      department: "Analytics",
+      createdAt: "2025-09-05",
+      ingoing: 2,
+      outgoing: 1,
+      employeeCount: 2,
+      employees: [
+        {
+          id: "3468090d-9d5b-457a-b943-2a38be99aac2",
+          firstName: "Ayesha",
+          lastName: "Ali",
+          email: "ayesha.ali@example.com",
+          position: "MLOps",
+          salary: "40000",
+          employeeId: "N/A",
+        },
+        {
+          id: "839891c2-2948-4f45-a84e-6dffee4f2427",
+          firstName: "Omar",
+          lastName: "Hussain",
+          email: "omar.hussain@example.com",
+          position: "Data Analyst",
+          salary: "45000",
+          employeeId: "DA001",
+        },
+      ],
+    },
+    {
+      department: "Design",
+      createdAt: "2025-09-05",
+      ingoing: 2,
+      outgoing: 1,
+      employeeCount: 1,
+      employees: [
+        {
+          id: "design-001",
+          firstName: "Sarah",
+          lastName: "Khan",
+          email: "sarah.khan@example.com",
+          position: "UI/UX Designer",
+          salary: "38000",
+          employeeId: "DG001",
+        },
+      ],
+    },
+    {
+      department: "IT",
+      createdAt: "2025-09-05",
+      ingoing: 0,
+      outgoing: 2,
+      employeeCount: 2,
+      employees: [
+        {
+          id: "it-001",
+          firstName: "Ahmed",
+          lastName: "Hassan",
+          email: "ahmed.hassan@example.com",
+          position: "Software Engineer",
+          salary: "50000",
+          employeeId: "IT001",
+        },
+        {
+          id: "it-002",
+          firstName: "Fatima",
+          lastName: "Sheikh",
+          email: "fatima.sheikh@example.com",
+          position: "DevOps Engineer",
+          salary: "52000",
+          employeeId: "IT002",
+        },
+      ],
+    },
+  ];
 
-    const employeeCount = deptEmployees.length;
-    const employeesWithReports = deptEmployees.filter(
-      (emp: any) => emp.reports?.length > 0
-    );
-    const completedAssessments = employeesWithReports.length;
-    const completion = employeeCount
-      ? Math.round((completedAssessments / employeeCount) * 100)
-      : 0;
+  const cardData: DepartmentCardData =
+    departmentCardData || mockDepartmentCardData;
+  const deptData: Department[] = departmentData || mockDepartmentData;
 
-    const geniusFactorScores = employeesWithReports
-      .flatMap((emp: any) =>
-        emp.reports.map((report: any) =>
-          parseFloat(
-            report?.geniusFactorProfileJson?.primary_genius_factor?.match(
-              /(\d+)%/
-            )?.[1] || "0"
-          )
-        )
-      )
-      .filter((score: number) => score > 0);
-    const geniusFactor = geniusFactorScores.length
-      ? Math.round(
-          geniusFactorScores.reduce(
-            (sum: number, score: number) => sum + score,
-            0
-          ) / geniusFactorScores.length
-        )
-      : 0;
+  // Prepare data for department distribution chart
+  const departmentDistributionData = deptData.map((dept) => ({
+    name: dept.department,
+    value: dept.employeeCount,
+  }));
 
-    const alignmentScores = employeesWithReports
-      .flatMap((emp: any) =>
-        emp.reports.map((report: any) =>
-          parseFloat(
-            report?.currentRoleAlignmentAnalysisJson?.alignment_score?.split(
-              "/"
-            )[0] || "0"
-          )
-        )
-      )
-      .filter((score: number) => score > 0);
-    const skillsAlignment = alignmentScores.length
-      ? Math.round(
-          alignmentScores.reduce(
-            (sum: number, score: number) => sum + score,
-            0
-          ) / alignmentScores.length
-        )
-      : 0;
+  // Prepare data for ingoing vs outgoing chart
+  const movementData = deptData.map((dept) => ({
+    name: dept.department,
+    ingoing: dept.ingoing,
+    outgoing: dept.outgoing,
+  }));
 
-    const retentionRisks = employeesWithReports.flatMap((emp: any) =>
-      emp.reports.map(
-        (report: any) =>
-          report?.currentRoleAlignmentAnalysisJson?.retention_risk_level
-      )
-    );
-    const retentionRisk = retentionRisks.includes("High")
-      ? "High"
-      : retentionRisks.includes("Moderate")
-      ? "Moderate"
-      : "Low";
+  const COLORS = ["#3b82f6", "#9333ea", "#22c55e", "#f97316", "#ef4444"];
 
-    const radarData = [
-      { subject: "Empathy", score: geniusFactor, fullMark: 100 },
-      { subject: "Leadership", score: skillsAlignment, fullMark: 100 },
-      {
-        subject: "Communication",
-        score: Math.min(geniusFactor + 10, 100),
-        fullMark: 100,
-      },
-      {
-        subject: "Purpose-Driven",
-        score: Math.min(geniusFactor + 5, 100),
-        fullMark: 100,
-      },
-    ];
-
-    return {
-      employeeCount,
-      completion,
-      geniusFactor,
-      productivity: Math.round((geniusFactor + skillsAlignment) / 2),
-      engagement: Math.round((geniusFactor + skillsAlignment) / 2 + 5),
-      skillsAlignment,
-      retentionRisk,
-      mobilityScore: Math.round(skillsAlignment * 0.9),
-      radarData,
-      employees: deptEmployees.map((emp: any) => ({
-        id: emp.id,
-        firstName: emp.firstName,
-        lastName: emp.lastName,
-        email: emp.email,
-        salary: emp.salary,
-        employee: emp.employee,
-        reports: emp.reports,
-        name: `${emp.firstName} ${
-          emp.lastName === "Not provide" ? "" : emp.lastName
-        }`,
-        position: emp.employee?.position || emp.position || "N/A",
-        department: emp.employee?.department || emp.department || "N/A",
-        salaryFormatted: emp.salary ? `$${emp.salary.toLocaleString()}` : "N/A",
-        status: emp.reports?.length ? "Completed" : "Pending",
-        risk:
-          emp.reports?.[0]?.currentRoleAlignmentAnalysisJson
-            ?.retention_risk_level || "Unknown",
-      })),
-    };
-  };
-
-  const deptData: any =
-    selectedDepartment === "All"
-      ? getAllEmployeesData()
-      : getDepartmentData(selectedDepartment);
-
-  const getRiskColor = (risk: any) => {
-    switch (risk) {
-      case "Low":
-        return "bg-success text-success-foreground";
-      case "Moderate":
-        return "bg-warning text-warning-foreground";
-      case "High":
-        return "bg-destructive text-destructive-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const handleViewDetails = (employee: any) => {
-    setSelectedEmployee(employee);
+  const handleEmployeeClick = (employee: Employee, department: string) => {
+    setSelectedEmployee({ ...employee, department }); // Include department in selected employee
     setIsModalOpen(true);
   };
 
-  if (isLoading) return <HRLayout>Loading...</HRLayout>;
-  if (isError) return <HRLayout>Error loading data</HRLayout>;
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`;
+  };
+
+  const getDepartmentColor = (department: string) => {
+    const colors: Record<string, string> = {
+      Analytics: "bg-blue-500",
+      Design: "bg-purple-500",
+      IT: "bg-green-500",
+      HR: "bg-orange-500",
+      Finance: "bg-red-500",
+    };
+    return colors[department] || "bg-gray-500";
+  };
+
+  // Custom tooltip for department distribution chart
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+          <p className="text-white">{`${payload[0].name}: ${payload[0].value} employees`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
-        {/* Department Selector */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Department Analytics</h2>
-            <p className="text-muted-foreground">
-              Select a department to view detailed insights or "All" for
-              company-wide metrics
-            </p>
+      <div className="min-h-screen text-white p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex items-center space-x-2">
+            <Building2 className="h-8 w-8 text-blue-500" />
+            <h1 className="text-3xl font-bold">Department Dashboard</h1>
           </div>
-          <Select
-            value={selectedDepartment}
-            onValueChange={setSelectedDepartment}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {departments.map((dept: any) => (
-                <SelectItem key={dept.toString()} value={dept.toString()}>
-                  {dept.toString()}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        {/* Department Overview Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            title="Total Employees"
-            value={deptData.employeeCount || 0}
-            icon={Users}
-            color="primary"
-          />
-          <MetricCard
-            title="Assessment Completion"
-            value={`${deptData.completion || 0}%`}
-            icon={Award}
-            color="hr-chart-2"
-          />
-          <MetricCard
-            title="Genius Factor Score"
-            value={deptData.geniusFactor || 0}
-            icon={TrendingUp}
-            color="hr-chart-1"
-          />
-          <MetricCard
-            title="Retention Risk"
-            value={deptData.retentionRisk || "Unknown"}
-            icon={AlertTriangle}
-            color={
-              deptData.retentionRisk === "Low" ? "hr-chart-2" : "hr-chart-3"
-            }
-          />
-        </div>
-
-        {/* Performance Metrics */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Skills Radar Chart */}
-          <Card className="hr-card">
-            <CardHeader>
-              <CardTitle>Skills Profile</CardTitle>
-              <CardDescription>
-                Core competency assessment for{" "}
-                {selectedDepartment === "All"
-                  ? "all employees"
-                  : selectedDepartment}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <RadarChart data={deptData.radarData || []}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar
-                    name="Skills"
-                    dataKey="score"
-                    stroke="hsl(var(--hr-chart-1))"
-                    fill="hsl(var(--hr-chart-1))"
-                    fillOpacity={0.3}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Performance Metrics */}
-          <Card className="hr-card">
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>
-                Key performance indicators for{" "}
-                {selectedDepartment === "All"
-                  ? "all employees"
-                  : selectedDepartment}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Productivity Score
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {deptData.productivity || 0}/100
-                  </span>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-400">
+                  Total Departments
+                </CardTitle>
+                <Building2 className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">
+                  {cardData.totalDepartments}
                 </div>
-                <Progress value={deptData.productivity || 0} className="h-2" />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Engagement Score</span>
-                  <span className="text-sm text-muted-foreground">
-                    {deptData.engagement || 0}/100
-                  </span>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-400">
+                  Total Employees
+                </CardTitle>
+                <Users className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">
+                  {cardData.totalEmployees}
                 </div>
-                <Progress value={deptData.engagement || 0} className="h-2" />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Skills-Job Alignment
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {deptData.skillsAlignment || 0}/100
-                  </span>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-400">
+                  Total Ingoing
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-400">
+                  {cardData.totalIngoing}
                 </div>
-                <Progress
-                  value={deptData.skillsAlignment || 0}
-                  className="h-2"
-                />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Internal Mobility Score
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {deptData.mobilityScore || 0}/100
-                  </span>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-400">
+                  Total Outgoing
+                </CardTitle>
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-400">
+                  {cardData.totalOutgoing}
                 </div>
-                <Progress value={deptData.mobilityScore || 0} className="h-2" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Employee List */}
-        <Card className="hr-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              {selectedDepartment === "All"
-                ? "All Employees"
-                : `${selectedDepartment} Employees`}
-            </CardTitle>
-            <CardDescription>
-              Employee details and assessment status
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left p-3 font-medium">Employee</th>
-                    <th className="text-left p-3 font-medium">Position</th>
-                    <th className="text-left p-3 font-medium">Salary</th>
-                    <th className="text-left p-3 font-medium">
-                      Assessment Status
-                    </th>
-                    <th className="text-left p-3 font-medium">Risk Level</th>
-                    <th className="text-left p-3 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deptData.employees?.map((employee: any) => (
-                    <tr
-                      key={employee.id}
-                      className="border-b border-border last:border-0 hover:bg-muted/50"
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">
+                  Department Distribution
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Employee count by department
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={departmentDistributionData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {departmentDistributionData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">
+                  Ingoing vs Outgoing
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Department-wise movement comparison
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={movementData}
+                      margin={{
+                        top: 20,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
                     >
-                      <td className="p-3 font-medium">{employee.name}</td>
-                      <td className="p-3 text-muted-foreground">
-                        {employee.position}
-                      </td>
-                      <td className="p-3">{employee.salaryFormatted}</td>
-                      <td className="p-3">
-                        <Badge
-                          variant={
-                            employee.status === "Completed"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {employee.status}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Badge className={getRiskColor(employee.risk)}>
-                          {employee.risk}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleViewDetails(employee)}
-                        >
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
+                      <XAxis dataKey="name" stroke="#9ca3af" />
+                      <YAxis stroke="#9ca3af" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1f2937",
+                          borderColor: "#4b5563",
+                          color: "white",
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="ingoing" fill="#22c55e" name="Ingoing" />
+                      <Bar dataKey="outgoing" fill="#ef4444" name="Outgoing" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Employee Detail Modal */}
-      <EmployeeDetailModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        employee={selectedEmployee}
-      />
+          {/* Department Cards */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Departments</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {deptData.map((department, index) => (
+                <Card key={index} className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`w-3 h-3 rounded-full ${getDepartmentColor(
+                            department.department
+                          )}`}
+                        ></div>
+                        <CardTitle className="text-white">
+                          {department.department}
+                        </CardTitle>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="bg-gray-700 text-gray-300"
+                      >
+                        {department.employeeCount} employees
+                      </Badge>
+                    </div>
+                    <CardDescription className="text-gray-400">
+                      Created: {department.createdAt}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="flex items-center space-x-1 text-green-400">
+                        <TrendingUp className="h-4 w-4" />
+                        <span>Ingoing: {department.ingoing}</span>
+                      </span>
+                      <span className="flex items-center space-x-1 text-red-400">
+                        <TrendingDown className="h-4 w-4" />
+                        <span>Outgoing: {department.outgoing}</span>
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-300">
+                        Employees:
+                      </h4>
+                      <div className="space-y-2">
+                        {department.employees?.map((employee, empIndex) => (
+                          <div
+                            key={empIndex}
+                            className="flex items-center justify-between p-2 bg-gray-700 rounded-lg"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-gray-600 text-white text-xs">
+                                  {getInitials(
+                                    employee.firstName,
+                                    employee.lastName
+                                  )}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-medium text-white">
+                                  {employee.firstName} {employee.lastName}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {employee.position}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() =>
+                                handleEmployeeClick(
+                                  employee,
+                                  department.department
+                                )
+                              }
+                              className="text-blue-400 hover:text-blue-300 hover:bg-gray-600"
+                            >
+                              View
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Employee Detail Modal */}
+          <EmployeeDetailModal
+            employee={selectedEmployee}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        </div>
+      </div>
     </HRLayout>
   );
-}
+};
+
+export default DepartmentDashboard;

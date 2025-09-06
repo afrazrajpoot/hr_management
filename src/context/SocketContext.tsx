@@ -66,6 +66,47 @@ interface InternalMobilityData {
   };
 }
 
+interface MobilityAnalysisData {
+  overview: {
+    total_movements: number;
+    promotions: number;
+    transfers: number;
+    lateral_moves: number;
+    other_movements: number;
+    avg_time_to_promotion: number;
+    departments_analyzed: number;
+  };
+  chartData: {
+    movement_types: Array<{ name: string; value: number; color: string }>;
+    department_mobility: Array<{
+      name: string;
+      movements: number;
+      color: string;
+    }>;
+    monthly_trends: Array<{ month: string; movements: number }>;
+  };
+  departmentBreakdown: { [department: string]: number };
+  timeMetrics: {
+    promotion_times: number[];
+    analysis_period: { start: string; end: string };
+  };
+}
+
+interface DepartmentData {
+  department: string;
+  createdAt: string;
+  ingoing: number;
+  outgoing: number;
+  employeeCount: number;
+}
+
+interface DepartmentCardData {
+  totalEmployees: number;
+  totalIngoing: number;
+  totalOutgoing: number;
+  totalDepartments: number;
+}
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
@@ -84,7 +125,10 @@ interface SocketContextType {
   roomsData: any;
   totalEmployees: number;
   internalMobility: InternalMobilityData | null;
+  mobilityAnalysis: any | null;
   isAdmin: boolean;
+  departmentData: DepartmentData[] | null;
+  departmentCardData: DepartmentCardData | null;
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -102,7 +146,10 @@ const SocketContext = createContext<SocketContextType>({
   roomsData: null,
   totalEmployees: 0,
   internalMobility: null,
+  mobilityAnalysis: null,
   isAdmin: false,
+  departmentData: null,
+  departmentCardData: null,
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -113,6 +160,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [internalMobility, setInternalMobility] =
     useState<InternalMobilityData | null>(null);
+  const [mobilityAnalysis, setMobilityAnalysis] = useState<any | null>(null);
+  const [departmentData, setDepartmentData] = useState<DepartmentData[] | null>(
+    null
+  );
+  const [departmentCardData, setDepartmentCardData] =
+    useState<DepartmentCardData | null>(null);
   const [lastNotification, setLastNotification] = useState<Notification | null>(
     null
   );
@@ -143,7 +196,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("📊 dashboardData state:", dashboardData);
     console.log("👤 isAdmin:", isAdmin);
     console.log("🔗 isConnected:", isConnected);
-  }, [dashboardData, isAdmin, isConnected]);
+    console.log("🚶 mobilityAnalysis:", mobilityAnalysis);
+    console.log("🏢 departmentData:", departmentData);
+    console.log("📊 departmentCardData:", departmentCardData);
+  }, [
+    dashboardData,
+    isAdmin,
+    isConnected,
+    mobilityAnalysis,
+    departmentData,
+    departmentCardData,
+  ]);
 
   // Initialize audio with your custom sound file
   useEffect(() => {
@@ -219,25 +282,38 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user?.id) {
         if (isAdmin) {
           // Emit admin_dashboard event for admin users
-          // console.log(
-          //   "👑 Emitting admin_dashboard for admin user:",
-          //   session.user.id
-          // );
+          console.log(
+            "👑 Emitting admin_dashboard for admin user:",
+            session.user.id
+          );
           socketInstance.emit("admin_dashboard", { adminId: session.user.id });
 
-          // Admin doesn't need internal_mobility data (or you can create an admin version)
-          // console.log("⏭️  Skipping internal_mobility for admin user");
+          // Emit internal_mobility_analysis for admin users
+          console.log(
+            "📈 Emitting admin_internal_mobility_analysis for admin user:",
+            session.user.id
+          );
+          socketInstance.emit("admin_internal_mobility_analysis", {
+            adminId: session.user.id,
+          });
         } else {
           // Emit hr_dashboard event for HR users
-          // console.log("📊 Emitting hr_dashboard for hrId:", session.user.id);
+          console.log("📊 Emitting hr_dashboard for hrId:", session.user.id);
           socketInstance.emit("hr_dashboard", { hrId: session.user.id });
 
           // Emit internal_mobility event for HR users
-          // console.log(
-          //   "🚶 Emitting internal_mobility for hrId:",
-          //   session.user.id
-          // );
+          console.log(
+            "🚶 Emitting internal_mobility for hrId:",
+            session.user.id
+          );
           socketInstance.emit("internal_mobility", { hrId: session.user.id });
+
+          // Emit department_analysis for HR users
+          console.log(
+            "🏢 Emitting department_analysis for hrId:",
+            session.user.id
+          );
+          socketInstance.emit("department_analysis", { hrId: session.user.id });
         }
       }
     },
@@ -426,7 +502,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // Listen for internal mobility data updates (only for HR users)
+    // Listen for internal mobility data updates (for HR users)
     socketInstance.on("mobility_info", (data) => {
       if (isAdmin) {
         console.log("⏭️  Skipping mobility_info for admin user");
@@ -447,6 +523,47 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         });
       } else if (data.error) {
         console.error("❌ Internal mobility error:", data.error);
+      }
+    });
+
+    // Listen for internal mobility analysis data (for admin users)
+    socketInstance.on("mobility_analysis", (data) => {
+      if (!isAdmin) {
+        console.log("⏭️  Skipping mobility_analysis for non-admin user");
+        return;
+      }
+
+      console.log("📈 Mobility analysis data received:", data);
+      if (data) {
+        setMobilityAnalysis(data);
+      } else if (data.error) {
+        console.error("❌ Mobility analysis error:", data.error);
+      }
+    });
+
+    // Listen for department_info data (for HR users)
+    socketInstance.on("department_info", (data) => {
+      if (isAdmin) {
+        console.log("⏭️  Skipping department_info for admin user");
+        return;
+      }
+
+      console.log("🏢 Department info data received:", data);
+
+      if (data.error) {
+        console.error("❌ Department info error:", data.error);
+        return;
+      }
+
+      // Handle department data for HR users
+      if (data.departments && Array.isArray(data.departments)) {
+        setDepartmentData(data.departments);
+        console.log("✅ Department data processed:", data.departments);
+      }
+
+      if (data.cardData) {
+        setDepartmentCardData(data.cardData);
+        console.log("📊 Department card data:", data.cardData);
       }
     });
 
@@ -482,7 +599,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         roomsData,
         totalEmployees,
         internalMobility,
+        mobilityAnalysis,
         isAdmin,
+        departmentData,
+        departmentCardData,
       }}
     >
       {children}
