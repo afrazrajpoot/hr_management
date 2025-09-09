@@ -17,6 +17,7 @@ import {
   Target,
   Lightbulb,
   Loader2,
+  Brain,
 } from "lucide-react";
 import {
   BarChart,
@@ -33,6 +34,21 @@ import {
 import HRLayout from "@/components/hr/HRLayout";
 import { useSocket } from "@/context/SocketContext";
 import { useEffect, useState } from "react";
+import { useAnalyzeRetentionRiskMutation } from "@/redux/hr-python-api/intervation";
+import ChatPopup from "@/components/hr/ChatPopup";
+// import ChatPopup from "./ChatPopup";
+
+// Interface for chat messages
+interface ChatMessage {
+  role: string;
+  content: string;
+  timestamp?: string;
+}
+
+interface ChatConversation {
+  department: string;
+  messages: ChatMessage[];
+}
 
 const RiskStatCard = ({
   title,
@@ -40,9 +56,8 @@ const RiskStatCard = ({
   change,
   icon: Icon,
   trend = "neutral",
-  color = "primary",
 }: any) => (
-  <Card className="hr-card">
+  <Card>
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -78,74 +93,78 @@ const RiskStatCard = ({
   </Card>
 );
 
-const InterventionCard = ({ intervention }: any) => {
-  const getImpactColor = (impact: any) => {
-    switch (impact) {
-      case "High":
-        return "bg-success text-success-foreground";
-      case "Medium":
-        return "bg-warning text-warning-foreground";
-      case "Low":
-        return "bg-muted text-muted-foreground";
+const RecommendationCard = ({ recommendation, onClick }: any) => {
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel.toLowerCase()) {
+      case "high":
+        return "destructive";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
       default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getCostColor = (cost: any) => {
-    switch (cost) {
-      case "High":
-        return "bg-destructive text-destructive-foreground";
-      case "Medium":
-        return "bg-warning text-warning-foreground";
-      case "Low":
-        return "bg-success text-success-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
+        return "secondary";
     }
   };
 
   return (
-    <Card className="hr-card">
+    <Card
+      className="cursor-pointer transition-shadow hover:shadow-md"
+      onClick={onClick}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg">{intervention.title}</CardTitle>
+            <CardTitle className="text-lg">
+              {recommendation.department}
+            </CardTitle>
             <CardDescription className="mt-2">
-              {intervention.description}
+              Retention Score: {recommendation.retention_score.toFixed(1)}/100
             </CardDescription>
           </div>
-          <div className="flex flex-col gap-2">
-            <Badge className={getImpactColor(intervention.impact)}>
-              {intervention.impact} Impact
-            </Badge>
-            <Badge className={getCostColor(intervention.cost)}>
-              {intervention.cost} Cost
-            </Badge>
-          </div>
+          <Badge variant={getRiskColor(recommendation.risk_level)}>
+            {recommendation.risk_level} Risk
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">Target Risk</span>
-            <p className="font-medium">{intervention.targetRisk}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Timeline</span>
-            <p className="font-medium">{intervention.timeline}</p>
-          </div>
+        <div>
+          <h4 className="text-sm font-medium mb-2">Mobility Opportunities</h4>
+          <ul className="text-sm space-y-1">
+            {recommendation.mobility_opportunities.map(
+              (item: string, i: number) => (
+                <li key={i} className="flex items-start">
+                  <TrendingUp className="h-4 w-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                  <span>{item}</span>
+                </li>
+              )
+            )}
+          </ul>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Success Rate</span>
-            <span className="font-medium">{intervention.successRate}%</span>
-          </div>
-          <Progress value={intervention.successRate} className="h-2" />
+        <div>
+          <h4 className="text-sm font-medium mb-2">Recommendations</h4>
+          <ul className="text-sm space-y-1">
+            {recommendation.recommendations.map((item: string, i: number) => (
+              <li key={i} className="flex items-start">
+                <Lightbulb className="h-4 w-4 text-warning mr-2 mt-0.5 flex-shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <Button className="w-full mt-4">Implement Intervention</Button>
+        <div>
+          <h4 className="text-sm font-medium mb-2">Action Items</h4>
+          <ul className="text-sm space-y-1">
+            {recommendation.action_items.map((item: string, i: number) => (
+              <li key={i} className="flex items-start">
+                <Target className="h-4 w-4 text-success mr-2 mt-0.5 flex-shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );
@@ -193,9 +212,19 @@ const fallbackRiskData = {
 
 export default function RetentionRisk() {
   const { dashboardData } = useSocket();
-  console.log("Dashboard data in retention risk:", dashboardData);
+  const [
+    analyzeRetentionRisk,
+    { data: analysisData, isLoading: isAnalysisLoading, error },
+  ] = useAnalyzeRetentionRiskMutation();
+
   const [riskData, setRiskData] = useState<any>(fallbackRiskData);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatConversations, setChatConversations] = useState<
+    Record<string, ChatConversation>
+  >({});
+  const [hrId] = useState("7431db61-1d21-4fbc-aa33-fa813feff7bf"); // Replace with actual HR ID from auth
 
   useEffect(() => {
     // Check if dashboardData exists and is an array
@@ -300,6 +329,57 @@ export default function RetentionRisk() {
     });
   };
 
+  const handleAnalyzeWithAI = async () => {
+    if (dashboardData && Array.isArray(dashboardData)) {
+      try {
+        await analyzeRetentionRisk(dashboardData).unwrap();
+      } catch (err) {
+        console.error("Failed to analyze retention risk:", err);
+      }
+    }
+  };
+
+  const handleCardClick = (recommendation: any) => {
+    setSelectedDepartment(recommendation);
+    setIsChatOpen(true);
+
+    // Initialize conversation if it doesn't exist
+    const conversationKey = `${hrId}_${recommendation.department}`;
+    if (!chatConversations[conversationKey]) {
+      setChatConversations((prev) => ({
+        ...prev,
+        [conversationKey]: {
+          department: recommendation.department,
+          messages: [
+            {
+              role: "assistant",
+              content: `Hello! I'm here to help you with retention strategies for the ${recommendation.department} department. How can I assist you today?`,
+            },
+          ],
+        },
+      }));
+    }
+  };
+
+  const updateChatMessages = (
+    department: string,
+    newMessages: ChatMessage[]
+  ) => {
+    const conversationKey = `${hrId}_${department}`;
+    setChatConversations((prev) => ({
+      ...prev,
+      [conversationKey]: {
+        department,
+        messages: newMessages,
+      },
+    }));
+  };
+
+  const handleCloseChat = () => {
+    setIsChatOpen(false);
+    setSelectedDepartment(null);
+  };
+
   if (isLoading) {
     return (
       <HRLayout>
@@ -318,66 +398,52 @@ export default function RetentionRisk() {
     );
   }
 
-  const interventionData = [
-    {
-      title: "Career Development Program",
-      description: "Personalized career path planning for high-risk employees",
-      targetRisk: "Medium to High",
-      impact: riskData.highRisk > 5 ? "High" : "Medium",
-      timeline: "3-6 months",
-      cost: "Medium",
-      successRate: Math.min(85, 100 - Number(riskData.avgRiskScore)),
-    },
-    {
-      title: "Manager Training Initiative",
-      description:
-        "Enhanced leadership training focused on retention strategies",
-      targetRisk: "All Levels",
-      impact: "Medium",
-      timeline: "2-4 months",
-      cost: "Low",
-      successRate: 65,
-    },
-    {
-      title: "Flexible Work Arrangements",
-      description:
-        "Remote options and flexible schedules for better work-life balance",
-      targetRisk: Number(riskData.avgRiskScore) > 40 ? "High" : "Medium",
-      impact: "High",
-      timeline: "1-2 months",
-      cost: "Low",
-      successRate: 82,
-    },
-    {
-      title: "Targeted Retention Strategy",
-      description: "Customized retention plans for critical at-risk roles",
-      targetRisk: "High",
-      impact: "High",
-      timeline: "1-3 months",
-      cost: "High",
-      successRate: Math.min(95, 100 - Number(riskData.avgRiskScore) + 10),
-    },
-  ];
-
   return (
     <HRLayout>
       <div className="space-y-6 p-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Retention Risk Insights
-          </h1>
-          <p className="text-muted-foreground">
-            {riskData.departmentCount > 0 ? (
-              <>
-                Analyze retention risks across {riskData.departmentCount}{" "}
-                departments and {riskData.totalEmployees} employees
-              </>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Retention Risk Insights
+            </h1>
+            <p className="text-muted-foreground">
+              {riskData.departmentCount > 0 ? (
+                <>
+                  Analyze retention risks across {riskData.departmentCount}{" "}
+                  departments and {riskData.totalEmployees} employees
+                </>
+              ) : (
+                "No data available. Showing demo metrics."
+              )}
+            </p>
+          </div>
+
+          <Button
+            onClick={handleAnalyzeWithAI}
+            disabled={isAnalysisLoading || !dashboardData}
+            className="gap-2"
+          >
+            {isAnalysisLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "No data available. Showing demo metrics."
+              <Brain className="h-4 w-4" />
             )}
-          </p>
+            AI Analysis
+          </Button>
         </div>
+
+        {error && (
+          <div className="bg-destructive/15 border border-destructive/50 text-destructive rounded-md p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              <span>
+                Failed to generate AI analysis:{" "}
+                {(error as any).data?.detail || "Unknown error"}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Risk Overview Stats */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -426,7 +492,7 @@ export default function RetentionRisk() {
         {/* Risk Distribution & Department Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Risk Distribution Pie Chart */}
-          <Card className="hr-card">
+          <Card>
             <CardHeader>
               <CardTitle>Risk Level Distribution</CardTitle>
               <CardDescription>
@@ -480,7 +546,7 @@ export default function RetentionRisk() {
           </Card>
 
           {/* Department Risk Breakdown */}
-          <Card className="hr-card">
+          <Card>
             <CardHeader>
               <CardTitle>Risk by Department</CardTitle>
               <CardDescription>
@@ -526,18 +592,70 @@ export default function RetentionRisk() {
           </Card>
         </div>
 
-        {/* Suggested Interventions */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Suggested Interventions</h2>
-          <p className="text-muted-foreground mb-6">
-            Based on your current retention risk profile
-          </p>
-          <div className="grid gap-6 md:grid-cols-2">
-            {interventionData.map((intervention, index) => (
-              <InterventionCard key={index} intervention={intervention} />
-            ))}
+        {/* AI Analysis Results - Show after charts */}
+        {analysisData && analysisData.department_recommendations && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Brain className="h-5 w-5 text-primary" />
+              <h2 className="text-2xl font-bold">AI-Powered Recommendations</h2>
+            </div>
+
+            <div className="mb-6 p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">Overall Summary</p>
+              <p className="font-medium">{analysisData.summary}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline">
+                  Overall Risk Score:{" "}
+                  {analysisData.overall_risk_score.toFixed(1)}/100
+                </Badge>
+              </div>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {analysisData.department_recommendations.map(
+                (recommendation, index) => (
+                  <RecommendationCard
+                    key={index}
+                    recommendation={recommendation}
+                    onClick={() => handleCardClick(recommendation)}
+                  />
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Show empty state if no AI analysis has been run */}
+        {!analysisData && (
+          <div className="text-center py-12 bg-muted rounded-lg">
+            <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-medium mb-2">Run AI Analysis</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Get personalized retention risk recommendations by running our AI
+              analysis on your department data.
+            </p>
+            <Button onClick={handleAnalyzeWithAI} disabled={!dashboardData}>
+              <Brain className="h-4 w-4 mr-2" />
+              Analyze with AI
+            </Button>
+          </div>
+        )}
+
+        {/* Chat Popup */}
+        <ChatPopup
+          isOpen={isChatOpen}
+          onClose={handleCloseChat}
+          department={selectedDepartment}
+          hrId={hrId}
+          dashboardData={dashboardData || []}
+          messages={
+            selectedDepartment
+              ? chatConversations[`${hrId}_${selectedDepartment.department}`]
+                  ?.messages || []
+              : []
+          }
+          onMessagesUpdate={updateChatMessages}
+        />
       </div>
     </HRLayout>
   );

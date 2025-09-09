@@ -143,6 +143,7 @@ export async function GET(req: NextRequest) {
 }
 
 // POST: Create or update employee data with secure password handling
+// POST: Create or update employee data with secure password handling
 export async function POST(req: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions);
@@ -165,8 +166,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate password if provided
-    if (data.password) {
+    // Validate password only if provided and not masked
+    if (data.password && data.password !== '********') {
       if (data.password.length < 8) {
         return NextResponse.json(
           { error: 'Password must be at least 8 characters long' },
@@ -204,8 +205,8 @@ export async function POST(req: NextRequest) {
         salary: data.salary
       };
 
-      // Hash password if provided
-      if (data.password) {
+      // Hash password only if provided and not masked
+      if (data.password && data.password !== '********') {
         userData.password = await bcrypt.hash(data.password, 10);
       }
 
@@ -265,7 +266,7 @@ export async function POST(req: NextRequest) {
       firstName: user.firstName || employee.firstName,
       lastName: user.lastName || employee.lastName,
       email: user.email || '',
-      password: user.password ? '********' : '', // Mask password
+      password: '********', // Always return masked password
       phone: user.phoneNumber || '',
       address: employee.address || '',
       dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',

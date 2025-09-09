@@ -1,20 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { employeeApi } from './employe-api';
+import { employeePythonApi } from './employee-python-api/employee-python-api';
+
 import counterReducer from './features/counterSlice';
 import { hrApi } from './hr-api';
-
+import { retentionApi } from './hr-python-api/intervation';
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     [employeeApi.reducerPath]: employeeApi.reducer,
     [hrApi.reducerPath]: hrApi.reducer,
+    [employeePythonApi.reducerPath]: employeePythonApi.reducer,
+    [retentionApi.reducerPath]: retentionApi.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(employeeApi.middleware)
-      .concat(hrApi.middleware), // ✅ add this line
+      .concat(hrApi.middleware)// ✅ add this line
+      .concat(employeePythonApi.middleware)
+      .concat(retentionApi.middleware),
 });
+
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors
 setupListeners(store.dispatch);
