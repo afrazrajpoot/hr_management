@@ -11,7 +11,7 @@ export async function GET(){
              return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
            }
     
-        const res = await fetch(`http://127.0.0.1:8000/employee_dashboard/dashboard-data`, {
+        const res = await fetch(`http://127.0.0.1:8000/employee_dashboard/generate-employee-career-recommendation`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -19,22 +19,12 @@ export async function GET(){
             body: JSON.stringify({ employeeId: session.user.id }),
           });
           
-          const careerRecommendation = await prisma.aiCareerRecommendation.findFirst({
-            where: {
-              employeeId: session.user.id,
-            },
-          });
-          const assessmentReports = await prisma.individualEmployeeReport.findMany({
-            where: {
-              userId: session.user.id,
-            },
-          })
+  
             const data = await res.json();
-           console.log(data);
-           console.log(careerRecommendation,'recommendation');
+       
         return NextResponse.json({
             data,
-            assessmentReports
+            
         }, { status: 200 });
 
     }catch(err){
@@ -42,7 +32,3 @@ export async function GET(){
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 }
-
-
-
-

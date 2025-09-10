@@ -246,7 +246,7 @@ export default function Dashboard() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-6 bg-[#081229]">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>

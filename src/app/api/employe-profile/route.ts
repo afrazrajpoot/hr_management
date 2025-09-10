@@ -195,15 +195,28 @@ export async function POST(req: NextRequest) {
     let employee;
 
     const result = await prisma.$transaction(async (tx: any) => {
+      // Convert position and department to arrays if they are strings
       const userData: any = {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         phoneNumber: data.phone,
-        position: data.position,
-        department: data.department,
         salary: data.salary
       };
+
+      // Handle position as array (convert string to array if needed)
+      if (data.position) {
+        userData.position = Array.isArray(data.position) 
+          ? data.position 
+          : [data.position];
+      }
+
+      // Handle department as array (convert string to array if needed)
+      if (data.department) {
+        userData.department = Array.isArray(data.department)
+          ? data.department
+          : [data.department];
+      }
 
       // Hash password only if provided and not masked
       if (data.password && data.password !== '********') {
@@ -271,8 +284,8 @@ export async function POST(req: NextRequest) {
       address: employee.address || '',
       dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',
       hireDate: employee.hireDate?.toISOString().split('T')[0] || '',
-      department: user.department || '',
-      position: user.position || '',
+      department: user.department || [],
+      position: user.position || [],
       salary: user.salary || '',
       bio: employee.bio || '',
       avatar: employee.avatar || '',

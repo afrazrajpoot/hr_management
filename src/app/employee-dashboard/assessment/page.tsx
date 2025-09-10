@@ -95,7 +95,11 @@ export default function Assessment() {
         },
         body: JSON.stringify({ data: partsData, userId: session?.user.id }),
       });
-
+      if (response.ok) {
+        const generateREcommendation = await fetch(
+          `/api/generate-career-recommendation`
+        );
+      }
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }

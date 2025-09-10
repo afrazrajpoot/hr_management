@@ -23,6 +23,7 @@ import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import EmployeeModal from "@/components/hr/EmployeeModal";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
+import { useSession } from "next-auth/react";
 // import EmployeeModal from "./EmployeeModal";
 
 const assessmentStatuses = [
@@ -70,7 +71,7 @@ export default function Employees() {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
-  console.log(data, "my employees data");
+  const { data: sessionData } = useSession();
   const uniqueDepartments = useMemo(() => {
     const depts = new Set<string>();
     data?.employees?.forEach((emp: any) => {
@@ -316,6 +317,7 @@ export default function Employees() {
         <EmployeeDetailModal
           employee={selectedEmployee}
           isOpen={isModalOpen}
+          hrId={sessionData?.user?.id || ""}
           onClose={() => setIsModalOpen(false)}
         />
       </div>

@@ -29,24 +29,24 @@ interface EmployeeLearningResponse {
 }
 
 export const employeePythonApi = createApi({
-  reducerPath: 'employeeApi',
+  reducerPath: 'employeePythonApi',
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://localhost:8000',
     prepareHeaders: (headers) => {
       return headers;
     },
   }),
-  tagTypes: ['Employee'],
+  tagTypes: ['EmployeeLearning'],
+
   endpoints: (builder) => ({
-    getEmployeeLearningDashboard: builder.mutation<EmployeeLearningResponse, string>({
+    getEmployeeLearningDashboard: builder.query<EmployeeLearningResponse, string>({
       query: (userId) => ({
-        url: '/employees/learning-dashboard',
-        method: 'POST',
-        body: { user_id: userId },
+        url: `/employees/learning-dashboard?user_id=${userId}`,
+        method: 'GET',
       }),
-      invalidatesTags: ['Employee'],
+      providesTags: ['EmployeeLearning'],
     }),
   }),
 });
 
-export const { useGetEmployeeLearningDashboardMutation } = employeePythonApi;
+export const { useGetEmployeeLearningDashboardQuery } = employeePythonApi;

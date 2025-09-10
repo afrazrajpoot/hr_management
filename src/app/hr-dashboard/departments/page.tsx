@@ -9,16 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Users,
-  TrendingUp,
-  TrendingDown,
-  Building2,
-  Mail,
-  DollarSign,
-} from "lucide-react";
+import { Users, TrendingUp, TrendingDown, Building2 } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -35,6 +27,8 @@ import {
 } from "recharts";
 import HRLayout from "@/components/hr/HRLayout";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
+import { useSession } from "next-auth/react";
+import DepartmentModal from "@/components/hr/DepartmentModal";
 
 // Define TypeScript interfaces
 interface Employee {
@@ -68,6 +62,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {}
 
 const DepartmentDashboard = () => {
   const { departmentCardData, departmentData } = useSocket();
+  const { data: session } = useSession();
 
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
@@ -176,7 +171,7 @@ const DepartmentDashboard = () => {
 
   const COLORS = ["#3b82f6", "#9333ea", "#22c55e", "#f97316", "#ef4444"];
 
-  const handleEmployeeClick = (employee: Employee, department: string) => {
+  const handleCardClick = (employee: Employee, department: string) => {
     setSelectedEmployee({ ...employee, department }); // Include department in selected employee
     setIsModalOpen(true);
   };
@@ -365,7 +360,16 @@ const DepartmentDashboard = () => {
             <h2 className="text-2xl font-semibold text-white">Departments</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {deptData.map((department, index) => (
-                <Card key={index} className="bg-gray-800 border-gray-700">
+                <Card
+                  key={index}
+                  className="bg-gray-800 border-gray-700 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-105 cursor-pointer"
+                  onClick={() =>
+                    handleCardClick(
+                      department.employees[0],
+                      department.department
+                    )
+                  }
+                >
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -429,19 +433,6 @@ const DepartmentDashboard = () => {
                                 </p>
                               </div>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleEmployeeClick(
-                                  employee,
-                                  department.department
-                                )
-                              }
-                              className="text-blue-400 hover:text-blue-300 hover:bg-gray-600"
-                            >
-                              View
-                            </Button>
                           </div>
                         ))}
                       </div>
@@ -453,10 +444,11 @@ const DepartmentDashboard = () => {
           </div>
 
           {/* Employee Detail Modal */}
-          <EmployeeDetailModal
+          <DepartmentModal
             employee={selectedEmployee}
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            hrId={session?.user?.id as string}
           />
         </div>
       </div>

@@ -22,7 +22,7 @@ interface HRTopBarProps {
 
 export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   return (
-    <div className="bg-hr-topbar border-b border-border px-6 py-4">
+    <div className="border-b border-border px-6 py-4 dark:bg-[#081229] bg-white">
       <div className="flex items-center justify-between">
         {/* Title Section */}
         <div>

@@ -2,11 +2,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-// import { useGetEmployeeLearningDashboardMutation } from "@/lib/features/employee/employeeApiSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress"; // Add Shadcn Progress component
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookOpen,
@@ -18,28 +17,26 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
-import { useGetEmployeeLearningDashboardMutation } from "@/redux/employee-python-api/employee-python-api";
+import { useGetEmployeeLearningDashboardQuery } from "@/redux/employee-python-api/employee-python-api";
 
 export default function Development() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const userId = session?.user?.id;
 
-  const [
-    getEmployeeLearningDashboard,
-    { data: employeeData, error, isLoading },
-  ] = useGetEmployeeLearningDashboardMutation();
+  // Use query with skip option - it won't run until userId is available
+  const {
+    data: employeeData,
+    error,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetEmployeeLearningDashboardQuery(userId || "", {
+    skip: !userId, // Skip the query if userId is not available
+  });
 
   const [activeTab, setActiveTab] = useState("skills");
 
-  useEffect(() => {
-    if (userId) {
-      getEmployeeLearningDashboard(userId).catch((err) =>
-        console.error("Failed to fetch employee data:", err)
-      );
-    }
-  }, [userId, getEmployeeLearningDashboard]);
-
-  if (isLoading) {
+  if (sessionStatus === "loading") {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -49,7 +46,7 @@ export default function Development() {
     );
   }
 
-  if (error || !employeeData) {
+  if (isError) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -57,9 +54,22 @@ export default function Development() {
             <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
             <h2 className="text-2xl font-bold">Error loading data</h2>
             <p className="text-muted-foreground mt-2">
-              {error ? "Failed to load employee data" : "No data available"}
+              Failed to load employee data
             </p>
+            <Button onClick={() => refetch()} className="mt-4">
+              Retry
+            </Button>
           </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isLoading || !employeeData) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       </AppLayout>
     );

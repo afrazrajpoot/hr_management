@@ -114,7 +114,7 @@ export default function HRSidebar({
   return (
     <div
       className={cn(
-        "flex flex-col bg-hr-sidebar border-r border-sidebar-border transition-all duration-300",
+        "flex flex-col  border-r border-sidebar-border transition-all duration-300 bg-[#081229]",
         collapsed ? "w-16" : "w-64"
       )}
     >
