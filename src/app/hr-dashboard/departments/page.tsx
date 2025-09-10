@@ -205,7 +205,7 @@ const DepartmentDashboard = () => {
 
   return (
     <HRLayout>
-      <div className="min-h-screen text-white p-6">
+      <div className="min-h-screen text-white p-6 bg-[#081229]">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex items-center space-x-2">

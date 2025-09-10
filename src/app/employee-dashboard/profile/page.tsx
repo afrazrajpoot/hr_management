@@ -180,7 +180,7 @@ const EmployeeProfilePage: React.FC = () => {
         }}
       />
       <div className="min-h-screen p-4">
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6 ">
           <ProfileHeader
             employee={employee}
             formData={formData}
@@ -192,12 +192,12 @@ const EmployeeProfilePage: React.FC = () => {
           />
 
           <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 shadow-sm border">
+            <TabsList className="grid w-full grid-cols-4 shadow-sm border bg-gray-800 border-gray-700">
               <TabsTrigger value="personal">Personal Info</TabsTrigger>
               <TabsTrigger value="employment">Employment</TabsTrigger>
               <TabsTrigger value="skills">Skills</TabsTrigger>
               <TabsTrigger value="experience">Experience</TabsTrigger>
-              <TabsTrigger value="resume">Resume</TabsTrigger>
+              {/* <TabsTrigger value="resume">Resume</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="personal">
@@ -227,12 +227,12 @@ const EmployeeProfilePage: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="resume">
+            {/* <TabsContent value="resume">
               <ResumeTab
                 formData={formData}
                 handleResumeUpload={handleResumeUpload}
               />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </div>
       </div>

@@ -161,9 +161,9 @@ export default function Assessment() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-4xl mx-auto bg-[#081229]">
         {analysisResults ? (
-          <Card className="card-elevated">
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="text-2xl">Assessment Analysis</CardTitle>
             </CardHeader>
@@ -210,8 +210,8 @@ export default function Assessment() {
         ) : (
           <>
             {/* Header */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="mb-6 ">
+              <div className="flex items-center justify-between mb-4 ">
                 <div>
                   <h1 className="text-3xl font-bold">Career Assessment</h1>
                   <p className="text-muted-foreground">
@@ -245,7 +245,7 @@ export default function Assessment() {
             )}
 
             {/* Current Part Card */}
-            <Card className="card-elevated mb-6">
+            <Card className="card-elevated mb-6 bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-xl">{currentPart.part}</CardTitle>
               </CardHeader>
@@ -363,7 +363,6 @@ export default function Assessment() {
           </>
         )}
       </div>
-      <FileUploader />
     </AppLayout>
   );
 }

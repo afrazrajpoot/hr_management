@@ -31,6 +31,7 @@ import {
   Globe,
   MapPin,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
@@ -180,10 +181,13 @@ export default function Results() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="p-6">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Loading...</p>
+        <div className="p-6 flex justify-center items-center h-[80vh]">
+          <Card className="w-full max-w-sm">
+            <CardContent className="pt-6 flex justify-center items-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">
+                Loading...
+              </span>
             </CardContent>
           </Card>
         </div>
@@ -242,7 +246,7 @@ export default function Results() {
         {selectedAssessment ? (
           <>
             {/* Overall Score Card */}
-            <Card className="card-elevated bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            <Card className="bg-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -272,7 +276,7 @@ export default function Results() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Genius Factors Breakdown */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BarChart3 className="w-5 h-5 mr-2" />
@@ -328,7 +332,7 @@ export default function Results() {
 
               {/* Strengths & Growth Areas */}
               <div className="space-y-6">
-                <Card className="card-elevated">
+                <Card className="bg-gray-800 border-gray-700">
                   <CardHeader>
                     <CardTitle className="flex items-center text-black dark:text-white">
                       <Award className="w-5 h-5 mr-2" />
@@ -352,7 +356,7 @@ export default function Results() {
                   </CardContent>
                 </Card>
 
-                <Card className="card-elevated">
+                <Card className="bg-gray-800 border-gray-700">
                   <CardHeader>
                     <CardTitle className="flex items-center text-black dark:text-white">
                       <TrendingUp className="w-5 h-5 mr-2" />
@@ -381,7 +385,7 @@ export default function Results() {
             {/* Full Report Details */}
             <div className="space-y-6">
               {/* Executive Summary */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
@@ -396,7 +400,7 @@ export default function Results() {
               </Card>
 
               {/* Department and HR Info */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Users className="w-5 h-5 mr-2" />
@@ -434,7 +438,7 @@ export default function Results() {
               </Card>
 
               {/* Energy Sources */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Sparkles className="w-5 h-5 mr-2" />
@@ -455,7 +459,7 @@ export default function Results() {
               </Card>
 
               {/* Current Role Alignment Analysis */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <AlertCircle className="w-5 h-5 mr-2" />
@@ -521,7 +525,7 @@ export default function Results() {
               </Card>
 
               {/* Internal Career Opportunities */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Globe className="w-5 h-5 mr-2" />
@@ -625,7 +629,7 @@ export default function Results() {
               </Card>
 
               {/* Retention and Mobility Strategies */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <CheckCircle className="w-5 h-5 mr-2" />
@@ -679,7 +683,7 @@ export default function Results() {
               </Card>
 
               {/* Development Action Plan */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Calendar className="w-5 h-5 mr-2" />
@@ -747,7 +751,7 @@ export default function Results() {
               </Card>
 
               {/* Personalized Resources */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
@@ -815,7 +819,7 @@ export default function Results() {
               </Card>
 
               {/* Data Sources and Methodology */}
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <MapPin className="w-5 h-5 mr-2" />
@@ -848,7 +852,7 @@ export default function Results() {
             </div>
           </>
         ) : (
-          <Card className="card-elevated">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
                 No assessments completed yet.
@@ -861,7 +865,7 @@ export default function Results() {
         )}
 
         {/* Assessment History */}
-        <Card className="card-elevated" id="assessment-history">
+        <Card className="bg-gray-800 border-gray-700" id="assessment-history">
           <CardHeader>
             <CardTitle className="text-black dark:text-white">
               Assessment History
@@ -962,7 +966,7 @@ export default function Results() {
         </Card>
 
         {/* Action Items */}
-        <Card className="card-elevated">
+        <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="text-black dark:text-white">
               Recommended Next Steps

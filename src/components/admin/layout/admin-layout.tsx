@@ -12,7 +12,7 @@ interface HRLayoutProps {
 export function HRLayout({ children, title, subtitle }: HRLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-[#081229]">
         <HRSidebar />
         <div className="flex-1 flex flex-col">
           <HRHeader title={title} subtitle={subtitle} />

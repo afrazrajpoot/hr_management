@@ -64,6 +64,7 @@ interface InternalMobilityData {
     start_date: string;
     end_date: string;
   };
+  users: any[];
 }
 
 interface MobilityAnalysisData {
@@ -520,6 +521,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           departmentMovementFlow: data.departmentMovementFlow,
           metrics: data.metrics,
           data_timeframe: data.data_timeframe,
+          users: data.users,
         });
       } else if (data.error) {
         console.error("❌ Internal mobility error:", data.error);

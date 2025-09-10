@@ -186,7 +186,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
   };
 
   return (
-    <Card className="hr-card hover:shadow-lg transition-all duration-200">
+    <Card className="bg-gray-800 border-gray-700 hover:shadow-lg transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -426,7 +426,7 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
                 Loading assessments...
@@ -442,7 +442,7 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="pt-6">
               <p className="text-destructive">Error loading assessments</p>
             </CardContent>
@@ -454,7 +454,7 @@ export default function Assessments() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-6 bg-[#081229]">
         {/* Header */}
         <div id="assessments-header">
           <h1 className="text-3xl font-bold tracking-tight">Assessments</h1>
@@ -464,7 +464,7 @@ export default function Assessments() {
         </div>
 
         {/* Filters */}
-        <Card className="hr-card">
+        <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
@@ -510,7 +510,7 @@ export default function Assessments() {
 
         {/* Assessment Stats */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -523,7 +523,7 @@ export default function Assessments() {
               </div>
             </CardContent>
           </Card>
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -540,7 +540,7 @@ export default function Assessments() {
               </div>
             </CardContent>
           </Card>
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -557,7 +557,7 @@ export default function Assessments() {
               </div>
             </CardContent>
           </Card>
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -587,7 +587,7 @@ export default function Assessments() {
 
         {/* No results */}
         {filteredEmployees.length === 0 && (
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No employees found</h3>

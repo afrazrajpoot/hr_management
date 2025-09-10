@@ -174,7 +174,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({ isEditing, control }: any) => {
       animate="visible"
       className="space-y-6"
     >
-      <Card className="border-0 bg-gradient-to-br from-background to-muted/20 shadow-lg dark:shadow-2xl">
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">

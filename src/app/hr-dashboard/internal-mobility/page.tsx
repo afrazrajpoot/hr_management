@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, ArrowRight, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TrendingUp, ArrowRight, User, Search } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -22,6 +24,8 @@ import {
 } from "recharts";
 import HRLayout from "@/components/hr/HRLayout";
 import { useSocket } from "@/context/SocketContext";
+import EmployeeDirectory from "@/components/hr/EmployeeDirectrory";
+// import EmployeeDirectory from "@/components/hr/EmployeeDirectory";
 
 // Type definitions
 interface MonthlyTrends {
@@ -50,11 +54,22 @@ interface DataTimeframe {
   end_date: string;
 }
 
+interface UserData {
+  id: string;
+  hrId: string;
+  name: string;
+  email: string;
+  position: string[];
+  department: string[];
+  salary: number;
+}
+
 interface InternalMobilityData {
   monthlyMobilityTrends: MonthlyTrends;
   departmentMovementFlow: DepartmentFlow;
   metrics: Metrics;
   data_timeframe?: DataTimeframe;
+  users?: UserData[];
   error?: string;
 }
 
@@ -91,7 +106,7 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
   icon: Icon,
   description,
 }) => (
-  <Card className="hr-card">
+  <Card className="bg-gray-800 border-gray-700">
     <CardContent className="p-6">
       <div className="flex items-center justify-between mb-2">
         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -110,16 +125,78 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
   </Card>
 );
 
+// Generate default empty data
+const generateDefaultMonthlyTrends = (): MonthlyTrends => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  const emptyMonths: { [month: string]: number } = {};
+  months.forEach((month) => {
+    emptyMonths[month] = 0;
+  });
+
+  return {
+    ingoing: emptyMonths,
+    outgoing: emptyMonths,
+    promotions: emptyMonths,
+  };
+};
+
+const generateDefaultDepartmentFlow = (): DepartmentFlow => {
+  const departments = ["Engineering", "Marketing", "Sales", "HR", "Operations"];
+  const flow: DepartmentFlow = {};
+
+  departments.forEach((dept) => {
+    flow[dept] = {
+      incoming: 0,
+      outgoing: 0,
+      net_movement: 0,
+    };
+  });
+
+  return flow;
+};
+
+const defaultMetrics: Metrics = {
+  total_promotions: 0,
+  total_transfers: 0,
+  total_movements: 0,
+  retention_rate: 0,
+};
+
+const defaultInternalMobilityData: InternalMobilityData = {
+  monthlyMobilityTrends: generateDefaultMonthlyTrends(),
+  departmentMovementFlow: generateDefaultDepartmentFlow(),
+  metrics: defaultMetrics,
+};
+
 export default function InternalMobility() {
   const { internalMobility } = useSocket() as {
     internalMobility: InternalMobilityData | null;
   };
-  const [loading, setLoading] = useState(true);
+  console.log("Received internal mobility data:", internalMobility);
   const [error, setError] = useState<string | null>(null);
   const [retentionRate, setRetentionRate] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Calculate retention rate on client side
-  // Calculate retention rate on client side
+  // Filter users based on search
+  const filteredUsers = useMemo(() => {
+    if (!internalMobility?.users) return [];
+
+    return internalMobility.users.filter((user) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.position.some((pos) =>
+          pos.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        user.department.some((dept) =>
+          dept.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+      return matchesSearch;
+    });
+  }, [internalMobility?.users, searchTerm]);
+
+  // Calculate retention rate
   const calculateRetentionRate = (data: InternalMobilityData): number => {
     try {
       const { departmentMovementFlow } = data;
@@ -133,25 +210,13 @@ export default function InternalMobility() {
         totalOutgoing += dept.outgoing;
       });
 
-      console.log("📊 Retention Calculation:");
-      console.log("Total Incoming:", totalIncoming);
-      console.log("Total Outgoing:", totalOutgoing);
-      console.log("Net Movement:", totalIncoming - totalOutgoing);
-
       // Calculate retention rate: (incoming - outgoing) / incoming * 100
       if (totalIncoming === 0) {
-        console.log("No incoming movements - defaulting to 100% retention");
         return 100; // No incoming movements means 100% retention
       }
 
       const rate = ((totalIncoming - totalOutgoing) / totalIncoming) * 100;
-      const roundedRate = Math.max(
-        0,
-        Math.min(100, Math.round(rate * 10) / 10)
-      );
-
-      console.log("Retention Rate:", roundedRate + "%");
-      return roundedRate;
+      return Math.max(0, Math.min(100, Math.round(rate * 10) / 10));
     } catch (err) {
       console.error("Error calculating retention rate:", err);
       return 0;
@@ -159,21 +224,27 @@ export default function InternalMobility() {
   };
 
   // Process socket data for charts
-  const processMobilityData = (): ProcessedData | null => {
-    if (!internalMobility || internalMobility.error) return null;
+  const processMobilityData = (): ProcessedData => {
+    const dataToProcess = internalMobility || defaultInternalMobilityData;
 
-    // Process monthly trends data - Use the backend's transfer calculation
+    if (dataToProcess.error) {
+      setError(dataToProcess.error);
+      return processMobilityDataFromData(defaultInternalMobilityData);
+    }
+
+    return processMobilityDataFromData(dataToProcess);
+  };
+
+  const processMobilityDataFromData = (
+    data: InternalMobilityData
+  ): ProcessedData => {
+    // Process monthly trends data
     const monthlyTrendsData = Object.keys(
-      internalMobility.monthlyMobilityTrends.ingoing
+      data.monthlyMobilityTrends.ingoing
     ).map((month) => {
-      const ingoing = internalMobility.monthlyMobilityTrends.ingoing[month];
-      const outgoing = internalMobility.monthlyMobilityTrends.outgoing[month];
-      const promotions =
-        internalMobility.monthlyMobilityTrends.promotions[month];
-
-      // Calculate transfers based on what the backend provides
-      // Since backend shows total_movements = 4, total_promotions = 3, total_transfers = 3
-      // This suggests transfers include both incoming and outgoing movements
+      const ingoing = data.monthlyMobilityTrends.ingoing[month];
+      const outgoing = data.monthlyMobilityTrends.outgoing[month];
+      const promotions = data.monthlyMobilityTrends.promotions[month];
       const transfers = ingoing + outgoing;
 
       return {
@@ -187,19 +258,19 @@ export default function InternalMobility() {
     });
 
     // Process department flow data
-    const departmentFlowData = Object.entries(
-      internalMobility.departmentMovementFlow
-    ).map(([department, data]) => ({
-      department,
-      incoming: data.incoming,
-      outgoing: data.outgoing,
-      color: getDepartmentColor(department),
-    }));
+    const departmentFlowData = Object.entries(data.departmentMovementFlow).map(
+      ([department, flowData]) => ({
+        department,
+        incoming: flowData.incoming,
+        outgoing: flowData.outgoing,
+        color: getDepartmentColor(department),
+      })
+    );
 
     return {
       monthlyTrendsData,
       departmentFlowData,
-      metrics: internalMobility.metrics,
+      metrics: data.metrics,
     };
   };
 
@@ -227,7 +298,6 @@ export default function InternalMobility() {
 
   useEffect(() => {
     if (internalMobility) {
-      setLoading(false);
       if (internalMobility.error) {
         setError(internalMobility.error);
       } else {
@@ -235,53 +305,17 @@ export default function InternalMobility() {
         // Calculate and set retention rate
         const rate = calculateRetentionRate(internalMobility);
         setRetentionRate(rate);
-
-        // Debug log to see the data
-        console.log("Internal mobility data:", internalMobility);
-        console.log("Calculated retention rate:", rate);
       }
+    } else {
+      // Reset to default values when no data
+      setRetentionRate(0);
+      setError(null);
     }
   }, [internalMobility]);
 
-  if (loading) {
-    return (
-      <HRLayout>
-        <div className="space-y-6 p-6">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        </div>
-      </HRLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <HRLayout>
-        <div className="space-y-6 p-6">
-          <div className="text-center text-destructive">
-            <p>Error loading mobility data: {error}</p>
-          </div>
-        </div>
-      </HRLayout>
-    );
-  }
-
-  if (!processedData) {
-    return (
-      <HRLayout>
-        <div className="space-y-6 p-6">
-          <div className="text-center">
-            <p>No mobility data available</p>
-          </div>
-        </div>
-      </HRLayout>
-    );
-  }
-
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-6 bg-[#081229]">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -292,33 +326,40 @@ export default function InternalMobility() {
           </p>
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="bg-destructive/15 text-destructive p-3 rounded-md">
+            Error loading mobility data: {error}
+          </div>
+        )}
+
         {/* Mobility Overview Stats */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MobilityStatCard
             title="Total Movements"
             value={processedData.metrics.total_movements}
-            change="+18.5%"
+            change="+0%"
             icon={TrendingUp}
             description="Last 6 months"
           />
           <MobilityStatCard
             title="Promotions"
             value={processedData.metrics.total_promotions}
-            change="+25.0%"
+            change="+0%"
             icon={TrendingUp}
             description="Last 6 months"
           />
           <MobilityStatCard
             title="Transfers"
             value={processedData.metrics.total_transfers}
-            change="+12.0%"
+            change="+0%"
             icon={ArrowRight}
             description="Last 6 months"
           />
           <MobilityStatCard
             title="Retention Rate"
             value={`${retentionRate}%`}
-            change={retentionRate > 0 ? "+2.1%" : "0%"}
+            change={retentionRate > 0 ? "+0%" : "0%"}
             icon={User}
             description="Post-mobility"
           />
@@ -327,7 +368,7 @@ export default function InternalMobility() {
         {/* Mobility Trends */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Monthly Mobility Trend - Show Promotions, Transfers, and Total */}
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle>Monthly Mobility Trends</CardTitle>
               <CardDescription>
@@ -368,7 +409,7 @@ export default function InternalMobility() {
           </Card>
 
           {/* Department Flow Chart - Only Incoming & Outgoing */}
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle>Department Movement Flow</CardTitle>
               <CardDescription>
@@ -406,38 +447,32 @@ export default function InternalMobility() {
           </Card>
         </div>
 
-        {/* Data Debug Info */}
-        {internalMobility && (
-          <Card className="hr-card">
-            <CardHeader>
-              <CardTitle>Data Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  Total Incoming:{" "}
-                  {Object.values(
-                    internalMobility.departmentMovementFlow
-                  ).reduce((sum, dept) => sum + dept.incoming, 0)}
-                </p>
-                <p>
-                  Total Outgoing:{" "}
-                  {Object.values(
-                    internalMobility.departmentMovementFlow
-                  ).reduce((sum, dept) => sum + dept.outgoing, 0)}
-                </p>
-                <p>
-                  Total Promotions: {internalMobility.metrics.total_promotions}
-                </p>
-                <p>
-                  Total Transfers: {internalMobility.metrics.total_transfers}
-                </p>
-                <p>
-                  Total Movements: {internalMobility.metrics.total_movements}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Employee Directory */}
+        {internalMobility?.users && internalMobility.users.length > 0 && (
+          <>
+            {/* Search Bar */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="max-w-md space-y-2">
+                  <Label
+                    htmlFor="search"
+                    className="text-sm font-medium flex items-center gap-2"
+                  >
+                    <Search className="h-4 w-4" />
+                    Search Employees
+                  </Label>
+                  <Input
+                    id="search"
+                    placeholder="Search by name, email, position, or department..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <EmployeeDirectory users={filteredUsers} />
+          </>
         )}
       </div>
     </HRLayout>

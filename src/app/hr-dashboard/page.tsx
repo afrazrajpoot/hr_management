@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
-  <Card className="hr-card">
+  <Card className=" bg-gray-800 border-gray-700">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -136,10 +136,12 @@ export default function Dashboard() {
   const avgGeniusFactor =
     departmentData.length > 0
       ? Math.round(
-          departmentData.reduce(
-            (sum: number, dept: any) =>
-              sum + (dept.metrics?.avg_scores?.genius_factor_score || 0)
-          ) / departmentData.length
+          departmentData
+            .map(
+              (dept: any) => dept.metrics?.avg_scores?.genius_factor_score || 0
+            )
+            .reduce((sum: number, score: number) => sum + score, 0) /
+            departmentData.length
         )
       : 0;
   const avgRetentionRisk =
@@ -276,7 +278,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 ">
           <StatCard
             title="Total Employees"
             value={totalEmployees}
@@ -303,7 +305,7 @@ export default function Dashboard() {
         {/* Comprehensive Charts Grid */}
         <div className="grid gap-6">
           {/* Assessment Completion Rate */}
-          <Card className="hr-card">
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle>Assessment Completion by Department</CardTitle>
               <CardDescription>
@@ -335,7 +337,7 @@ export default function Dashboard() {
           {/* Row 2: Two charts side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Genius Factor Distribution */}
-            <Card className="hr-card">
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle>Genius Factor Score Distribution</CardTitle>
                 <CardDescription>
@@ -363,7 +365,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Retention Risk Distribution */}
-            <Card className="hr-card">
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle>Retention Risk Distribution</CardTitle>
                 <CardDescription>
@@ -394,7 +396,7 @@ export default function Dashboard() {
           {/* Row 3: Two charts side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Department Averages */}
-            <Card className="hr-card">
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle>Department Score Averages</CardTitle>
                 <CardDescription>
@@ -437,7 +439,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Internal Mobility Trend */}
-            <Card className="hr-card">
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle>Internal Mobility Trend</CardTitle>
                 <CardDescription>

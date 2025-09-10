@@ -21,6 +21,7 @@ import {
   ArrowRight,
   Trophy,
   ClipboardList,
+  Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
@@ -153,20 +154,22 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="p-6">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Loading...</p>
+        <div className="p-6 flex justify-center items-center h-[80vh]">
+          <Card className="w-full max-w-sm">
+            <CardContent className="pt-6 flex justify-center items-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">
+                Loading...
+              </span>
             </CardContent>
           </Card>
         </div>
       </AppLayout>
     );
   }
-
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 bg-[#081229]">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -187,7 +190,7 @@ export default function Dashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Assessment Progress
@@ -209,7 +212,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Completed Assessments
@@ -228,7 +231,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Average Score
@@ -247,7 +250,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated">
+          <Card className="card-elevated bg-gray-800 border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Career Matches
@@ -268,7 +271,7 @@ export default function Dashboard() {
         </div>
 
         {/* AI Career Recommendation */}
-        <Card className="card-elevated bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl">
+        <Card className="card-elevated bg-gray-800 border-gray-700 rounded-xl">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center text-2xl font-semibold text-gray-800 dark:text-gray-100">
               <BookOpen className="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-400" />
@@ -323,7 +326,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Assessments */}
-          <Card className="card-elevated" id="recent-assessments">
+          <Card className="bg-gray-800 border-gray-700" id="recent-assessments">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
@@ -435,7 +438,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Career Recommendations */}
-          <Card className="card-elevated">
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2" />
@@ -489,7 +492,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="card-elevated">
+        <Card className="card-elevated bg-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />

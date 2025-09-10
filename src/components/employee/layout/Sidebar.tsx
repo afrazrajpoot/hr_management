@@ -69,7 +69,7 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-card border-r border-border transition-all duration-300",
+        "flex flex-col h-screen bg-[#081229] transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >

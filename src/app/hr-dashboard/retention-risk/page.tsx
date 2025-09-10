@@ -57,8 +57,8 @@ const RiskStatCard = ({
   icon: Icon,
   trend = "neutral",
 }: any) => (
-  <Card>
-    <CardContent className="p-6">
+  <Card className="bg-gray-800 border-gray-700">
+    <CardContent className="p-6 ">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -109,7 +109,7 @@ const RecommendationCard = ({ recommendation, onClick }: any) => {
 
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md"
+      className="cursor-pointer transition-shadow hover:shadow-md bg-gray-800 border-gray-700"
       onClick={onClick}
     >
       <CardHeader>
@@ -400,7 +400,7 @@ export default function RetentionRisk() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-6 bg-[#081229]">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -446,7 +446,7 @@ export default function RetentionRisk() {
         )}
 
         {/* Risk Overview Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 ">
           <RiskStatCard
             title="Total At Risk"
             value={riskData.totalAtRisk}
@@ -492,7 +492,7 @@ export default function RetentionRisk() {
         {/* Risk Distribution & Department Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Risk Distribution Pie Chart */}
-          <Card>
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle>Risk Level Distribution</CardTitle>
               <CardDescription>
@@ -546,7 +546,7 @@ export default function RetentionRisk() {
           </Card>
 
           {/* Department Risk Breakdown */}
-          <Card>
+          <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle>Risk by Department</CardTitle>
               <CardDescription>
@@ -594,13 +594,13 @@ export default function RetentionRisk() {
 
         {/* AI Analysis Results - Show after charts */}
         {analysisData && analysisData.department_recommendations && (
-          <div>
+          <div className="">
             <div className="flex items-center gap-2 mb-4">
               <Brain className="h-5 w-5 text-primary" />
               <h2 className="text-2xl font-bold">AI-Powered Recommendations</h2>
             </div>
 
-            <div className="mb-6 p-4 bg-muted rounded-lg">
+            <div className="mb-6 p-4  rounded-lg bg-gray-800 border-gray-700">
               <p className="text-sm text-muted-foreground">Overall Summary</p>
               <p className="font-medium">{analysisData.summary}</p>
               <div className="flex items-center gap-2 mt-2">
@@ -611,7 +611,7 @@ export default function RetentionRisk() {
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2 ">
               {analysisData.department_recommendations.map(
                 (recommendation, index) => (
                   <RecommendationCard
@@ -627,7 +627,7 @@ export default function RetentionRisk() {
 
         {/* Show empty state if no AI analysis has been run */}
         {!analysisData && (
-          <div className="text-center py-12 bg-muted rounded-lg">
+          <div className="text-center py-12  rounded-lg bg-gray-800 border-gray-700">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-medium mb-2">Run AI Analysis</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">

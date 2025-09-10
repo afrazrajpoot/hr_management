@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Eye } from "lucide-react";
+import { Search, Filter, Eye, Loader2 } from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import EmployeeModal from "@/components/hr/EmployeeModal";
@@ -126,12 +126,27 @@ export default function Employees() {
     setIsModalOpen(true);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <HRLayout>
+        <div className="p-6 flex justify-center items-center h-[80vh]">
+          <Card className="w-full max-w-sm">
+            <CardContent className="pt-6 flex justify-center items-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">
+                Loading...
+              </span>
+            </CardContent>
+          </Card>
+        </div>
+      </HRLayout>
+    );
+  }
   if (isError) return <div>Error loading employees</div>;
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-6 bg-[#081229]">
         {/* Header & Search */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -155,7 +170,7 @@ export default function Employees() {
         </div>
 
         {/* Filters */}
-        <Card className="hr-card">
+        <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
@@ -209,7 +224,7 @@ export default function Employees() {
         </Card>
 
         {/* Employee List */}
-        <Card className="hr-card">
+        <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle>All Employees</CardTitle>
             <CardDescription>

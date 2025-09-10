@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +16,14 @@ import {
   Calendar,
   Loader2,
   AlertCircle,
+  User,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useGetEmployeeLearningDashboardQuery } from "@/redux/employee-python-api/employee-python-api";
 
 export default function Development() {
   const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
   const userId = session?.user?.id;
 
   // Use query with skip option - it won't run until userId is available
@@ -36,6 +39,18 @@ export default function Development() {
 
   const [activeTab, setActiveTab] = useState("skills");
 
+  // Check if the error is specifically a "User or employee not found" error
+  const isUserNotFoundError =
+    isError &&
+    error &&
+    typeof error === "object" &&
+    "data" in error &&
+    typeof error.data === "object" &&
+    error.data !== null &&
+    "detail" in error.data &&
+    typeof error.data.detail === "string" &&
+    error.data.detail.includes("User or employee not found");
+
   if (sessionStatus === "loading") {
     return (
       <AppLayout>
@@ -46,7 +61,37 @@ export default function Development() {
     );
   }
 
-  if (isError) {
+  // Handle user not found error with a specific UI
+  if (isUserNotFoundError) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-screen p-6 ">
+          <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+            <CardHeader className="text-center">
+              <div className="mx-auto bg-muted p-3 rounded-full w-fit">
+                <User className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <CardTitle className="mt-4">Profile Incomplete</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-center">
+              <p className="text-muted-foreground">
+                We couldn't find your employee profile. Please complete your
+                profile to access your development roadmap.
+              </p>
+              <Button
+                onClick={() => router.push("/employee-dashboard/profile")}
+                className="w-full"
+              >
+                Complete Your Profile
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isError && !isUserNotFoundError) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -104,15 +149,19 @@ export default function Development() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full "
+        >
+          <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700">
             <TabsTrigger value="skills">Skills</TabsTrigger>
             <TabsTrigger value="courses">Recommended Courses</TabsTrigger>
             <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
           </TabsList>
 
           <TabsContent value="skills" className="space-y-6">
-            <Card className="card-elevated">
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Target className="w-5 h-5 mr-2" />
@@ -155,7 +204,7 @@ export default function Development() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {recommended_courses.length > 0 ? (
                 recommended_courses.map((course, index) => (
-                  <Card key={index} className="card-interactive">
+                  <Card key={index} className="bg-gray-800 border-gray-700">
                     <CardHeader>
                       <CardTitle className="text-lg">{course.title}</CardTitle>
                       <div className="flex items-center space-x-2 mt-1 text-sm text-muted-foreground">
@@ -191,7 +240,7 @@ export default function Development() {
                   </Card>
                 ))
               ) : (
-                <Card>
+                <Card className="bg-gray-800 border-gray-700">
                   <CardContent className="p-6 text-center">
                     <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium mb-2">
@@ -209,7 +258,7 @@ export default function Development() {
 
           <TabsContent value="progress" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2" />
@@ -257,7 +306,7 @@ export default function Development() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="card-elevated">
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2" />

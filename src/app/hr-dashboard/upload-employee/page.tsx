@@ -93,7 +93,7 @@ export default function UploadEmployeesPage() {
 
   return (
     <HRLayout>
-      <div className="p-8 max-w-2xl mx-auto">
+      <div className="p-8 max-w-2xl mx-auto ">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

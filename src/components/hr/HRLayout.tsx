@@ -68,7 +68,7 @@ export default function HRLayout({ children, segment }: any) {
   const currentPage = pageConfig[currentPath] || pageConfig["/hr-dashboard"];
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[#081229]">
       {/* Sidebar */}
       <HRSidebar
         collapsed={sidebarCollapsed}
@@ -78,12 +78,12 @@ export default function HRLayout({ children, segment }: any) {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#081229]">
         {/* Top Bar */}
         <HRTopBar title={currentPage.title} subtitle={currentPage.subtitle} />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-background">{children}</main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   );
