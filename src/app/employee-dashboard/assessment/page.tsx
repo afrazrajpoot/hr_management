@@ -21,6 +21,7 @@ import FileUploader from "@/components/FileUploader";
 import { useSession } from "next-auth/react";
 import { useSocket } from "@/context/SocketContext";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Group questions by part
 const questionsByPart = questions.map((part) => ({
@@ -40,6 +41,7 @@ export default function Assessment() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [timeSpent, setTimeSpent] = useState(0);
+  const navigate = useRouter();
   const [analysisResults, setAnalysisResults] = useState<Array<{
     part: string;
     majorityOptions: string[] | null;
@@ -127,6 +129,9 @@ export default function Assessment() {
       });
     } finally {
       setIsSubmitting(false); // Stop loading
+      setTimeout(() => {
+        navigate.push("/employee-dashboard/results");
+      }, 3000); // Redirect after 3 seconds
     }
   };
 
@@ -347,15 +352,14 @@ export default function Assessment() {
                 {currentPartQuestions.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      index === currentQuestionIndex
-                        ? "bg-primary dark:bg-primary"
-                        : index < currentQuestionIndex
+                    className={`w-3 h-3 rounded-full transition-colors ${index === currentQuestionIndex
+                      ? "bg-primary dark:bg-primary"
+                      : index < currentQuestionIndex
                         ? "bg-success dark:bg-success"
                         : answers[currentPartQuestions[index].id]
-                        ? "bg-warning dark:bg-warning"
-                        : "bg-muted dark:bg-muted"
-                    }`}
+                          ? "bg-warning dark:bg-warning"
+                          : "bg-muted dark:bg-muted"
+                      }`}
                   />
                 ))}
               </div>

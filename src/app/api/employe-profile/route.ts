@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/auth';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/auth";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
 
 interface EmployeeData {
   firstName: string;
@@ -49,12 +49,17 @@ export async function GET(req: NextRequest) {
     const session: any = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     if (!prisma || !prisma.employee) {
-      console.error('Prisma client or Employee model is not properly initialized');
-      return NextResponse.json({ error: 'Database configuration error' }, { status: 500 });
+      console.error(
+        "Prisma client or Employee model is not properly initialized"
+      );
+      return NextResponse.json(
+        { error: "Database configuration error" },
+        { status: 500 }
+      );
     }
 
     const employee = await prisma.employee.findFirst({
@@ -69,10 +74,10 @@ export async function GET(req: NextRequest) {
             position: true,
             department: true,
             salary: true,
-            password: true
-          }
-        }
-      }
+            password: true,
+          },
+        },
+      },
     });
 
     if (!employee) {
@@ -86,27 +91,27 @@ export async function GET(req: NextRequest) {
           position: true,
           department: true,
           salary: true,
-          password: true
-        }
+          password: true,
+        },
       });
 
       return NextResponse.json({
-        id: '',
+        id: "",
         employeeId: session.user.id,
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        email: user?.email || '',
-        password: user?.password ? '********' : '',
-        phone: user?.phoneNumber || '',
-        address: '',
-        dateOfBirth: '',
-        hireDate: '',
-        department: user?.department || '',
-        position: user?.position || '',
-        manager: '',
-        salary: user?.salary || '',
-        bio: '',
-        avatar: '',
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        email: user?.email || "",
+        password: user?.password ? "********" : "",
+        phone: user?.phoneNumber || "",
+        address: "",
+        dateOfBirth: "",
+        hireDate: "",
+        department: user?.department || "",
+        position: user?.position || "",
+        manager: "",
+        salary: user?.salary || "",
+        bio: "",
+        avatar: "",
         skills: [],
         education: [],
         experience: [],
@@ -120,25 +125,28 @@ export async function GET(req: NextRequest) {
       firstName: employee.user?.firstName || employee.firstName,
       lastName: employee.user?.lastName || employee.lastName,
       email: employee.user?.email || employee.email,
-      password: employee.user?.password ? '********' : '',
-      phone: employee.user?.phoneNumber || employee.phone || '',
-      address: employee.address || '',
-      dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',
-      hireDate: employee.hireDate?.toISOString().split('T')[0] || '',
-      department: employee.user?.department || employee.department || '',
-      position: employee.user?.position || employee.position || '',
-      manager: employee.manager || '',
-      salary: employee.user?.salary || employee.salary || '',
-      bio: employee.bio || '',
-      avatar: employee.avatar || '',
+      password: employee.user?.password ? "********" : "",
+      phone: employee.user?.phoneNumber || employee.phone || "",
+      address: employee.address || "",
+      dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
+      hireDate: employee.hireDate?.toISOString().split("T")[0] || "",
+      department: employee.user?.department || employee.department || "",
+      position: employee.user?.position || employee.position || "",
+      manager: employee.manager || "",
+      salary: employee.user?.salary || employee.salary || "",
+      bio: employee.bio || "",
+      avatar: employee.avatar || "",
       skills: employee.skills,
       education: employee.education || [],
       experience: employee.experience || [],
       resume: employee.resume || null,
     });
-  } catch (error) {
-    console.error('Error fetching employee:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error("Error fetching employee:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -149,38 +157,44 @@ export async function POST(req: NextRequest) {
     const session: any = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     if (!prisma || !prisma.employee) {
-      console.error('Prisma client or Employee model is not properly initialized');
-      return NextResponse.json({ error: 'Database configuration error' }, { status: 500 });
+      console.error(
+        "Prisma client or Employee model is not properly initialized"
+      );
+      return NextResponse.json(
+        { error: "Database configuration error" },
+        { status: 500 }
+      );
     }
 
     const data: EmployeeData = await req.json();
 
     if (!data.firstName || !data.lastName || !data.email) {
       return NextResponse.json(
-        { error: 'Missing required fields: firstName, lastName, or email' },
+        { error: "Missing required fields: firstName, lastName, or email" },
         { status: 400 }
       );
     }
 
     // Validate password only if provided and not masked
-    if (data.password && data.password !== '********') {
+    if (data.password && data.password !== "********") {
       if (data.password.length < 8) {
         return NextResponse.json(
-          { error: 'Password must be at least 8 characters long' },
+          { error: "Password must be at least 8 characters long" },
           { status: 400 }
         );
       }
       // Additional password validation (e.g., complexity)
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!passwordRegex.test(data.password)) {
         return NextResponse.json(
           {
             error:
-              'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+              "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
           },
           { status: 400 }
         );
@@ -189,7 +203,7 @@ export async function POST(req: NextRequest) {
 
     const existingEmployee = await prisma.employee.findFirst({
       where: { employeeId: session.user.id },
-      include: { user: true }
+      include: { user: true },
     });
 
     let employee;
@@ -201,13 +215,13 @@ export async function POST(req: NextRequest) {
         lastName: data.lastName,
         email: data.email,
         phoneNumber: data.phone,
-        salary: data.salary
+        salary: data.salary,
       };
 
       // Handle position as array (convert string to array if needed)
       if (data.position) {
-        userData.position = Array.isArray(data.position) 
-          ? data.position 
+        userData.position = Array.isArray(data.position)
+          ? data.position
           : [data.position];
       }
 
@@ -219,13 +233,13 @@ export async function POST(req: NextRequest) {
       }
 
       // Hash password only if provided and not masked
-      if (data.password && data.password !== '********') {
+      if (data.password && data.password !== "********") {
         userData.password = await bcrypt.hash(data.password, 10);
       }
 
       const updatedUser = await tx.user.update({
         where: { id: session.user.id },
-        data: userData
+        data: userData,
       });
 
       const employeeData = {
@@ -240,13 +254,13 @@ export async function POST(req: NextRequest) {
         education: data.education || [],
         experience: data.experience || [],
         resume: data.resume || null,
-        manager: data.manager
+        manager: data.manager,
       };
 
       if (existingEmployee) {
         employee = await tx.employee.update({
           where: { id: existingEmployee.id },
-          data: employeeData
+          data: employeeData,
         });
       } else {
         employee = await tx.employee.create({
@@ -254,16 +268,16 @@ export async function POST(req: NextRequest) {
             employeeId: session.user.id,
             ...employeeData,
             user: {
-              connect: { id: session.user.id }
-            }
-          }
+              connect: { id: session.user.id },
+            },
+          },
         });
 
         await tx.user.update({
           where: { id: session.user.id },
           data: {
-            employeeId: employee.id
-          }
+            employeeId: employee.id,
+          },
         });
       }
 
@@ -278,36 +292,39 @@ export async function POST(req: NextRequest) {
       employeeId: employee.employeeId,
       firstName: user.firstName || employee.firstName,
       lastName: user.lastName || employee.lastName,
-      email: user.email || '',
-      password: '********', // Always return masked password
-      phone: user.phoneNumber || '',
-      address: employee.address || '',
-      dateOfBirth: employee.dateOfBirth?.toISOString().split('T')[0] || '',
-      hireDate: employee.hireDate?.toISOString().split('T')[0] || '',
+      email: user.email || "",
+      password: "********", // Always return masked password
+      phone: user.phoneNumber || "",
+      address: employee.address || "",
+      dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
+      hireDate: employee.hireDate?.toISOString().split("T")[0] || "",
       department: user.department || [],
       position: user.position || [],
-      salary: user.salary || '',
-      bio: employee.bio || '',
-      avatar: employee.avatar || '',
+      salary: user.salary || "",
+      bio: employee.bio || "",
+      avatar: employee.avatar || "",
       skills: employee.skills,
       education: employee.education || [],
       experience: employee.experience || [],
-      resume: employee.resume || null
+      resume: employee.resume || null,
     });
   } catch (error: any) {
-    console.error('Error creating/updating employee:', error);
+    console.error("Error creating/updating employee:", error);
     if (
-      error.message === 'Password must be at least 8 characters long' ||
-      error.message.includes('Password must contain')
+      error.message === "Password must be at least 8 characters long" ||
+      error.message.includes("Password must contain")
     ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    if (error.code === 'P2002') {
+    if (error.code === "P2002") {
       return NextResponse.json(
-        { error: 'Employee ID or email already exists' },
+        { error: "Employee ID or email already exists" },
         { status: 409 }
       );
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }

@@ -137,7 +137,7 @@ export default function Development() {
               Personalized skill development for {employee_name}
             </p>
           </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+          {/* <div className="flex items-center space-x-3 mt-4 sm:mt-0">
             <Button variant="outline">
               <Calendar className="w-4 h-4 mr-2" />
               Schedule Review
@@ -146,7 +146,7 @@ export default function Development() {
               <Target className="w-4 h-4 mr-2" />
               Set Goals
             </Button>
-          </div>
+          </div> */}
         </div>
 
         <Tabs

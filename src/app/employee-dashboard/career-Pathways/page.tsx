@@ -205,7 +205,7 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 100 &&
+        document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
         !isFetching
       ) {
@@ -280,10 +280,10 @@ export default function CareerPathways() {
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <Button variant="outline">
+            {/* <Button variant="outline">
               <Filter className="w-4 h-4 mr-2" />
               Advanced Filters
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -394,11 +394,10 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${
-                          savedJobs.includes(career.id)
-                            ? "fill-current text-primary"
-                            : ""
-                        }`}
+                        className={`w-4 h-4 ${savedJobs.includes(career.id)
+                          ? "fill-current text-primary"
+                          : ""
+                          }`}
                       />
                     </Button>
                   </div>
@@ -448,9 +447,9 @@ export default function CareerPathways() {
                     View Details
                     <ExternalLink className="w-3 h-3 ml-2" />
                   </Button>
-                  <Button size="sm" className="btn-gradient">
+                  {/* <Button size="sm" className="btn-gradient">
                     Explore Path
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>

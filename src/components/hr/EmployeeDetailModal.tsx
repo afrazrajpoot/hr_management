@@ -275,7 +275,7 @@ export default function EmployeeDetailModal({
                       )}
                     </div>
 
-                    <div className="group">
+                    {/* <div className="group">
                       <div className="flex items-center gap-2 mb-2">
                         <Award className="h-4 w-4" />
                         <p className="text-sm font-medium">Employee ID</p>
@@ -283,7 +283,7 @@ export default function EmployeeDetailModal({
                       <p className="font-semibold px-3 py-2 rounded-lg">
                         {employee.employee?.id || "N/A"}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
 
                   {isEditing && (
@@ -386,14 +386,14 @@ export default function EmployeeDetailModal({
                   </CardHeader>
                   <CardContent className="pt-6">
                     <div className="flex flex-wrap gap-3">
-                      {employee.employee.skills.map(
-                        (skill: string, index: number) => (
+                      {employee?.employee?.skills?.map(
+                        (skill: { name: string; proficiency: number }, index: number) => (
                           <Badge
                             key={index}
                             variant="secondary"
                             className="px-3 py-1 text-sm font-medium"
                           >
-                            {skill}
+                            {skill ? skill?.name : "N/A"}
                           </Badge>
                         )
                       )}

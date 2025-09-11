@@ -180,7 +180,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
             <Button asChild className="btn-gradient">
-              <Link href="/assessment">
+              <Link href="/employee-dashboard/assessment">
                 <ClipboardList className="w-4 h-4 mr-2" />
                 Continue Assessment
               </Link>

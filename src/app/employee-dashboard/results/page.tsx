@@ -226,16 +226,16 @@ export default function Results() {
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
-                    selectedAssessment.createdAt
-                  ).toLocaleDateString()}`
+                  selectedAssessment.createdAt
+                ).toLocaleDateString()}`
                 : "No assessments completed yet"}
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <Button variant="outline" disabled={!selectedAssessment}>
+            {/* <Button variant="outline" disabled={!selectedAssessment}>
               <Share2 className="w-4 h-4 mr-2" />
               Share Results
-            </Button>
+            </Button> */}
             <Button className="btn-gradient" disabled={!selectedAssessment}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
@@ -877,11 +877,10 @@ export default function Results() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedAssessment?.id === assessment.id
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
                         ? "bg-primary/10 border-primary"
                         : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                      }`}
                     onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>
