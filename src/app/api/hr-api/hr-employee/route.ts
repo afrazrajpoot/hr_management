@@ -7,7 +7,7 @@ interface CustomSession {
   user?: { id: string };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // 1. Get the authenticated session
     const session: CustomSession | null = await getServerSession(authOptions);
@@ -16,9 +16,40 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Fetch employees (users under this HR) with their employee profile
+    // Parse query parameters for pagination and filters
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
+    const searchTerm = url.searchParams.get("search") || "";
+    const department = url.searchParams.get("department") || "";
+    const risk = url.searchParams.get("risk") || "";
+    const status = url.searchParams.get("status") || "";
+
+    // Build where clause for filters
+    const whereClause: any = { hrId: session.user.id };
+    if (searchTerm) {
+      whereClause.OR = [
+        { firstName: { contains: searchTerm, mode: "insensitive" } },
+        { lastName: { contains: searchTerm, mode: "insensitive" } },
+        { email: { contains: searchTerm, mode: "insensitive" } },
+        { position: { hasSome: [searchTerm] } },
+      ];
+    }
+    if (department && department !== "All Departments") {
+      whereClause.department = { hasSome: [department] };
+    }
+
+    // 2. Fetch total count of employees with filters
+    const totalEmployees = await prisma.user.count({
+      where: whereClause,
+    });
+
+    // 3. Fetch paginated employees with filters
     const employees = await prisma.user.findMany({
-      where: { hrId: session.user.id },
+      where: whereClause,
+      skip,
+      take: limit,
       select: {
         id: true,
         firstName: true,
@@ -27,7 +58,7 @@ export async function GET() {
         salary: true,
         department: true,
         position: true,
-        employeeId: true, // Included for debugging
+        employeeId: true,
         employee: {
           select: {
             id: true,
@@ -36,20 +67,22 @@ export async function GET() {
             lastName: true,
             skills: true,
             education: true,
-            experience: true
+            experience: true,
           },
         },
       },
     });
 
-    // 3. Log users with missing employee data for debugging
+    // 4. Log users with missing employee data for debugging
     employees.forEach((emp: any) => {
       if (!emp.employee) {
-        console.warn(`User ${emp.id} (${emp.email}) has no employee record. employeeId: ${emp.employeeId}`);
+        console.warn(
+          `User ${emp.id} (${emp.email}) has no employee record. employeeId: ${emp.employeeId}`
+        );
       }
     });
 
-    // 4. Fetch all reports under this HR
+    // 5. Fetch all reports under this HR (for now, fetch all; optimize later if needed)
     const reports = await prisma.individualEmployeeReport.findMany({
       where: { hrId: session.user.id },
       select: {
@@ -70,7 +103,7 @@ export async function GET() {
       },
     });
 
-    // 5. Group reports by userId
+    // 6. Group reports by userId
     const grouped: Record<string, any> = {};
     for (const emp of employees) {
       grouped[emp.id] = { ...emp, reports: [] };
@@ -84,8 +117,22 @@ export async function GET() {
     // ✅ Removed filtering, now return all employees (even without reports)
     const result = Object.values(grouped);
 
-    // 6. Return the response
-    return NextResponse.json({ employees: result }, { status: 200 });
+    // 7. Calculate total pages
+    const totalPages = Math.ceil(totalEmployees / limit);
+
+    // 8. Return the response with pagination info
+    return NextResponse.json(
+      {
+        employees: result,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalEmployees,
+          limit,
+        },
+      },
+      { status: 200 }
+    );
   } catch (err: any) {
     console.error("Error in GET endpoint:", err);
     return NextResponse.json(

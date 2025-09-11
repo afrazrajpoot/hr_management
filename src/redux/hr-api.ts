@@ -1,18 +1,32 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const hrApi = createApi({
-  reducerPath: 'hrApi',
+  reducerPath: "hrApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
+    baseUrl: "/api",
     prepareHeaders: (headers) => {
       return headers;
     },
   }),
-  tagTypes: ['Employee'], // ✅ define tag
+  tagTypes: ["Employee"], // ✅ define tag
   endpoints: (builder) => ({
-    getHrEmployee: builder.query<void, void>({
-      query: () => '/hr-api/hr-employee',
-      providesTags: ['Employee'], // ✅ provides tag
+    getHrEmployee: builder.query<
+      {
+        employees: any[];
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalEmployees: number;
+          limit: number;
+        };
+      },
+      { page?: number; limit?: number; search?: string; department?: string }
+    >({
+      query: ({ page = 1, limit = 10, search = "", department = "" }) =>
+        `/hr-api/hr-employee?page=${page}&limit=${limit}&search=${encodeURIComponent(
+          search
+        )}&department=${encodeURIComponent(department)}`,
+      providesTags: ["Employee"], // ✅ provides tag
     }),
     updateEmployee: builder.mutation<
       { message: string; department: any; user: { salary: number } },
@@ -25,15 +39,16 @@ export const hrApi = createApi({
         promotion: string;
       },
       {
-        transfer: any; promotion: any
+        transfer: any;
+        promotion: any;
       }
     >({
       query: (body) => ({
-        url: '/hr-api/update-mobility',
-        method: 'POST',
+        url: "/hr-api/update-mobility",
+        method: "POST",
         body,
       }),
-      invalidatesTags: ['Employee'], // ✅ invalidates cache
+      invalidatesTags: ["Employee"], // ✅ invalidates cache
     }),
   }),
 });

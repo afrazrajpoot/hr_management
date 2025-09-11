@@ -108,13 +108,12 @@ export default function UploadJobsPage() {
         {/* Upload Area */}
         <div className="space-y-6">
           <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive
-                ? "border-primary bg-primary/5"
-                : file
+            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
+              ? "border-primary bg-primary/5"
+              : file
                 ? "border-green-500 bg-green-500/5"
                 : "border-border hover:border-primary/50"
-            }`}
+              }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
@@ -124,7 +123,7 @@ export default function UploadJobsPage() {
               type="file"
               id="file"
               onChange={handleFileChange}
-              accept=".csv,.xls,.xlsx,.odt,.pdf"
+              accept=".csv,.xls,.xlsx,.odt,.ods,.pdf"
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
 

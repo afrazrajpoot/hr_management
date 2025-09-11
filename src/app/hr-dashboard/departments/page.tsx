@@ -58,7 +58,7 @@ interface DepartmentCardData {
   totalOutgoing: number;
 }
 
-interface CustomTooltipProps extends TooltipProps<number, string> {}
+interface CustomTooltipProps extends TooltipProps<number, string> { }
 
 const DepartmentDashboard = () => {
   const { departmentCardData, departmentData } = useSocket();
@@ -307,7 +307,7 @@ const DepartmentDashboard = () => {
                         ))}
                       </Pie>
                       <Tooltip content={<CustomTooltip />} />
-                      <Legend />
+                      {/* <Legend /> */}
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

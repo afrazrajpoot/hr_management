@@ -47,7 +47,7 @@ const mainNavItems = [
 
 const accountItems = [
   { title: "Profile", url: "/dashboard/profile", icon: User },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  // { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 export function HRSidebar() {

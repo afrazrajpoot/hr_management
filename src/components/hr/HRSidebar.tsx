@@ -23,7 +23,7 @@ import { useSocket } from "@/context/SocketContext";
 
 const bottomNavigation = [
   { name: "Profile", href: "/hr-dashboard/profile", icon: User },
-  { name: "Settings", href: "/hr-dashboard/settings", icon: Settings },
+  // { name: "Settings", href: "/hr-dashboard/settings", icon: Settings },
 ];
 
 interface HRSidebarProps {
@@ -47,9 +47,9 @@ export default function HRSidebar({
   const completedAssessments =
     dashboardData && Array.isArray(dashboardData)
       ? dashboardData.reduce(
-          (sum, dept) => sum + (dept.completed_assessments || 0),
-          0
-        )
+        (sum, dept) => sum + (dept.completed_assessments || 0),
+        0
+      )
       : 0;
 
   const departmentCount =
@@ -87,7 +87,7 @@ export default function HRSidebar({
       name: "Retention Risk",
       href: "/hr-dashboard/retention-risk",
       icon: AlertTriangle,
-      badge: "31",
+      // badge: "31",
     },
     {
       name: "Internal Mobility",

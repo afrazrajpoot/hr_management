@@ -167,6 +167,11 @@ export default function Assessment() {
   return (
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto bg-[#081229]">
+        {isSubmitting && (
+          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+            <Loader2 className="w-16 h-16 animate-spin text-white" />
+          </div>
+        )}
         {analysisResults ? (
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
@@ -321,7 +326,6 @@ export default function Assessment() {
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Submitting...
                       </>
                     ) : (

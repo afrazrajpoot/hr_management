@@ -34,10 +34,10 @@ const pageConfig: any = {
     title: "My Profile",
     subtitle: "Manage your account settings",
   },
-  "/hr-dashboard/settings": {
-    title: "Settings",
-    subtitle: "System preferences and configurations",
-  },
+  // "/hr-dashboard/settings": {
+  //   title: "Settings",
+  //   subtitle: "System preferences and configurations",
+  // },
   "/hr-dashboard/upload-jobs": {
     title: "Upload Jobs",
     subtitle: "System preferences and configurations",

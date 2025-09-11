@@ -1,5 +1,5 @@
 "use client";
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -242,13 +242,12 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           <Calendar className="h-4 w-4" />
           <span>
             {status === "Completed"
-              ? `Completed: ${
-                  firstReport.createdAt
-                    ? new Date(firstReport.createdAt)
-                        .toISOString()
-                        .split("T")[0]
-                    : "Unknown"
-                }`
+              ? `Completed: ${firstReport.createdAt
+                ? new Date(firstReport.createdAt)
+                  .toISOString()
+                  .split("T")[0]
+                : "Unknown"
+              }`
               : "Not Started"}
           </span>
         </div>
@@ -345,38 +344,40 @@ export default function Assessments() {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>({
+    page: currentPage,
+    limit,
+    search: searchTerm,
+    department: departmentFilter === "all" ? "" : departmentFilter
+  });
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, departmentFilter]);
 
   // Transform API data into employee format with grouped reports
   const employeeData =
     data?.employees?.map((employee: any) => ({
       id: employee.id,
-      name: `${employee.firstName} ${
-        employee.lastName !== "Not provide" ? employee.lastName : ""
-      }`.trim(),
+      name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
+        }`.trim(),
       department: employee.department || "Unknown",
       position: employee.position || "Unknown",
       reports: employee.reports || [],
-      avatar: `${employee.firstName[0]}${
-        employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-      }`,
+      avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+        }`,
     })) || [];
 
   const filteredEmployees = employeeData.filter((employee: any) => {
-    const matchesSearch =
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "Completed" && employee.reports.length > 0) ||
       (statusFilter === "Not Started" && employee.reports.length === 0);
 
-    const matchesDepartment =
-      departmentFilter === "all" || employee.department === departmentFilter;
-
-    return matchesSearch && matchesStatus && matchesDepartment;
+    return matchesStatus;
   });
 
   const handleViewDetails = (assessment: any) => {
@@ -404,22 +405,22 @@ export default function Assessments() {
   const inProgressCount = 0; // No in-progress reports in data
   const avgScore = completedCount
     ? Math.round(
-        employeeData.reduce(
-          (sum: number, emp: any) =>
-            sum +
-            emp.reports.reduce(
-              (rSum: number, report: any) =>
-                rSum +
-                parseInt(
-                  report.geniusFactorProfileJson.primary_genius_factor.match(
-                    /\d+/
-                  )?.[0] || "0"
-                ),
-              0
-            ),
-          0
-        ) / completedCount
-      )
+      employeeData.reduce(
+        (sum: number, emp: any) =>
+          sum +
+          emp.reports.reduce(
+            (rSum: number, report: any) =>
+              rSum +
+              parseInt(
+                report.geniusFactorProfileJson.primary_genius_factor.match(
+                  /\d+/
+                )?.[0] || "0"
+              ),
+            0
+          ),
+        0
+      ) / completedCount
+    )
     : 0;
 
   if (isLoading) {
@@ -459,7 +460,7 @@ export default function Assessments() {
         <div id="assessments-header">
           <h1 className="text-3xl font-bold tracking-tight">Assessments</h1>
           <p className="text-muted-foreground">
-            Manage and review all career assessments
+            Manage and review all career assessments ({data?.pagination?.totalEmployees || 0} employees)
           </p>
         </div>
 
@@ -584,6 +585,36 @@ export default function Assessments() {
             />
           ))}
         </div>
+
+        {/* Pagination */}
+        {data?.pagination && (
+          <div className="flex justify-between items-center mt-4">
+            <div className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, data.pagination.totalEmployees)} of {data.pagination.totalEmployees} employees
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="flex items-center px-3 text-sm">
+                Page {currentPage} of {data.pagination.totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, data.pagination.totalPages))}
+                disabled={currentPage === data.pagination.totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* No results */}
         {filteredEmployees.length === 0 && (

@@ -81,8 +81,10 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <Link href="/hr-dashboard/profile">Profile</Link>
+                <Link className="flex items-center w-full" href="/hr-dashboard/profile">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell className="mr-2 h-4 w-4" />

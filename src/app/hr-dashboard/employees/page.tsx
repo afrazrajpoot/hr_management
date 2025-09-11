@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -70,7 +70,14 @@ export default function Employees() {
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>({
+    page: currentPage,
+    limit,
+    search: searchTerm,
+    department: selectedDepartment
+  });
   const { data: sessionData } = useSession();
   const uniqueDepartments = useMemo(() => {
     const depts = new Set<string>();
@@ -95,19 +102,6 @@ export default function Employees() {
     if (!data?.employees) return [];
 
     return data.employees.filter((employee: any) => {
-      const fullName = `${employee.firstName} ${
-        employee.lastName !== "Not provide" ? employee.lastName : ""
-      }`;
-      const matchesSearch =
-        fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (employee.employee?.position || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-      const dept =
-        employee.employee?.department || employee.reports[0]?.departement;
-      const matchesDepartment =
-        selectedDepartment === "All Departments" || dept === selectedDepartment;
       const risk =
         employee.reports[0]?.currentRoleAlignmentAnalysisJson
           .retention_risk_level;
@@ -117,9 +111,14 @@ export default function Employees() {
       const matchesStatus =
         selectedStatus === "All Statuses" || status === selectedStatus;
 
-      return matchesSearch && matchesDepartment && matchesRisk && matchesStatus;
+      return matchesRisk && matchesStatus;
     });
-  }, [data, searchTerm, selectedDepartment, selectedRisk, selectedStatus]);
+  }, [data, selectedRisk, selectedStatus]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDepartment, selectedRisk, selectedStatus]);
   // console.log(filteredEmployees[0].department[0], "filtered employees");
   const handleViewEmployee = (employee: any) => {
     setSelectedEmployee(employee);
@@ -152,7 +151,7 @@ export default function Employees() {
           <div>
             <h2 className="text-2xl font-bold">Employee Management</h2>
             <p className="text-muted-foreground">
-              {filteredEmployees.length} employees found
+              {data?.pagination?.totalEmployees || 0} employees found
             </p>
           </div>
 
@@ -256,21 +255,18 @@ export default function Employees() {
                           <Avatar className="h-10 w-10">
                             <AvatarImage src="/api/placeholder/40/40" />
                             <AvatarFallback>
-                              {`${employee.firstName[0]}${
-                                employee.lastName !== "Not provide"
+                              {`${employee.firstName[0]}${employee.lastName !== "Not provide"
                                   ? employee.lastName[0]
                                   : ""
-                              }`}
+                                }`}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{`${
-                              employee.firstName
-                            } ${
-                              employee.lastName !== "Not provide"
+                            <p className="font-medium">{`${employee.firstName
+                              } ${employee.lastName !== "Not provide"
                                 ? employee.lastName
                                 : ""
-                            }`}</p>
+                              }`}</p>
                             <p className="text-sm text-muted-foreground">
                               {employee.email}
                             </p>
@@ -335,6 +331,36 @@ export default function Employees() {
           // hrId={sessionData?.user?.id || ""}
           onClose={() => setIsModalOpen(false)}
         />
+
+        {/* Pagination */}
+        {data?.pagination && (
+          <div className="flex justify-between items-center mt-4">
+            <div className="text-sm text-muted-foreground">
+              Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, data.pagination.totalEmployees)} of {data.pagination.totalEmployees} employees
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <span className="flex items-center px-3 text-sm">
+                Page {currentPage} of {data.pagination.totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, data.pagination.totalPages))}
+                disabled={currentPage === data.pagination.totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </HRLayout>
   );
