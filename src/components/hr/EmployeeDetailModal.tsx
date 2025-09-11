@@ -54,7 +54,7 @@ export default function EmployeeDetailModal({
 }: EmployeeDetailModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateEmployee, { isLoading }] = useUpdateEmployeeMutation();
-  console.log("Employee Data:", employee);
+
   const {
     control,
     handleSubmit,
@@ -64,12 +64,18 @@ export default function EmployeeDetailModal({
     clearErrors,
   } = useForm<FormData>();
 
+  // Get the last position and department from arrays
+  const getLastItem = (array: any[] | undefined) => {
+    if (!array || array.length === 0) return "";
+    return array[array.length - 1];
+  };
+
   // Reset form with employee data when modal opens or employee changes
   useEffect(() => {
     if (employee) {
       reset({
-        department: employee.department || "",
-        position: employee.position || "",
+        department: getLastItem(employee.department) || "",
+        position: getLastItem(employee.position) || "",
         salary: employee.salary || "",
         transfer: employee.transfer || false,
         promotion: employee.promotion || false,
@@ -114,8 +120,8 @@ export default function EmployeeDetailModal({
     if (isEditing) {
       // Reset form to original employee data when canceling edit
       reset({
-        department: employee.department || "",
-        position: employee.position || "",
+        department: getLastItem(employee.department) || "",
+        position: getLastItem(employee.position) || "",
         salary: employee.salary || "",
         transfer: employee.transfer || false,
         promotion: employee.promotion || false,
@@ -206,7 +212,7 @@ export default function EmployeeDetailModal({
                         />
                       ) : (
                         <p className="font-semibold px-3 py-2 rounded-lg">
-                          {employee.position}
+                          {getLastItem(employee.position) || "N/A"}
                         </p>
                       )}
                       {errors.position && (
@@ -233,7 +239,7 @@ export default function EmployeeDetailModal({
                         />
                       ) : (
                         <p className="font-semibold px-3 py-2 rounded-lg">
-                          {employee.department}
+                          {getLastItem(employee.department) || "N/A"}
                         </p>
                       )}
                       {errors.department && (
@@ -387,7 +393,10 @@ export default function EmployeeDetailModal({
                   <CardContent className="pt-6">
                     <div className="flex flex-wrap gap-3">
                       {employee?.employee?.skills?.map(
-                        (skill: { name: string; proficiency: number }, index: number) => (
+                        (
+                          skill: { name: string; proficiency: number },
+                          index: number
+                        ) => (
                           <Badge
                             key={index}
                             variant="secondary"

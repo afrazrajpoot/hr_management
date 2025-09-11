@@ -69,13 +69,7 @@ export const authOptions: AuthOptions = {
 
         if (!user) {
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
-          console.log('Creating user with data:', {
-            email: credentials.email,
-            firstName: credentials.firstName,
-            lastName: credentials.lastName,
-            phoneNumber: credentials.phoneNumber,
-            role,
-          });
+      
           user = await prisma.user.create({
             data: {
               email: credentials.email,
@@ -100,12 +94,7 @@ export const authOptions: AuthOptions = {
 
           // Update user fields if provided
           if (credentials.firstName || credentials.lastName || credentials.phoneNumber) {
-            console.log('Updating user with data:', {
-              email: credentials.email,
-              firstName: credentials.firstName,
-              lastName: credentials.lastName,
-              phoneNumber: credentials.phoneNumber,
-            });
+          
             user = await prisma.user.update({
               where: { email: credentials.email },
               data: {

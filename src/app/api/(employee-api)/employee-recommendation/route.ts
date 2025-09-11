@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       startIndex,
       endIndex
     );
-    console.log("Paginated Recommendations:", recommendations);
+
     return NextResponse.json({
       recommendations: paginatedRecommendations,
       total: recommendations.length,

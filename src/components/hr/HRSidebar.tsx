@@ -104,6 +104,11 @@ export default function HRSidebar({
       href: "/hr-dashboard/upload-jobs",
       icon: FileText,
     },
+    {
+      name: "Profile",
+      href: "/hr-dashboard/profile",
+      icon: User,
+    },
   ];
 
   const isActive = (path: string) => {

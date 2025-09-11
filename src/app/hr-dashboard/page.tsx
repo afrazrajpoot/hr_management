@@ -117,7 +117,7 @@ const fallbackDepartmentData = [
 
 export default function Dashboard() {
   const { socket, isConnected, dashboardData } = useSocket();
-  console.log("Dashboard Data:", dashboardData);
+
   const { data: session } = useSession();
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 

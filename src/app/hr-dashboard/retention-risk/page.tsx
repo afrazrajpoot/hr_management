@@ -232,7 +232,7 @@ export default function RetentionRisk() {
       processRiskData(dashboardData);
     } else {
       // Use fallback data if no valid dashboard data
-      console.log("Using fallback data - dashboardData is not an array");
+
       setRiskData(fallbackRiskData);
     }
     setIsLoading(false);
@@ -425,11 +425,16 @@ export default function RetentionRisk() {
             className="gap-2"
           >
             {isAnalysisLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
             ) : (
-              <Brain className="h-4 w-4" />
+              <>
+                <Brain className="h-4 w-4" />
+                Analyze with AI
+              </>
             )}
-            AI Analysis
           </Button>
         </div>
 
@@ -634,9 +639,21 @@ export default function RetentionRisk() {
               Get personalized retention risk recommendations by running our AI
               analysis on your department data.
             </p>
-            <Button onClick={handleAnalyzeWithAI} disabled={!dashboardData}>
-              <Brain className="h-4 w-4 mr-2" />
-              Analyze with AI
+            <Button
+              onClick={handleAnalyzeWithAI}
+              disabled={!dashboardData || isAnalysisLoading}
+            >
+              {isAnalysisLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Analyze with AI
+                </>
+              )}
             </Button>
           </div>
         )}

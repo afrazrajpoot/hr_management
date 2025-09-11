@@ -37,6 +37,7 @@ import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
+import PDFReport from "@/components/employee/PDFReport";
 
 interface GeniusFactorProfile {
   description: string;
@@ -226,8 +227,8 @@ export default function Results() {
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
-                  selectedAssessment.createdAt
-                ).toLocaleDateString()}`
+                    selectedAssessment.createdAt
+                  ).toLocaleDateString()}`
                 : "No assessments completed yet"}
             </p>
           </div>
@@ -236,10 +237,8 @@ export default function Results() {
               <Share2 className="w-4 h-4 mr-2" />
               Share Results
             </Button> */}
-            <Button className="btn-gradient" disabled={!selectedAssessment}>
-              <Download className="w-4 h-4 mr-2" />
-              Download PDF
-            </Button>
+
+            <PDFReport assessment={selectedAssessment} />
           </div>
         </div>
 
@@ -877,10 +876,11 @@ export default function Results() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedAssessment?.id === assessment.id
                         ? "bg-primary/10 border-primary"
                         : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
+                    }`}
                     onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>

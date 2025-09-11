@@ -97,9 +97,11 @@ export default function DepartmentModal({
 
   useEffect(() => {
     if (isOpen && employee?.department) {
+      // Reset departmentStats when dialog opens
+      setDepartmentStats(null);
       fetchDepartmentStats();
     }
-  }, [isOpen, employee]);
+  }, [isOpen, employee?.department, hrId]);
 
   const fetchDepartmentStats = async () => {
     if (!employee?.department) return;

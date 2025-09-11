@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function GET(){
     try{
           const session:any | null = await getServerSession(authOptions);
-                    console.log(session.user.id,'server session');
+                  
                    if (!session?.user?.id) {
                      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
                    }
@@ -19,7 +19,7 @@ export async function GET(){
                        data:assessmentResult
                    })
     }catch(err){
-        console.log(err);
+     
         return NextResponse.json({error:"Internal Server Error"},{status:500})
     }
 }

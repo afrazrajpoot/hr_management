@@ -50,7 +50,7 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
   };
 
   return (
-    <Card className="hr-card">
+    <Card className="bg-[#081229]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
@@ -67,7 +67,7 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
             return (
               <Card
                 key={user.id}
-                className="group hover:shadow-lg transition-all duration-300"
+                className="group hover:shadow-lg transition-all duration-300 bg-gray-800 border-gray-700"
               >
                 <CardContent className="p-6">
                   {/* Header */}

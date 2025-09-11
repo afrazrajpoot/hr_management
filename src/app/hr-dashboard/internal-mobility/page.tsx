@@ -172,7 +172,7 @@ export default function InternalMobility() {
   const { internalMobility } = useSocket() as {
     internalMobility: InternalMobilityData | null;
   };
-  console.log("Received internal mobility data:", internalMobility);
+
   const [error, setError] = useState<string | null>(null);
   const [retentionRate, setRetentionRate] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -451,7 +451,7 @@ export default function InternalMobility() {
         {internalMobility?.users && internalMobility.users.length > 0 && (
           <>
             {/* Search Bar */}
-            <Card>
+            <Card className="bg-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <div className="max-w-md space-y-2">
                   <Label

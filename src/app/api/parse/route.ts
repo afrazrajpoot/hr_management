@@ -33,12 +33,12 @@ export async function POST(req: NextRequest) {
     // Iterate over each file's parsed_json
     for (const fileData of parsedData) {
       if (fileData.parsed_json && Array.isArray(fileData.parsed_json.companies)) {
-        console.log(`Found ${fileData.parsed_json.companies.length} companies in this file`);
+
         
         // Save each company individually
         for (const company of fileData.parsed_json.companies) {
           try {
-            console.log('Saving company:', company.name);
+          
             
             const savedCompany = await prisma.company.create({
               data: {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
               },
             }as any);
             
-            console.log('Successfully saved company:', savedCompany.id);
+        
             savedCompanies++;
           } catch (dbError) {
             console.error('Database save error for company:', company.name, dbError);
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    console.log(`Total companies saved: ${savedCompanies}`);
+   
 
     return NextResponse.json({
       status: 'success',
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       companiesSaved: savedCompanies,
     });
   } catch (error) {
-    console.error('API Error:', error);
+
     return NextResponse.json(
       {
         status: 'error',

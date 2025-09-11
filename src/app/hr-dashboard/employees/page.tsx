@@ -332,7 +332,7 @@ export default function Employees() {
         <EmployeeDetailModal
           employee={selectedEmployee}
           isOpen={isModalOpen}
-          hrId={sessionData?.user?.id || ""}
+          // hrId={sessionData?.user?.id || ""}
           onClose={() => setIsModalOpen(false)}
         />
       </div>

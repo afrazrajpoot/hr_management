@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { signOut } from "next-auth/react"; // ✅ import signOut
+import { signOut, useSession } from "next-auth/react"; // ✅ import signOut
+import Link from "next/link";
 
 interface HRTopBarProps {
   title: string;
@@ -21,6 +22,7 @@ interface HRTopBarProps {
 }
 
 export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
+  const { data: session } = useSession();
   return (
     <div className="border-b border-border px-6 py-4 dark:bg-[#081229] bg-white">
       <div className="flex items-center justify-between">
@@ -66,10 +68,10 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     src="/api/placeholder/32/32"
                     alt="Sarah Johnson"
                   />
-                  <AvatarFallback>SJ</AvatarFallback>
+                  <AvatarFallback>{session?.user?.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">Sarah Johnson</p>
+                  <p className="text-sm font-medium">{session?.user?.name}</p>
                   <p className="text-xs text-muted-foreground">HR Manager</p>
                 </div>
                 <ChevronDown className="h-4 w-4" />
@@ -80,7 +82,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <Link href="/hr-dashboard/profile">Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell className="mr-2 h-4 w-4" />
