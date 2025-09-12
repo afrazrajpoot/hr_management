@@ -136,7 +136,7 @@ export default function ChatPopup({
         dashboard_data: dashboardData,
       };
 
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch("https://api.geniusfactor.ai/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export default function ChatPopup({
   const clearChat = async () => {
     try {
       await fetch(
-        `http://localhost:8000/api/chat/${hrId}/${encodeURIComponent(
+        `https://api.geniusfactor.ai/api/chat/${hrId}/${encodeURIComponent(
           department.department
         )}`,
         {
@@ -245,16 +245,14 @@ export default function ChatPopup({
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
+                }`}
             >
               <div
-                className={`max-w-[75%] px-4 py-3 rounded-lg shadow-sm ${
-                  message.role === "user"
+                className={`max-w-[75%] px-4 py-3 rounded-lg shadow-sm ${message.role === "user"
                     ? "rounded-br-sm"
                     : "rounded-bl-sm border"
-                }`}
+                  }`}
               >
                 {message.role === "assistant" && (
                   <div className="flex items-center mb-2 pb-2 border-b">

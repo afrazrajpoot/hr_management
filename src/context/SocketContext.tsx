@@ -137,12 +137,12 @@ const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
   notifications: [],
-  subscribeToNotifications: () => {},
-  clearNotifications: () => {},
+  subscribeToNotifications: () => { },
+  clearNotifications: () => { },
   lastNotification: null,
   subscriptionStatus: "disconnected",
   unreadCount: 0,
-  markAsRead: () => {},
+  markAsRead: () => { },
   isRinging: false,
   dashboardData: null,
   roomsData: null,
@@ -328,7 +328,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // console.log("🔌 Initializing Socket.IO connection...");
 
     const socketInstance = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000",
+      process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.geniusfactor.ai",
       {
         transports: ["websocket", "polling"],
         autoConnect: true,
@@ -454,17 +454,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           // Calculate total employees from department metrics
           const totalEmps = data.departmentMetrics
             ? Object.values(data.departmentMetrics).reduce(
-                (sum: number, metrics: any) =>
-                  sum + (metrics.employee_count || 0),
-                0
-              )
+              (sum: number, metrics: any) =>
+                sum + (metrics.employee_count || 0),
+              0
+            )
             : 0;
 
           setTotalEmployees(
             totalEmps ||
-              data.overallMetrics?.total_employee_users ||
-              data.overallMetrics?.total_reports ||
-              0
+            data.overallMetrics?.total_employee_users ||
+            data.overallMetrics?.total_reports ||
+            0
           );
         } else {
           // HR dashboard data handling
@@ -477,14 +477,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             // Fallback: if dashboardData is not an array, try to use departmentMetrics
             const transformedData = data.departmentMetrics
               ? Object.entries(data.departmentMetrics).map(
-                  ([name, metrics]: [string, any]) => ({
-                    name,
-                    completion: metrics.avg_retention_risk || 0,
-                    color: "#2563eb",
-                    completed_assessments: metrics.total_reports || 0,
-                    total_employees: metrics.employee_count || 0,
-                  })
-                )
+                ([name, metrics]: [string, any]) => ({
+                  name,
+                  completion: metrics.avg_retention_risk || 0,
+                  color: "#2563eb",
+                  completed_assessments: metrics.total_reports || 0,
+                  total_employees: metrics.employee_count || 0,
+                })
+              )
               : [];
 
             setDashboardData(transformedData);

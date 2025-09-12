@@ -1,5 +1,5 @@
 // lib/features/employee/employeeApiSlice.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 interface RecommendedCourse {
   title: string;
@@ -29,22 +29,25 @@ interface EmployeeLearningResponse {
 }
 
 export const employeePythonApi = createApi({
-  reducerPath: 'employeePythonApi',
+  reducerPath: "employeePythonApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000',
+    baseUrl: "https://api.geniusfactor.ai",
     prepareHeaders: (headers) => {
       return headers;
     },
   }),
-  tagTypes: ['EmployeeLearning'],
+  tagTypes: ["EmployeeLearning"],
 
   endpoints: (builder) => ({
-    getEmployeeLearningDashboard: builder.query<EmployeeLearningResponse, string>({
+    getEmployeeLearningDashboard: builder.query<
+      EmployeeLearningResponse,
+      string
+    >({
       query: (userId) => ({
         url: `/employees/learning-dashboard?user_id=${userId}`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: ['EmployeeLearning'],
+      providesTags: ["EmployeeLearning"],
     }),
   }),
 });

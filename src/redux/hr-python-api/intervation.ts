@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface DepartmentMetrics {
   avg_scores: {
@@ -56,19 +56,21 @@ export interface AnalysisResponse {
 }
 
 export const retentionApi = createApi({
-  reducerPath: 'retentionApi',
+  reducerPath: "retentionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.geniusfactor.ai",
   }),
-  tagTypes: ['RetentionAnalysis'],
+  tagTypes: ["RetentionAnalysis"],
   endpoints: (builder) => ({
-    analyzeRetentionRisk: builder.mutation<AnalysisResponse, DepartmentInput[]>({
-      query: (departments) => ({
-        url: '/api/analysis/retention-risk',
-        method: 'POST',
-        body: departments,
-      }),
-    }),
+    analyzeRetentionRisk: builder.mutation<AnalysisResponse, DepartmentInput[]>(
+      {
+        query: (departments) => ({
+          url: "/api/analysis/retention-risk",
+          method: "POST",
+          body: departments,
+        }),
+      }
+    ),
   }),
 });
 
