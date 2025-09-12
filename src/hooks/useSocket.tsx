@@ -20,6 +20,7 @@ export const useSocket = () => {
   useEffect(() => {
     // Initialize Socket.IO client
     const socketIo = io(SOCKET_SERVER_URL, {
+      transports: ["websocket"],
       autoConnect: true,
     });
 
