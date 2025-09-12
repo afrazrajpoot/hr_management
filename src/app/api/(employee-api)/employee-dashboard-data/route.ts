@@ -42,6 +42,6 @@ export async function GET() {
       { status: 200 }
     );
   } catch (err) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: err.message }, { status: 401 });
   }
 }
