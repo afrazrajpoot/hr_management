@@ -59,7 +59,7 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://127.0.0.1:8000/employees/upload", {
+      const res = await fetch("https://api.geniusfactor.ai/employees/upload", {
         method: "POST",
         body: formData,
       });
@@ -108,13 +108,12 @@ export default function UploadEmployeesPage() {
         {/* Upload Area */}
         <div className="space-y-6">
           <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive
+            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
                 ? "border-primary bg-primary/5"
                 : file
-                ? "border-green-500 bg-green-500/5"
-                : "border-border hover:border-primary/50"
-            }`}
+                  ? "border-green-500 bg-green-500/5"
+                  : "border-border hover:border-primary/50"
+              }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
