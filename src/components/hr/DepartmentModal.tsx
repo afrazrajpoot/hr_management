@@ -109,7 +109,7 @@ export default function DepartmentModal({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `https://api.geniusfactor.ai/departments/aggregate?department=${encodeURIComponent(
+        `https://13.89.121.86/departments/aggregate?department=${encodeURIComponent(
           employee.department
         )}&hrId=${hrId}`
       );
@@ -215,8 +215,8 @@ export default function DepartmentModal({
                             <div
                               key={emp.id}
                               className={`p-3 rounded-lg border ${emp.id === employee.id
-                                  ? "border-primary bg-primary/10"
-                                  : "bg-muted/30"
+                                ? "border-primary bg-primary/10"
+                                : "bg-muted/30"
                                 }`}
                             >
                               <div className="flex justify-between items-center">

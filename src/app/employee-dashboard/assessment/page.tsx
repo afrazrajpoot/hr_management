@@ -34,7 +34,7 @@ const questionsByPart = questions.map((part) => ({
   ),
 }));
 
-const API_URL = `https://api.geniusfactor.ai/analyze/assessment`;
+const API_URL = `https://13.89.121.86/analyze/assessment`;
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);
@@ -363,12 +363,12 @@ export default function Assessment() {
                   <div
                     key={index}
                     className={`w-3 h-3 rounded-full transition-colors ${index === currentQuestionIndex
-                        ? "bg-primary dark:bg-primary"
-                        : index < currentQuestionIndex
-                          ? "bg-success dark:bg-success"
-                          : answers[currentPartQuestions[index].id]
-                            ? "bg-warning dark:bg-warning"
-                            : "bg-muted dark:bg-muted"
+                      ? "bg-primary dark:bg-primary"
+                      : index < currentQuestionIndex
+                        ? "bg-success dark:bg-success"
+                        : answers[currentPartQuestions[index].id]
+                          ? "bg-warning dark:bg-warning"
+                          : "bg-muted dark:bg-muted"
                       }`}
                   />
                 ))}

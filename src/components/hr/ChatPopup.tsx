@@ -136,7 +136,7 @@ export default function ChatPopup({
         dashboard_data: dashboardData,
       };
 
-      const response = await fetch("https://api.geniusfactor.ai/api/chat", {
+      const response = await fetch("https://13.89.121.86/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export default function ChatPopup({
   const clearChat = async () => {
     try {
       await fetch(
-        `https://api.geniusfactor.ai/api/chat/${hrId}/${encodeURIComponent(
+        `https://13.89.121.86/api/chat/${hrId}/${encodeURIComponent(
           department.department
         )}`,
         {
@@ -250,8 +250,8 @@ export default function ChatPopup({
             >
               <div
                 className={`max-w-[75%] px-4 py-3 rounded-lg shadow-sm ${message.role === "user"
-                    ? "rounded-br-sm"
-                    : "rounded-bl-sm border"
+                  ? "rounded-br-sm"
+                  : "rounded-bl-sm border"
                   }`}
               >
                 {message.role === "assistant" && (
