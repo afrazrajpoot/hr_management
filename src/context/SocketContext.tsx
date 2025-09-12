@@ -130,6 +130,7 @@ interface SocketContextType {
   isAdmin: boolean;
   departmentData: DepartmentData[] | null;
   departmentCardData: DepartmentCardData | null;
+  hrNotifications: any[];
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -151,6 +152,7 @@ const SocketContext = createContext<SocketContextType>({
   isAdmin: false,
   departmentData: null,
   departmentCardData: null,
+  hrNotifications: [],
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -178,6 +180,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [roomsData, setRoomsData] = useState<any>(null);
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hrNotifications, setHrNotifications] = useState<Notification[]>([]);
   const { data: session } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -569,6 +572,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
+    // Listen for hr_notification event and save data in state
+    socketInstance.on("hr_notification", (data) => {
+      console.log("📨 HR Notification received:", data);
+      setHrNotifications((prev) => [...prev, data]);
+    });
+
     socketInstance.on("error", (error) => {
       console.error("Socket error:", error);
     });
@@ -605,6 +614,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         isAdmin,
         departmentData,
         departmentCardData,
+        hrNotifications,
       }}
     >
       {children}

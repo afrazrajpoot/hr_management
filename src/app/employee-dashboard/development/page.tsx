@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useGetEmployeeLearningDashboardQuery } from "@/redux/employee-python-api/employee-python-api";
+import Loader from "@/components/Loader";
 
 export default function Development() {
   const { data: session, status: sessionStatus } = useSession();
@@ -54,9 +55,7 @@ export default function Development() {
   if (sessionStatus === "loading") {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -113,9 +112,7 @@ export default function Development() {
   if (isLoading || !employeeData) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
+        <Loader />
       </AppLayout>
     );
   }

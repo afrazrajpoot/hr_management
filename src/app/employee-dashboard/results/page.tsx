@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
 import PDFReport from "@/components/employee/PDFReport";
+import Loader from "@/components/Loader";
 
 interface GeniusFactorProfile {
   description: string;
@@ -182,16 +183,7 @@ export default function Results() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="p-6 flex justify-center items-center h-[80vh]">
-          <Card className="w-full max-w-sm">
-            <CardContent className="pt-6 flex justify-center items-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">
-                Loading...
-              </span>
-            </CardContent>
-          </Card>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
