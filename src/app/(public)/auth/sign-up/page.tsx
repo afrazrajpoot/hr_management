@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -29,6 +29,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Lock, User, Chrome, Phone } from "lucide-react";
+import Loader from "@/components/Loader";
 
 type FormData = {
   firstName: string;
@@ -39,7 +40,7 @@ type FormData = {
   role: string;
 };
 
-const SignUpPage = () => {
+const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -367,9 +368,8 @@ const SignUpPage = () => {
                           );
                         }
                       }}
-                      className={`pl-10 ${
-                        field.id === "password" ? "pr-10" : ""
-                      } h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-colors`}
+                      className={`pl-10 ${field.id === "password" ? "pr-10" : ""
+                        } h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-colors`}
                     />
                     {field.id === "password" && (
                       <button
@@ -409,13 +409,12 @@ const SignUpPage = () => {
                       Password strength:
                     </span>
                     <span
-                      className={`font-medium ${
-                        passwordStrength <= 2
-                          ? "text-red-600"
-                          : passwordStrength === 3
+                      className={`font-medium ${passwordStrength <= 2
+                        ? "text-red-600"
+                        : passwordStrength === 3
                           ? "text-yellow-600"
                           : "text-blue-500"
-                      }`}
+                        }`}
                     >
                       {getPasswordStrengthText()}
                     </span>
@@ -530,6 +529,16 @@ const SignUpPage = () => {
         </Card>
       </motion.div>
     </div>
+  );
+};
+
+const SignUpPage = () => {
+  return (
+    <Suspense fallback={
+      <Loader />
+    }>
+      <SignUpForm />
+    </Suspense>
   );
 };
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner"; // Import sonner
@@ -22,13 +22,14 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, Github, Chrome } from "lucide-react";
+import Loader from "@/components/Loader";
 
 type FormData = {
   email: string;
   password: string;
 };
 
-const SignInPage = () => {
+const SignInForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -316,9 +317,8 @@ const SignInPage = () => {
                         field.registerOptions
                       )}
                       disabled={isLoading}
-                      className={`pl-10 ${
-                        field.id === "password" ? "pr-10" : ""
-                      } h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300`}
+                      className={`pl-10 ${field.id === "password" ? "pr-10" : ""
+                        } h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300`}
                     />
                     {field.id === "password" && (
                       <button
@@ -416,6 +416,16 @@ const SignInPage = () => {
         </Card>
       </motion.div>
     </div>
+  );
+};
+
+const SignInPage = () => {
+  return (
+    <Suspense fallback={
+      <Loader />
+    }>
+      <SignInForm />
+    </Suspense>
   );
 };
 

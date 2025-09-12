@@ -25,6 +25,7 @@ import EmployeeModal from "@/components/hr/EmployeeModal";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 import { useSession } from "next-auth/react";
 import { dashboardOptions } from "@/app/data";
+import Loader from "@/components/Loader";
 // import EmployeeModal from "./EmployeeModal";
 
 const assessmentStatuses = [
