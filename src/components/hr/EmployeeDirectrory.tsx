@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   Mail,
@@ -15,7 +16,10 @@ import {
   ArrowRight,
   Clock,
   Star,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { useState } from "react";
 
 export interface UserData {
   id: string;
@@ -32,6 +36,9 @@ interface EmployeeDirectoryProps {
 }
 
 export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 10;
+
   // Helper function to get department progression
   const getDepartmentProgression = (departments: string[]) => {
     if (departments.length <= 1) {
@@ -49,6 +56,20 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
     };
   };
 
+  // Calculate pagination
+  const totalPages = Math.ceil(users.length / employeesPerPage);
+  const startIndex = (currentPage - 1) * employeesPerPage;
+  const endIndex = startIndex + employeesPerPage;
+  const currentUsers = users.slice(startIndex, endIndex);
+
+  const handlePrevious = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <Card className="bg-[#081229]">
       <CardHeader>
@@ -56,11 +77,14 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
           <Users className="h-5 w-5" />
           Employee Directory
         </CardTitle>
-        <CardDescription>{users.length} employees found</CardDescription>
+        <CardDescription>
+          Showing {startIndex + 1}-{Math.min(endIndex, users.length)} of {users.length} employees
+          {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {users.map((user) => {
+          {currentUsers.map((user) => {
             const { current, previous, hasProgression } =
               getDepartmentProgression(user.department);
 
@@ -186,6 +210,37 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
             );
           })}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            <div className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         {/* No Results */}
         {users.length === 0 && (

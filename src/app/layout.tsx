@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SocketProvider } from "@/context/SocketContext";
 
 export const metadata: Metadata = {
-  title: "Genius Factor - HR Analytics Platform",
+  title: "GeniusFactor",
   description:
     "Advanced HR Analytics and Career Assessment Platform with AI-powered insights, retention risk analysis, and comprehensive employee management tools.",
 };
@@ -18,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/logo-3.png" className="rounded-[1vw]" />
+      </head>
       <body>
         <Providers>
           <SocketProvider>

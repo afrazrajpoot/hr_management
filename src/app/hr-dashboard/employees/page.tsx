@@ -24,6 +24,7 @@ import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import EmployeeModal from "@/components/hr/EmployeeModal";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 import { useSession } from "next-auth/react";
+import { dashboardOptions } from "@/app/data";
 // import EmployeeModal from "./EmployeeModal";
 
 const assessmentStatuses = [
@@ -64,8 +65,7 @@ const getRiskColor = (risk: string | undefined) => {
 
 export default function Employees() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedRisk, setSelectedRisk] = useState("All Risk Levels");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
@@ -80,13 +80,11 @@ export default function Employees() {
   });
   const { data: sessionData } = useSession();
   const uniqueDepartments = useMemo(() => {
-    const depts = new Set<string>();
-    data?.employees?.forEach((emp: any) => {
-      const dept = emp.employee?.department || emp.reports[0]?.departement;
-      if (dept) depts.add(dept);
-    });
-    return ["All Departments", ...Array.from(depts)];
-  }, [data]);
+    return [
+      { option: "All Departments", value: "All Departments" },
+      ...dashboardOptions.Departments
+    ];
+  }, []);
 
   const uniqueRiskLevels = useMemo(() => {
     const risks = new Set<string>();
@@ -182,12 +180,12 @@ export default function Employees() {
                 onValueChange={setSelectedDepartment}
               >
                 <SelectTrigger className="w-48">
-                  <SelectValue />
+                  <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
                   {uniqueDepartments.map((dept) => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept}
+                    <SelectItem key={dept.value} value={dept.value}>
+                      {dept.option}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -221,6 +219,7 @@ export default function Employees() {
             </div>
           </CardContent>
         </Card>
+
 
         {/* Employee List */}
         <Card className="bg-gray-800 border-gray-700">
@@ -256,8 +255,8 @@ export default function Employees() {
                             <AvatarImage src="/api/placeholder/40/40" />
                             <AvatarFallback>
                               {`${employee.firstName[0]}${employee.lastName !== "Not provide"
-                                  ? employee.lastName[0]
-                                  : ""
+                                ? employee.lastName[0]
+                                : ""
                                 }`}
                             </AvatarFallback>
                           </Avatar>

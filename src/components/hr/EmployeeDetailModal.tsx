@@ -32,6 +32,8 @@ import { useState, useEffect } from "react";
 import { useUpdateEmployeeMutation } from "@/redux/hr-api";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { dashboardOptions } from "@/app/data";
 
 interface EmployeeDetailModalProps {
   isOpen: boolean;
@@ -207,7 +209,22 @@ export default function EmployeeDetailModal({
                           control={control}
                           rules={{ required: "Position is required" }}
                           render={({ field }) => (
-                            <Input {...field} disabled={isLoading} />
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isLoading}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a position" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {dashboardOptions.Positions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           )}
                         />
                       ) : (
@@ -234,7 +251,22 @@ export default function EmployeeDetailModal({
                           control={control}
                           rules={{ required: "Department is required" }}
                           render={({ field }) => (
-                            <Input {...field} disabled={isLoading} />
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isLoading}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select department" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {dashboardOptions.Departments.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           )}
                         />
                       ) : (
