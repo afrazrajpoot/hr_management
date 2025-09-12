@@ -36,6 +36,7 @@ import { useSocket } from "@/context/SocketContext";
 import { useEffect, useState } from "react";
 import { useAnalyzeRetentionRiskMutation } from "@/redux/hr-python-api/intervation";
 import ChatPopup from "@/components/hr/ChatPopup";
+import Loader from "@/components/Loader";
 // import ChatPopup from "./ChatPopup";
 
 // Interface for chat messages
@@ -383,17 +384,8 @@ export default function RetentionRisk() {
   if (isLoading) {
     return (
       <HRLayout>
-        <div className="space-y-6 p-6">
-          <div className="flex justify-center items-center h-96">
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 text-muted-foreground animate-spin mx-auto mb-4" />
-              <h3 className="text-lg font-medium">Loading retention data...</h3>
-              <p className="text-muted-foreground">
-                Analyzing retention risk metrics from your dashboard
-              </p>
-            </div>
-          </div>
-        </div>
+                     <Loader />
+
       </HRLayout>
     );
   }

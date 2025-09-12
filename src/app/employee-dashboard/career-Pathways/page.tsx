@@ -24,6 +24,7 @@ import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useGetRecommendationsQuery } from "@/redux/employe-api";
 import { useDebounce } from "@/custom-hooks/useDebounce";
 import JobDetailsModal from "@/components/employee/JobDetailsModal";
+import Loader from "@/components/Loader";
 
 // Map API data to match the expected career recommendation structure
 const mapApiToCareerData = (apiData: any) => {
@@ -205,7 +206,7 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 100 &&
+          document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
         !isFetching
       ) {
@@ -249,10 +250,7 @@ export default function CareerPathways() {
   if (isLoading && page === 1) {
     return (
       <AppLayout>
-        <div className="p-6 text-center flex items-center justify-center min-h-64">
-          <Loader2 className="w-8 h-8 animate-spin mr-2" />
-          Loading recommendations...
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -394,10 +392,11 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${savedJobs.includes(career.id)
-                          ? "fill-current text-primary"
-                          : ""
-                          }`}
+                        className={`w-4 h-4 ${
+                          savedJobs.includes(career.id)
+                            ? "fill-current text-primary"
+                            : ""
+                        }`}
                       />
                     </Button>
                   </div>
@@ -462,7 +461,7 @@ export default function CareerPathways() {
         {/* Loading More Indicator */}
         {isFetching && (
           <div className="text-center py-4">
-            <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+            <Loader />
           </div>
         )}
 

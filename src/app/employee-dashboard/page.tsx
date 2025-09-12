@@ -27,6 +27,7 @@ import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
 import { useGetDashboardDataQuery } from "@/redux/employe-api";
 import ReactMarkdown from "react-markdown";
+import Loader from "@/components/Loader";
 
 // Define the DashboardData interface
 interface Assessment {
@@ -154,16 +155,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="p-6 flex justify-center items-center h-[80vh]">
-          <Card className="w-full max-w-sm">
-            <CardContent className="pt-6 flex justify-center items-center">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">
-                Loading...
-              </span>
-            </CardContent>
-          </Card>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }

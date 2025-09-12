@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Loader from "@/components/Loader";
 
 interface DashboardMetrics {
   overallMetrics: {
@@ -381,19 +382,7 @@ export default function HROverview() {
         title="Admin Dashboard Overview"
         subtitle="Loading dashboard data..."
       >
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {isConnected
-                ? "Connected, waiting for data..."
-                : "Connecting to server..."}
-            </p>
-            {isAdmin && (
-              <p className="text-sm text-green-600 mt-2">Admin Mode</p>
-            )}
-          </div>
-        </div>
+        <Loader />
       </HRLayout>
     );
   }
