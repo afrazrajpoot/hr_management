@@ -21,6 +21,10 @@ export async function GET() {
       where: { userId: session.user.id },
     });
 
+    console.log("====================================");
+    console.log(assessmentReports);
+    console.log("====================================");
+
     return NextResponse.json({ assessmentReports }, { status: 200 });
   } catch (err: any) {
     console.error("API route error:", err);

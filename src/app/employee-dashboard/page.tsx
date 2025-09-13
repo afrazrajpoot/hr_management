@@ -107,6 +107,9 @@ const mapJsonToDashboardData = (data: any, assessmentReports: any): DashboardDat
 
 export default function Dashboard() {
   const { data: assessmentData, isLoading } = useGetDashboardDataQuery<any>();
+  console.log('====================================');
+  console.log(assessmentData, "assessmentData");
+  console.log('====================================');
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     recentAssessments: [],
     assessmentProgress: { current: 0, total: 68, percentage: 0 },
