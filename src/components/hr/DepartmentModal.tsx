@@ -109,7 +109,7 @@ export default function DepartmentModal({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8001/departments/aggregate?department=${encodeURIComponent(
+        `https://api.geniusfactor.ai/departments/aggregate?department=${encodeURIComponent(
           employee.department
         )}&hrId=${hrId}`
       );

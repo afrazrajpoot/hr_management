@@ -58,7 +58,7 @@ export interface AnalysisResponse {
 export const retentionApi = createApi({
   reducerPath: "retentionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8001",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.geniusfactor.ai",
   }),
   tagTypes: ["RetentionAnalysis"],
   endpoints: (builder) => ({

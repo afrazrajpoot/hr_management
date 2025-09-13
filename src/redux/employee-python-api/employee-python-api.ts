@@ -31,7 +31,7 @@ interface EmployeeLearningResponse {
 export const employeePythonApi = createApi({
   reducerPath: "employeePythonApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://127.0.0.1:8001",
+    baseUrl: "https://api.geniusfactor.ai",
     prepareHeaders: (headers) => {
       return headers;
     },

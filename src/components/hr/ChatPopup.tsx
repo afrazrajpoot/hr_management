@@ -136,7 +136,7 @@ export default function ChatPopup({
         dashboard_data: dashboardData,
       };
 
-      const response = await fetch("http://127.0.0.1:8001/api/chat", {
+      const response = await fetch("https://api.geniusfactor.ai/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export default function ChatPopup({
   const clearChat = async () => {
     try {
       await fetch(
-        `http://127.0.0.1:8001/api/chat/${hrId}/${encodeURIComponent(
+        `https://api.geniusfactor.ai/api/chat/${hrId}/${encodeURIComponent(
           department.department
         )}`,
         {

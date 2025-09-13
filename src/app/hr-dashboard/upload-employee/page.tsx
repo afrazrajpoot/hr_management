@@ -59,7 +59,7 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://127.0.0.1:8001/employees/upload", {
+      const res = await fetch("https://api.geniusfactor.ai/employees/upload", {
         method: "POST",
         body: formData,
       });

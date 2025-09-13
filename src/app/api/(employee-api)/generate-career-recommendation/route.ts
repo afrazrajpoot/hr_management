@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const res = await fetch(
-      `http://127.0.0.1:8001/employee_dashboard/generate-employee-career-recommendation`,
+      `https://api.geniusfactor.ai/employee_dashboard/generate-employee-career-recommendation`,
       {
         method: "POST",
         headers: {

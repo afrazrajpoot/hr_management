@@ -13,7 +13,7 @@ export async function GET() {
 
     // Add timeout and better error handling for the fetch
     const res = await fetch(
-      `http://127.0.0.1:8001/employee_dashboard/dashboard-data`,
+      `https://api.geniusfactor.ai/employee_dashboard/dashboard-data`,
       {
         method: "POST",
         headers: {
