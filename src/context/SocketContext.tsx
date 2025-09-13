@@ -492,7 +492,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } else if (data.error) {
-        console.error("❌ Dashboard error:", data.error);
+        // console.error("❌ Dashboard error:", data.error);
         // Set empty data to avoid infinite loading
         setDashboardData({});
       } else {

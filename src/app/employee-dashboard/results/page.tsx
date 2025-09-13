@@ -67,6 +67,9 @@ interface TransitionTimeline {
   "6_months"?: string;
   "2_year"?: string;
   "6_month"?: string;
+  "six_months"?: string;
+  "one_year"?: string;
+  "two_years"?: string;
 }
 
 interface InternalCareerOpportunities {
@@ -125,6 +128,10 @@ interface Assessment {
 export default function Results() {
   const { data: session, status } = useSession();
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
+
+  console.log('====================================');
+  console.log(data);
+  console.log('====================================');
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
@@ -219,8 +226,8 @@ export default function Results() {
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
-                    selectedAssessment.createdAt
-                  ).toLocaleDateString()}`
+                  selectedAssessment.createdAt
+                ).toLocaleDateString()}`
                 : "No assessments completed yet"}
             </p>
           </div>
@@ -564,9 +571,9 @@ export default function Results() {
                       Transition Timeline:
                     </h4>
                     <ul className="list-disc pl-5 space-y-2">
-                      {Object.entries(
-                        selectedAssessment.internalCareerOpportunitiesJson
-                          .transition_timeline
+                      {Object?.entries(
+                        selectedAssessment?.internalCareerOpportunitiesJson
+                          ?.transition_timeline
                       ).map(([key, value], index) => (
                         <li key={index} className="text-sm">
                           {key.replace("_", " ")}: {value}
@@ -868,11 +875,10 @@ export default function Results() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedAssessment?.id === assessment.id
-                        ? "bg-primary/10 border-primary"
-                        : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
+                      ? "bg-primary/10 border-primary"
+                      : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
                     onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>

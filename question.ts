@@ -2,208 +2,208 @@ export const questions = [
   {
     part: "Part I: Self-Awareness Audit Questions",
     sections: [
-      {
-        section: "Section A: Energy and Motivation Patterns",
-        questions: [
-          {
-            id: 1,
-            type: "multiple-choice",
-            question:
-              "When facing a challenging project at work, which scenario energizes you most?",
-            options: [
-              "A) Breaking down complex problems into logical, step-by-step solutions",
-              "B) Collaborating with team members to brainstorm creative approaches",
-              "C) Visualizing the end result and designing the overall framework",
-              "D) Finding ways to make the project meaningful and purposeful",
-            ],
-            category: "Energy and Motivation",
-          },
-          {
-            id: 2,
-            type: "multiple-choice",
-            question:
-              "At the end of a fulfilling workday, you most likely spent time:",
-            options: [
-              "A) Analyzing data or solving technical problems",
-              "B) Building relationships and helping colleagues",
-              "C) Creating, designing, or improving visual elements",
-              "D) Writing, communicating, or sharing ideas",
-            ],
-            category: "Energy and Motivation",
-          },
-          {
-            id: 3,
-            type: "multiple-choice",
-            question:
-              "When you were a child, you were most drawn to activities that involved:",
-            options: [
-              "A) Taking things apart to see how they worked",
-              "B) Organizing games and bringing people together",
-              "C) Drawing, building, or creating with your hands",
-              "D) Reading, storytelling, or performing",
-            ],
-            category: "Energy and Motivation",
-          },
-          {
-            id: 4,
-            type: "multiple-choice",
-            question: "In team meetings, you naturally tend to:",
-            options: [
-              "A) Focus on the logical flow and practical implementation",
-              "B) Ensure everyone's voice is heard and build consensus",
-              "C) Sketch out ideas or create visual representations",
-              "D) Ask deeper questions about purpose and meaning",
-            ],
-            category: "Energy and Motivation",
-          },
-          {
-            id: 5,
-            type: "multiple-choice",
-            question: "When learning something new, you prefer to:",
-            options: [
-              "A) Study the technical specifications and understand the mechanics",
-              "B) Learn through discussion and interaction with others",
-              "C) See demonstrations and visual examples",
-              "D) Understand the broader context and philosophical implications",
-            ],
-            category: "Energy and Motivation",
-          },
-        ],
-      },
-      {
-        section: "Section B: Work Environment Preferences",
-        questions: [
-          {
-            id: 6,
-            type: "multiple-choice",
-            question: "Your ideal work environment would:",
-            options: [
-              "A) Provide quiet space for deep analysis and problem-solving",
-              "B) Encourage collaboration and frequent team interaction",
-              "C) Offer creative freedom and aesthetic inspiration",
-              "D) Connect to a larger mission and meaningful purpose",
-            ],
-            category: "Work Environment",
-          },
-          {
-            id: 7,
-            type: "multiple-choice",
-            question: "When given a choice of projects, you gravitate toward:",
-            options: [
-              "A) Technical challenges that require systematic thinking",
-              "B) People-centered initiatives that build community",
-              "C) Creative projects that involve design or visual elements",
-              "D) Mission-driven work that creates positive impact",
-            ],
-            category: "Work Environment",
-          },
-          {
-            id: 8,
-            type: "multiple-choice",
-            question: "You feel most confident when:",
-            options: [
-              "A) Working with data, numbers, or logical systems",
-              "B) Facilitating relationships and team dynamics",
-              "C) Creating something visually appealing or innovative",
-              "D) Contributing to something larger than yourself",
-            ],
-            category: "Work Environment",
-          },
-          {
-            id: 9,
-            type: "multiple-choice",
-            question:
-              "During your most productive work periods, you're typically:",
-            options: [
-              "A) Analyzing patterns and optimizing processes",
-              "B) Connecting with people and building networks",
-              "C) Designing, creating, or improving visual experiences",
-              "D) Reflecting on deeper meaning and long-term impact",
-            ],
-            category: "Work Environment",
-          },
-          {
-            id: 10,
-            type: "multiple-choice",
-            question: "When facing workplace stress, you recover best by:",
-            options: [
-              "A) Organizing your thoughts and creating systematic plans",
-              "B) Talking through challenges with trusted colleagues",
-              "C) Engaging in creative activities or changing your environment",
-              "D) Taking time for reflection and reconnecting with your values",
-            ],
-            category: "Work Environment",
-          },
-        ],
-      },
-      {
-        section: "Section C: Natural Response Patterns",
-        questions: [
-          {
-            id: 11,
-            type: "multiple-choice",
-            question:
-              "When someone asks for your help, your first instinct is to:",
-            options: [
-              "A) Analyze their problem and provide logical solutions",
-              "B) Listen empathetically and offer emotional support",
-              "C) Help them visualize possibilities and creative alternatives",
-              "D) Explore the deeper meaning and long-term implications",
-            ],
-            category: "Response Patterns",
-          },
-          {
-            id: 12,
-            type: "multiple-choice",
-            question: "In group settings, others often look to you to:",
-            options: [
-              "A) Provide technical expertise and analytical thinking",
-              "B) Facilitate discussion and maintain group harmony",
-              "C) Generate creative ideas and innovative solutions",
-              "D) Offer wisdom and perspective on important decisions",
-            ],
-            category: "Response Patterns",
-          },
-          {
-            id: 13,
-            type: "multiple-choice",
-            question:
-              "When you disagree with a decision at work, you're most likely to:",
-            options: [
-              "A) Present data and logical arguments for your position",
-              "B) Seek to understand different perspectives and find compromise",
-              "C) Propose alternative approaches or creative solutions",
-              "D) Question whether the decision aligns with core values and purpose",
-            ],
-            category: "Response Patterns",
-          },
-          {
-            id: 14,
-            type: "multiple-choice",
-            question:
-              "Your colleagues would describe your communication style as:",
-            options: [
-              "A) Precise, logical, and detail-oriented",
-              "B) Warm, inclusive, and relationship-focused",
-              "C) Creative, visual, and innovative",
-              "D) Thoughtful, meaningful, and purpose-driven",
-            ],
-            category: "Response Patterns",
-          },
-          {
-            id: 15,
-            type: "multiple-choice",
-            question: "When celebrating a team success, you most value:",
-            options: [
-              "A) Recognition for technical excellence and problem-solving",
-              "B) Acknowledgment of collaborative effort and team building",
-              "C) Appreciation for creative contribution and innovation",
-              "D) Understanding of the meaningful impact created",
-            ],
-            category: "Response Patterns",
-          },
-        ],
-      },
+      // {
+      //   section: "Section A: Energy and Motivation Patterns",
+      //   questions: [
+      //     {
+      //       id: 1,
+      //       type: "multiple-choice",
+      //       question:
+      //         "When facing a challenging project at work, which scenario energizes you most?",
+      //       options: [
+      //         "A) Breaking down complex problems into logical, step-by-step solutions",
+      //         "B) Collaborating with team members to brainstorm creative approaches",
+      //         "C) Visualizing the end result and designing the overall framework",
+      //         "D) Finding ways to make the project meaningful and purposeful",
+      //       ],
+      //       category: "Energy and Motivation",
+      //     },
+      //     {
+      //       id: 2,
+      //       type: "multiple-choice",
+      //       question:
+      //         "At the end of a fulfilling workday, you most likely spent time:",
+      //       options: [
+      //         "A) Analyzing data or solving technical problems",
+      //         "B) Building relationships and helping colleagues",
+      //         "C) Creating, designing, or improving visual elements",
+      //         "D) Writing, communicating, or sharing ideas",
+      //       ],
+      //       category: "Energy and Motivation",
+      //     },
+      //     {
+      //       id: 3,
+      //       type: "multiple-choice",
+      //       question:
+      //         "When you were a child, you were most drawn to activities that involved:",
+      //       options: [
+      //         "A) Taking things apart to see how they worked",
+      //         "B) Organizing games and bringing people together",
+      //         "C) Drawing, building, or creating with your hands",
+      //         "D) Reading, storytelling, or performing",
+      //       ],
+      //       category: "Energy and Motivation",
+      //     },
+      //     {
+      //       id: 4,
+      //       type: "multiple-choice",
+      //       question: "In team meetings, you naturally tend to:",
+      //       options: [
+      //         "A) Focus on the logical flow and practical implementation",
+      //         "B) Ensure everyone's voice is heard and build consensus",
+      //         "C) Sketch out ideas or create visual representations",
+      //         "D) Ask deeper questions about purpose and meaning",
+      //       ],
+      //       category: "Energy and Motivation",
+      //     },
+      //     {
+      //       id: 5,
+      //       type: "multiple-choice",
+      //       question: "When learning something new, you prefer to:",
+      //       options: [
+      //         "A) Study the technical specifications and understand the mechanics",
+      //         "B) Learn through discussion and interaction with others",
+      //         "C) See demonstrations and visual examples",
+      //         "D) Understand the broader context and philosophical implications",
+      //       ],
+      //       category: "Energy and Motivation",
+      //     },
+      //   ],
+      // },
+      // {
+      //   section: "Section B: Work Environment Preferences",
+      //   questions: [
+      //     {
+      //       id: 6,
+      //       type: "multiple-choice",
+      //       question: "Your ideal work environment would:",
+      //       options: [
+      //         "A) Provide quiet space for deep analysis and problem-solving",
+      //         "B) Encourage collaboration and frequent team interaction",
+      //         "C) Offer creative freedom and aesthetic inspiration",
+      //         "D) Connect to a larger mission and meaningful purpose",
+      //       ],
+      //       category: "Work Environment",
+      //     },
+      //     {
+      //       id: 7,
+      //       type: "multiple-choice",
+      //       question: "When given a choice of projects, you gravitate toward:",
+      //       options: [
+      //         "A) Technical challenges that require systematic thinking",
+      //         "B) People-centered initiatives that build community",
+      //         "C) Creative projects that involve design or visual elements",
+      //         "D) Mission-driven work that creates positive impact",
+      //       ],
+      //       category: "Work Environment",
+      //     },
+      //     {
+      //       id: 8,
+      //       type: "multiple-choice",
+      //       question: "You feel most confident when:",
+      //       options: [
+      //         "A) Working with data, numbers, or logical systems",
+      //         "B) Facilitating relationships and team dynamics",
+      //         "C) Creating something visually appealing or innovative",
+      //         "D) Contributing to something larger than yourself",
+      //       ],
+      //       category: "Work Environment",
+      //     },
+      //     {
+      //       id: 9,
+      //       type: "multiple-choice",
+      //       question:
+      //         "During your most productive work periods, you're typically:",
+      //       options: [
+      //         "A) Analyzing patterns and optimizing processes",
+      //         "B) Connecting with people and building networks",
+      //         "C) Designing, creating, or improving visual experiences",
+      //         "D) Reflecting on deeper meaning and long-term impact",
+      //       ],
+      //       category: "Work Environment",
+      //     },
+      //     {
+      //       id: 10,
+      //       type: "multiple-choice",
+      //       question: "When facing workplace stress, you recover best by:",
+      //       options: [
+      //         "A) Organizing your thoughts and creating systematic plans",
+      //         "B) Talking through challenges with trusted colleagues",
+      //         "C) Engaging in creative activities or changing your environment",
+      //         "D) Taking time for reflection and reconnecting with your values",
+      //       ],
+      //       category: "Work Environment",
+      //     },
+      //   ],
+      // },
+      // {
+      //   section: "Section C: Natural Response Patterns",
+      //   questions: [
+      //     {
+      //       id: 11,
+      //       type: "multiple-choice",
+      //       question:
+      //         "When someone asks for your help, your first instinct is to:",
+      //       options: [
+      //         "A) Analyze their problem and provide logical solutions",
+      //         "B) Listen empathetically and offer emotional support",
+      //         "C) Help them visualize possibilities and creative alternatives",
+      //         "D) Explore the deeper meaning and long-term implications",
+      //       ],
+      //       category: "Response Patterns",
+      //     },
+      //     {
+      //       id: 12,
+      //       type: "multiple-choice",
+      //       question: "In group settings, others often look to you to:",
+      //       options: [
+      //         "A) Provide technical expertise and analytical thinking",
+      //         "B) Facilitate discussion and maintain group harmony",
+      //         "C) Generate creative ideas and innovative solutions",
+      //         "D) Offer wisdom and perspective on important decisions",
+      //       ],
+      //       category: "Response Patterns",
+      //     },
+      //     {
+      //       id: 13,
+      //       type: "multiple-choice",
+      //       question:
+      //         "When you disagree with a decision at work, you're most likely to:",
+      //       options: [
+      //         "A) Present data and logical arguments for your position",
+      //         "B) Seek to understand different perspectives and find compromise",
+      //         "C) Propose alternative approaches or creative solutions",
+      //         "D) Question whether the decision aligns with core values and purpose",
+      //       ],
+      //       category: "Response Patterns",
+      //     },
+      //     {
+      //       id: 14,
+      //       type: "multiple-choice",
+      //       question:
+      //         "Your colleagues would describe your communication style as:",
+      //       options: [
+      //         "A) Precise, logical, and detail-oriented",
+      //         "B) Warm, inclusive, and relationship-focused",
+      //         "C) Creative, visual, and innovative",
+      //         "D) Thoughtful, meaningful, and purpose-driven",
+      //       ],
+      //       category: "Response Patterns",
+      //     },
+      //     {
+      //       id: 15,
+      //       type: "multiple-choice",
+      //       question: "When celebrating a team success, you most value:",
+      //       options: [
+      //         "A) Recognition for technical excellence and problem-solving",
+      //         "B) Acknowledgment of collaborative effort and team building",
+      //         "C) Appreciation for creative contribution and innovation",
+      //         "D) Understanding of the meaningful impact created",
+      //       ],
+      //       category: "Response Patterns",
+      //     },
+      //   ],
+      // },
       {
         section: "Section D: Decision-Making Patterns",
         questions: [
