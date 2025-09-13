@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const res = await fetch(
-      `https://api.geniusfactor.ai/employee_dashboard/generate-employee-career-recommendation`,
+      `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/generate-employee-career-recommendation`,
       {
         method: "POST",
         headers: {

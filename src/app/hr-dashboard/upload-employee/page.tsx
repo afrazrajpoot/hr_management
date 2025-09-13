@@ -59,7 +59,7 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("https://api.geniusfactor.ai/employees/upload", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/employees/upload`, {
         method: "POST",
         body: formData,
       });
@@ -171,47 +171,6 @@ export default function UploadEmployeesPage() {
             )}
           </Button>
         </div>
-
-        {/* Uploaded Employees List */}
-        {/* {uploadedEmployees.length > 0 && (
-          <div className="mt-8 space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <CheckCircle className="w-5 h-5 text-green-500" />
-              Uploaded Employees ({uploadedEmployees.length})
-            </div>
-
-            <div className="space-y-2">
-              {uploadedEmployees.map((employee, index) => (
-                <div
-                  key={employee.id}
-                  className="flex items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <Users className="w-4 h-4 text-muted-foreground mr-3" />
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      {employee.name || employee.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      ID: {employee.id}
-                    </p>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <p className="text-sm text-center">
-                <span className="font-medium text-green-600">
-                  {uploadedEmployees.length}
-                </span>{" "}
-                employee{uploadedEmployees.length !== 1 ? "s" : ""} successfully
-                added to your database
-              </p>
-            </div>
-          </div>
-        )} */}
-
         {/* Help Text */}
         <div className="mt-8 p-4 border rounded-lg bg-muted/30">
           <h3 className="font-medium mb-2">Supported file formats:</h3>

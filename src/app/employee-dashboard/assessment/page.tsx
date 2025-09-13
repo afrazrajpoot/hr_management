@@ -34,7 +34,7 @@ const questionsByPart = questions.map((part) => ({
   ),
 }));
 
-const API_URL = `https://api.geniusfactor.ai/analyze/assessment`;
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/analyze/assessment`;
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);

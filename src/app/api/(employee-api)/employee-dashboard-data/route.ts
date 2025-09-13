@@ -11,9 +11,16 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log("====================================");
+    console.log(
+      session.user.id,
+      "session.user.id",
+      `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`
+    );
+    console.log("====================================");
     // Add timeout and better error handling for the fetch
     const res = await fetch(
-      `https://api.geniusfactor.ai/employee_dashboard/dashboard-data`,
+      `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
       {
         method: "POST",
         headers: {
@@ -24,6 +31,10 @@ export async function GET() {
         signal: AbortSignal.timeout(30000), // 30 second timeout
       }
     );
+
+    console.log("====================================");
+    console.log(res, "res from trhe req");
+    console.log("====================================");
 
     // Check if the response is ok
     if (!res.ok) {
