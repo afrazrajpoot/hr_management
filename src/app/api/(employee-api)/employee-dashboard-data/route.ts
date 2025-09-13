@@ -19,8 +19,8 @@ export async function GET() {
       `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`
     );
     console.log("====================================");
-    // Add timeout and better error handling for the fetch
 
+    // Call FastAPI with axios
     const res = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
       { employeeId: session.user.id },
@@ -28,52 +28,34 @@ export async function GET() {
     );
 
     console.log("====================================");
-    console.log(res, "res from trhe req");
+    console.log(res.data, "res.data from the request");
     console.log("====================================");
 
-    // Check if the response is ok
-    if (!res.ok) {
-      console.error(`FastAPI responded with status: ${res.status}`);
-      const errorText = await res.text();
-      console.error(`FastAPI error response: ${errorText}`);
-      return NextResponse.json(
-        { error: `External API error: ${res.status}` },
-        { status: 502 } // Bad Gateway
-      );
-    }
-
-    const data = await res.json();
+    const data = res.data;
 
     // Fetch additional data from database
     const careerRecommendation = await prisma.aiCareerRecommendation.findFirst({
-      where: {
-        employeeId: session.user.id,
-      },
+      where: { employeeId: session.user.id },
     });
 
     const assessmentReports = await prisma.individualEmployeeReport.findMany({
-      where: {
-        userId: session.user.id,
-      },
+      where: { userId: session.user.id },
     });
 
-    return NextResponse.json(
-      {
-        data,
-        assessmentReports,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ data, assessmentReports }, { status: 200 });
   } catch (err: any) {
-    // Log the actual error for debugging
     console.error("API route error:", err);
 
-    // Return appropriate status codes
-    if (err.name === "AbortError") {
-      return NextResponse.json({ error: "Request timeout" }, { status: 504 });
+    if (axios.isAxiosError(err)) {
+      return NextResponse.json(
+        {
+          error: "External API error",
+          details: err.response?.data || err.message,
+        },
+        { status: err.response?.status || 500 }
+      );
     }
 
-    // For other errors, return 500 (Internal Server Error), not 401
     return NextResponse.json(
       { error: "Internal server error", details: err.message },
       { status: 500 }
