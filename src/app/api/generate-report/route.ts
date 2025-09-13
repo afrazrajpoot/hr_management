@@ -2,11 +2,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    console.log("====================================");
+    console.log(body, "request body");
+    console.log("====================================");
     const {
       executive_summary,
       genius_factor_profile,
@@ -17,13 +19,17 @@ export async function POST(req: Request) {
       personalized_resources,
       data_sources_and_methodology,
       genius_factor_score,
-      
     } = body?.report || {};
     const user = await prisma.user.findUnique({
       where: {
         id: body.userId,
       },
-    })
+    });
+
+    console.log("====================================");
+    console.log(user, "user");
+    console.log("====================================");
+
     const report = await prisma.individualEmployeeReport.create({
       data: {
         userId: body.userId,
@@ -38,11 +44,14 @@ export async function POST(req: Request) {
         personalizedResourcesJson: personalized_resources,
         dataSourcesAndMethodologyJson: data_sources_and_methodology,
         geniusFactorScore: genius_factor_score,
-        risk_analysis: body.risk_analysis || {}
+        risk_analysis: body.risk_analysis || {},
       },
     });
 
-  
+    console.log("====================================");
+    console.log(report, "saved report");
+    console.log("====================================");
+
     return NextResponse.json({ status: "success", report });
   } catch (error: any) {
     console.error("Error saving report:", error);
