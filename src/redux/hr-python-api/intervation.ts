@@ -58,7 +58,7 @@ export interface AnalysisResponse {
 export const retentionApi = createApi({
   reducerPath: "retentionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://13.89.121.86",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://13.89.121.86",
   }),
   tagTypes: ["RetentionAnalysis"],
   endpoints: (builder) => ({

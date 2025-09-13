@@ -31,7 +31,7 @@ interface EmployeeLearningResponse {
 export const employeePythonApi = createApi({
   reducerPath: "employeePythonApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://13.89.121.86",
+    baseUrl: "http://13.89.121.86",
     prepareHeaders: (headers) => {
       return headers;
     },

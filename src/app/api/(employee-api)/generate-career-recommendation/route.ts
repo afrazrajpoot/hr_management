@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const res = await fetch(
-      `https://13.89.121.86/employee_dashboard/generate-employee-career-recommendation`,
+      `http://13.89.121.86/employee_dashboard/generate-employee-career-recommendation`,
       {
         method: "POST",
         headers: {

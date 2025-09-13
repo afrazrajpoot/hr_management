@@ -13,7 +13,7 @@ export async function GET() {
 
     // Add timeout and better error handling for the fetch
     const res = await fetch(
-      `https://13.89.121.86/employee_dashboard/dashboard-data`,
+      `http://13.89.121.86/employee_dashboard/dashboard-data`,
       {
         method: "POST",
         headers: {

@@ -59,7 +59,7 @@ export default function UploadJobsPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("https://13.89.121.86/jobs/upload", {
+      const res = await fetch("http://13.89.121.86/jobs/upload", {
         method: "POST",
         body: formData,
       });
