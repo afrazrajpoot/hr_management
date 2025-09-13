@@ -104,8 +104,15 @@ export default function Assessment() {
         }),
       });
       if (response.ok) {
-        const generateREcommendation = await fetch(
-          `/api/generate-career-recommendation`
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/generate-employee-career-recommendation`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ employeeId: session.user.id }),
+          }
         );
       }
       if (!response.ok) {

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +28,8 @@ import Link from "next/link";
 import { useGetDashboardDataQuery } from "@/redux/employe-api";
 import ReactMarkdown from "react-markdown";
 import Loader from "@/components/Loader";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 // Define the DashboardData interface
 interface Assessment {
@@ -61,9 +63,7 @@ interface DashboardData {
 }
 
 // Function to map JSON data to DashboardData interface
-const mapJsonToDashboardData = (jsonData: any): DashboardData => {
-  const { data, assessmentReports } = jsonData;
-
+const mapJsonToDashboardData = (data: any, assessmentReports: any): DashboardData => {
   // Map recent assessments from assessmentReports
   const recentAssessments = assessmentReports.map((report: any) => ({
     id: report.id.toString(),
@@ -106,7 +106,7 @@ const mapJsonToDashboardData = (jsonData: any): DashboardData => {
 };
 
 export default function Dashboard() {
-  const { data, isLoading } = useGetDashboardDataQuery<any>();
+  const { data: assessmentData, isLoading } = useGetDashboardDataQuery<any>();
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     recentAssessments: [],
     assessmentProgress: { current: 0, total: 68, percentage: 0 },
@@ -119,13 +119,38 @@ export default function Dashboard() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
+  const { data: session, status } = useSession();
+  const [isFetching, setIsFetching] = useState(false);
+  const [apiData, setApiData] = useState<any>(null);
 
-  if (data && !isLoading) {
-    const mappedData = mapJsonToDashboardData(data);
-    if (JSON.stringify(mappedData) !== JSON.stringify(dashboardData)) {
+  useEffect(() => {
+    if (session?.user?.id) {
+      const fetchDashboardData = async () => {
+        setIsFetching(true);
+        try {
+          const res = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
+            { employeeId: session.user.id },
+            { headers: { "Content-Type": "application/json" } }
+          );
+          setApiData(res.data);
+        } catch (error) {
+          console.error("Error fetching dashboard data:", error);
+        } finally {
+          setIsFetching(false);
+        }
+      };
+      fetchDashboardData();
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (apiData && !isLoading) {
+      const assessmenReport: any = assessmentData.assessmentReports;
+      const mappedData = mapJsonToDashboardData(apiData, assessmenReport);
       setDashboardData(mappedData);
     }
-  }
+  }, [apiData, isLoading]);
 
   // Pagination logic
   const totalPages = Math.ceil(
@@ -152,7 +177,7 @@ export default function Dashboard() {
     day: "numeric",
   });
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <AppLayout>
         <Loader />
@@ -166,7 +191,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">
-              Welcome back, {data?.data?.name || "User"}
+              Welcome back, {apiData?.data?.name || "User"}
             </h1>
             <p className="text-muted-foreground mt-1">{currentDate}</p>
           </div>
