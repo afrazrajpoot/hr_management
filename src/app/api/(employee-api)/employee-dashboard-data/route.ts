@@ -27,8 +27,6 @@ export async function GET() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ employeeId: session.user.id }),
-        // Add timeout
-        signal: AbortSignal.timeout(30000), // 30 second timeout
       }
     );
 
