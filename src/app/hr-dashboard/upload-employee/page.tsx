@@ -59,7 +59,7 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://13.89.121.86/employees/upload", {
+      const res = await fetch("http://127.0.0.1:8001/employees/upload", {
         method: "POST",
         body: formData,
       });

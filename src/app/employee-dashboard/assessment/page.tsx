@@ -34,7 +34,7 @@ const questionsByPart = questions.map((part) => ({
   ),
 }));
 
-const API_URL = `http://13.89.121.86/analyze/assessment`;
+const API_URL = `http://127.0.0.1:8001/analyze/assessment`;
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);
