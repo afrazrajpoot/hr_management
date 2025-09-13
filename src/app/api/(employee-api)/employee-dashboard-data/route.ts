@@ -2,6 +2,7 @@ import { authOptions } from "@/app/auth";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import axios from "axios";
 
 export async function GET() {
   try {
@@ -19,15 +20,11 @@ export async function GET() {
     );
     console.log("====================================");
     // Add timeout and better error handling for the fetch
-    const res = await fetch(
+
+    const res = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ employeeId: session.user.id }),
-      }
+      { employeeId: session.user.id },
+      { headers: { "Content-Type": "application/json" } }
     );
 
     console.log("====================================");
