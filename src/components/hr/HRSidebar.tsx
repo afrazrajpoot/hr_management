@@ -128,7 +128,7 @@ export default function HRSidebar({
         {!collapsed && (
           <div className="flex items-center gap-2">
             <figure className="w-full rounded-[1vw]">
-              <img src="/logo-3.png" alt="Genius Factor" className="w-full rounded-2xl h-[3vw]" />
+              <img src="/logo.png" alt="Genius Factor" className="w-full rounded-2xl h-[3.5vw]" />
             </figure>
             <span className="font-semibold text-sidebar-foreground">
               GeniusFactor
