@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
-import { useGetRecommendationsQuery } from "@/redux/employe-api";
+import { useGetRecommendationsMutation } from "@/redux/employe-api";
 import { useDebounce } from "@/custom-hooks/useDebounce";
 import JobDetailsModal from "@/components/employee/JobDetailsModal";
 import Loader from "@/components/Loader";
@@ -103,10 +103,11 @@ export default function CareerPathways() {
   const debouncedSearch = useDebounce(filters.search, 500);
 
   // Fetch data with pagination
-  const { data, isLoading, isError, isFetching } = useGetRecommendationsQuery({
-    page,
-    limit,
-  });
+  const [getRecommendations, { data, isLoading, isError, isSuccess }] = useGetRecommendationsMutation();
+
+  useEffect(() => {
+    getRecommendations({ page, limit });
+  }, [page, limit, getRecommendations]);
 
   // Transform and cache all recommendations
   const allRecommendations = useMemo(() => {
@@ -183,10 +184,10 @@ export default function CareerPathways() {
 
   // Load more function
   const loadMore = useCallback(() => {
-    if (data?.hasMore && !isFetching) {
+    if (data?.hasMore && !isSuccess) {
       setPage((prev) => prev + 1);
     }
-  }, [data?.hasMore, isFetching]);
+  }, [data?.hasMore, isSuccess]);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -206,9 +207,9 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 100 &&
+        document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
-        !isFetching
+        !isSuccess
       ) {
         loadMore();
       }
@@ -216,7 +217,7 @@ export default function CareerPathways() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [data?.hasMore, isFetching, loadMore]);
+  }, [data?.hasMore, isSuccess, loadMore]);
 
   const toggleSaved = (jobId: string) => {
     setSavedJobs((prev) =>
@@ -392,11 +393,10 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${
-                          savedJobs.includes(career.id)
-                            ? "fill-current text-primary"
-                            : ""
-                        }`}
+                        className={`w-4 h-4 ${savedJobs.includes(career.id)
+                          ? "fill-current text-primary"
+                          : ""
+                          }`}
                       />
                     </Button>
                   </div>
@@ -459,7 +459,7 @@ export default function CareerPathways() {
         <JobDetailsModal job={selectedJob} onClose={closeJobDetails} />
 
         {/* Loading More Indicator */}
-        {isFetching && (
+        {isSuccess && (
           <div className="text-center py-4">
             <Loader />
           </div>
@@ -473,14 +473,14 @@ export default function CareerPathways() {
         )}
 
         {/* No Results */}
-        {filteredAndSortedRecommendations.length === 0 && !isFetching && (
+        {filteredAndSortedRecommendations.length === 0 && !isSuccess && (
           <div className="text-center py-12 text-muted-foreground">
             No recommendations found matching your filters
           </div>
         )}
 
         {/* Load More Button */}
-        {data?.hasMore && !isFetching && (
+        {data?.hasMore && !isSuccess && (
           <div className="text-center">
             <Button onClick={loadMore} variant="outline" size="lg">
               Load More Recommendations

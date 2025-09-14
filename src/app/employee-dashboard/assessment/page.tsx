@@ -99,6 +99,7 @@ export default function Assessment() {
           data: partsData,
           userId: session?.user.id,
           hrId: session?.user.hrId,
+          departement: session?.user.departement?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
         }),

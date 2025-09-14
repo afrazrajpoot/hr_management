@@ -1,5 +1,5 @@
 // redux/employe-api.ts
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 interface Recommendation {
   name: string;
@@ -22,88 +22,62 @@ interface Filters {
 }
 
 export const employeeApi = createApi({
-  reducerPath: 'employeeApi',
+  reducerPath: "employeeApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
+    baseUrl: "/api",
     prepareHeaders: (headers) => {
       return headers;
     },
   }),
-  tagTypes: ['Employee', 'Recommendations'],
+  tagTypes: ["Employee", "Recommendations"],
   endpoints: (builder) => ({
     getEmployee: builder.query<void, void>({
-      query: () => '/employe-profile',
-      providesTags: ['Employee'],
+      query: () => "/employe-profile",
+      providesTags: ["Employee"],
     }),
     createOrUpdateEmployee: builder.mutation<void, void>({
       query: (employee) => ({
-        url: '/employe-profile',
-        method: 'POST',
+        url: "/employe-profile",
+        method: "POST",
         body: employee,
       }),
-      invalidatesTags: ['Employee'],
+      invalidatesTags: ["Employee"],
     }),
     recommendCompanies: builder.query<string[], void>({
-      query: () => '/employee-recommendation',
+      query: () => "/employee-recommendation",
     }),
-    
-    getRecommendations: builder.query<RecommendationsResponse, Filters>({
-      query: (filters) => {
-        const params = new URLSearchParams();
-        
-        // Only send pagination parameters to server
-        if (filters.page) params.append('page', filters.page.toString());
-        if (filters.limit) params.append('limit', filters.limit.toString());
 
-        return `employee-recommendation?${params.toString()}`;
-      },
-      providesTags: ['Recommendations'],
-      keepUnusedDataFor: 300,
-      serializeQueryArgs: ({ endpointName }) => {
-        return endpointName; // Same cache key for all pages
-      },
-      merge: (currentCache, newData, { arg }) => {
-        if (arg.page === 1 || arg.forceRefresh) {
-          return newData;
-        }
-        return {
-          ...newData,
-          recommendations: [
-            ...(currentCache?.recommendations || []),
-            ...newData.recommendations,
-          ],
-        };
-      },
-      forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.forceRefresh || 
-               currentArg?.page !== previousArg?.page;
-      },
+    getRecommendations: builder.mutation<RecommendationsResponse, Filters>({
+      query: (filters) => ({
+        url: "/employee-recommendation",
+        method: "POST",
+        body: filters,
+      }),
     }),
 
     clearRecommendationsCache: builder.mutation<void, void>({
       query: () => ({
-        url: '/recommendations',
-        method: 'POST',
-        body: { action: 'clear-cache' },
+        url: "/recommendations",
+        method: "POST",
+        body: { action: "clear-cache" },
       }),
-      invalidatesTags: ['Recommendations'],
+      invalidatesTags: ["Recommendations"],
     }),
     getDashboardData: builder.query<void, void>({
-      query: () => '/employee-dashboard-data',
+      query: () => "/employee-dashboard-data",
     }),
     getAssessmentResults: builder.query<void, void>({
-      query: () => '/assessment-results',
+      query: () => "/assessment-results",
     }),
   }),
-
 });
 
-export const { 
-  useGetEmployeeQuery, 
-  useCreateOrUpdateEmployeeMutation, 
+export const {
+  useGetEmployeeQuery,
+  useCreateOrUpdateEmployeeMutation,
   useRecommendCompaniesQuery,
-  useGetRecommendationsQuery,
+  useGetRecommendationsMutation,
   useClearRecommendationsCacheMutation,
   useGetDashboardDataQuery,
-  useGetAssessmentResultsQuery
+  useGetAssessmentResultsQuery,
 } = employeeApi;

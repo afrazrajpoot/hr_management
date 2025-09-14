@@ -36,7 +36,7 @@ async function getRecommendations(employeeId: string, recruiterId: string) {
   return recommendations;
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session: any = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
