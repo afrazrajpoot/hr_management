@@ -59,10 +59,13 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/employees/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/employees/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!res.ok) throw new Error("Upload failed");
 
@@ -108,12 +111,13 @@ export default function UploadEmployeesPage() {
         {/* Upload Area */}
         <div className="space-y-6">
           <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-              ? "border-primary bg-primary/5"
-              : file
+            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              dragActive
+                ? "border-primary bg-primary/5"
+                : file
                 ? "border-green-500 bg-green-500/5"
                 : "border-border hover:border-primary/50"
-              }`}
+            }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}

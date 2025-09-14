@@ -58,7 +58,7 @@ export interface AnalysisResponse {
 export const retentionApi = createApi({
   reducerPath: "retentionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.geniusfactor.ai",
+    baseUrl: "http://127.0.0.1:8000" ,
   }),
   tagTypes: ["RetentionAnalysis"],
   endpoints: (builder) => ({
@@ -71,7 +71,20 @@ export const retentionApi = createApi({
         }),
       }
     ),
+    createCareerPathwayRecommendations: builder.mutation<
+      { recruiter_id: string },
+      { recruiter_id: string } & { employee_id: string }
+    >({
+      query: ({ recruiter_id, employee_id }) => ({
+        url: "/employee_dashboard/recommend-companies",
+        method: "POST",
+        body: { recruiter_id, employee_id },
+      }),
+    }),
   }),
 });
 
-export const { useAnalyzeRetentionRiskMutation } = retentionApi;
+export const {
+  useAnalyzeRetentionRiskMutation,
+  useCreateCareerPathwayRecommendationsMutation,
+} = retentionApi;

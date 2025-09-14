@@ -22,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { useSocket } from "@/context/SocketContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/Loader";
 
 // Group questions by part
 const questionsByPart = questions.map((part) => ({
@@ -34,7 +35,7 @@ const questionsByPart = questions.map((part) => ({
   ),
 }));
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/analyze/assessment`;
+const API_URL = `${process.env.NEXT_PUBLIC_PYTHON_URL}/analyze/assessment`;
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);
@@ -106,7 +107,7 @@ export default function Assessment() {
       });
       if (response.ok) {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/generate-employee-career-recommendation`,
+          `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/generate-employee-career-recommendation`,
           {
             method: "POST",
             headers: {
@@ -182,8 +183,8 @@ export default function Assessment() {
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto bg-[#081229]">
         {isSubmitting && (
-          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-            <Loader2 className="w-16 h-16 animate-spin text-white" />
+          <div className="fixed inset-0 bg-opacity-10 flex items-center justify-center z-50 ">
+            <Loader />
           </div>
         )}
         {analysisResults ? (
@@ -339,9 +340,7 @@ export default function Assessment() {
                     className="btn-gradient"
                   >
                     {isSubmitting ? (
-                      <>
-                        Submitting...
-                      </>
+                      <>Submitting...</>
                     ) : (
                       <>
                         Submit Assessment
@@ -370,14 +369,15 @@ export default function Assessment() {
                 {currentPartQuestions.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-colors ${index === currentQuestionIndex
-                      ? "bg-primary dark:bg-primary"
-                      : index < currentQuestionIndex
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      index === currentQuestionIndex
+                        ? "bg-primary dark:bg-primary"
+                        : index < currentQuestionIndex
                         ? "bg-success dark:bg-success"
                         : answers[currentPartQuestions[index].id]
-                          ? "bg-warning dark:bg-warning"
-                          : "bg-muted dark:bg-muted"
-                      }`}
+                        ? "bg-warning dark:bg-warning"
+                        : "bg-muted dark:bg-muted"
+                    }`}
                   />
                 ))}
               </div>

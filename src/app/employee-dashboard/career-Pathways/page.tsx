@@ -15,26 +15,27 @@ import {
   Search,
   DollarSign,
   MapPin,
-  Filter,
   Bookmark,
   ExternalLink,
-  Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useGetRecommendationsMutation } from "@/redux/employe-api";
 import { useDebounce } from "@/custom-hooks/useDebounce";
 import JobDetailsModal from "@/components/employee/JobDetailsModal";
 import Loader from "@/components/Loader";
+import { useCreateCareerPathwayRecommendationsMutation } from "@/redux/hr-python-api/intervation";
+import { useSession } from "next-auth/react";
 
-// Map API data to match the expected career recommendation structure
+// Map API data to career recommendation structure
 const mapApiToCareerData = (apiData: any) => {
+  console.log("Mapping API Data:", apiData);
   if (!apiData?.recommendations) return [];
 
   return apiData.recommendations.map((job: any) => ({
-    id: job.id,
+    id: job.id || `job-${Math.random()}`, // Fallback ID
     title: job.title || "Untitled Job",
-    industry: inferIndustry(job.title, job.description),
-    matchScore: job.match_score || 0, // Use the API's match_score field
+    industry: inferIndustry(job.title || "", job.description || ""),
+    matchScore: job.match_score || job.matchScore || 0,
     salaryRange: job.salary
       ? `$${job.salary.toLocaleString()}`
       : "Not specified",
@@ -51,7 +52,7 @@ const mapApiToCareerData = (apiData: any) => {
   }));
 };
 
-// Helper function to infer industry based on job title and description
+// Infer industry
 const inferIndustry = (title: string, description: string) => {
   const lowerTitle = title.toLowerCase();
   const lowerDescription = description.toLowerCase();
@@ -84,38 +85,59 @@ const sortOptions = [
 ];
 
 export default function CareerPathways() {
-  const [filters, setFilters] = useState<any>({
+  const [filters, setFilters] = useState({
     search: "",
     industry: "All",
     type: "All",
     minScore: 0,
     maxScore: 100,
     sortBy: "score",
-    sortOrder: "desc" as const,
+    sortOrder: "desc",
   });
 
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const limit = 6;
-
-  // Debounce search term
+  const { data: session, status } = useSession<any>();
   const debouncedSearch = useDebounce(filters.search, 500);
 
   // Fetch data with pagination
-  const [getRecommendations, { data, isLoading, isError, isSuccess }] = useGetRecommendationsMutation();
+  const [getRecommendations, { data, isLoading, isError, isSuccess }] =
+    useGetRecommendationsMutation();
 
   useEffect(() => {
     getRecommendations({ page, limit });
   }, [page, limit, getRecommendations]);
 
-  // Transform and cache all recommendations
+  useEffect(() => {
+    if (
+      status === "authenticated" &&
+      session?.user?.hrId &&
+      session?.user?.id
+    ) {
+      console.log("Sending Payload:", {
+        recruiter_id: session.user.hrId,
+        employee_id: session.user.id,
+      });
+      getRecommendations({
+        recruiter_id: session.user.hrId,
+        employee_id: session.user.id,
+      });
+    } else {
+      console.warn(
+        "Cannot fetch recommendations: Session not ready or missing data"
+      );
+    }
+  }, [getRecommendations, status, session]);
+
   const allRecommendations = useMemo(() => {
     if (!data?.recommendations) return [];
     return mapApiToCareerData(data);
-  }, [data?.recommendations]);
+  }, [data]);
 
-  // Client-side filtering and sorting
+  console.log("allRecommendations:", allRecommendations);
+
   const filteredAndSortedRecommendations = useMemo(() => {
     if (!allRecommendations.length) return [];
 
@@ -130,38 +152,28 @@ export default function CareerPathways() {
       ) {
         return false;
       }
-
-      // Industry filter
       if (filters.industry !== "All" && career.industry !== filters.industry) {
         return false;
       }
-
-      // Type filter
       if (filters.type !== "All" && career.type !== filters.type) {
         return false;
       }
-
-      // Score filters
       if (
         career.matchScore < filters.minScore ||
         career.matchScore > filters.maxScore
       ) {
         return false;
       }
-
       return true;
     });
 
-    // Sorting
     filtered.sort((a: any, b: any) => {
       let comparison = 0;
-
       switch (filters.sortBy) {
         case "score":
           comparison = a.matchScore - b.matchScore;
           break;
         case "salary":
-          // Handle cases where salary is "Not specified"
           const salaryA =
             a.salaryRange === "Not specified"
               ? 0
@@ -175,21 +187,18 @@ export default function CareerPathways() {
         default:
           comparison = a.matchScore - b.matchScore;
       }
-
       return filters.sortOrder === "desc" ? -comparison : comparison;
     });
 
     return filtered;
   }, [allRecommendations, filters, debouncedSearch]);
 
-  // Load more function
   const loadMore = useCallback(() => {
     if (data?.hasMore && !isSuccess) {
       setPage((prev) => prev + 1);
     }
   }, [data?.hasMore, isSuccess]);
 
-  // Reset pagination when filters change
   useEffect(() => {
     setPage(1);
   }, [
@@ -202,19 +211,17 @@ export default function CareerPathways() {
     filters.sortOrder,
   ]);
 
-  // Infinite scroll handler
   useEffect(() => {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 100 &&
+          document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
         !isSuccess
       ) {
         loadMore();
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [data?.hasMore, isSuccess, loadMore]);
@@ -228,12 +235,12 @@ export default function CareerPathways() {
   };
 
   const handleFilterChange = (key: string, value: any) => {
-    setFilters((prev: any) => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSortChange = (value: string) => {
     const [sortBy, sortOrder] = value.split("-");
-    setFilters((prev: any) => ({
+    setFilters((prev) => ({
       ...prev,
       sortBy,
       sortOrder: sortOrder as "asc" | "desc",
@@ -260,7 +267,7 @@ export default function CareerPathways() {
     return (
       <AppLayout>
         <div className="p-6 text-center text-red-500">
-          Error loading recommendations. Please try again later.
+          Error loading recommendations: {JSON.stringify(error)}
         </div>
       </AppLayout>
     );
@@ -269,7 +276,6 @@ export default function CareerPathways() {
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Career Pathways</h1>
@@ -278,15 +284,8 @@ export default function CareerPathways() {
               profile
             </p>
           </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            {/* <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Advanced Filters
-            </Button> */}
-          </div>
         </div>
 
-        {/* Search and Filters */}
         <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -337,7 +336,6 @@ export default function CareerPathways() {
           </CardContent>
         </Card>
 
-        {/* Results Summary */}
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground">
             Showing {filteredAndSortedRecommendations.length} career matches
@@ -363,7 +361,6 @@ export default function CareerPathways() {
           </div>
         </div>
 
-        {/* Career Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredAndSortedRecommendations.map((career: any) => (
             <Card key={career.id} className="bg-gray-800 border-gray-700 group">
@@ -393,10 +390,11 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${savedJobs.includes(career.id)
-                          ? "fill-current text-primary"
-                          : ""
-                          }`}
+                        className={`w-4 h-4 ${
+                          savedJobs.includes(career.id)
+                            ? "fill-current text-primary"
+                            : ""
+                        }`}
                       />
                     </Button>
                   </div>
@@ -446,16 +444,12 @@ export default function CareerPathways() {
                     View Details
                     <ExternalLink className="w-3 h-3 ml-2" />
                   </Button>
-                  {/* <Button size="sm" className="btn-gradient">
-                    Explore Path
-                  </Button> */}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Job Details Modal */}
         <JobDetailsModal job={selectedJob} onClose={closeJobDetails} />
 
         {/* Loading More Indicator */}
@@ -465,7 +459,6 @@ export default function CareerPathways() {
           </div>
         )}
 
-        {/* No More Results */}
         {!data?.hasMore && filteredAndSortedRecommendations.length > 0 && (
           <div className="text-center py-4 text-muted-foreground">
             No more recommendations to load

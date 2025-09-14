@@ -67,9 +67,9 @@ interface TransitionTimeline {
   "6_months"?: string;
   "2_year"?: string;
   "6_month"?: string;
-  "six_months"?: string;
-  "one_year"?: string;
-  "two_years"?: string;
+  six_months?: string;
+  one_year?: string;
+  two_years?: string;
 }
 
 interface InternalCareerOpportunities {
@@ -129,9 +129,9 @@ export default function Results() {
   const { data: session, status } = useSession();
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
 
-  console.log('====================================');
+  console.log("====================================");
   console.log(data);
-  console.log('====================================');
+  console.log("====================================");
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
@@ -226,8 +226,8 @@ export default function Results() {
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
-                  selectedAssessment.createdAt
-                ).toLocaleDateString()}`
+                    selectedAssessment.createdAt
+                  ).toLocaleDateString()}`
                 : "No assessments completed yet"}
             </p>
           </div>
@@ -856,7 +856,9 @@ export default function Results() {
                 No assessments completed yet.
               </p>
               <Button variant="outline" className="mt-4" asChild>
-                <Link href="/assessment">Take an Assessment</Link>
+                <Link href="/employee-dashboard/assessment">
+                  Take an Assessment
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -875,10 +877,11 @@ export default function Results() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
-                      ? "bg-primary/10 border-primary"
-                      : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedAssessment?.id === assessment.id
+                        ? "bg-primary/10 border-primary"
+                        : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
                     onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>
@@ -976,7 +979,7 @@ export default function Results() {
                 className="h-auto flex-col space-y-2 p-4"
                 asChild
               >
-                <Link href="/employee-dashboard/career-pathways">
+                <Link href="/employee-dashboard/career-Pathways">
                   <TrendingUp className="w-6 h-6" />
                   <span>Explore Career Paths</span>
                   <span className="text-xs text-muted-foreground">

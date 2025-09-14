@@ -18,6 +18,7 @@ import ExperienceTab from "@/components/profileComponants/ExperienceTab";
 import EducationTab from "@/components/profileComponants/EducationTab";
 import ResumeTab from "@/components/profileComponants/ResumeTab";
 import { toast, Toaster } from "sonner";
+import Loader from "@/components/Loader";
 
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
@@ -153,13 +154,7 @@ const EmployeeProfilePage: React.FC = () => {
     return (
       <AppLayout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="bg-white/30 dark:bg-black/30 backdrop-blur-md rounded-lg p-6 shadow-lg">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-            ></motion.div>
-          </div>
+          <Loader />
         </div>
       </AppLayout>
     );
