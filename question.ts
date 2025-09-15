@@ -753,7 +753,8 @@ export const questions = [
           {
             id: 54,
             type: "multiple-choice",
-            question: "You experience 'flow state' most often when:",
+            question:
+              "You experience the 'flow state' or being in the zone most often when:",
             options: [
               "A) Coding, programming, or working with complex technical systems",
               "B) Facilitating meetings, coaching others, or building team consensus",
