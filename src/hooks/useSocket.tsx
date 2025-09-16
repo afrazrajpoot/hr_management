@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "wss://13.89.121.86"; // Match the server port
+const SOCKET_SERVER_URL = "wss://api.geniusfactor.ai"; // Match the server port
 
 interface Notification {
   id: number;
