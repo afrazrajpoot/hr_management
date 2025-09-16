@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.geniusfactor.ai",
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.geniusfactor.ai";
 
-  interface Notification {
-    id: number;
-type: "success" | "error";
-title: string;
-message: string;
-reportId ?: string;
-userId ?: string;
-timestamp: string;
+interface Notification {
+  id: number;
+  type: "success" | "error";
+  title: string;
+  message: string;
+  reportId?: string;
+  userId?: string;
+  timestamp: string;
 }
 
 export const useSocket = () => {
