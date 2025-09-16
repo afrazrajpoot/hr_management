@@ -96,7 +96,7 @@ export default function UploadJobsPage() {
 
   return (
     <HRLayout>
-      <div className="p-8 max-w-2xl mx-auto bg-[#081229]">
+      <div className="p-8 max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

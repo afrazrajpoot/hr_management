@@ -281,12 +281,14 @@ const HRProfilePage = () => {
         </div>
 
         {/* Profile Section */}
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader className="flex flex-row items-center justify-between bg-gray-800 border-gray-700">
+        <Card className="card">
+          <CardHeader className="flex flex-row items-center justify-between card">
             <div>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>
+                <p>Personal Information</p>
+              </CardTitle>
               <CardDescription>
-                Your personal details and contact information
+                <p> Your personal details and contact information</p>
               </CardDescription>
             </div>
             <Button
@@ -297,7 +299,7 @@ const HRProfilePage = () => {
             </Button>
           </CardHeader>
 
-          <CardContent className="bg-gray-800 border-gray-700">
+          <CardContent className="card">
             {isEditingProfile ? (
               <form
                 onSubmit={profileForm.handleSubmit(onUpdateProfile)}
@@ -410,13 +412,11 @@ const HRProfilePage = () => {
         </Card>
 
         {/* Company Section */}
-        <Card className="bg-gray-800 border-gray-700">
-          <CardHeader className="flex flex-row items-center justify-between bg-gray-800 border-gray-700">
+        <Card className="card">
+          <CardHeader className="flex flex-row items-center justify-between card">
             <div>
-              <CardTitle>Company Information</CardTitle>
-              <CardDescription>
-                Your company details and business information
-              </CardDescription>
+              <p>Company Information</p>
+              <p>Your company details and business information</p>
             </div>
             <Button
               variant="outline"
@@ -430,11 +430,11 @@ const HRProfilePage = () => {
             </Button>
           </CardHeader>
 
-          <CardContent className="bg-gray-800 border-gray-700">
+          <CardContent className="card">
             {isEditingCompany ? (
               <form
                 onSubmit={companyForm.handleSubmit(onUpdateCompany)}
-                className="space-y-4 bg-gray-800 border-gray-700"
+                className="space-y-4 card"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 space-y-2">

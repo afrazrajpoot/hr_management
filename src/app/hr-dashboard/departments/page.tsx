@@ -58,7 +58,7 @@ interface DepartmentCardData {
   totalOutgoing: number;
 }
 
-interface CustomTooltipProps extends TooltipProps<number, string> { }
+interface CustomTooltipProps extends TooltipProps<number, string> {}
 
 const DepartmentDashboard = () => {
   const { departmentCardData, departmentData } = useSocket();
@@ -195,7 +195,7 @@ const DepartmentDashboard = () => {
   const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+        <div className=" p-3 rounded-lg border card">
           <p className="text-white">{`${payload[0].name}: ${payload[0].value} employees`}</p>
         </div>
       );
@@ -205,7 +205,7 @@ const DepartmentDashboard = () => {
 
   return (
     <HRLayout>
-      <div className="min-h-screen text-white p-6 bg-[#081229]">
+      <div className="min-h-screen ">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex items-center space-x-2">
@@ -215,21 +215,21 @@ const DepartmentDashboard = () => {
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-400">
+                <CardTitle className="text-sm font-medium dark:text-gray-400">
                   Total Departments
                 </CardTitle>
                 <Building2 className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  {cardData.totalDepartments}
+                  <p> {cardData.totalDepartments}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">
                   Total Employees
@@ -238,12 +238,12 @@ const DepartmentDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  {cardData.totalEmployees}
+                  <p>{cardData.totalEmployees}</p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">
                   Total Ingoing
@@ -257,7 +257,7 @@ const DepartmentDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-400">
                   Total Outgoing
@@ -274,13 +274,13 @@ const DepartmentDashboard = () => {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
                 <CardTitle className="text-white">
-                  Department Distribution
+                  <p> Department Distribution</p>
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  Employee count by department
+                  <p> Employee count by department</p>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -314,13 +314,13 @@ const DepartmentDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
-                <CardTitle className="text-white">
-                  Ingoing vs Outgoing
+                <CardTitle className="">
+                  <p> Ingoing vs Outgoing</p>
                 </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Department-wise movement comparison
+                <CardDescription className="">
+                  <p> Department-wise movement comparison</p>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -338,13 +338,7 @@ const DepartmentDashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
                       <XAxis dataKey="name" stroke="#9ca3af" />
                       <YAxis stroke="#9ca3af" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#1f2937",
-                          borderColor: "#4b5563",
-                          color: "white",
-                        }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
                       <Legend />
                       <Bar dataKey="ingoing" fill="#22c55e" name="Ingoing" />
                       <Bar dataKey="outgoing" fill="#ef4444" name="Outgoing" />
@@ -357,12 +351,12 @@ const DepartmentDashboard = () => {
 
           {/* Department Cards */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold text-white">Departments</h2>
+            <h2 className="text-2xl font-semibold ">Departments</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {deptData.map((department, index) => (
                 <Card
                   key={index}
-                  className="bg-gray-800 border-gray-700 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-105 cursor-pointer"
+                  className="card transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-105 cursor-pointer"
                   onClick={() =>
                     handleCardClick(
                       department.employees[0],
@@ -382,25 +376,22 @@ const DepartmentDashboard = () => {
                           {department.department}
                         </CardTitle>
                       </div>
-                      <Badge
-                        variant="secondary"
-                        className="bg-gray-700 text-gray-300"
-                      >
+                      <Badge variant="secondary" className="card">
                         {department.employeeCount} employees
                       </Badge>
                     </div>
-                    <CardDescription className="text-gray-400">
+                    <CardDescription className="card">
                       Created: {department.createdAt}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between text-sm">
                       <span className="flex items-center space-x-1 text-green-400">
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendingUp className="h-4 w-4 card" />
                         <span>Ingoing: {department.ingoing}</span>
                       </span>
                       <span className="flex items-center space-x-1 text-red-400">
-                        <TrendingDown className="h-4 w-4" />
+                        <TrendingDown className="h-4 w-4 card" />
                         <span>Outgoing: {department.outgoing}</span>
                       </span>
                     </div>
@@ -413,11 +404,11 @@ const DepartmentDashboard = () => {
                         {department.employees?.map((employee, empIndex) => (
                           <div
                             key={empIndex}
-                            className="flex items-center justify-between p-2 bg-gray-700 rounded-lg"
+                            className="flex items-center justify-between p-2 card rounded-lg"
                           >
                             <div className="flex items-center space-x-3">
                               <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-gray-600 text-white text-xs">
+                                <AvatarFallback className="card text-white text-xs">
                                   {getInitials(
                                     employee.firstName,
                                     employee.lastName

@@ -30,15 +30,13 @@ import {
   Sparkles,
   Globe,
   MapPin,
-  ArrowRight,
-  Loader2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
+
 import PDFReport from "@/components/employee/PDFReport";
 import Loader from "@/components/Loader";
+import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
 
 interface GeniusFactorProfile {
   description: string;
@@ -126,12 +124,8 @@ interface Assessment {
 }
 
 export default function Results() {
-  const { data: session, status } = useSession();
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
 
-  console.log("====================================");
-  console.log(data);
-  console.log("====================================");
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);

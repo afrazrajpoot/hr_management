@@ -66,7 +66,8 @@ const getRiskColor = (risk: string | undefined) => {
 
 export default function Employees() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] =
+    useState("All Departments");
   const [selectedRisk, setSelectedRisk] = useState("All Risk Levels");
   const [selectedStatus, setSelectedStatus] = useState("All Statuses");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
@@ -77,13 +78,13 @@ export default function Employees() {
     page: currentPage,
     limit,
     search: searchTerm,
-    department: selectedDepartment
+    department: selectedDepartment,
   });
   const { data: sessionData } = useSession();
   const uniqueDepartments = useMemo(() => {
     return [
       { option: "All Departments", value: "All Departments" },
-      ...dashboardOptions.Departments
+      ...dashboardOptions.Departments,
     ];
   }, []);
 
@@ -135,7 +136,7 @@ export default function Employees() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 bg-[#081229]">
+      <div className="space-y-6 p-6">
         {/* Header & Search */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -159,7 +160,7 @@ export default function Employees() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="card">
           <CardContent className="p-4">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
@@ -212,9 +213,8 @@ export default function Employees() {
           </CardContent>
         </Card>
 
-
         {/* Employee List */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="card">
           <CardHeader>
             <CardTitle>All Employees</CardTitle>
             <CardDescription>
@@ -246,18 +246,21 @@ export default function Employees() {
                           <Avatar className="h-10 w-10">
                             <AvatarImage src="/api/placeholder/40/40" />
                             <AvatarFallback>
-                              {`${employee.firstName[0]}${employee.lastName !== "Not provide"
-                                ? employee.lastName[0]
-                                : ""
-                                }`}
+                              {`${employee.firstName[0]}${
+                                employee.lastName !== "Not provide"
+                                  ? employee.lastName[0]
+                                  : ""
+                              }`}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{`${employee.firstName
-                              } ${employee.lastName !== "Not provide"
+                            <p className="font-medium">{`${
+                              employee.firstName
+                            } ${
+                              employee.lastName !== "Not provide"
                                 ? employee.lastName
                                 : ""
-                              }`}</p>
+                            }`}</p>
                             <p className="text-sm text-muted-foreground">
                               {employee.email}
                             </p>
@@ -327,13 +330,15 @@ export default function Employees() {
         {data?.pagination && (
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-muted-foreground">
-              Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, data.pagination.totalEmployees)} of {data.pagination.totalEmployees} employees
+              Showing {(currentPage - 1) * limit + 1} to{" "}
+              {Math.min(currentPage * limit, data.pagination.totalEmployees)} of{" "}
+              {data.pagination.totalEmployees} employees
             </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -344,7 +349,11 @@ export default function Employees() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, data.pagination.totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, data.pagination.totalPages)
+                  )
+                }
                 disabled={currentPage === data.pagination.totalPages}
               >
                 Next

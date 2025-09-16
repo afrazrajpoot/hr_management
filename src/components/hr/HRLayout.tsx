@@ -1,11 +1,10 @@
-// app/hr-dashboard/layout.js
 "use client";
 
 import { useState, useEffect } from "react";
 import HRSidebar from "./HRSidebar";
 import HRTopBar from "./HRTopBar";
 
-const pageConfig: any = {
+const pageConfig = {
   "/hr-dashboard": {
     title: "Dashboard Overview",
     subtitle: "Company-wide analytics and insights",
@@ -34,10 +33,6 @@ const pageConfig: any = {
     title: "My Profile",
     subtitle: "Manage your account settings",
   },
-  // "/hr-dashboard/settings": {
-  //   title: "Settings",
-  //   subtitle: "System preferences and configurations",
-  // },
   "/hr-dashboard/upload-jobs": {
     title: "Upload Jobs",
     subtitle: "System preferences and configurations",
@@ -48,19 +43,28 @@ export default function HRLayout({ children, segment }: any) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
-  // Initialize dark mode from localStorage
+  // Initialize dark mode from localStorage and sync with document
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("hr-dark-mode") === "true";
     setDarkMode(savedDarkMode);
-    if (savedDarkMode) document.documentElement.classList.add("dark");
+    updateDarkModeClass(savedDarkMode);
   }, []);
 
+  // Function to update the dark class on document
+  const updateDarkModeClass = (isDark: any) => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  // Toggle dark mode and sync state with class
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     localStorage.setItem("hr-dark-mode", newDarkMode.toString());
-    if (newDarkMode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
+    updateDarkModeClass(newDarkMode);
   };
 
   // Determine current path from segment
@@ -68,7 +72,7 @@ export default function HRLayout({ children, segment }: any) {
   const currentPage = pageConfig[currentPath] || pageConfig["/hr-dashboard"];
 
   return (
-    <div className="flex h-screen bg-[#081229]">
+    <div className="flex h-screen">
       {/* Sidebar */}
       <HRSidebar
         collapsed={sidebarCollapsed}
@@ -78,7 +82,7 @@ export default function HRLayout({ children, segment }: any) {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-[#081229]">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
         <HRTopBar title={currentPage.title} subtitle={currentPage.subtitle} />
 

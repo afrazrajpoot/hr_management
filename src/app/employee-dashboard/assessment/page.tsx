@@ -99,8 +99,8 @@ export default function Assessment() {
         body: JSON.stringify({
           data: partsData,
           userId: session?.user.id,
-          hrId: session?.user.hrId,
-          departement: session?.user.departement?.at(-1) || "Healthcare",
+          hrId: session?.user?.hrId,
+          departement: session?.user?.departement?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
         }),
@@ -113,7 +113,7 @@ export default function Assessment() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ employeeId: session.user.id }),
+            body: JSON.stringify({ employeeId: session?.user?.id }),
           }
         );
       }
@@ -183,7 +183,14 @@ export default function Assessment() {
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto bg-[#081229]">
         {isSubmitting && (
-          <div className="fixed inset-0 bg-opacity-10 flex items-center justify-center z-50 ">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{
+              background: "rgba(15, 23, 42, 0.45)", // navy/dark blue with opacity
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+          >
             <Loader />
           </div>
         )}

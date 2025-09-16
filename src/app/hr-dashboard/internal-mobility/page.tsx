@@ -106,7 +106,7 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
   icon: Icon,
   description,
 }) => (
-  <Card className="bg-gray-800 border-gray-700">
+  <Card className="card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between mb-2">
         <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -124,6 +124,38 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
     </CardContent>
   </Card>
 );
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload || !payload.length) return null;
+
+  // Detect dark mode using a CSS class on <body> or <html>
+  const isDark =
+    typeof window !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+
+  return (
+    <div
+      style={{
+        background: isDark ? "#1f2937" : "#fff", // gray-800 for dark, white for light
+        color: isDark ? "#fff" : "#000",
+        border: "1px solid",
+        borderColor: isDark ? "#374151" : "#e5e7eb", // gray-700 or gray-200
+        borderRadius: 8,
+        padding: "12px 16px",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+        minWidth: 180,
+        zIndex: 1000,
+      }}
+    >
+      <div className="font-semibold mb-2">{label}</div>
+      {payload.map((entry: any, idx: number) => (
+        <div key={idx} style={{ color: entry.color, marginBottom: 4 }}>
+          {entry.name}: <span className="font-bold">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // Generate default empty data
 const generateDefaultMonthlyTrends = (): MonthlyTrends => {
@@ -315,7 +347,7 @@ export default function InternalMobility() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 bg-[#081229]">
+      <div className="space-y-6 p-6 ">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -368,7 +400,7 @@ export default function InternalMobility() {
         {/* Mobility Trends */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Monthly Mobility Trend - Show Promotions, Transfers, and Total */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle>Monthly Mobility Trends</CardTitle>
               <CardDescription>
@@ -381,7 +413,7 @@ export default function InternalMobility() {
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Line
                     type="monotone"
                     dataKey="promotions"
@@ -409,7 +441,7 @@ export default function InternalMobility() {
           </Card>
 
           {/* Department Flow Chart - Only Incoming & Outgoing */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle>Department Movement Flow</CardTitle>
               <CardDescription>
@@ -430,7 +462,7 @@ export default function InternalMobility() {
                     height={80}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="incoming"
                     fill="hsl(var(--hr-chart-2))"
@@ -451,7 +483,7 @@ export default function InternalMobility() {
         {internalMobility?.users && internalMobility.users.length > 0 && (
           <>
             {/* Search Bar */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardContent className="p-6">
                 <div className="max-w-md space-y-2">
                   <Label

@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
-  <Card className=" bg-gray-800 border-gray-700">
+  <Card className="card">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -248,7 +248,7 @@ export default function Dashboard() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 bg-[#081229]">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -305,7 +305,7 @@ export default function Dashboard() {
         {/* Comprehensive Charts Grid */}
         <div className="grid gap-6">
           {/* Assessment Completion Rate */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle>Assessment Completion by Department</CardTitle>
               <CardDescription>
@@ -337,7 +337,7 @@ export default function Dashboard() {
           {/* Row 2: Two charts side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Genius Factor Distribution */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
                 <CardTitle>Genius Factor Score Distribution</CardTitle>
                 <CardDescription>
@@ -365,7 +365,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Retention Risk Distribution */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
                 <CardTitle>Retention Risk Distribution</CardTitle>
                 <CardDescription>
@@ -396,7 +396,7 @@ export default function Dashboard() {
           {/* Row 3: Two charts side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Department Averages */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
                 <CardTitle>Department Score Averages</CardTitle>
                 <CardDescription>
@@ -439,7 +439,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Internal Mobility Trend */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardHeader>
                 <CardTitle>Internal Mobility Trend</CardTitle>
                 <CardDescription>

@@ -38,8 +38,68 @@ export default function ChatPopup({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [currentStream, setCurrentStream] = useState("");
+  const [isFetchingConversation, setIsFetchingConversation] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Only fetch if dialog is open and we have required data
+    if (isOpen && hrId && department?.department) {
+      let isMounted = true;
+
+      const fetchConversation = async () => {
+        setIsFetchingConversation(true);
+        try {
+          const response = await fetch(
+            `/api/get-conversation?department=${encodeURIComponent(
+              department.department
+            )}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!isMounted) return;
+
+          const result = await response.json();
+          if (response.ok && result.data) {
+            const fetchedMessages: ChatMessage[] = result.data.messages || [];
+            onMessagesUpdate(department.department, fetchedMessages);
+          } else {
+            console.error(result.error || "Failed to fetch conversation");
+            const welcomeMessage: ChatMessage = {
+              role: "assistant",
+              content: `Hello! I'm your AI assistant for the ${department.department} department. I'm here to help you analyze data, provide insights, and answer questions about employee retention, performance metrics, and strategic recommendations.\n\nHow may I assist you today?`,
+              timestamp: new Date().toISOString(),
+            };
+            onMessagesUpdate(department.department, [welcomeMessage]);
+          }
+        } catch (error) {
+          if (!isMounted) return;
+          console.error("Error fetching conversation:", error);
+          const errorMessage: ChatMessage = {
+            role: "assistant",
+            content: "Failed to load conversation history. Please try again.",
+            timestamp: new Date().toISOString(),
+          };
+          onMessagesUpdate(department.department, [errorMessage]);
+        } finally {
+          if (isMounted) {
+            setIsFetchingConversation(false);
+          }
+        }
+      };
+
+      fetchConversation();
+
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [isOpen, hrId, department?.department]); // Remove onMessagesUpdate from dependencies
 
   // Auto-scroll to bottom when messages change or streaming updates
   useEffect(() => {
@@ -54,11 +114,8 @@ export default function ChatPopup({
 
   // Format message content for professional display
   const formatMessageContent = (content: string) => {
-    // Split content into paragraphs and format
     const paragraphs = content.split("\n\n").filter((p) => p.trim());
-
     return paragraphs.map((paragraph, index) => {
-      // Check if it's a list item
       if (paragraph.includes("•") || /^\d+\./.test(paragraph.trim())) {
         const items = paragraph.split("\n").filter((item) => item.trim());
         return (
@@ -71,8 +128,6 @@ export default function ChatPopup({
           </ul>
         );
       }
-
-      // Check if it's a heading (starts with #, ##, etc.)
       if (paragraph.startsWith("#")) {
         const level = paragraph.match(/^#+/)?.[0].length || 1;
         const text = paragraph.replace(/^#+\s*/, "");
@@ -80,15 +135,12 @@ export default function ChatPopup({
           level + 2,
           6
         )}` as keyof JSX.IntrinsicElements;
-
         return (
           <HeadingTag key={index} className="font-semibold text-sm my-2">
             {text}
           </HeadingTag>
         );
       }
-
-      // Check if it contains bold text (**text**)
       if (paragraph.includes("**")) {
         const parts = paragraph.split(/(\*\*.*?\*\*)/g);
         return (
@@ -103,8 +155,6 @@ export default function ChatPopup({
           </p>
         );
       }
-
-      // Regular paragraph
       return (
         <p key={index} className="text-sm leading-relaxed my-2">
           {paragraph}
@@ -136,13 +186,16 @@ export default function ChatPopup({
         dashboard_data: dashboardData,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok && response.body) {
         const reader = response.body.getReader();
@@ -187,9 +240,9 @@ export default function ChatPopup({
   const clearChat = async () => {
     try {
       await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/chat/${hrId}/${encodeURIComponent(
-          department.department
-        )}`,
+        `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/api/chat/${hrId}/${encodeURIComponent(department.department)}`,
         {
           method: "DELETE",
         }
@@ -217,7 +270,7 @@ export default function ChatPopup({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col card">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">
@@ -242,66 +295,80 @@ export default function ChatPopup({
           className="flex-1 overflow-y-auto p-4 space-y-4"
           style={{ maxHeight: "calc(85vh - 160px)" }}
         >
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-            >
-              <div
-                className={`max-w-[75%] px-4 py-3 rounded-lg shadow-sm ${message.role === "user"
-                  ? "rounded-br-sm"
-                  : "rounded-bl-sm border"
+          {isFetchingConversation ? (
+            <div className="flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : (
+            <>
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
-              >
-                {message.role === "assistant" && (
-                  <div className="flex items-center mb-2 pb-2 border-b">
-                    <div className="w-2 h-2 rounded-full mr-2"></div>
-                    <span className="text-xs font-medium">AI Assistant</span>
+                >
+                  <div
+                    className={`max-w-[75%] px-4 py-3 rounded-lg shadow-sm ${
+                      message.role === "user"
+                        ? "bg-blue-500 text-white rounded-br-sm"
+                        : "rounded-bl-sm border"
+                    }`}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="flex items-center mb-2 pb-2 border-b">
+                        <div className="w-2 h-2 rounded-full mr-2"></div>
+                        <span className="text-xs font-medium">
+                          AI Assistant
+                        </span>
+                      </div>
+                    )}
+
+                    <div>
+                      {message.role === "assistant" ? (
+                        formatMessageContent(message.content)
+                      ) : (
+                        <p className="text-sm leading-relaxed">
+                          {message.content}
+                        </p>
+                      )}
+                    </div>
+
+                    {message.timestamp && (
+                      <div className="text-xs mt-2">
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
-
-                <div>
-                  {message.role === "assistant" ? (
-                    formatMessageContent(message.content)
-                  ) : (
-                    <p className="text-sm leading-relaxed">{message.content}</p>
-                  )}
                 </div>
+              ))}
 
-                {message.timestamp && (
-                  <div className="text-xs mt-2">
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+              {currentStream && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-3 rounded-lg rounded-bl-sm border max-w-[75%] shadow-sm">
+                    <div className="flex items-center mb-2 pb-2 border-b">
+                      <div className="w-2 h-2 rounded-full mr-2 animate-pulse"></div>
+                      <span className="text-xs font-medium">
+                        AI Assistant (typing...)
+                      </span>
+                    </div>
+                    <div>{formatMessageContent(currentStream)}</div>
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {currentStream && (
-            <div className="flex justify-start">
-              <div className="px-4 py-3 rounded-lg rounded-bl-sm border max-w-[75%] shadow-sm">
-                <div className="flex items-center mb-2 pb-2 border-b">
-                  <div className="w-2 h-2 rounded-full mr-2 animate-pulse"></div>
-                  <span className="text-xs font-medium">
-                    AI Assistant (typing...)
-                  </span>
                 </div>
-                <div>{formatMessageContent(currentStream)}</div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {isLoading && !currentStream && (
-            <div className="flex justify-start">
-              <div className="px-4 py-3 rounded-lg rounded-bl-sm border flex items-center shadow-sm">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                <span className="text-sm">Analyzing your request...</span>
-              </div>
-            </div>
+              {isLoading && !currentStream && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-3 rounded-lg rounded-bl-sm border flex items-center shadow-sm">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <span className="text-sm">Analyzing your request...</span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Invisible element for auto-scrolling */}
@@ -316,12 +383,12 @@ export default function ChatPopup({
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about retention strategies, performance metrics, or departmental insights..."
-              disabled={isLoading}
+              disabled={isLoading || isFetchingConversation}
               className="flex-1"
             />
             <Button
               onClick={handleSendMessage}
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !input.trim() || isFetchingConversation}
               className="px-4 py-2"
             >
               {isLoading ? (

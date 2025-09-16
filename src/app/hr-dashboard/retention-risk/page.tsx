@@ -18,6 +18,7 @@ import {
   Lightbulb,
   Loader2,
   Brain,
+  Bot,
 } from "lucide-react";
 import {
   BarChart,
@@ -33,11 +34,11 @@ import {
 } from "recharts";
 import HRLayout from "@/components/hr/HRLayout";
 import { useSocket } from "@/context/SocketContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAnalyzeRetentionRiskMutation } from "@/redux/hr-python-api/intervation";
 import ChatPopup from "@/components/hr/ChatPopup";
 import Loader from "@/components/Loader";
-// import ChatPopup from "./ChatPopup";
+import { useSession } from "next-auth/react";
 
 // Interface for chat messages
 interface ChatMessage {
@@ -51,6 +52,23 @@ interface ChatConversation {
   messages: ChatMessage[];
 }
 
+// Interface for AnalysisResult (based on Prisma schema)
+interface AnalysisResult {
+  id: number;
+  hrid: string;
+  department_name: string;
+  ai_response: {
+    department: string;
+    retention_score: number;
+    risk_level: string;
+    mobility_opportunities: string[];
+    recommendations: string[];
+    action_items: string[];
+  };
+  risk_score: number | null;
+  created_at: string;
+}
+
 const RiskStatCard = ({
   title,
   value,
@@ -58,8 +76,8 @@ const RiskStatCard = ({
   icon: Icon,
   trend = "neutral",
 }: any) => (
-  <Card className="bg-gray-800 border-gray-700">
-    <CardContent className="p-6 ">
+  <Card className="card">
+    <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -110,7 +128,7 @@ const RecommendationCard = ({ recommendation, onClick }: any) => {
 
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md bg-gray-800 border-gray-700"
+      className="cursor-pointer transition-shadow hover:shadow-md card"
       onClick={onClick}
     >
       <CardHeader>
@@ -123,9 +141,10 @@ const RecommendationCard = ({ recommendation, onClick }: any) => {
               Retention Score: {recommendation.retention_score.toFixed(1)}/100
             </CardDescription>
           </div>
-          <Badge variant={getRiskColor(recommendation.risk_level)}>
-            {recommendation.risk_level} Risk
-          </Badge>
+          <Button variant="default" className="flex items-center gap-2">
+            <Bot className="w-4 h-4" />
+            Chat with Genius Factor AI
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -211,13 +230,49 @@ const fallbackRiskData = {
   departmentCount: 0,
 };
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const isDark =
+    typeof window !== "undefined" &&
+    document.documentElement.classList.contains("dark");
+
+  return (
+    <div
+      style={{
+        background: isDark ? "#1f2937" : "#fff",
+        color: isDark ? "#fff" : "#000",
+        border: "1px solid",
+        borderColor: isDark ? "#374151" : "#e5e7eb",
+        borderRadius: 8,
+        padding: "12px 16px",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+        minWidth: 180,
+        zIndex: 1000,
+      }}
+    >
+      {label && <div className="font-semibold mb-2">{label}</div>}
+      {payload.map((entry: any, idx: number) => (
+        <div key={idx} style={{ color: entry.color, marginBottom: 4 }}>
+          {entry.name}: <span className="font-bold">{entry.value}</span>
+          {entry.payload && entry.payload.percentage !== undefined && (
+            <span className="ml-2 text-xs opacity-80">
+              ({entry.payload.percentage}%)
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function RetentionRisk() {
   const { dashboardData } = useSocket();
+  const { data: session } = useSession();
   const [
     analyzeRetentionRisk,
     { data: analysisData, isLoading: isAnalysisLoading, error },
   ] = useAnalyzeRetentionRiskMutation();
-
   const [riskData, setRiskData] = useState<any>(fallbackRiskData);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
@@ -225,22 +280,63 @@ export default function RetentionRisk() {
   const [chatConversations, setChatConversations] = useState<
     Record<string, ChatConversation>
   >({});
-  const [hrId] = useState("7431db61-1d21-4fbc-aa33-fa813feff7bf"); // Replace with actual HR ID from auth
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
 
+  // Determine if there are unanalyzed departments
+  const hasUnanalyzedDepartments = useMemo(() => {
+    if (!dashboardData || !Array.isArray(dashboardData)) return false;
+    const analyzedDepartments = new Set(
+      analysisResults.map((result) => result.department_name)
+    );
+    return dashboardData.some(
+      (dept: any) => !analyzedDepartments.has(dept.name)
+    );
+  }, [dashboardData, analysisResults]);
+
+  // Fetch AnalysisResult data from API
   useEffect(() => {
-    // Check if dashboardData exists and is an array
+    const fetchAnalysisResults = async () => {
+      if (!session?.user?.id) {
+        console.error("No hrid found in session");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/get-analysis-result", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setAnalysisResults(result.data || []);
+      } catch (error) {
+        console.error("Error fetching analysis results:", error);
+        setAnalysisResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAnalysisResults();
+  }, [session?.user?.id]);
+
+  // Process dashboard data for risk statistics
+  useEffect(() => {
     if (dashboardData && Array.isArray(dashboardData)) {
       processRiskData(dashboardData);
     } else {
-      // Use fallback data if no valid dashboard data
-
       setRiskData(fallbackRiskData);
     }
-    setIsLoading(false);
   }, [dashboardData]);
 
   const processRiskData = (departmentData: any[]) => {
-    // Ensure we're working with an array
     if (!Array.isArray(departmentData)) {
       console.error(
         "processRiskData expected an array but got:",
@@ -250,7 +346,6 @@ export default function RetentionRisk() {
       return;
     }
 
-    // Calculate risk distribution
     let lowRisk = 0;
     let mediumRisk = 0;
     let highRisk = 0;
@@ -302,20 +397,19 @@ export default function RetentionRisk() {
       },
     ];
 
-    // Prepare department risk data
     const departmentRiskData =
       departmentData.length > 0
-        ? departmentData.map((dept: any) => {
-            const riskDist = dept.metrics?.retention_risk_distribution || {};
-            return {
-              department: dept.name || "Unknown Department",
-              low: riskDist["Low (0-30)"] || 0,
-              medium: riskDist["Medium (31-60)"] || 0,
-              high: riskDist["High (61-100)"] || 0,
-              total: dept.employee_count || 0,
-              color: dept.color || "#8884d8",
-            };
-          })
+        ? departmentData.map((dept: any) => ({
+            department: dept.name || "Unknown Department",
+            low: dept.metrics?.retention_risk_distribution?.["Low (0-30)"] || 0,
+            medium:
+              dept.metrics?.retention_risk_distribution?.["Medium (31-60)"] ||
+              0,
+            high:
+              dept.metrics?.retention_risk_distribution?.["High (61-100)"] || 0,
+            total: dept.employee_count || 0,
+            color: dept.color || "#8884d8",
+          }))
         : fallbackRiskData.departmentRiskData;
 
     setRiskData({
@@ -330,13 +424,45 @@ export default function RetentionRisk() {
     });
   };
 
+  // Handle "Analyze with AI" button click
   const handleAnalyzeWithAI = async () => {
-    if (dashboardData && Array.isArray(dashboardData)) {
-      try {
-        await analyzeRetentionRisk(dashboardData).unwrap();
-      } catch (err) {
-        console.error("Failed to analyze retention risk:", err);
+    if (!dashboardData || !Array.isArray(dashboardData)) {
+      console.error("No valid dashboard data available");
+      return;
+    }
+
+    // Identify departments without analysis data
+    const analyzedDepartments = new Set(
+      analysisResults.map((result) => result.department_name)
+    );
+    const departmentsToAnalyze = dashboardData.filter(
+      (dept: any) => !analyzedDepartments.has(dept.name)
+    );
+
+    if (departmentsToAnalyze.length === 0) {
+      console.log("All departments already have analysis data");
+      return;
+    }
+
+    try {
+      // Send only unanalyzed departments to the AI analysis endpoint
+      await analyzeRetentionRisk(departmentsToAnalyze).unwrap();
+      // Refetch analysis results after generating new data
+      const response = await fetch("/api/get-analysis-result", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      setAnalysisResults(result.data || []);
+    } catch (err) {
+      console.error("Failed to analyze retention risk:", err);
     }
   };
 
@@ -344,8 +470,7 @@ export default function RetentionRisk() {
     setSelectedDepartment(recommendation);
     setIsChatOpen(true);
 
-    // Initialize conversation if it doesn't exist
-    const conversationKey = `${hrId}_${recommendation.department}`;
+    const conversationKey = `${session?.user?.id}_${recommendation.department}`;
     if (!chatConversations[conversationKey]) {
       setChatConversations((prev) => ({
         ...prev,
@@ -366,7 +491,7 @@ export default function RetentionRisk() {
     department: string,
     newMessages: ChatMessage[]
   ) => {
-    const conversationKey = `${hrId}_${department}`;
+    const conversationKey = `${session?.user?.id}_${department}`;
     setChatConversations((prev) => ({
       ...prev,
       [conversationKey]: {
@@ -384,15 +509,14 @@ export default function RetentionRisk() {
   if (isLoading) {
     return (
       <HRLayout>
-                     <Loader />
-
+        <Loader />
       </HRLayout>
     );
   }
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 bg-[#081229]">
+      <div className="space-y-6 p-6 ">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -411,23 +535,26 @@ export default function RetentionRisk() {
             </p>
           </div>
 
-          <Button
-            onClick={handleAnalyzeWithAI}
-            disabled={isAnalysisLoading || !dashboardData}
-            className="gap-2"
-          >
-            {isAnalysisLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4" />
-                Analyze with AI
-              </>
-            )}
-          </Button>
+          {/* Conditionally render the Analyze with AI button */}
+          {hasUnanalyzedDepartments && (
+            <Button
+              onClick={handleAnalyzeWithAI}
+              disabled={isAnalysisLoading || !dashboardData}
+              className="gap-2"
+            >
+              {isAnalysisLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4" />
+                  Analyze with AI
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {error && (
@@ -443,7 +570,7 @@ export default function RetentionRisk() {
         )}
 
         {/* Risk Overview Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 ">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <RiskStatCard
             title="Total At Risk"
             value={riskData.totalAtRisk}
@@ -475,7 +602,7 @@ export default function RetentionRisk() {
             value={`${riskData.retentionRate}%`}
             change={`${100 - riskData.retentionRate}% at risk`}
             icon={Users}
-            trend={riskData.retentionRate > 90 ? "up" : "down"}
+            trend={riskData.retentionRate > 90 ? "down" : "up"}
           />
           <RiskStatCard
             title="Avg Risk Score"
@@ -489,7 +616,7 @@ export default function RetentionRisk() {
         {/* Risk Distribution & Department Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Risk Distribution Pie Chart */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle>Risk Level Distribution</CardTitle>
               <CardDescription>
@@ -515,12 +642,7 @@ export default function RetentionRisk() {
                       )
                     )}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number, name: string, props: any) => [
-                      `${value} employees (${props.payload.percentage}%)`,
-                      name,
-                    ]}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-wrap justify-center gap-4 mt-4">
@@ -543,7 +665,7 @@ export default function RetentionRisk() {
           </Card>
 
           {/* Department Risk Breakdown */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle>Risk by Department</CardTitle>
               <CardDescription>
@@ -564,7 +686,7 @@ export default function RetentionRisk() {
                     height={80}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="low"
                     stackId="a"
@@ -589,64 +711,75 @@ export default function RetentionRisk() {
           </Card>
         </div>
 
-        {/* AI Analysis Results - Show after charts */}
-        {analysisData && analysisData.department_recommendations && (
-          <div className="">
+        {/* AI Analysis Results */}
+        {analysisResults.length > 0 && (
+          <div>
             <div className="flex items-center gap-2 mb-4">
               <Brain className="h-5 w-5 text-primary" />
               <h2 className="text-2xl font-bold">AI-Powered Recommendations</h2>
             </div>
 
-            <div className="mb-6 p-4  rounded-lg bg-gray-800 border-gray-700">
+            <div className="mb-6 p-4 rounded-lg card">
               <p className="text-sm text-muted-foreground">Overall Summary</p>
-              <p className="font-medium">{analysisData.summary}</p>
+              <p className="font-medium">
+                {analysisData?.summary ||
+                  "Analysis of retention risks across departments."}
+              </p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline">
                   Overall Risk Score:{" "}
-                  {analysisData.overall_risk_score.toFixed(1)}/100
+                  {analysisResults.length > 0
+                    ? (
+                        analysisResults.reduce(
+                          (sum, result) => sum + (result.risk_score || 0),
+                          0
+                        ) / analysisResults.length
+                      ).toFixed(1)
+                    : "0.0"}
+                  /100
                 </Badge>
               </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 ">
-              {analysisData.department_recommendations.map(
-                (recommendation, index) => (
-                  <RecommendationCard
-                    key={index}
-                    recommendation={recommendation}
-                    onClick={() => handleCardClick(recommendation)}
-                  />
-                )
-              )}
+            <div className="grid gap-6 md:grid-cols-2">
+              {analysisResults.map((result, index) => (
+                <RecommendationCard
+                  key={index}
+                  recommendation={result.ai_response}
+                  onClick={() => handleCardClick(result.ai_response)}
+                />
+              ))}
             </div>
           </div>
         )}
 
-        {/* Show empty state if no AI analysis has been run */}
-        {!analysisData && (
-          <div className="text-center py-12  rounded-lg bg-gray-800 border-gray-700">
+        {/* Empty State */}
+        {analysisResults.length === 0 && (
+          <div className="text-center py-12 rounded-lg card">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-medium mb-2">Run AI Analysis</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Get personalized retention risk recommendations by running our AI
               analysis on your department data.
             </p>
-            <Button
-              onClick={handleAnalyzeWithAI}
-              disabled={!dashboardData || isAnalysisLoading}
-            >
-              {isAnalysisLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  Analyze with AI
-                </>
-              )}
-            </Button>
+            {hasUnanalyzedDepartments && (
+              <Button
+                onClick={handleAnalyzeWithAI}
+                disabled={!dashboardData || isAnalysisLoading}
+              >
+                {isAnalysisLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="h-4 w-4 mr-2" />
+                    Analyze with AI
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         )}
 
@@ -655,12 +788,13 @@ export default function RetentionRisk() {
           isOpen={isChatOpen}
           onClose={handleCloseChat}
           department={selectedDepartment}
-          hrId={hrId}
+          hrId={session?.user?.id || ""}
           dashboardData={dashboardData || []}
           messages={
             selectedDepartment
-              ? chatConversations[`${hrId}_${selectedDepartment.department}`]
-                  ?.messages || []
+              ? chatConversations[
+                  `${session?.user?.id}_${selectedDepartment.department}`
+                ]?.messages || []
               : []
           }
           onMessagesUpdate={updateChatMessages}

@@ -109,7 +109,9 @@ export default function DepartmentModal({
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/departments/aggregate?department=${encodeURIComponent(
+        `${
+          process.env.NEXT_PUBLIC_API_URL
+        }/departments/aggregate?department=${encodeURIComponent(
           employee.department
         )}&hrId=${hrId}`
       );
@@ -144,7 +146,7 @@ export default function DepartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden card">
         <DialogHeader className="relative pb-6 border-b">
           <div className="absolute inset-0 rounded-t-lg"></div>
           <DialogTitle className="flex items-center justify-between relative z-10">
@@ -214,10 +216,11 @@ export default function DepartmentModal({
                           {departmentStats.employees.map((emp) => (
                             <div
                               key={emp.id}
-                              className={`p-3 rounded-lg border ${emp.id === employee.id
-                                ? "border-primary bg-primary/10"
-                                : "bg-muted/30"
-                                }`}
+                              className={`p-3 rounded-lg border ${
+                                emp.id === employee.id
+                                  ? "border-primary bg-primary/10"
+                                  : "bg-muted/30"
+                              }`}
                             >
                               <div className="flex justify-between items-center">
                                 <div>
@@ -292,153 +295,153 @@ export default function DepartmentModal({
                     {departmentStats.llm_recommendations
                       .structured_recommendations.team_composition_overview
                       .overview && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">Team Overview</h4>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {
-                              departmentStats.llm_recommendations
-                                .structured_recommendations
-                                .team_composition_overview.overview
-                            }
-                          </p>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">Team Overview</h4>
                         </div>
-                      )}
+                        <p className="text-sm text-muted-foreground">
+                          {
+                            departmentStats.llm_recommendations
+                              .structured_recommendations
+                              .team_composition_overview.overview
+                          }
+                        </p>
+                      </div>
+                    )}
 
                     {/* Strengths */}
                     {departmentStats.llm_recommendations
                       .structured_recommendations.strengths_identified.strengths
                       .length > 0 && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">Team Strengths</h4>
-                          </div>
-                          <div className="space-y-2">
-                            {departmentStats.llm_recommendations.structured_recommendations.strengths_identified.strengths.map(
-                              (strength, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                  <p className="text-sm">{strength}</p>
-                                </div>
-                              )
-                            )}
-                          </div>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">Team Strengths</h4>
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          {departmentStats.llm_recommendations.structured_recommendations.strengths_identified.strengths.map(
+                            (strength, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                <p className="text-sm">{strength}</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Critical Gaps */}
                     {departmentStats.llm_recommendations
                       .structured_recommendations.critical_gaps.gaps.length >
                       0 && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">
-                              Areas for Improvement
-                            </h4>
-                          </div>
-                          <div className="space-y-2">
-                            {departmentStats.llm_recommendations.structured_recommendations.critical_gaps.gaps.map(
-                              (gap, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground mt-2 flex-shrink-0" />
-                                  <p className="text-sm">{gap}</p>
-                                </div>
-                              )
-                            )}
-                          </div>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">
+                            Areas for Improvement
+                          </h4>
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          {departmentStats.llm_recommendations.structured_recommendations.critical_gaps.gaps.map(
+                            (gap, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground mt-2 flex-shrink-0" />
+                                <p className="text-sm">{gap}</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Recommendations for Balance */}
                     {departmentStats.llm_recommendations
                       .structured_recommendations.recommendations_for_balance
                       .recommendations.length > 0 && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Target className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">
-                              Balance Recommendations
-                            </h4>
-                          </div>
-                          <div className="space-y-2">
-                            {departmentStats.llm_recommendations.structured_recommendations.recommendations_for_balance.recommendations.map(
-                              (rec, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                  <p className="text-sm">{rec}</p>
-                                </div>
-                              )
-                            )}
-                          </div>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Target className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">
+                            Balance Recommendations
+                          </h4>
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          {departmentStats.llm_recommendations.structured_recommendations.recommendations_for_balance.recommendations.map(
+                            (rec, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                <p className="text-sm">{rec}</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Training & Development */}
                     {departmentStats.llm_recommendations
                       .structured_recommendations.targeted_training_development
                       .training_recommendations.length > 0 && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <BookOpen className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">
-                              Training & Development
-                            </h4>
-                          </div>
-                          <div className="space-y-2">
-                            {departmentStats.llm_recommendations.structured_recommendations.targeted_training_development.training_recommendations.map(
-                              (training, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                  <p className="text-sm">{training}</p>
-                                </div>
-                              )
-                            )}
-                          </div>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <BookOpen className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">
+                            Training & Development
+                          </h4>
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          {departmentStats.llm_recommendations.structured_recommendations.targeted_training_development.training_recommendations.map(
+                            (training, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                <p className="text-sm">{training}</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Collaboration Recommendations */}
                     {departmentStats.llm_recommendations
                       .structured_recommendations.team_building_collaboration
                       .collaboration_recommendations.length > 0 && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <HandHeart className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">
-                              Team Building & Collaboration
-                            </h4>
-                          </div>
-                          <div className="space-y-2">
-                            {departmentStats.llm_recommendations.structured_recommendations.team_building_collaboration.collaboration_recommendations.map(
-                              (collab, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-start gap-3"
-                                >
-                                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                  <p className="text-sm">{collab}</p>
-                                </div>
-                              )
-                            )}
-                          </div>
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <HandHeart className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">
+                            Team Building & Collaboration
+                          </h4>
                         </div>
-                      )}
+                        <div className="space-y-2">
+                          {departmentStats.llm_recommendations.structured_recommendations.team_building_collaboration.collaboration_recommendations.map(
+                            (collab, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                <p className="text-sm">{collab}</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Risk Mitigation */}
                     {(departmentStats.llm_recommendations
@@ -447,57 +450,57 @@ export default function DepartmentModal({
                       departmentStats.llm_recommendations
                         .structured_recommendations.risk_mitigation
                         .mitigation_strategies.length > 0) && (
-                        <div className="p-4 rounded-lg border bg-muted/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Shield className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">Risk Management</h4>
-                          </div>
-                          {departmentStats.llm_recommendations
-                            .structured_recommendations.risk_mitigation.risks
-                            .length > 0 && (
-                              <div className="mb-3">
-                                <p className="text-xs font-medium text-muted-foreground mb-2">
-                                  Identified Risks:
-                                </p>
-                                <div className="space-y-1">
-                                  {departmentStats.llm_recommendations.structured_recommendations.risk_mitigation.risks.map(
-                                    (risk, index) => (
-                                      <div
-                                        key={index}
-                                        className="flex items-start gap-3"
-                                      >
-                                        <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground mt-2 flex-shrink-0" />
-                                        <p className="text-sm">{risk}</p>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          {departmentStats.llm_recommendations
-                            .structured_recommendations.risk_mitigation
-                            .mitigation_strategies.length > 0 && (
-                              <div>
-                                <p className="text-xs font-medium text-muted-foreground mb-2">
-                                  Mitigation Strategies:
-                                </p>
-                                <div className="space-y-1">
-                                  {departmentStats.llm_recommendations.structured_recommendations.risk_mitigation.mitigation_strategies.map(
-                                    (strategy, index) => (
-                                      <div
-                                        key={index}
-                                        className="flex items-start gap-3"
-                                      >
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                        <p className="text-sm">{strategy}</p>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
-                              </div>
-                            )}
+                      <div className="p-4 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Shield className="h-4 w-4 text-muted-foreground" />
+                          <h4 className="font-semibold">Risk Management</h4>
                         </div>
-                      )}
+                        {departmentStats.llm_recommendations
+                          .structured_recommendations.risk_mitigation.risks
+                          .length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">
+                              Identified Risks:
+                            </p>
+                            <div className="space-y-1">
+                              {departmentStats.llm_recommendations.structured_recommendations.risk_mitigation.risks.map(
+                                (risk, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-start gap-3"
+                                  >
+                                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground mt-2 flex-shrink-0" />
+                                    <p className="text-sm">{risk}</p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {departmentStats.llm_recommendations
+                          .structured_recommendations.risk_mitigation
+                          .mitigation_strategies.length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">
+                              Mitigation Strategies:
+                            </p>
+                            <div className="space-y-1">
+                              {departmentStats.llm_recommendations.structured_recommendations.risk_mitigation.mitigation_strategies.map(
+                                (strategy, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-start gap-3"
+                                  >
+                                    <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                                    <p className="text-sm">{strategy}</p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

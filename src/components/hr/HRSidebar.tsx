@@ -47,9 +47,9 @@ export default function HRSidebar({
   const completedAssessments =
     dashboardData && Array.isArray(dashboardData)
       ? dashboardData.reduce(
-        (sum, dept) => sum + (dept.completed_assessments || 0),
-        0
-      )
+          (sum, dept) => sum + (dept.completed_assessments || 0),
+          0
+        )
       : 0;
 
   const departmentCount =
@@ -119,7 +119,7 @@ export default function HRSidebar({
   return (
     <div
       className={cn(
-        "flex flex-col  border-r border-sidebar-border transition-all duration-300 bg-[#081229]",
+        "flex flex-col  border-r border-sidebar-border transition-all duration-300 ",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -128,7 +128,11 @@ export default function HRSidebar({
         {!collapsed && (
           <div className="flex items-center gap-2">
             <figure className="w-full rounded-[1vw]">
-              <img src="/logo.png" alt="Genius Factor" className="w-full rounded-2xl h-[3.5vw]" />
+              <img
+                src="/logo.png"
+                alt="Genius Factor"
+                className="w-full rounded-2xl h-[3.5vw]"
+              />
             </figure>
             <span className="font-semibold text-sidebar-foreground">
               GeniusFactor

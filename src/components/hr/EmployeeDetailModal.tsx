@@ -32,7 +32,13 @@ import { useState, useEffect } from "react";
 import { useUpdateEmployeeMutation } from "@/redux/hr-api";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { dashboardOptions } from "@/app/data";
 
 interface EmployeeDetailModalProps {
@@ -134,7 +140,7 @@ export default function EmployeeDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden card">
         <DialogHeader className="relative pb-6 border-b">
           <div className="absolute inset-0 rounded-t-lg"></div>
           <DialogTitle className="flex items-center justify-between relative z-10">
@@ -219,7 +225,10 @@ export default function EmployeeDetailModal({
                               </SelectTrigger>
                               <SelectContent>
                                 {dashboardOptions.Positions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
                                     {option.option}
                                   </SelectItem>
                                 ))}
@@ -261,7 +270,10 @@ export default function EmployeeDetailModal({
                               </SelectTrigger>
                               <SelectContent>
                                 {dashboardOptions.Departments.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                  >
                                     {option.option}
                                   </SelectItem>
                                 ))}

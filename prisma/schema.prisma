@@ -203,3 +203,29 @@ enum UserRole {
   RECRUITER
   ADMIN
 }
+
+
+model ChatConversation {
+  id           String   @id @default(cuid())
+  hr_id        String
+  department   String
+  messages     Json     // Store entire conversation as JSON array
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([hr_id, department])
+  @@map("chat_conversations")
+}
+
+model AnalysisResult {
+  id              Int      @id @default(autoincrement())
+  hrid            String   @db.VarChar(50)
+  department_name String   @db.VarChar(255)
+  ai_response     Json
+  risk_score      Float?
+  created_at      DateTime @default(now())
+
+  @@index([hrid])
+  @@index([department_name])
+  @@index([created_at])
+}

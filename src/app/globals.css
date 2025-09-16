@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
-/* Your original custom CSS variables - Keep these exactly as they were */
+/* Your original custom CSS variables - Modified for background and foreground */
 :root {
     /* Core Background & Text */
-    --background: 224 64% 11%;
-    /* Changed to #081229 */
-    --foreground: 224 71% 4%;
+    --background: 0 0% 100%;
+    /* Light mode: white (#FFFFFF) */
+    --foreground: 0 0% 0%;
+    /* Light mode: black (#000000) */
     /* Card System */
     --card: 0 0% 100%;
     --card-foreground: 224 71% 4%;
@@ -89,9 +90,10 @@
 
 .dark {
     /* Core Background & Text - Dark */
-    --background: 220 19% 18%;
+    --background: 224 64% 5%;
+    /* Dark mode: #081229 */
     --foreground: 220 14% 96%;
-
+    /* Dark mode: light text for contrast */
     /* Card System - Dark */
     --card: 220 15% 25%;
     --card-foreground: 220 14% 96%;
@@ -261,6 +263,10 @@ html {
     color-scheme: light;
 }
 
+.dark html {
+    color-scheme: dark;
+}
+
 /* Base styles */
 * {
     border-color: hsl(var(--border));
@@ -275,6 +281,11 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+.dark body {
+    background-color: #081229 !important;
+    /* Explicit fallback to ensure #081229 */
+}
+
 /* HR Dashboard Component Styles */
 .hr-card {
     /* background-color: hsl(var(--card)) !important; */
@@ -282,10 +293,19 @@ body {
     border-radius: calc(var(--radius) * 1.5);
     box-shadow: var(--shadow-card);
     transition: all 0.2s ease;
+
+    /* Light mode styles (unchanged) */
 }
 
 .hr-card:hover {
     box-shadow: var(--shadow-hover);
+}
+
+.dark .hr-card {
+    background-color: #1F2937;
+    /* dark:bg-gray-800 */
+    border-color: #374151;
+    /* dark:border-gray-700 */
 }
 
 .hr-gradient-primary {
@@ -405,4 +425,79 @@ body {
     left: auto;
     right: 15%;
     animation-delay: .3s;
+}
+
+/* Default card background and border for all cards */
+.card,
+.hr-card,
+.shadcn-card,
+.bg-card {
+    background-color: #fff !important;
+    /* Light mode: white */
+    color: #000 !important;
+    /* Light mode: black text */
+    border: 1px solid #e5e7eb !important;
+    /* Light mode: gray-200 */
+}
+
+/* If you use a custom card class, add it here as well */
+.card {
+    /* fallback for generic card class */
+}
+
+/* Dark mode: override card background and border */
+.dark .card,
+.dark .hr-card,
+.dark .shadcn-card,
+.dark .bg-card {
+    background-color: #1f2937 !important;
+    /* Dark mode: gray-800 */
+    color: #f3f4f6 !important;
+    /* Dark mode: gray-100 */
+    border: 1px solid #374151 !important;
+    /* Dark mode: gray-700 */
+}
+
+/* Optionally, ensure text color for card headers/titles in both modes */
+.card .card-header,
+.hr-card .card-header,
+.shadcn-card .card-header {
+    color: inherit !important;
+}
+
+/* Set heading and paragraph text color for light and dark mode */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+li,
+dt,
+dd,
+th,
+td {
+    color: #000 !important;
+    /* Light mode: black */
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6,
+.dark p,
+.dark span,
+.dark label,
+.dark li,
+.dark dt,
+.dark dd,
+.dark th,
+.dark td {
+    color: #fff !important;
+    /* Dark mode: white */
 }

@@ -276,7 +276,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     <>
       {/* Inject custom styles */}
       <style>{styles}</style>
-      <div className="border-b border-border px-6 py-4 dark:bg-[#081229] bg-white overflow-x-hidden">
+      <div className="border-b border-border px-6 py-4  overflow-x-hidden">
         <div className="flex items-center justify-between overflow-x-hidden">
           <div>
             <h1 className="text-2xl font-bold text-foreground">{title}</h1>
@@ -359,13 +359,15 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-3 hover:bg-muted/50 dark:hover:bg-slate-800 border-l-4 ${notification.status === "unread"
+                        className={`p-3 hover:bg-muted/50 dark:hover:bg-slate-800 border-l-4 ${
+                          notification.status === "unread"
                             ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
                             : "border-l-transparent"
-                          } ${notification.id.startsWith("socket-")
+                        } ${
+                          notification.id.startsWith("socket-")
                             ? "bg-amber-50/30 dark:bg-amber-950/20"
                             : ""
-                          }`}
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1">
