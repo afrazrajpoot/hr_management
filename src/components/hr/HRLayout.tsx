@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import HRSidebar from "./HRSidebar";
 import HRTopBar from "./HRTopBar";
+import { useTheme } from "next-themes";
 
 const pageConfig = {
   "/hr-dashboard": {
@@ -41,30 +42,21 @@ const pageConfig = {
 
 export default function HRLayout({ children, segment }: any) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // Initialize dark mode from localStorage and sync with document
+  // Wait for component to mount to avoid hydration mismatch
   useEffect(() => {
-    const savedDarkMode = localStorage.getItem("hr-dark-mode") === "true";
-    setDarkMode(savedDarkMode);
-    updateDarkModeClass(savedDarkMode);
+    setMounted(true);
   }, []);
 
-  // Function to update the dark class on document
-  const updateDarkModeClass = (isDark: any) => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
+  if (!mounted) {
+    return null; // or a loading spinner
+  }
 
-  // Toggle dark mode and sync state with class
-  const toggleDarkMode = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    localStorage.setItem("hr-dark-mode", newDarkMode.toString());
-    updateDarkModeClass(newDarkMode);
+  // Toggle theme
+  const toggleTheme = (): void => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   // Determine current path from segment
@@ -77,8 +69,8 @@ export default function HRLayout({ children, segment }: any) {
       <HRSidebar
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
+        darkMode={theme === "dark"}
+        onToggleDarkMode={toggleTheme}
       />
 
       {/* Main Content */}

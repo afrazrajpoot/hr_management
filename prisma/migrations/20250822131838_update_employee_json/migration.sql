@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."User" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

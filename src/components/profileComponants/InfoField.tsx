@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { InputFieldConfig } from "../../../types/profileTypes";
-// import { InputFieldConfig } from "./types";
 
 interface InfoFieldProps extends InputFieldConfig {
   isEditing: boolean;
@@ -29,6 +28,7 @@ const InfoField: React.FC<InfoFieldProps> = React.memo(
     isEditing,
     control,
     defaultValue,
+    disabled = false, // Default to false if not provided
   }) => (
     <motion.div
       className="space-y-2"
@@ -40,16 +40,20 @@ const InfoField: React.FC<InfoFieldProps> = React.memo(
         <Icon size={16} />
         {label}
       </Label>
-      {isEditing ? (
+      {isEditing && !disabled ? (
         <Controller
           name={field}
           control={control}
           defaultValue={defaultValue}
           render={({ field: controllerField }) =>
             isTextarea ? (
-              <Textarea {...controllerField} className="min-h-[100px]" />
+              <Textarea
+                {...controllerField}
+                className="min-h-[100px]"
+                disabled={disabled}
+              />
             ) : (
-              <Input {...controllerField} type={type} />
+              <Input {...controllerField} type={type} disabled={disabled} />
             )
           }
         />

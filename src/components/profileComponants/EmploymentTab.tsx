@@ -56,9 +56,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                 Employment Details
               </CardTitle>
               <CardDescription className="text-base mt-1">
-                {isEditing
-                  ? "Edit your employment and workplace information"
-                  : "View your employment and workplace information"}
+                View your employment and workplace information
               </CardDescription>
             </div>
           </div>
@@ -89,7 +87,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                     isEditing={isEditing}
                     control={control}
                     defaultValue={getFieldValue(field.field)}
-                    disabled={!isEditing} // Disable inputs when not editing
+                    disabled={true} // Always disabled, regardless of isEditing
                   />
                 </motion.div>
               ))}

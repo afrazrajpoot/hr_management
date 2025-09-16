@@ -106,8 +106,8 @@ export async function GET(req: NextRequest) {
         address: "",
         dateOfBirth: "",
         hireDate: "",
-        department: user?.department || "",
-        position: user?.position || "",
+        department: user?.department.at(-1) || "",
+        position: user?.position.at(-1) || "",
         manager: "",
         salary: user?.salary || "",
         bio: "",
@@ -130,8 +130,8 @@ export async function GET(req: NextRequest) {
       address: employee.address || "",
       dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
       hireDate: employee.hireDate?.toISOString().split("T")[0] || "",
-      department: employee.user?.department || employee.department || "",
-      position: employee.user?.position || employee.position || "",
+      department: employee.user?.department.at(-1) || employee.department || "",
+      position: employee.user?.position.at(-1) || employee.position || "",
       manager: employee.manager || "",
       salary: employee.user?.salary || employee.salary || "",
       bio: employee.bio || "",
@@ -150,7 +150,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Create or update employee data with secure password handling
 // POST: Create or update employee data with secure password handling
 export async function POST(req: NextRequest) {
   try {
@@ -209,7 +208,7 @@ export async function POST(req: NextRequest) {
     let employee;
 
     const result = await prisma.$transaction(async (tx: any) => {
-      // Convert position and department to arrays if they are strings
+      // Only update these fields for user
       const userData: any = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -218,18 +217,18 @@ export async function POST(req: NextRequest) {
         salary: data.salary,
       };
 
-      // Handle position as array (convert string to array if needed)
-      if (data.position) {
-        userData.position = Array.isArray(data.position)
-          ? data.position
-          : [data.position];
-      }
-
-      // Handle department as array (convert string to array if needed)
-      if (data.department) {
-        userData.department = Array.isArray(data.department)
-          ? data.department
-          : [data.department];
+      // Only set position/department if creating a new user (not on update)
+      if (!existingEmployee) {
+        if (data.position) {
+          userData.position = Array.isArray(data.position)
+            ? data.position
+            : [data.position];
+        }
+        if (data.department) {
+          userData.department = Array.isArray(data.department)
+            ? data.department
+            : [data.department];
+        }
       }
 
       // Hash password only if provided and not masked
@@ -242,20 +241,24 @@ export async function POST(req: NextRequest) {
         data: userData,
       });
 
-      const employeeData = {
+      // Only set manager and hireDate if creating a new employee
+      const employeeData: any = {
         firstName: data.firstName,
         lastName: data.lastName,
         address: data.address || null,
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        hireDate: data.hireDate ? new Date(data.hireDate) : null,
         bio: data.bio || null,
         avatar: data.avatar || null,
         skills: data.skills || [],
         education: data.education || [],
         experience: data.experience || [],
         resume: data.resume || null,
-        manager: data.manager,
       };
+
+      if (!existingEmployee) {
+        employeeData.manager = data.manager;
+        employeeData.hireDate = data.hireDate ? new Date(data.hireDate) : null;
+      }
 
       if (existingEmployee) {
         employee = await tx.employee.update({
@@ -267,6 +270,8 @@ export async function POST(req: NextRequest) {
           data: {
             employeeId: session.user.id,
             ...employeeData,
+            manager: data.manager,
+            hireDate: data.hireDate ? new Date(data.hireDate) : null,
             user: {
               connect: { id: session.user.id },
             },
