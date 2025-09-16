@@ -91,6 +91,17 @@ export default function Assessment() {
         };
       });
 
+      // Build detailed answers array
+      const allAnswers = questionsByPart.flatMap((part) =>
+        part.questions.map((q) => ({
+          id: q.id,
+          part: part.part,
+          section: q.section,
+          question: q.question,
+          selectedOption: answers[q.id] || null,
+        }))
+      );
+
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -103,6 +114,7 @@ export default function Assessment() {
           departement: session?.user?.departement?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
+          allAnswers, // <-- Add this line
         }),
       });
       if (response.ok) {
@@ -181,7 +193,7 @@ export default function Assessment() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-4xl mx-auto bg-[#081229]">
+      <div className="p-6 max-w-4xl mx-auto ">
         {isSubmitting && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center"
@@ -195,7 +207,7 @@ export default function Assessment() {
           </div>
         )}
         {analysisResults ? (
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle className="text-2xl">Assessment Analysis</CardTitle>
             </CardHeader>
@@ -277,7 +289,7 @@ export default function Assessment() {
             )}
 
             {/* Current Part Card */}
-            <Card className="card-elevated mb-6 bg-gray-800 border-gray-700">
+            <Card className="card-elevated mb-6 card">
               <CardHeader>
                 <CardTitle className="text-xl">{currentPart.part}</CardTitle>
               </CardHeader>

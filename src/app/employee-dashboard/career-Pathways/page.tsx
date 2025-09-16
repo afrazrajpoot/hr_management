@@ -294,7 +294,7 @@ export default function CareerPathways() {
           </div>
         </div>
 
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="card">
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
@@ -371,7 +371,7 @@ export default function CareerPathways() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredAndSortedRecommendations.map((career: any) => (
-            <Card key={career.id} className="bg-gray-800 border-gray-700 group">
+            <Card key={career.id} className="card group">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

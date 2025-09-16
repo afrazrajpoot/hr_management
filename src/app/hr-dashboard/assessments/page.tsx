@@ -31,6 +31,7 @@ import {
 import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import AssessmentDetailsModal from "@/components/hr/AssessmentDetailsModal";
+import Loader from "@/components/Loader";
 
 const AssessmentCard = ({ employee, onViewDetails }: any) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -430,13 +431,7 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                Loading assessments...
-              </p>
-            </CardContent>
-          </Card>
+          <Loader />
         </div>
       </HRLayout>
     );
@@ -446,7 +441,7 @@ export default function Assessments() {
     return (
       <HRLayout>
         <div className="p-6 text-center">
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardContent className="pt-6">
               <p className="text-destructive">Error loading assessments</p>
             </CardContent>

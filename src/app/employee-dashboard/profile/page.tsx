@@ -187,7 +187,7 @@ const EmployeeProfilePage: React.FC = () => {
           />
 
           <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 shadow-sm border bg-gray-800 border-gray-700">
+            <TabsList className="grid w-full grid-cols-4 shadow-sm border card">
               <TabsTrigger value="personal">Personal Info</TabsTrigger>
               <TabsTrigger value="employment">Employment</TabsTrigger>
               <TabsTrigger value="skills">Skills</TabsTrigger>

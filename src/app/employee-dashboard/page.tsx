@@ -63,7 +63,10 @@ interface DashboardData {
 }
 
 // Function to map JSON data to DashboardData interface
-const mapJsonToDashboardData = (data: any, assessmentReports: any): DashboardData => {
+const mapJsonToDashboardData = (
+  data: any,
+  assessmentReports: any
+): DashboardData => {
   // Map recent assessments from assessmentReports
   const recentAssessments = assessmentReports.map((report: any) => ({
     id: report.id.toString(),
@@ -107,9 +110,9 @@ const mapJsonToDashboardData = (data: any, assessmentReports: any): DashboardDat
 
 export default function Dashboard() {
   const { data: assessmentData, isLoading } = useGetDashboardDataQuery<any>();
-  console.log('====================================');
+  console.log("====================================");
   console.log(assessmentData, "assessmentData");
-  console.log('====================================');
+  console.log("====================================");
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     recentAssessments: [],
     assessmentProgress: { current: 0, total: 68, percentage: 0 },
@@ -189,7 +192,7 @@ export default function Dashboard() {
   }
   return (
     <AppLayout>
-      <div className="p-6 space-y-6 bg-[#081229]">
+      <div className="p-6 space-y-6 ">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -210,7 +213,7 @@ export default function Dashboard() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="card-elevated bg-gray-800 border-gray-700">
+          <Card className=" card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Assessment Progress
@@ -232,7 +235,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gray-800 border-gray-700">
+          <Card className=" card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Completed Assessments
@@ -251,7 +254,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gray-800 border-gray-700">
+          <Card className=" card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Average Score
@@ -270,7 +273,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="card-elevated bg-gray-800 border-gray-700">
+          <Card className="card-elevated card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Career Matches
@@ -291,12 +294,13 @@ export default function Dashboard() {
         </div>
 
         {/* AI Career Recommendation */}
-        <Card className="card-elevated bg-gray-800 border-gray-700 rounded-xl">
+        <Card className="card-elevated card rounded-xl">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center text-2xl font-semibold text-gray-800 dark:text-gray-100">
               <BookOpen className="w-6 h-6 mr-3 text-indigo-600 dark:text-indigo-400" />
-              AI Career Recommendation
+              <p> AI Career Recommendation</p>
             </CardTitle>
+
             <div className="h-px bg-gray-200 dark:bg-gray-600 mt-2"></div>
           </CardHeader>
           <CardContent className="p-6">
@@ -346,7 +350,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Assessments */}
-          <Card className="bg-gray-800 border-gray-700" id="recent-assessments">
+          <Card className="card" id="recent-assessments">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
@@ -458,7 +462,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Career Recommendations */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <TrendingUp className="w-5 h-5 mr-2" />
@@ -512,7 +516,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <Card className="card-elevated bg-gray-800 border-gray-700">
+        <Card className="card-elevated card">
           <CardHeader>
             <CardTitle className="flex items-center">
               <BookOpen className="w-5 h-5 mr-2" />

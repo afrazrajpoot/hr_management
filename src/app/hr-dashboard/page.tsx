@@ -63,16 +63,39 @@ const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
   </Card>
 );
 
-// Custom Tooltip for Mobility Trend
+// Custom Tooltip for all charts (works for BarChart, LineChart, etc.)
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
+    // Detect dark mode by checking the 'dark' class on <html>
+    const isDark =
+      typeof window !== "undefined" &&
+      document.documentElement.classList.contains("dark");
+
     return (
-      <div className="bg-white p-4 border rounded-md shadow-md">
-        <p className="font-bold">{label}</p>
+      <div
+        style={{
+          background: isDark ? "#1f2937" : "#fff", // dark: gray-800, light: white
+          color: isDark ? "#fff" : "#000",
+          border: "1px solid",
+          borderColor: isDark ? "#374151" : "#e5e7eb", // dark: gray-700, light: gray-200
+          borderRadius: 8,
+          padding: "12px 16px",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+          minWidth: 180,
+          zIndex: 1000,
+        }}
+      >
+        {label && <div className="font-bold mb-2">{label}</div>}
         {payload.map((entry: any, index: number) => (
-          <p key={index} style={{ color: entry.color }}>
-            {entry.dataKey}: {entry.value} ({entry.payload.department})
-          </p>
+          <div key={index} style={{ color: entry.color, marginBottom: 4 }}>
+            {entry.dataKey || entry.name}:{" "}
+            <span className="font-bold">{entry.value}</span>
+            {entry.payload && entry.payload.department && (
+              <span className="ml-2 text-xs opacity-80">
+                ({entry.payload.department})
+              </span>
+            )}
+          </div>
         ))}
       </div>
     );
@@ -323,7 +346,7 @@ export default function Dashboard() {
                     height={80}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Bar
                     dataKey="completion"
                     fill="hsl(var(--hr-chart-1))"
@@ -353,7 +376,7 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="range" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip content={<CustomTooltip />} />
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-2))"
@@ -381,7 +404,7 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="range" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip content={<CustomTooltip />} />
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-3))"
@@ -417,7 +440,7 @@ export default function Dashboard() {
                       height={60}
                     />
                     <YAxis domain={[0, 100]} />
-                    <Tooltip />
+                    <Tooltip content={<CustomTooltip />} />
                     <Bar
                       dataKey="genius_factor_score"
                       fill="hsl(var(--hr-chart-1))"

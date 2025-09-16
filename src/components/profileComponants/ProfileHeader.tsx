@@ -32,7 +32,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
   >
-    <Card className="shadow-lg border-0 overflow-hidden bg-gray-800 border-gray-700">
+    <Card className="shadow-lg border-0 overflow-hidden card">
       <div className="h-32 bg-gradient-to-r from-primary to-secondary"></div>
       <CardContent className="relative pt-0 pb-6">
         <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16">

@@ -289,7 +289,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search employees, assessments..."
-                className="w-80 pl-10 dark:bg-slate-800 dark:border-slate-700"
+                className="w-80 pl-10 card"
               />
             </div>
             <DropdownMenu
@@ -300,7 +300,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative no-scale-hover dark:hover:bg-slate-800"
+                  className="relative sidebar-menu-item "
                 >
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
@@ -313,10 +313,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-96 dark:bg-slate-900 dark:border-slate-700 dark:text-gray-100 max-h-96"
-              >
+              <DropdownMenuContent align="end" className="w-96 card  max-h-96">
                 <div className="flex items-center justify-between p-3">
                   <DropdownMenuLabel className="text-base">
                     Notifications ({notifications.length})
@@ -327,7 +324,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                       size="sm"
                       onClick={markAllAsRead}
                       disabled={loading || unreadCount === 0}
-                      className="text-xs h-7 px-2 no-scale-hover dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                      className="text-xs h-7 px-2 sidebar-menu-item "
                     >
                       {loading ? (
                         <Loader2 className="h-3 w-3 animate-spin mr-1" />
@@ -359,7 +356,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-3 hover:bg-muted/50 dark:hover:bg-slate-800 border-l-4 ${
+                        className={`p-3 hover:bg-muted/50 sidebar-menu-item  border-l-4 ${
                           notification.status === "unread"
                             ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
                             : "border-l-transparent"
@@ -371,9 +368,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1">
-                            <Avatar className="h-10 w-10 flex-shrink-0">
+                            <Avatar className="h-10 w-10 flex-shrink-0 ">
                               <AvatarImage src="/api/placeholder/40/40" />
-                              <AvatarFallback className="text-xs dark:bg-slate-700">
+                              <AvatarFallback className="text-xs card">
                                 {getEmployeeInitials(notification.employeeName)}
                               </AvatarFallback>
                             </Avatar>
@@ -441,7 +438,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                             disabled={updatingNotifications.has(
                               notification.id
                             )}
-                            className="flex-shrink-0 h-8 w-8 p-0 no-scale-hover dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                            className="flex-shrink-0 h-8 w-8 p-0 sidebar-menu-item "
                             title={
                               notification.status === "read"
                                 ? "Mark as unread"
@@ -464,7 +461,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild className="sidebar-menu-item ">
                 <Button
                   variant="ghost"
                   className="flex items-center gap-2 no-scale-hover"
@@ -474,7 +471,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                       src={session?.user?.image || "/api/placeholder/32/32"}
                       alt={session?.user?.name || "User"}
                     />
-                    <AvatarFallback className="dark:bg-slate-700">
+                    <AvatarFallback className="card">
                       {session?.user?.name?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
@@ -489,25 +486,22 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 dark:bg-slate-900 dark:border-slate-700 dark:text-gray-100"
-              >
+              <DropdownMenuContent align="end" className="w-56 card">
                 <DropdownMenuLabel className="text-base">
                   My Account
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="dark:bg-slate-700" />
-                <DropdownMenuItem className="dropdown-item-hover dark:hover:bg-slate-800 dark:hover:text-gray-100">
+                <DropdownMenuSeparator className="card" />
+                <DropdownMenuItem className="dropdown-item-hover card">
                   <User className="mr-2 h-4 w-4" />
                   <Link href="/hr-dashboard/profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="dropdown-item-hover dark:hover:bg-slate-800 dark:hover:text-gray-100">
+                <DropdownMenuItem className="dropdown-item-hover card">
                   <Bell className="mr-2 h-4 w-4" />
                   <span>Notifications</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="dark:bg-slate-700" />
+                <DropdownMenuSeparator className="card" />
                 <DropdownMenuItem
-                  className="dropdown-item-hover text-destructive cursor-pointer dark:hover:bg-slate-800 dark:hover:text-red-400"
+                  className="sidebar-menu-item  text-destructive cursor-pointer sidebar-menu-item "
                   onClick={() => signOut({ callbackUrl: "/auth/sign-in" })}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

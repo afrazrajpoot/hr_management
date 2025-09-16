@@ -121,6 +121,7 @@ interface Assessment {
   developmentActionPlanJson: DevelopmentActionPlan;
   personalizedResourcesJson: PersonalizedResources;
   dataSourcesAndMethodologyJson: DataSourcesAndMethodology;
+  risk_analysis: any;
 }
 
 export default function Results() {
@@ -131,7 +132,7 @@ export default function Results() {
     useState<Assessment | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
-
+  console.log(selectedAssessment, "selected assessment");
   useEffect(() => {
     if (data) {
       const assessmentsData = Array.isArray(data) ? data : data.data || [];
@@ -238,7 +239,7 @@ export default function Results() {
         {selectedAssessment ? (
           <>
             {/* Overall Score Card */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="card">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -246,7 +247,11 @@ export default function Results() {
                       Overall Genius Score
                     </h2>
                     <div className="text-4xl font-bold text-primary mb-2">
-                      {selectedAssessment.geniusFactorScore}/100
+                      {
+                        selectedAssessment?.risk_analysis?.scores
+                          ?.genius_factor_score
+                      }
+                      /100
                     </div>
                     <p className="text-muted-foreground">
                       Your strongest area is{" "}
@@ -256,7 +261,11 @@ export default function Results() {
                             .primary_genius_factor
                         }
                       </strong>{" "}
-                      with a score of {selectedAssessment.geniusFactorScore}
+                      with a score of{" "}
+                      {
+                        selectedAssessment?.risk_analysis?.scores
+                          ?.genius_factor_score
+                      }
                     </p>
                   </div>
                   <div className="hidden sm:block">
@@ -268,7 +277,7 @@ export default function Results() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Genius Factors Breakdown */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BarChart3 className="w-5 h-5 mr-2" />
@@ -287,12 +296,15 @@ export default function Results() {
                             .primary_genius_factor
                         }
                       </span>
-                      <span className="text-sm font-semibold text-black dark:text-white">
+                      {/* <span className="text-sm font-semibold text-black dark:text-white">
                         {selectedAssessment.geniusFactorScore}/100
-                      </span>
+                      </span> */}
                     </div>
                     <Progress
-                      value={selectedAssessment.geniusFactorScore}
+                      value={
+                        selectedAssessment?.risk_analysis?.scores
+                          ?.geniusFactorScore
+                      }
                       className="h-2"
                     />
                     <p className="text-sm text-black dark:text-white leading-relaxed">
@@ -324,7 +336,7 @@ export default function Results() {
 
               {/* Strengths & Growth Areas */}
               <div className="space-y-6">
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="card">
                   <CardHeader>
                     <CardTitle className="flex items-center text-black dark:text-white">
                       <Award className="w-5 h-5 mr-2" />
@@ -348,7 +360,7 @@ export default function Results() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="card">
                   <CardHeader>
                     <CardTitle className="flex items-center text-black dark:text-white">
                       <TrendingUp className="w-5 h-5 mr-2" />
@@ -377,7 +389,7 @@ export default function Results() {
             {/* Full Report Details */}
             <div className="space-y-6">
               {/* Executive Summary */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
@@ -392,7 +404,7 @@ export default function Results() {
               </Card>
 
               {/* Department and HR Info */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Users className="w-5 h-5 mr-2" />
@@ -430,7 +442,7 @@ export default function Results() {
               </Card>
 
               {/* Energy Sources */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Sparkles className="w-5 h-5 mr-2" />
@@ -451,7 +463,7 @@ export default function Results() {
               </Card>
 
               {/* Current Role Alignment Analysis */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <AlertCircle className="w-5 h-5 mr-2" />
@@ -517,7 +529,7 @@ export default function Results() {
               </Card>
 
               {/* Internal Career Opportunities */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Globe className="w-5 h-5 mr-2" />
@@ -621,7 +633,7 @@ export default function Results() {
               </Card>
 
               {/* Retention and Mobility Strategies */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <CheckCircle className="w-5 h-5 mr-2" />
@@ -675,7 +687,7 @@ export default function Results() {
               </Card>
 
               {/* Development Action Plan */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Calendar className="w-5 h-5 mr-2" />
@@ -743,7 +755,7 @@ export default function Results() {
               </Card>
 
               {/* Personalized Resources */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <BookOpen className="w-5 h-5 mr-2" />
@@ -811,7 +823,7 @@ export default function Results() {
               </Card>
 
               {/* Data Sources and Methodology */}
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <MapPin className="w-5 h-5 mr-2" />
@@ -844,7 +856,7 @@ export default function Results() {
             </div>
           </>
         ) : (
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="card">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
                 No assessments completed yet.
@@ -859,7 +871,7 @@ export default function Results() {
         )}
 
         {/* Assessment History */}
-        <Card className="bg-gray-800 border-gray-700" id="assessment-history">
+        <Card className="card" id="assessment-history">
           <CardHeader>
             <CardTitle className="text-black dark:text-white">
               Assessment History
@@ -960,7 +972,7 @@ export default function Results() {
         </Card>
 
         {/* Action Items */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="card">
           <CardHeader>
             <CardTitle className="text-black dark:text-white">
               Recommended Next Steps

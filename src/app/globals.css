@@ -501,3 +501,26 @@ td {
     color: #fff !important;
     /* Dark mode: white */
 }
+
+/* Sidebar menu item base style */
+.sidebar-menu-item {
+    transition: background 0.2s, color 0.2s;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+/* Light mode: Attractive blue gradient and text on hover */
+.sidebar-menu-item:hover,
+.sidebar-menu-item.active {
+    background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+    color: #fff !important;
+    box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.10);
+}
+
+/* Dark mode: Vibrant purple/blue gradient and text on hover */
+.dark .sidebar-menu-item:hover,
+.dark .sidebar-menu-item.active {
+    background: linear-gradient(90deg, #6366f1 0%, #0ea5e9 100%);
+    color: #fff !important;
+    box-shadow: 0 2px 12px 0 rgba(99, 102, 241, 0.15);
+}

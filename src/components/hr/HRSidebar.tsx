@@ -157,7 +157,7 @@ export default function HRSidebar({
             href={item.href}
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-              "text-sidebar-foreground hover:bg-hr-sidebar-hover",
+              "sidebar-menu-item ",
               isActive(item.href) && "bg-hr-sidebar-active text-white"
             )}
           >
@@ -184,7 +184,7 @@ export default function HRSidebar({
           size="sm"
           onClick={onToggleDarkMode}
           className={cn(
-            "w-full justify-start gap-3 text-sidebar-foreground hover:bg-hr-sidebar-hover",
+            "w-full justify-start gap-3 text-sidebar-foreground hover:card",
             collapsed && "justify-center"
           )}
         >
@@ -198,15 +198,7 @@ export default function HRSidebar({
 
         {/* Bottom Navigation */}
         {bottomNavigation.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-              "text-sidebar-foreground hover:bg-hr-sidebar-hover",
-              isActive(item.href) && "bg-hr-sidebar-active text-white"
-            )}
-          >
+          <Link key={item.name} href={item.href} className="">
             <item.icon className="h-5 w-5" />
             {!collapsed && <span>{item.name}</span>}
           </Link>
