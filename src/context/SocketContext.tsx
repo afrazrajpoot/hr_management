@@ -329,11 +329,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const socketInstance = io(
       process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.geniusfactor.ai",
-      // "http://localhost:8000",
-
       {
-        transports: ["websocket", "polling"],
-        path: "/socket.io",
+        transports: ["websocket"],
+        path: "/socket.io/",
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: Infinity,
