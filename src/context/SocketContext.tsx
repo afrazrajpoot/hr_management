@@ -328,18 +328,30 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // console.log("🔌 Initializing Socket.IO connection...");
 
     const socketInstance = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL || "https://api.geniusfactor.ai",
+      process.env.NEXT_PUBLIC_SOCKET_URL,
       {
-        transports: ["websocket"],
-        path: "/socket.io/",
+        transports: ['websocket'],
+        path: '/socket.io/',
         autoConnect: true,
         reconnection: true,
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         timeout: 20000,
+
       }
     );
+
+    socketInstance.on('connect_error', (err: any) => {
+      console.error('Connection Error:', err.message);
+      console.error('Description:', err.description);
+      console.error('Context:', err.context);
+    });
+
+    socketInstance.on('disconnect', (reason, details) => {
+      console.log('Disconnected:', reason);
+      console.log('Details:', details);
+    });
 
     socketInstance.on("connect", () => {
       console.log("✅ Connected to server with ID:", socketInstance.id);
@@ -363,6 +375,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     socketInstance.on("disconnect", (reason) => {
       console.log("❌ Disconnected from server:", reason);
+      console.log("Attempting to reconnect..." + reason);
       setIsConnected(false);
       setSubscriptionStatus("disconnected");
     });
