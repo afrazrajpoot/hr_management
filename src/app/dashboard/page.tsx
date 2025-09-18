@@ -739,7 +739,7 @@ export default function HROverview() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip content={customTooltip} />
+                    <Tooltip content={customTooltip} cursor={false} />
                     <Bar dataKey="value" fill="#dc2626" name="Employees" />
                   </BarChart>
                 </ResponsiveContainer>
