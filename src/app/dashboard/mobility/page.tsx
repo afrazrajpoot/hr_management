@@ -55,9 +55,27 @@ export default function Mobility() {
   const hrStats = mobilityAnalysis?.hr_stats || {};
   const overallTrends = mobilityAnalysis?.overall_monthly_trends || [];
   const analysisPeriod = mobilityAnalysis?.analysis_period;
+  const totals = mobilityAnalysis?.totals || {};
 
   // Get all HR IDs for dropdown
   const hrIds = useMemo(() => Object.keys(hrStats), [hrStats]);
+
+  // Create HR ID to name mapping
+  const hrNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    hrIds.forEach((hrId) => {
+      const hrData = hrStats[hrId];
+      const fullName = hrData?.user?.fullName || `HR-${hrId.slice(0, 8)}`;
+      map[hrId] = fullName;
+    });
+    return map;
+  }, [hrIds, hrStats]);
+
+  // Get selected HR name
+  const selectedHrName = useMemo(() => {
+    if (selectedHrId === "all") return "All HR Managers";
+    return hrNameMap[selectedHrId] || `HR-${selectedHrId.slice(0, 8)}`;
+  }, [selectedHrId, hrNameMap]);
 
   // Filter data based on selected HR ID
   const filteredHrStats = useMemo(() => {
@@ -88,6 +106,24 @@ export default function Mobility() {
     (sum: any, hr: any) => sum + (hr.transfers || 0),
     0
   );
+  const totalIngoingArrays: any = Object.values(filteredHrStats).reduce(
+    (sum: any, hr: any) => sum + (hr.ingoing_array_count || 0),
+    0
+  );
+  const totalOutgoingArrays: any = Object.values(filteredHrStats).reduce(
+    (sum: any, hr: any) => sum + (hr.outgoing_array_count || 0),
+    0
+  );
+
+  // Use totals from API if available and selectedHrId is "all"
+  const finalTotalIngoing =
+    selectedHrId === "all"
+      ? totals.total_ingoing_arrays || totalIngoingArrays
+      : totalIngoingArrays;
+  const finalTotalOutgoing =
+    selectedHrId === "all"
+      ? totals.total_outgoing_arrays || totalOutgoingArrays
+      : totalOutgoingArrays;
 
   // Calculate percentages
   const promotionPercentage =
@@ -97,6 +133,14 @@ export default function Mobility() {
   const transferPercentage =
     totalMovements > 0
       ? Math.round((totalTransfers / totalMovements) * 100)
+      : 0;
+  const ingoingPercentage =
+    totalMovements > 0
+      ? Math.round((finalTotalIngoing / totalMovements) * 100)
+      : 0;
+  const outgoingPercentage =
+    totalMovements > 0
+      ? Math.round((finalTotalOutgoing / totalMovements) * 100)
       : 0;
 
   // Prepare department data for chart
@@ -109,18 +153,24 @@ export default function Mobility() {
           external: 0,
           retention: 85,
           hrId,
+          hrName: hrNameMap[hrId], // Add HR name for tooltip
         })
       )
   );
 
-  // Prepare mobility type data for pie chart
+  // UPDATED: Prepare mobility type data for pie chart - Ingoing vs Outgoing
   const mobilityTypeData = [
-    { name: "Promotions", value: totalPromotions, color: "#10b981" },
-    { name: "Transfers", value: totalTransfers, color: "#3b82f6" },
     {
-      name: "Other Movements",
-      value: Math.max(0, totalMovements - totalPromotions - totalTransfers),
-      color: "#f59e0b",
+      name: "Ingoing",
+      value: finalTotalIngoing,
+      color: "#10b981", // Green
+      percentage: ingoingPercentage,
+    },
+    {
+      name: "Outgoing",
+      value: finalTotalOutgoing,
+      color: "#ef4444", // Red
+      percentage: outgoingPercentage,
     },
   ].filter((item) => item.value > 0);
 
@@ -137,6 +187,7 @@ export default function Mobility() {
                   type: "promotion",
                   count: deptData.promotions,
                   hrId,
+                  hrName: hrNameMap[hrId], // Add HR name
                 },
               ]
             : []),
@@ -148,6 +199,7 @@ export default function Mobility() {
                   type: "transfer",
                   count: deptData.transfers,
                   hrId,
+                  hrName: hrNameMap[hrId], // Add HR name
                 },
               ]
             : []),
@@ -193,14 +245,14 @@ export default function Mobility() {
                 Filter by HR Manager
               </div>
               <Select value={selectedHrId} onValueChange={setSelectedHrId}>
-                <SelectTrigger className="w-[250px]">
+                <SelectTrigger className="w-[300px]">
                   <SelectValue placeholder="Select HR Manager" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All HR Managers</SelectItem>
                   {hrIds.map((hrId) => (
                     <SelectItem key={hrId} value={hrId}>
-                      HR Manager: {hrId.slice(0, 8)}...
+                      {hrNameMap[hrId]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -214,34 +266,34 @@ export default function Mobility() {
           <StatCard
             title="Total Movements"
             value={totalMovements.toString()}
-            description={`Last 6 months`}
+            description={`Last 6 months • ${selectedHrName}`}
             icon={<ArrowUpDown className="h-4 w-4" />}
             trend={{
               value: 0,
-              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
+              label: selectedHrName,
               isPositive: true,
             }}
           />
           <StatCard
-            title="Promotions"
-            value={totalPromotions.toString()}
-            description={`${promotionPercentage}% of movements`}
-            icon={<ArrowUp className="h-4 w-4" />}
+            title="Ingoing Movements"
+            value={finalTotalIngoing.toString()}
+            description={`${ingoingPercentage}% of movements`}
+            icon={<ArrowDown className="h-4 w-4 text-green-600" />}
             trend={{
-              value: 0,
-              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
+              value: ingoingPercentage,
+              label: "vs last period",
               isPositive: true,
             }}
           />
           <StatCard
-            title="Transfers"
-            value={totalTransfers.toString()}
-            description={`${transferPercentage}% of movements`}
-            icon={<ArrowRight className="h-4 w-4" />}
+            title="Outgoing Movements"
+            value={finalTotalOutgoing.toString()}
+            description={`${outgoingPercentage}% of movements`}
+            icon={<ArrowUp className="h-4 w-4 text-red-600" />}
             trend={{
-              value: 0,
-              label: selectedHrId === "all" ? "All HR Managers" : "Selected HR",
-              isPositive: true,
+              value: outgoingPercentage,
+              label: "vs last period",
+              isPositive: false,
             }}
           />
           <StatCard
@@ -254,10 +306,12 @@ export default function Mobility() {
                   ).length.toString()
             }
             description={
-              selectedHrId === "all" ? "Active managers" : "Managed departments"
+              selectedHrName === "all"
+                ? "Active managers"
+                : "Managed departments"
             }
             icon={<Building2 className="h-4 w-4" />}
-            trend={{ value: 0, label: "Active", isPositive: true }}
+            trend={{ value: 0, label: selectedHrName, isPositive: true }}
           />
         </div>
 
@@ -268,8 +322,7 @@ export default function Mobility() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-hr-primary" />
-                {selectedHrId === "all" ? "Overall" : "HR Manager"} Mobility
-                Trends
+                {selectedHrName} Mobility Trends
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -294,14 +347,14 @@ export default function Mobility() {
                   <Line
                     type="monotone"
                     dataKey="incoming"
-                    stroke="hsl(var(--success))"
+                    stroke="#10b981" // Green
                     strokeWidth={3}
-                    name="Incoming"
+                    name="Ingoing"
                   />
                   <Line
                     type="monotone"
                     dataKey="outgoing"
-                    stroke="hsl(var(--hr-secondary))"
+                    stroke="#ef4444" // Red
                     strokeWidth={3}
                     name="Outgoing"
                   />
@@ -317,12 +370,12 @@ export default function Mobility() {
             </CardContent>
           </Card>
 
-          {/* Movement Types Pie Chart */}
+          {/* UPDATED: Movement Types Pie Chart - Ingoing vs Outgoing */}
           <Card className="bg-gradient-card shadow-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ArrowUpDown className="h-5 w-5 text-hr-accent" />
-                Movement Types Distribution
+                Movement Flow
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -347,6 +400,10 @@ export default function Mobility() {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    formatter={(value, name, props) => [
+                      `${value} movements`,
+                      name,
+                    ]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -357,11 +414,25 @@ export default function Mobility() {
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-xs text-muted-foreground">
-                      {item.name} ({item.value})
-                    </span>
+                    <div>
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {item.name}
+                      </span>
+                      <div className="text-xs text-muted-foreground">
+                        {item.value} ({item.percentage}%)
+                      </div>
+                    </div>
                   </div>
                 ))}
+                {mobilityTypeData.length < 2 && (
+                  <div className="col-span-2 text-xs text-muted-foreground">
+                    {finalTotalIngoing === 0 && finalTotalOutgoing === 0
+                      ? "No movement data available"
+                      : `Total: ${
+                          finalTotalIngoing + finalTotalOutgoing
+                        } movements`}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -372,10 +443,7 @@ export default function Mobility() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-hr-secondary" />
-              {selectedHrId === "all"
-                ? "All Departments"
-                : "Managed Departments"}{" "}
-              Mobility
+              Departments Mobility
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -396,6 +464,11 @@ export default function Mobility() {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "8px",
                   }}
+                  formatter={(value, name, props) => [
+                    value,
+                    `${name} (${props?.payload?.hrName || ""})`,
+                  ]}
+                  cursor={false}
                 />
                 <Bar
                   dataKey="internal"
@@ -413,7 +486,7 @@ export default function Mobility() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-hr-primary" />
-              Recent Activity Summary
+              Recent Activity Summary ({selectedHrName})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -445,9 +518,14 @@ export default function Mobility() {
                       </TableCell>
                       <TableCell>{movement.count}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {movement.hrId.slice(0, 8)}...
-                        </Badge>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-sm">
+                            {movement.hrName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {movement.hrId.slice(0, 8)}...
+                          </span>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -467,33 +545,6 @@ export default function Mobility() {
         </Card>
 
         {/* Analysis Period Info */}
-        {analysisPeriod && (
-          <Card className="bg-gradient-card shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-hr-primary" />
-                Analysis Period
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="font-medium mb-2">Time Range</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {analysisPeriod.start} to {analysisPeriod.end}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Data Coverage</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedHrId === "all" ? hrIds.length : 1} HR manager(s),{" "}
-                    {departmentMobilityData.length} department(s)
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </HRLayout>
   );

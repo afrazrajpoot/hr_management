@@ -1,6 +1,7 @@
 "use client";
 
-import { signOut } from "next-auth/react"; // Import signOut
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react"; // Add this import
 import { Search, Bell, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface HRHeaderProps {
 
 export function HRHeader({ title, subtitle }: HRHeaderProps) {
   const { theme, setTheme } = useTheme();
+  const { data: session, status } = useSession(); // Get session data
 
   const handleLogout = async () => {
     try {
@@ -31,6 +33,51 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
       console.error("Error signing out:", error);
     }
   };
+
+  // Handle loading state
+  if (status === "loading") {
+    return (
+      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-6">
+        <SidebarTrigger className="h-8 w-8" />
+        <div className="flex-1">
+          <div className="flex flex-col">
+            <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground">{subtitle}</p>
+            )}
+          </div>
+        </div>
+        {/* Show skeleton or loading indicator */}
+        <div className="animate-pulse bg-muted rounded-full h-8 w-8" />
+        <Button
+          variant="ghost"
+          size="icon"
+          disabled
+          className="animate-pulse bg-muted rounded-full"
+        >
+          <div className="h-4 w-4 bg-muted-foreground/50 rounded-full" />
+        </Button>
+      </header>
+    );
+  }
+
+  // Handle unauthenticated state
+  if (!session || !session.user) {
+    return null; // Or redirect to login
+  }
+
+  const user = session.user;
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.name || "User";
+
+  const initials =
+    user.firstName && user.lastName
+      ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+      : user.name
+      ? `${user.name.charAt(0)}${user.name.charAt(1) || user.name.charAt(0)}`
+      : "U";
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-6">
@@ -103,23 +150,31 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg" alt="HR Manager" />
+              <AvatarImage
+                src={user.image || "/placeholder.svg"}
+                alt={displayName}
+              />
               <AvatarFallback className="bg-gradient-primary text-white">
-                HM
+                {initials}
               </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <div className="flex flex-col space-y-1 p-2">
-            <p className="text-sm font-medium leading-none">HR Manager</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              hr@geniusfactor.com
+              {user.email || user.role}
             </p>
+            {user.role && (
+              <Badge variant="secondary" className="mt-1">
+                {user.role}
+              </Badge>
+            )}
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profile</DropdownMenuItem>
-          {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
+          {/* <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem>Settings</DropdownMenuItem> */}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
         </DropdownMenuContent>

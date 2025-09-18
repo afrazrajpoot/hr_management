@@ -413,7 +413,7 @@ export default function InternalMobility() {
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Line
                     type="monotone"
                     dataKey="promotions"
@@ -462,7 +462,7 @@ export default function InternalMobility() {
                     height={80}
                   />
                   <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Bar
                     dataKey="incoming"
                     fill="hsl(var(--hr-chart-2))"

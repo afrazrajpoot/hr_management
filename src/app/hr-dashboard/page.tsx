@@ -336,21 +336,52 @@ export default function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={completionData}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <ResponsiveContainer
+                width="100%"
+                height={350}
+                style={{ background: "transparent" }}
+              >
+                <BarChart
+                  data={completionData}
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 20,
+                    bottom: 80,
+                  }}
+                  className="bg-transparent"
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e5e7eb"
+                    strokeOpacity={0.5}
+                  />
+
                   <XAxis
                     dataKey="name"
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    tick={{ fill: "#6b7280", fontSize: 12, fontWeight: 500 }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
                   />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
+
+                  <YAxis
+                    tick={{ fill: "#6b7280", fontSize: 12, fontWeight: 500 }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                    tickLine={{ stroke: "#d1d5db" }}
+                  />
+
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
+
                   <Bar
                     dataKey="completion"
-                    fill="hsl(var(--hr-chart-1))"
+                    fill="#2563eb"
                     name="Completed Assessments"
+                    radius={[6, 6, 0, 0]}
+                    stroke="#1d4ed8"
+                    strokeWidth={1}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -376,7 +407,7 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="range" />
                     <YAxis />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-2))"
@@ -404,7 +435,7 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="range" />
                     <YAxis />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Bar
                       dataKey="count"
                       fill="hsl(var(--hr-chart-3))"
@@ -440,7 +471,7 @@ export default function Dashboard() {
                       height={60}
                     />
                     <YAxis domain={[0, 100]} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Bar
                       dataKey="genius_factor_score"
                       fill="hsl(var(--hr-chart-1))"
@@ -478,7 +509,7 @@ export default function Dashboard() {
                     />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Legend />
                     {departmentData.map((dept: any) => (
                       <Line

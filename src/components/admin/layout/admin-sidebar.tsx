@@ -32,11 +32,11 @@ const mainNavItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Companies", url: "/dashboard/companies", icon: Building2 },
   { title: "Employees", url: "/dashboard/employees", icon: Users },
-  {
-    title: "Assessments",
-    url: "/dashboard/assessments",
-    icon: ClipboardList,
-  },
+  // {
+  //   title: "Assessments",
+  //   url: "/dashboard/assessments",
+  //   icon: ClipboardList,
+  // },
   {
     title: "Risk Analysis",
     url: "/dashboard/risk-analysis",

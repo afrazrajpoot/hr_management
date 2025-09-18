@@ -48,11 +48,7 @@ import {
 } from "@/components/ui/select";
 
 export default function RiskAnalysis() {
-  const {
-    dashboardData,
-
-    isAdmin,
-  } = useSocket();
+  const { dashboardData, isAdmin } = useSocket();
 
   const [selectedHR, setSelectedHR] = useState<string | null>(null);
 
@@ -64,6 +60,50 @@ export default function RiskAnalysis() {
   const employeeRiskDetails = dashboardData?.employeeRiskDetails || [];
   const departmentMetrics = dashboardData?.departmentMetrics || {};
   const hrMetrics = dashboardData?.hrMetrics || {};
+
+  // Create HR list with full names
+  const hrList = useMemo(() => {
+    if (!riskAnalysisByHr) return [];
+
+    return Object.entries(riskAnalysisByHr).map(
+      ([hrId, hrData]: [string, any]) => ({
+        id: hrId,
+        fullName:
+          hrData.full_name ||
+          `${hrData.first_name} ${hrData.last_name}` ||
+          hrId,
+      })
+    );
+  }, [riskAnalysisByHr]);
+
+  // Get selected HR name for display
+  const selectedHRName = useMemo(() => {
+    if (!selectedHR) return "All HRs";
+
+    const hrData = riskAnalysisByHr?.[selectedHR];
+    if (hrData) {
+      return (
+        hrData.full_name ||
+        `${hrData.first_name} ${hrData.last_name}` ||
+        selectedHR
+      );
+    }
+    return selectedHR;
+  }, [selectedHR, riskAnalysisByHr]);
+
+  // Create a map of HR ID to full name for quick lookup
+  const hrNameMap = useMemo(() => {
+    const map: { [key: string]: string } = {};
+    Object.entries(riskAnalysisByHr).forEach(
+      ([hrId, hrData]: [string, any]) => {
+        map[hrId] =
+          hrData.full_name ||
+          `${hrData.first_name} ${hrData.last_name}` ||
+          hrId;
+      }
+    );
+    return map;
+  }, [riskAnalysisByHr]);
 
   // Risk distribution based on selected HR
   const riskDistribution =
@@ -148,22 +188,20 @@ export default function RiskAnalysis() {
     });
   }, [riskAnalysisByHr]);
 
-  // HR list for selector
-  const hrList = Object.keys(riskAnalysisByHr || {});
-
   // Auto-select first HR after data loads
   useMemo(() => {
     if (
       dashboardData &&
       riskAnalysisByHr &&
-      Object.keys(riskAnalysisByHr).length > 0
+      Object.keys(riskAnalysisByHr).length > 0 &&
+      hrList.length > 0
     ) {
-      const firstHrId = Object.keys(riskAnalysisByHr)[0];
+      const firstHrId = hrList[0].id;
       if (selectedHR === null) {
         setSelectedHR(firstHrId);
       }
     }
-  }, [dashboardData, riskAnalysisByHr, selectedHR]);
+  }, [dashboardData, riskAnalysisByHr, selectedHR, hrList]);
 
   const getRiskBadgeVariant = (level: string) => {
     switch (level.toLowerCase()) {
@@ -178,6 +216,18 @@ export default function RiskAnalysis() {
     }
   };
 
+  // Helper function to get HR full name
+  const getHRFullName = (hrId: string) => {
+    return hrNameMap[hrId] || hrId;
+  };
+
+  // Helper function to get employee full name with ID
+  const getEmployeeDisplayName = (employee: any) => {
+    const fullName = employee.employee_full_name || "Unknown Employee";
+    const employeeId = employee.employee_id || "";
+    return employeeId ? `${fullName} (ID: ${employeeId})` : fullName;
+  };
+
   return (
     <HRLayout
       title="Retention Risk Analysis"
@@ -185,7 +235,7 @@ export default function RiskAnalysis() {
     >
       <div className="space-y-6">
         {isAdmin && (
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <div className="card p-4 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Building2 className="h-5 w-5 text-blue-600 mr-2" />
@@ -199,14 +249,14 @@ export default function RiskAnalysis() {
                   setSelectedHR(value === "all" ? null : value)
                 }
               >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select HR" />
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Select HR Manager" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All HRs</SelectItem>
-                  {hrList.map((hrId) => (
-                    <SelectItem key={hrId} value={hrId}>
-                      {hrId}
+                  <SelectItem value="all">All HR Managers</SelectItem>
+                  {hrList.map((hr) => (
+                    <SelectItem key={hr.id} value={hr.id}>
+                      {hr.fullName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -237,7 +287,9 @@ export default function RiskAnalysis() {
           <StatCard
             title="Average Risk"
             value={`${overallMetrics.avg_retention_risk || 0}%`}
-            description="Across all companies"
+            description={
+              selectedHR ? `For ${selectedHRName}` : "Across all companies"
+            }
             icon={<Users className="h-4 w-4" />}
           />
         </div>
@@ -247,7 +299,9 @@ export default function RiskAnalysis() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-hr-risk-medium" />
-                Risk Distribution
+                {selectedHR
+                  ? "Risk Distribution"
+                  : "Risk Distribution Across All HRs"}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -336,7 +390,9 @@ export default function RiskAnalysis() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-hr-secondary" />
-              Risk by Department
+              {selectedHR
+                ? "Risk by Department"
+                : "Risk by Department Across All HRs"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -362,6 +418,7 @@ export default function RiskAnalysis() {
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
+                    cursor={false}
                   />
                   <Bar
                     dataKey="riskPercentage"
@@ -373,8 +430,7 @@ export default function RiskAnalysis() {
             ) : (
               <div className="flex items-center justify-center h-64">
                 <p className="text-gray-500 dark:text-gray-400">
-                  No department risk data available for{" "}
-                  {selectedHR || "All HRs"}
+                  No department risk data available for {selectedHRName}
                 </p>
               </div>
             )}
@@ -392,7 +448,8 @@ export default function RiskAnalysis() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
+                  <TableHead>Employee</TableHead>{" "}
+                  {/* UNCOMMENTED - Now showing employee name */}
                   <TableHead>Department</TableHead>
                   <TableHead>HR Manager</TableHead>
                   <TableHead>Risk Score</TableHead>
@@ -403,11 +460,12 @@ export default function RiskAnalysis() {
               </TableHeader>
               <TableBody>
                 {highRiskEmployees.slice(0, 10).map((employee: any) => (
-                  <TableRow key={employee.employee_id}>
+                  <TableRow key={employee.report_id || employee.employee_id}>
                     <TableCell>
                       <div>
                         <div className="font-medium">
-                          {employee.employee_id}
+                          {/* UPDATED: Now shows employee full name with ID */}
+                          {getEmployeeDisplayName(employee)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Created: {employee.created_at}
@@ -415,7 +473,11 @@ export default function RiskAnalysis() {
                       </div>
                     </TableCell>
                     <TableCell>{employee.department}</TableCell>
-                    <TableCell>{employee.hr_id}</TableCell>
+                    <TableCell className="font-medium">
+                      {getHRFullName(
+                        employee.hr_id || employee.hr_manager_id || ""
+                      )}
+                    </TableCell>
                     <TableCell>{employee.risk_score}%</TableCell>
                     <TableCell>
                       <Badge
@@ -456,6 +518,15 @@ export default function RiskAnalysis() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {highRiskEmployees.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      <div className="text-muted-foreground">
+                        No high-risk employees found. All employees are stable.
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>

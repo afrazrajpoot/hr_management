@@ -15,7 +15,7 @@ import {
 
 const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
   if (!assessment) return null;
-  console.log("assessment", assessment);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto rounded-lg p-0 card scrollbar-hide card">
@@ -73,7 +73,8 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                         Genius Score
                       </div>
                       <div className="text-2xl font-bold">
-                        {assessment.currentRoleAlignment.alignment_score}/100
+                        {assessment?.genius_factor_score}
+                        /100
                       </div>
                     </div>
                     <div className="p-4 rounded-lg border">
@@ -256,7 +257,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                         Alignment Score
                       </div>
                       <div className="text-4xl font-bold mb-2">
-                        {assessment.currentRoleAlignment.alignment_score}
+                        {assessment.genius_factor_score}
                       </div>
                       <div className="w-full rounded-full h-3 bg-opacity-30">
                         <div
@@ -334,7 +335,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  {/* <div className="space-y-6">
                     <div className="p-6 rounded-lg border">
                       <div className="text-sm uppercase tracking-wide font-semibold mb-4">
                         Transition Timeline
@@ -375,7 +376,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

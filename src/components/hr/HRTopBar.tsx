@@ -491,14 +491,14 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   My Account
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="card" />
-                <DropdownMenuItem className="dropdown-item-hover card">
+                <DropdownMenuItem className="dropdown-item-hover card sidebar-menu-item">
                   <User className="mr-2 h-4 w-4" />
                   <Link href="/hr-dashboard/profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="dropdown-item-hover card">
+                {/* <DropdownMenuItem className="dropdown-item-hover card">
                   <Bell className="mr-2 h-4 w-4" />
                   <span>Notifications</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator className="card" />
                 <DropdownMenuItem
                   className="sidebar-menu-item  text-destructive cursor-pointer sidebar-menu-item "

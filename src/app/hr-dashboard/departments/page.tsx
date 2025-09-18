@@ -338,7 +338,7 @@ const DepartmentDashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
                       <XAxis dataKey="name" stroke="#9ca3af" />
                       <YAxis stroke="#9ca3af" />
-                      <Tooltip content={<CustomTooltip />} />
+                      <Tooltip content={<CustomTooltip />} cursor={false} />
                       <Legend />
                       <Bar dataKey="ingoing" fill="#22c55e" name="Ingoing" />
                       <Bar dataKey="outgoing" fill="#ef4444" name="Outgoing" />

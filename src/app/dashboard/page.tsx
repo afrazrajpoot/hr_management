@@ -69,6 +69,9 @@ interface DashboardMetrics {
   chartData: {
     hr_department_chart_data: {
       [hrId: string]: {
+        first_name: string;
+        last_name: string;
+        full_name: string;
         departments: {
           [dept: string]: {
             avg_retention_risk: number;
@@ -84,6 +87,9 @@ interface DashboardMetrics {
     };
     risk_analysis_by_hr: {
       [hrId: string]: {
+        first_name: string;
+        last_name: string;
+        full_name: string;
         department_distribution: {
           [dept: string]: {
             count: number;
@@ -128,14 +134,54 @@ export default function HROverview() {
   const overallMobilityTrends = mobilityAnalysis?.overall_monthly_trends || [];
   const analysisPeriod = mobilityAnalysis?.analysis_period;
 
+  // Create HR list with full names
+  const hrList = useMemo(() => {
+    if (!chartData.risk_analysis_by_hr) return [];
+
+    return Object.entries(chartData.risk_analysis_by_hr).map(
+      ([hrId, hrData]: [string, any]) => ({
+        id: hrId,
+        fullName:
+          hrData.full_name ||
+          `${hrData.first_name} ${hrData.last_name}` ||
+          hrId,
+      })
+    );
+  }, [chartData.risk_analysis_by_hr]);
+
+  // Get selected HR name for display
+  const selectedHRName = useMemo(() => {
+    if (!selectedHR) return "All HRs";
+
+    const hrData = chartData.risk_analysis_by_hr?.[selectedHR];
+    if (hrData) {
+      return (
+        hrData.full_name ||
+        `${hrData.first_name} ${hrData.last_name}` ||
+        selectedHR
+      );
+    }
+    return selectedHR;
+  }, [selectedHR, chartData.risk_analysis_by_hr]);
+
   // Debugging logs
   useEffect(() => {
     console.log("Dashboard Data:", dashboardData);
     console.log("Mobility Analysis:", mobilityAnalysis);
     console.log("Selected HR:", selectedHR);
+    console.log("Selected HR Name:", selectedHRName);
+    console.log("HR List:", hrList);
     console.log("HR Metrics:", hrMetrics);
     console.log("Chart Data:", chartData);
-  }, [dashboardData, mobilityAnalysis, selectedHR, hrMetrics, chartData]);
+  }, [
+    dashboardData,
+    mobilityAnalysis,
+    selectedHR,
+    selectedHRName,
+    hrList,
+    hrMetrics,
+    chartData,
+  ]);
 
   // Calculate statistics
   const totalCompanies = metrics.total_hr_ids || 0;
@@ -175,22 +221,20 @@ export default function HROverview() {
       : 0;
   }, [hrMetrics]);
 
-  // HR list for selector
-  const hrList = Object.keys(chartData.risk_analysis_by_hr || {});
-
   // Auto-select first HR after data loads
   useEffect(() => {
     if (
       dashboardData &&
       chartData.risk_analysis_by_hr &&
-      Object.keys(chartData.risk_analysis_by_hr).length > 0
+      Object.keys(chartData.risk_analysis_by_hr).length > 0 &&
+      hrList.length > 0
     ) {
-      const firstHrId = Object.keys(chartData.risk_analysis_by_hr)[0];
+      const firstHrId = hrList[0].id;
       if (selectedHR === null) {
         setSelectedHR(firstHrId);
       }
     }
-  }, [dashboardData, chartData.risk_analysis_by_hr, selectedHR]);
+  }, [dashboardData, chartData.risk_analysis_by_hr, selectedHR, hrList]);
 
   // Transform HR department data for charts
   const hrDepartmentChartData = useMemo(() => {
@@ -313,9 +357,14 @@ export default function HROverview() {
       const hrDetails = Object.entries(chartData.risk_analysis_by_hr).reduce(
         (acc, [hrId, hrData]: [string, any]) => {
           const deptData = hrData.department_distribution?.[dept] || {};
+          const hrName =
+            hrData.full_name ||
+            `${hrData.first_name} ${hrData.last_name}` ||
+            hrId;
           return {
             ...acc,
             [hrId]: {
+              name: hrName,
               employees: deptData.employee_count || 0,
               assessments: deptData.count || 0,
               retentionRisk: deptData.avg_retention_risk || 0,
@@ -431,14 +480,14 @@ export default function HROverview() {
                   setSelectedHR(value === "all" ? null : value)
                 }
               >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select HR" />
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Select HR Manager" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All HRs</SelectItem>
-                  {hrList.map((hrId) => (
-                    <SelectItem key={hrId} value={hrId}>
-                      {hrId}
+                  <SelectItem value="all">All HR Managers</SelectItem>
+                  {hrList.map((hr) => (
+                    <SelectItem key={hr.id} value={hr.id}>
+                      {hr.fullName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -519,7 +568,7 @@ export default function HROverview() {
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-600" />
                 {selectedHR
-                  ? `Retention Risk by Department for ${selectedHR}`
+                  ? "Retention Risk by Department"
                   : "Retention Risk by Department per HR"}
               </CardTitle>
             </CardHeader>
@@ -530,7 +579,7 @@ export default function HROverview() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip content={customTooltip} />
+                    <Tooltip content={customTooltip} cursor={false} />
                     <Bar
                       dataKey="retentionRisk"
                       fill="#dc2626"
@@ -551,7 +600,7 @@ export default function HROverview() {
               ) : (
                 <div className="flex items-center justify-center h-64">
                   <p className="text-gray-500 dark:text-gray-400">
-                    No department data available for {selectedHR || "All HRs"}
+                    No department data available
                   </p>
                 </div>
               )}
@@ -564,7 +613,7 @@ export default function HROverview() {
               <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-red-600" />
                 {selectedHR
-                  ? `Retention Risk Distribution for ${selectedHR}`
+                  ? "Retention Risk Distribution"
                   : "Retention Risk Distribution Across HRs"}
               </CardTitle>
             </CardHeader>
@@ -592,8 +641,7 @@ export default function HROverview() {
               ) : (
                 <div className="flex items-center justify-center h-64">
                   <p className="text-gray-500 dark:text-gray-400">
-                    No retention risk data available for{" "}
-                    {selectedHR || "All HRs"}
+                    No retention risk data available
                   </p>
                 </div>
               )}
@@ -617,7 +665,7 @@ export default function HROverview() {
               <CardTitle className="flex items-center gap-2">
                 <ArrowUpDown className="h-5 w-5 text-blue-600" />
                 {selectedHR
-                  ? `Internal Mobility Trends for ${selectedHR}`
+                  ? "Internal Mobility Trends"
                   : "Internal Mobility Trends (6 Months)"}
               </CardTitle>
             </CardHeader>
@@ -628,7 +676,7 @@ export default function HROverview() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip content={customTooltip} />
+                    <Tooltip content={customTooltip} cursor={false} />
                     <Line
                       type="monotone"
                       dataKey="incoming"
@@ -661,7 +709,7 @@ export default function HROverview() {
               ) : (
                 <div className="flex items-center justify-center h-64">
                   <p className="text-gray-500 dark:text-gray-400">
-                    No mobility data available for {selectedHR || "All HRs"}
+                    No mobility data available
                   </p>
                 </div>
               )}
@@ -680,7 +728,7 @@ export default function HROverview() {
               <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-red-600" />
                 {selectedHR
-                  ? `Risk Analysis Distribution for ${selectedHR}`
+                  ? "Risk Analysis Distribution"
                   : "Risk Analysis Distribution Across HRs"}
               </CardTitle>
             </CardHeader>
@@ -698,74 +746,13 @@ export default function HROverview() {
               ) : (
                 <div className="flex items-center justify-center h-64">
                   <p className="text-gray-500 dark:text-gray-400">
-                    No risk analysis data available for{" "}
-                    {selectedHR || "All HRs"}
+                    No risk analysis data available
                   </p>
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Department Summary Cards with HR Breakdown */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Department Details by HR
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {departmentData.map((dept) => (
-                <div key={dept.name} className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-lg mb-2">{dept.name}</h4>
-                  <div className="space-y-4">
-                    {Object.entries(dept.hrDetails)
-                      .filter(
-                        ([_, metrics]: [string, any]) => metrics.employees > 0
-                      )
-                      .map(([hrId, metrics]: [string, any]) => (
-                        <div key={hrId} className="space-y-2 text-sm">
-                          <h5 className="font-medium">{hrId}</h5>
-                          <p>
-                            Employees:{" "}
-                            <span className="font-medium">
-                              {metrics.employees}
-                            </span>
-                          </p>
-                          <p>
-                            Assessments:{" "}
-                            <span className="font-medium">
-                              {metrics.assessments}
-                            </span>
-                          </p>
-                          <p>
-                            Retention Risk:{" "}
-                            <span className="font-medium">
-                              {metrics.retentionRisk}%
-                            </span>
-                          </p>
-                          <p>
-                            Mobility Score:{" "}
-                            <span className="font-medium">
-                              {metrics.mobilityScore}%
-                            </span>
-                          </p>
-                          <p>
-                            Genius Factor:{" "}
-                            <span className="font-medium">
-                              {metrics.geniusFactor}%
-                            </span>
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </HRLayout>
   );

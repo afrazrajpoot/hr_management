@@ -642,7 +642,7 @@ export default function RetentionRisk() {
                       )
                     )}
                   </Pie>
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-wrap justify-center gap-4 mt-4">
@@ -686,7 +686,7 @@ export default function RetentionRisk() {
                     height={80}
                   />
                   <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Bar
                     dataKey="low"
                     stackId="a"
