@@ -7,102 +7,138 @@ export default function PDFReport({ assessment }: any) {
   const generatePDF = () => {
     const doc = new jsPDF();
 
-    // Colors (RGB values for the colors you specified)
-    const navyBlue = [8, 18, 41]; // #081229
-    const darkGray = [31, 41, 55]; // #1f2937 (gray-800)
-    const lightGray = [156, 163, 175]; // #9ca3af
-    const white = [255, 255, 255];
-    const accent = [59, 130, 246]; // Blue accent
-    const success = [34, 197, 94]; // Green
-    const warning = [251, 146, 60]; // Orange
+    // Professional color palette - light and clean
+    const primaryBlue = [41, 98, 165]; // #2962A5 - Professional blue
+    const lightBlue = [227, 242, 253]; // #E3F2FD - Light blue background
+    const darkGray = [66, 66, 66]; // #424242 - Professional dark gray for text
+    const mediumGray = [117, 117, 117]; // #757575 - Medium gray for secondary text
+    const lightGray = [245, 245, 245]; // #F5F5F5 - Very light gray for backgrounds
+    const white = [255, 255, 255]; // #FFFFFF
+    const success = [76, 175, 80]; // #4CAF50 - Professional green
+    const warning = [255, 152, 0]; // #FF9800 - Professional orange
+    const danger = [244, 67, 54]; // #F44336 - Professional red
+    const borderGray = [224, 224, 224]; // #E0E0E0 - Light border
 
     let currentPage = 1;
     let yPos = 20;
-
-    const addBackground = () => {
-      doc.setFillColor(navyBlue[0], navyBlue[1], navyBlue[2]);
-      doc.rect(
-        0,
-        0,
-        doc.internal.pageSize.width,
-        doc.internal.pageSize.height,
-        "F"
-      );
-    };
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const contentWidth = pageWidth - (2 * margin);
 
     const addNewPage = () => {
       doc.addPage();
       currentPage++;
-      addBackground();
       yPos = 20;
     };
 
     const checkPageBreak = (requiredHeight: number) => {
-      if (yPos + requiredHeight > 270) {
+      if (yPos + requiredHeight > pageHeight - 30) {
         addNewPage();
       }
     };
 
-    const addSection = (title: string, content: any, type: string = "text") => {
-      const sectionHeight =
-        type === "list"
-          ? Math.max(40, content.length * 6 + 25)
-          : type === "text"
-          ? Math.max(30, Math.ceil(content.length / 80) * 6 + 20)
-          : 40;
+    const addSectionHeader = (title: string, isMainSection: boolean = false) => {
+      checkPageBreak(25);
 
-      checkPageBreak(sectionHeight);
+      if (isMainSection) {
+        // Main section with blue background
+        doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+        doc.rect(margin, yPos, contentWidth, 18, "F");
 
-      // Section background
-      doc.setFillColor(darkGray[0], darkGray[1], darkGray[2]);
-      doc.roundedRect(
-        10,
-        yPos,
-        doc.internal.pageSize.width - 20,
-        sectionHeight,
-        3,
-        3,
-        "F"
-      );
-      doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(
-        10,
-        yPos,
-        doc.internal.pageSize.width - 20,
-        sectionHeight,
-        3,
-        3,
-        "S"
-      );
+        doc.setTextColor(white[0], white[1], white[2]);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text(title, margin + 8, yPos + 12);
+        yPos += 25;
+      } else {
+        // Subsection with light background
+        doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+        doc.rect(margin, yPos, contentWidth, 15, "F");
 
-      // Section title
-      doc.setTextColor(accent[0], accent[1], accent[2]);
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.text(title, 20, yPos + 12);
+        doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, yPos, contentWidth, 15, "S");
 
-      // Section content
-      doc.setTextColor(lightGray[0], lightGray[1], lightGray[2]);
-      doc.setFontSize(10);
+        doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(title, margin + 6, yPos + 10);
+        yPos += 20;
+      }
+    };
+
+    const addTextContent = (content: string, fontSize: number = 10, indent: number = 0) => {
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      doc.setFontSize(fontSize);
       doc.setFont("helvetica", "normal");
 
-      if (type === "text") {
-        const lines = doc.splitTextToSize(content, 170);
-        doc.text(lines, 20, yPos + 22);
-      } else if (type === "list") {
-        let listYPos = yPos + 22;
-        content.forEach((item: string) => {
-          doc.setFillColor(accent[0], accent[1], accent[2]);
-          doc.circle(25, listYPos - 2, 1, "F");
+      const lines = doc.splitTextToSize(content, contentWidth - 20 - indent);
+      const lineHeight = fontSize * 0.4;
 
-          const itemLines = doc.splitTextToSize(item, 160);
-          doc.text(itemLines, 30, listYPos);
-          listYPos += itemLines.length * 5 + 2;
+      lines.forEach((line: string, index: number) => {
+        checkPageBreak(lineHeight + 5);
+        doc.text(line, margin + 10 + indent, yPos + (index * lineHeight));
+      });
+
+      yPos += (lines.length * lineHeight) + 8;
+    };
+
+    const addBulletList = (items: string[], indent: number = 0) => {
+      items.forEach((item: string) => {
+        checkPageBreak(15);
+
+        // Add bullet point
+        doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+        doc.circle(margin + 12 + indent, yPos + 3, 1.5, "F");
+
+        // Add text
+        doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        const lines = doc.splitTextToSize(item, contentWidth - 30 - indent);
+        lines.forEach((line: string, index: number) => {
+          doc.text(line, margin + 20 + indent, yPos + 6 + (index * 4));
         });
-      }
 
-      yPos += sectionHeight + 8;
+        yPos += (lines.length * 4) + 6;
+      });
+    };
+
+    const addScoreCard = (label: string, value: string, x: number, width: number, colorType: 'success' | 'warning' | 'danger') => {
+      const colors = {
+        success: success,
+        warning: warning,
+        danger: danger
+      };
+
+      const color = colors[colorType];
+
+      // Card background
+      doc.setFillColor(white[0], white[1], white[2]);
+      doc.rect(x, yPos, width, 35, "F");
+
+      // Card border
+      doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+      doc.setLineWidth(1);
+      doc.rect(x, yPos, width, 35, "S");
+
+      // Colored top border
+      doc.setFillColor(color[0], color[1], color[2]);
+      doc.rect(x, yPos, width, 4, "F");
+
+      // Value
+      doc.setTextColor(color[0], color[1], color[2]);
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text(value, x + width / 2, yPos + 22, { align: "center" });
+
+      // Label
+      doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(label.toUpperCase(), x + width / 2, yPos + 30, { align: "center" });
     };
 
     const addFooter = () => {
@@ -110,27 +146,20 @@ export default function PDFReport({ assessment }: any) {
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
 
-        doc.setFillColor(darkGray[0], darkGray[1], darkGray[2]);
-        doc.rect(
-          0,
-          doc.internal.pageSize.height - 15,
-          doc.internal.pageSize.width,
-          15,
-          "F"
-        );
+        // Footer line
+        doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+        doc.setLineWidth(0.5);
+        doc.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
 
-        doc.setTextColor(lightGray[0], lightGray[1], lightGray[2]);
+        // Footer text
+        doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
         doc.setFontSize(8);
-        doc.text(
-          "Generated by Genius Factor System",
-          10,
-          doc.internal.pageSize.height - 5
-        );
-        doc.text(
-          `Page ${i} of ${totalPages}`,
-          doc.internal.pageSize.width - 30,
-          doc.internal.pageSize.height - 5
-        );
+        doc.setFont("helvetica", "normal");
+        doc.text("Generated by Genius Factor Assessment System", margin, pageHeight - 12);
+        doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 12, { align: "right" });
+
+        // Date
+        doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 5, { align: "right" });
       }
     };
 
@@ -141,337 +170,200 @@ export default function PDFReport({ assessment }: any) {
       author: "Genius Factor System",
     });
 
-    // Add background
-    addBackground();
-
     // HEADER SECTION
-    doc.setFillColor(darkGray[0], darkGray[1], darkGray[2]);
-    doc.roundedRect(10, 10, doc.internal.pageSize.width - 20, 60, 3, 3, "F");
-    doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(10, 10, doc.internal.pageSize.width - 20, 60, 3, 3, "S");
+    doc.setFillColor(white[0], white[1], white[2]);
+    doc.rect(0, 0, pageWidth, pageHeight, "F");
 
-    doc.setTextColor(white[0], white[1], white[2]);
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.text("GENIUS FACTOR", 105, 30, { align: "center" });
+    // Header background
+    doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2]);
+    doc.rect(0, 0, pageWidth, 70, "F");
 
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "normal");
-    doc.text("Comprehensive Assessment Report", 105, 42, { align: "center" });
-
-    doc.setFontSize(10);
-    doc.setTextColor(lightGray[0], lightGray[1], lightGray[2]);
-    doc.text(
-      `Assessment Date: ${new Date(assessment.createdAt).toLocaleDateString()}`,
-      105,
-      52,
-      { align: "center" }
-    );
-    doc.text(`Department: ${assessment.departement}`, 105, 60, {
-      align: "center",
-    });
-
-    yPos = 80;
-
-    // ALIGNMENT SCORE CARD
-    const alignmentScore =
-      assessment.currentRoleAlignmentAnalysisJson.alignment_score;
-    const scoreColor =
-      parseInt(alignmentScore) >= 80
-        ? success
-        : parseInt(alignmentScore) >= 60
-        ? warning
-        : [239, 68, 68];
-
-    doc.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
-    doc.roundedRect(10, yPos, 90, 35, 3, 3, "F");
-
-    doc.setTextColor(white[0], white[1], white[2]);
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.text(`${alignmentScore}%`, 55, yPos + 22, { align: "center" });
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("ALIGNMENT SCORE", 55, yPos + 12, { align: "center" });
-
-    // RETENTION RISK
-    const riskLevel =
-      assessment.currentRoleAlignmentAnalysisJson.retention_risk_level;
-    const riskColor =
-      riskLevel === "Low"
-        ? success
-        : riskLevel === "Medium"
-        ? warning
-        : [239, 68, 68];
-
-    doc.setFillColor(riskColor[0], riskColor[1], riskColor[2]);
-    doc.roundedRect(110, yPos, 90, 35, 3, 3, "F");
-
+    // Company logo area (placeholder)
+    doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.rect(margin, 15, 40, 40, "F");
     doc.setTextColor(white[0], white[1], white[2]);
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text(riskLevel, 155, yPos + 22, { align: "center" });
-    doc.setFontSize(10);
+    doc.text("GF", margin + 20, 38, { align: "center" });
+
+    // Title
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.text("GENIUS FACTOR", margin + 50, 30);
+
+    doc.setFontSize(16);
     doc.setFont("helvetica", "normal");
-    doc.text("RETENTION RISK", 155, yPos + 12, { align: "center" });
+    doc.text("Comprehensive Assessment Report", margin + 50, 42);
+
+    // Assessment info
+    doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
+    doc.setFontSize(10);
+    doc.text(`Assessment Date: ${new Date(assessment.createdAt).toLocaleDateString()}`, margin + 50, 52);
+    doc.text(`Department: ${assessment.departement}`, margin + 50, 62);
+
+    yPos = 85;
+
+    // SCORE CARDS SECTION
+    const alignmentScore = assessment.currentRoleAlignmentAnalysisJson.alignment_score;
+    const riskLevel = assessment.currentRoleAlignmentAnalysisJson.retention_risk_level;
+
+    const scoreColor = parseInt(alignmentScore) >= 80 ? 'success' : parseInt(alignmentScore) >= 60 ? 'warning' : 'danger';
+    const riskColor = riskLevel === 'Low' ? 'success' : riskLevel === 'Medium' ? 'warning' : 'danger';
+
+    checkPageBreak(45);
+    addScoreCard("Alignment Score", `${alignmentScore}%`, margin, 85, scoreColor);
+    addScoreCard("Retention Risk", riskLevel, margin + 95, 85, riskColor);
 
     yPos += 45;
 
     // EXECUTIVE SUMMARY
-    addSection("EXECUTIVE SUMMARY", assessment.executiveSummary, "text");
+    addSectionHeader("EXECUTIVE SUMMARY", true);
+    addTextContent(assessment.executiveSummary);
 
-    // PRIMARY GENIUS FACTOR
-    const primaryGenius =
-      assessment.geniusFactorProfileJson.primary_genius_factor;
-    const secondaryGenius =
-      assessment.geniusFactorProfileJson.secondary_genius_factor;
+    // GENIUS FACTOR PROFILE
+    addSectionHeader("GENIUS FACTOR PROFILE", true);
 
-    addSection(
-      `PRIMARY GENIUS FACTOR: ${primaryGenius}`,
-      assessment.geniusFactorProfileJson.description,
-      "text"
-    );
+    const primaryGenius = assessment.geniusFactorProfileJson.primary_genius_factor;
+    const secondaryGenius = assessment.geniusFactorProfileJson.secondary_genius_factor;
 
-    // SECONDARY GENIUS FACTOR
-    addSection(
-      `SECONDARY GENIUS FACTOR: ${secondaryGenius}`,
-      assessment.geniusFactorProfileJson.secondary_description,
-      "text"
-    );
+    addSectionHeader(`Primary Genius Factor: ${primaryGenius}`);
+    addTextContent(assessment.geniusFactorProfileJson.description);
 
-    // KEY STRENGTHS
-    addSection(
-      "KEY STRENGTHS",
-      assessment.geniusFactorProfileJson.key_strengths,
-      "list"
-    );
+    addSectionHeader(`Secondary Genius Factor: ${secondaryGenius}`);
+    addTextContent(assessment.geniusFactorProfileJson.secondary_description);
 
-    // ENERGY SOURCES
-    addSection(
-      "ENERGY SOURCES",
-      assessment.geniusFactorProfileJson.energy_sources,
-      "list"
-    );
+    addSectionHeader("Key Strengths");
+    addBulletList(assessment.geniusFactorProfileJson.key_strengths);
 
-    // CURRENT ROLE ALIGNMENT ANALYSIS
-    addSection(
-      "CURRENT ROLE ALIGNMENT",
-      assessment.currentRoleAlignmentAnalysisJson.assessment,
-      "text"
-    );
+    addSectionHeader("Energy Sources");
+    addBulletList(assessment.geniusFactorProfileJson.energy_sources);
 
-    // STRENGTHS BEING UTILIZED
-    addSection(
-      "STRENGTHS CURRENTLY UTILIZED",
-      assessment.currentRoleAlignmentAnalysisJson.strengths_utilized,
-      "list"
-    );
+    // CURRENT ROLE ANALYSIS
+    addSectionHeader("CURRENT ROLE ANALYSIS", true);
+    addTextContent(assessment.currentRoleAlignmentAnalysisJson.assessment);
 
-    // UNDERUTILIZED TALENTS
-    addSection(
-      "UNDERUTILIZED TALENTS",
-      assessment.currentRoleAlignmentAnalysisJson.underutilized_talents,
-      "list"
-    );
+    addSectionHeader("Strengths Currently Utilized");
+    addBulletList(assessment.currentRoleAlignmentAnalysisJson.strengths_utilized);
 
-    // CAREER PATHWAYS
-    checkPageBreak(50);
-    doc.setFillColor(darkGray[0], darkGray[1], darkGray[2]);
-    doc.roundedRect(10, yPos, doc.internal.pageSize.width - 20, 45, 3, 3, "F");
-    doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
-    doc.roundedRect(10, yPos, doc.internal.pageSize.width - 20, 45, 3, 3, "S");
+    addSectionHeader("Underutilized Talents");
+    addBulletList(assessment.currentRoleAlignmentAnalysisJson.underutilized_talents);
 
-    doc.setTextColor(accent[0], accent[1], accent[2]);
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("CAREER PATHWAYS", 20, yPos + 12);
+    // CAREER DEVELOPMENT
+    addSectionHeader("CAREER DEVELOPMENT OPPORTUNITIES", true);
 
-    doc.setTextColor(lightGray[0], lightGray[1], lightGray[2]);
+    addSectionHeader("Career Pathways");
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("Short-term:", 20, yPos + 24);
-    doc.text(
-      assessment.internalCareerOpportunitiesJson.career_pathways.short_term,
-      50,
-      yPos + 24
-    );
-    doc.text("Long-term:", 20, yPos + 34);
-    const longTermLines = doc.splitTextToSize(
-      assessment.internalCareerOpportunitiesJson.career_pathways.long_term,
-      150
-    );
-    doc.text(longTermLines, 50, yPos + 34);
-
-    yPos += 53;
-
-    // TRANSITION TIMELINE
-    checkPageBreak(50);
-    doc.setFillColor(darkGray[0], darkGray[1], darkGray[2]);
-    doc.roundedRect(10, yPos, doc.internal.pageSize.width - 20, 45, 3, 3, "F");
-    doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
-    doc.roundedRect(10, yPos, doc.internal.pageSize.width - 20, 45, 3, 3, "S");
-
-    doc.setTextColor(accent[0], accent[1], accent[2]);
-    doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("TRANSITION TIMELINE", 20, yPos + 12);
+    doc.text("Short-term:", margin + 10, yPos + 5);
+    yPos += 10;
+    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.short_term, 10, 20);
 
-    doc.setTextColor(lightGray[0], lightGray[1], lightGray[2]);
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("Long-term:", margin + 10, yPos);
+    yPos += 10;
+    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.long_term, 10, 20);
+
+    addSectionHeader("Transition Timeline");
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFontSize(10);
-    doc.text("6 Months:", 20, yPos + 24);
-    const sixMonthLines = doc.splitTextToSize(
-      assessment.internalCareerOpportunitiesJson.transition_timeline.six_months,
-      140
-    );
-    doc.text(sixMonthLines, 50, yPos + 24);
+    doc.setFont("helvetica", "bold");
+    doc.text("6 Months:", margin + 10, yPos + 5);
+    yPos += 10;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.six_months, 10, 20);
 
-    doc.text("1 Year:", 20, yPos + 32);
-    const oneYearLines = doc.splitTextToSize(
-      assessment.internalCareerOpportunitiesJson.transition_timeline.one_year,
-      140
-    );
-    doc.text(oneYearLines, 50, yPos + 32);
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("1 Year:", margin + 10, yPos);
+    yPos += 10;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.one_year, 10, 20);
 
-    doc.text("2 Years:", 20, yPos + 40);
-    const twoYearLines = doc.splitTextToSize(
-      assessment.internalCareerOpportunitiesJson.transition_timeline.two_years,
-      140
-    );
-    doc.text(twoYearLines, 50, yPos + 40);
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("2 Years:", margin + 10, yPos);
+    yPos += 10;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.two_years, 10, 20);
 
-    yPos += 53;
+    addSectionHeader("Recommended Departments");
+    addBulletList(assessment.internalCareerOpportunitiesJson.recommended_departments);
 
-    // RECOMMENDED DEPARTMENTS
-    addSection(
-      "RECOMMENDED DEPARTMENTS",
-      assessment.internalCareerOpportunitiesJson.recommended_departments,
-      "list"
-    );
+    addSectionHeader("Specific Role Suggestions");
+    addBulletList(assessment.internalCareerOpportunitiesJson.specific_role_suggestions);
 
-    // SPECIFIC ROLE SUGGESTIONS
-    addSection(
-      "SPECIFIC ROLE SUGGESTIONS",
-      assessment.internalCareerOpportunitiesJson.specific_role_suggestions,
-      "list"
-    );
+    addSectionHeader("Required Skill Development");
+    addBulletList(assessment.internalCareerOpportunitiesJson.required_skill_development);
 
-    // REQUIRED SKILL DEVELOPMENT
-    addSection(
-      "REQUIRED SKILL DEVELOPMENT",
-      assessment.internalCareerOpportunitiesJson.required_skill_development,
-      "list"
-    );
+    // RETENTION & MOBILITY STRATEGIES
+    addSectionHeader("RETENTION & MOBILITY STRATEGIES", true);
 
-    // RETENTION STRATEGIES
-    addSection(
-      "RETENTION STRATEGIES",
-      assessment.retentionAndMobilityStrategiesJson.retention_strategies,
-      "list"
-    );
+    addSectionHeader("Retention Strategies");
+    addBulletList(assessment.retentionAndMobilityStrategiesJson.retention_strategies);
 
-    // DEVELOPMENT SUPPORT
-    addSection(
-      "DEVELOPMENT SUPPORT",
-      assessment.retentionAndMobilityStrategiesJson.development_support,
-      "list"
-    );
+    addSectionHeader("Development Support");
+    addBulletList(assessment.retentionAndMobilityStrategiesJson.development_support);
 
-    // INTERNAL MOBILITY RECOMMENDATIONS
-    addSection(
-      "INTERNAL MOBILITY RECOMMENDATIONS",
-      assessment.retentionAndMobilityStrategiesJson
-        .internal_mobility_recommendations,
-      "list"
-    );
+    addSectionHeader("Internal Mobility Recommendations");
+    addBulletList(assessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations);
 
     // DEVELOPMENT ACTION PLAN
-    addSection(
-      "30-DAY GOALS",
-      assessment.developmentActionPlanJson.thirty_day_goals,
-      "list"
-    );
+    addSectionHeader("DEVELOPMENT ACTION PLAN", true);
 
-    addSection(
-      "90-DAY GOALS",
-      assessment.developmentActionPlanJson.ninety_day_goals,
-      "list"
-    );
+    addSectionHeader("30-Day Goals");
+    addBulletList(assessment.developmentActionPlanJson.thirty_day_goals);
 
-    addSection(
-      "6-MONTH GOALS",
-      assessment.developmentActionPlanJson.six_month_goals,
-      "list"
-    );
+    addSectionHeader("90-Day Goals");
+    addBulletList(assessment.developmentActionPlanJson.ninety_day_goals);
 
-    // NETWORKING STRATEGY
-    addSection(
-      "NETWORKING STRATEGY",
-      assessment.developmentActionPlanJson.networking_strategy,
-      "list"
-    );
+    addSectionHeader("6-Month Goals");
+    addBulletList(assessment.developmentActionPlanJson.six_month_goals);
 
-    // LEARNING RESOURCES
-    addSection(
-      "RECOMMENDED LEARNING RESOURCES",
-      assessment.personalizedResourcesJson.learning_resources,
-      "list"
-    );
+    addSectionHeader("Networking Strategy");
+    addBulletList(assessment.developmentActionPlanJson.networking_strategy);
 
-    // AFFIRMATIONS
-    addSection(
-      "PERSONAL AFFIRMATIONS",
-      assessment.personalizedResourcesJson.affirmations,
-      "list"
-    );
+    // PERSONALIZED RESOURCES
+    addSectionHeader("PERSONALIZED RESOURCES", true);
 
-    // REFLECTION QUESTIONS
-    addSection(
-      "REFLECTION QUESTIONS",
-      assessment.personalizedResourcesJson.reflection_questions,
-      "list"
-    );
+    addSectionHeader("Recommended Learning Resources");
+    addBulletList(assessment.personalizedResourcesJson.learning_resources);
 
-    // MINDFULNESS PRACTICES
-    addSection(
-      "MINDFULNESS PRACTICES",
-      assessment.personalizedResourcesJson.mindfulness_practices,
-      "list"
-    );
+    addSectionHeader("Personal Affirmations");
+    addBulletList(assessment.personalizedResourcesJson.affirmations);
 
-    // METHODOLOGY
-    addSection(
-      "METHODOLOGY",
-      assessment.dataSourcesAndMethodologyJson.methodology,
-      "text"
-    );
+    addSectionHeader("Reflection Questions");
+    addBulletList(assessment.personalizedResourcesJson.reflection_questions);
 
-    // DATA SOURCES
-    addSection(
-      "DATA SOURCES",
-      assessment.dataSourcesAndMethodologyJson.data_sources,
-      "list"
-    );
+    addSectionHeader("Mindfulness Practices");
+    addBulletList(assessment.personalizedResourcesJson.mindfulness_practices);
+
+    // METHODOLOGY & DATA SOURCES
+    addSectionHeader("METHODOLOGY & DATA SOURCES", true);
+
+    addSectionHeader("Methodology");
+    addTextContent(assessment.dataSourcesAndMethodologyJson.methodology);
+
+    addSectionHeader("Data Sources");
+    addBulletList(assessment.dataSourcesAndMethodologyJson.data_sources);
 
     // Add footers to all pages
     addFooter();
 
     // Save the PDF
     doc.save(
-      `Genius-Factor-Assessment-${assessment.userId}-${
-        new Date(assessment.createdAt).toISOString().split("T")[0]
+      `Genius-Factor-Assessment-${assessment.userId}-${new Date(assessment.createdAt).toISOString().split("T")[0]
       }.pdf`
     );
   };
 
   return (
     <Button
-      className="btn-gradient hover:scale-105 transition-transform duration-200"
+      className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
       onClick={generatePDF}
       disabled={!assessment}
     >
-      <Download className="w-4 h-4 mr-2" />
-      Download Complete Assessment Report
+      <Download className="w-4 h-4" />
+      Download Assessment Report
     </Button>
   );
 }
