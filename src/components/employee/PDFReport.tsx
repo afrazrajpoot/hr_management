@@ -33,38 +33,44 @@ export default function PDFReport({ assessment }: any) {
     };
 
     const checkPageBreak = (requiredHeight: number) => {
-      if (yPos + requiredHeight > pageHeight - 30) {
+      if (yPos + requiredHeight > pageHeight - 35) {
         addNewPage();
       }
     };
 
     const addSectionHeader = (title: string, isMainSection: boolean = false) => {
-      checkPageBreak(25);
+      checkPageBreak(30);
 
       if (isMainSection) {
+        // Add some space before main sections
+        if (yPos > 85) yPos += 10;
+
         // Main section with blue background
         doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-        doc.rect(margin, yPos, contentWidth, 18, "F");
+        doc.rect(margin, yPos, contentWidth, 20, "F");
 
         doc.setTextColor(white[0], white[1], white[2]);
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text(title, margin + 8, yPos + 12);
-        yPos += 25;
+        doc.text(title, margin + 10, yPos + 13);
+        yPos += 30;
       } else {
+        // Add space before subsections
+        yPos += 5;
+
         // Subsection with light background
         doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-        doc.rect(margin, yPos, contentWidth, 15, "F");
+        doc.rect(margin, yPos, contentWidth, 16, "F");
 
         doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
         doc.setLineWidth(0.5);
-        doc.rect(margin, yPos, contentWidth, 15, "S");
+        doc.rect(margin, yPos, contentWidth, 16, "S");
 
         doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
-        doc.text(title, margin + 6, yPos + 10);
-        yPos += 20;
+        doc.text(title, margin + 10, yPos + 11);
+        yPos += 22;
       }
     };
 
@@ -73,37 +79,46 @@ export default function PDFReport({ assessment }: any) {
       doc.setFontSize(fontSize);
       doc.setFont("helvetica", "normal");
 
-      const lines = doc.splitTextToSize(content, contentWidth - 20 - indent);
-      const lineHeight = fontSize * 0.4;
+      const maxWidth = contentWidth - 20 - indent;
+      const lines = doc.splitTextToSize(content, maxWidth);
+      const lineHeight = fontSize * 0.35;
+      const totalHeight = lines.length * lineHeight + 3;
+
+      checkPageBreak(totalHeight + 5);
 
       lines.forEach((line: string, index: number) => {
-        checkPageBreak(lineHeight + 5);
-        doc.text(line, margin + 10 + indent, yPos + (index * lineHeight));
+        doc.text(line, margin + 10 + indent, yPos + 3 + (index * lineHeight));
       });
 
-      yPos += (lines.length * lineHeight) + 8;
+      yPos += totalHeight + 8;
     };
 
     const addBulletList = (items: string[], indent: number = 0) => {
-      items.forEach((item: string) => {
-        checkPageBreak(15);
+      items.forEach((item: string, index: number) => {
+        const maxWidth = contentWidth - 35 - indent;
+        const lines = doc.splitTextToSize(item, maxWidth);
+        const itemHeight = lines.length * 4 + 6;
+
+        checkPageBreak(itemHeight);
 
         // Add bullet point
         doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-        doc.circle(margin + 12 + indent, yPos + 3, 1.5, "F");
+        doc.circle(margin + 15 + indent, yPos + 4, 1.5, "F");
 
-        // Add text
+        // Add text with proper alignment
         doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
 
-        const lines = doc.splitTextToSize(item, contentWidth - 30 - indent);
-        lines.forEach((line: string, index: number) => {
-          doc.text(line, margin + 20 + indent, yPos + 6 + (index * 4));
+        lines.forEach((line: string, lineIndex: number) => {
+          doc.text(line, margin + 25 + indent, yPos + 6 + (lineIndex * 4));
         });
 
-        yPos += (lines.length * 4) + 6;
+        yPos += itemHeight;
       });
+
+      // Add spacing after bullet list
+      yPos += 3;
     };
 
     const addScoreCard = (label: string, value: string, x: number, width: number, colorType: 'success' | 'warning' | 'danger') => {
@@ -179,12 +194,13 @@ export default function PDFReport({ assessment }: any) {
     doc.rect(0, 0, pageWidth, 70, "F");
 
     // Company logo area (placeholder)
-    doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
-    doc.rect(margin, 15, 40, 40, "F");
-    doc.setTextColor(white[0], white[1], white[2]);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("GF", margin + 20, 38, { align: "center" });
+    doc.addImage('/logo.png', 'PNG', margin, 15, 40, 40);
+    // doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    // doc.rect(margin, 15, 40, 40, "F");
+    // doc.setTextColor(white[0], white[1], white[2]);
+    // doc.setFontSize(16);
+    // doc.setFont("helvetica", "bold");
+    // doc.text("GF", margin + 20, 38, { align: "center" });
 
     // Title
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
@@ -253,38 +269,46 @@ export default function PDFReport({ assessment }: any) {
     addSectionHeader("CAREER DEVELOPMENT OPPORTUNITIES", true);
 
     addSectionHeader("Career Pathways");
+
+    // Short-term pathway
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text("Short-term:", margin + 10, yPos + 5);
-    yPos += 10;
-    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.short_term, 10, 20);
+    doc.text("Short-term:", margin + 10, yPos + 3);
+    yPos += 8;
+    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.short_term, 10, 15);
 
+    // Long-term pathway
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.text("Long-term:", margin + 10, yPos);
-    yPos += 10;
-    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.long_term, 10, 20);
+    yPos += 8;
+    addTextContent(assessment.internalCareerOpportunitiesJson.career_pathways.long_term, 10, 15);
 
     addSectionHeader("Transition Timeline");
+
+    // 6 Months timeline
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text("6 Months:", margin + 10, yPos + 5);
-    yPos += 10;
-    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.six_months, 10, 20);
+    doc.text("6 Months:", margin + 10, yPos + 3);
+    yPos += 8;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.six_months, 10, 15);
 
+    // 1 Year timeline
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFont("helvetica", "bold");
     doc.text("1 Year:", margin + 10, yPos);
-    yPos += 10;
-    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.one_year, 10, 20);
+    yPos += 8;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.one_year, 10, 15);
 
+    // 2 Years timeline
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFont("helvetica", "bold");
     doc.text("2 Years:", margin + 10, yPos);
-    yPos += 10;
-    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.two_years, 10, 20);
+    yPos += 8;
+    addTextContent(assessment.internalCareerOpportunitiesJson.transition_timeline.two_years, 10, 15);
 
     addSectionHeader("Recommended Departments");
     addBulletList(assessment.internalCareerOpportunitiesJson.recommended_departments);
