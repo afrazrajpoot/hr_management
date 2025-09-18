@@ -45,10 +45,10 @@ const mainNavItems = [
   { title: "Mobility", url: "/dashboard/mobility", icon: ArrowUpDown },
 ];
 
-const accountItems = [
-  { title: "Profile", url: "/dashboard/profile", icon: User },
-  // { title: "Settings", url: "/dashboard/settings", icon: Settings },
-];
+// const accountItems = [
+//   // { title: "Profile", url: "/dashboard/profile", icon: User },
+//   // { title: "Settings", url: "/dashboard/settings", icon: Settings },
+// ];
 
 export function HRSidebar() {
   const sidebarContext = useSidebar();
@@ -111,11 +111,11 @@ export function HRSidebar() {
 
         {/* Account Section */}
         <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-medium px-6 py-3">
+          {/* <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-medium px-6 py-3">
             Account
-          </SidebarGroupLabel>
+          </SidebarGroupLabel> */}
           <SidebarGroupContent className="px-3">
-            <SidebarMenu>
+            {/* <SidebarMenu>
               {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -126,7 +126,7 @@ export function HRSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-            </SidebarMenu>
+            </SidebarMenu> */}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
