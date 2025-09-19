@@ -247,6 +247,7 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     handleViewReport({
+                      report,
                       id: report.id,
                       title: "Genius Factor Career Assessment",
                       employee: employee.name,

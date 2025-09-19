@@ -165,23 +165,23 @@ export default function HROverview() {
   }, [selectedHR, chartData.risk_analysis_by_hr]);
 
   // Debugging logs
-  useEffect(() => {
-    console.log("Dashboard Data:", dashboardData);
-    console.log("Mobility Analysis:", mobilityAnalysis);
-    console.log("Selected HR:", selectedHR);
-    console.log("Selected HR Name:", selectedHRName);
-    console.log("HR List:", hrList);
-    console.log("HR Metrics:", hrMetrics);
-    console.log("Chart Data:", chartData);
-  }, [
-    dashboardData,
-    mobilityAnalysis,
-    selectedHR,
-    selectedHRName,
-    hrList,
-    hrMetrics,
-    chartData,
-  ]);
+  // useEffect(() => {
+  //   console.log("Dashboard Data:", dashboardData);
+  //   console.log("Mobility Analysis:", mobilityAnalysis);
+  //   console.log("Selected HR:", selectedHR);
+  //   console.log("Selected HR Name:", selectedHRName);
+  //   console.log("HR List:", hrList);
+  //   console.log("HR Metrics:", hrMetrics);
+  //   console.log("Chart Data:", chartData);
+  // }, [
+  //   dashboardData,
+  //   mobilityAnalysis,
+  //   selectedHR,
+  //   selectedHRName,
+  //   hrList,
+  //   hrMetrics,
+  //   chartData,
+  // ]);
 
   // Calculate statistics
   const totalCompanies = metrics.total_hr_ids || 0;

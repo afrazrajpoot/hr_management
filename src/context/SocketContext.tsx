@@ -137,12 +137,12 @@ const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
   notifications: [],
-  subscribeToNotifications: () => { },
-  clearNotifications: () => { },
+  subscribeToNotifications: () => {},
+  clearNotifications: () => {},
   lastNotification: null,
   subscriptionStatus: "disconnected",
   unreadCount: 0,
-  markAsRead: () => { },
+  markAsRead: () => {},
   isRinging: false,
   dashboardData: null,
   roomsData: null,
@@ -196,21 +196,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   }, [session]);
 
   // Debug useEffect to track state changes
-  useEffect(() => {
-    console.log("📊 dashboardData state:", dashboardData);
-    console.log("👤 isAdmin:", isAdmin);
-    console.log("🔗 isConnected:", isConnected);
-    console.log("🚶 mobilityAnalysis:", mobilityAnalysis);
-    console.log("🏢 departmentData:", departmentData);
-    console.log("📊 departmentCardData:", departmentCardData);
-  }, [
-    dashboardData,
-    isAdmin,
-    isConnected,
-    mobilityAnalysis,
-    departmentData,
-    departmentCardData,
-  ]);
+  // useEffect(() => {
+  //   console.log("📊 dashboardData state:", dashboardData);
+  //   console.log("👤 isAdmin:", isAdmin);
+  //   console.log("🔗 isConnected:", isConnected);
+  //   console.log("🚶 mobilityAnalysis:", mobilityAnalysis);
+  //   console.log("🏢 departmentData:", departmentData);
+  //   console.log("📊 departmentCardData:", departmentCardData);
+  // }, [
+  //   dashboardData,
+  //   isAdmin,
+  //   isConnected,
+  //   mobilityAnalysis,
+  //   departmentData,
+  //   departmentCardData,
+  // ]);
 
   // Initialize audio with your custom sound file
   useEffect(() => {
@@ -230,9 +230,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       audioRef.current.volume = 0.3;
       audioRef.current
         .play()
-        .then(() => {
-          console.log("🔊 Notification sound played successfully");
-        })
+        .then(() => {})
         .catch((error) => {
           console.error("🔇 Error playing notification sound:", error);
         });
@@ -257,7 +255,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         socket.emit("subscribe_notifications", data);
         setSubscriptionStatus("subscribing");
       } else {
-        console.log("❌ Cannot subscribe - socket not connected");
+        console.error("❌ Cannot subscribe - socket not connected");
       }
     },
     [socket, isConnected]
@@ -286,37 +284,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (session?.user?.id) {
         if (isAdmin) {
           // Emit admin_dashboard event for admin users
-          console.log(
-            "👑 Emitting admin_dashboard for admin user:",
-            session.user.id
-          );
+
           socketInstance.emit("admin_dashboard", { adminId: session.user.id });
 
           // Emit internal_mobility_analysis for admin users
-          console.log(
-            "📈 Emitting admin_internal_mobility_analysis for admin user:",
-            session.user.id
-          );
+
           socketInstance.emit("admin_internal_mobility_analysis", {
             adminId: session.user.id,
           });
         } else {
-          // Emit hr_dashboard event for HR users
-          console.log("📊 Emitting hr_dashboard for hrId:", session.user.id);
           socketInstance.emit("hr_dashboard", { hrId: session.user.id });
 
           // Emit internal_mobility event for HR users
-          console.log(
-            "🚶 Emitting internal_mobility for hrId:",
-            session.user.id
-          );
+
           socketInstance.emit("internal_mobility", { hrId: session.user.id });
 
           // Emit department_analysis for HR users
-          console.log(
-            "🏢 Emitting department_analysis for hrId:",
-            session.user.id
-          );
+
           socketInstance.emit("department_analysis", { hrId: session.user.id });
         }
       }
@@ -327,42 +311,30 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // console.log("🔌 Initializing Socket.IO connection...");
 
-    const socketInstance = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL,
-      {
-        transports: ['websocket'],
-        path: '/socket.io/',
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: Infinity,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 20000,
-
-      }
-    );
-
-    socketInstance.on('connect_error', (err: any) => {
-      console.error('Connection Error:', err.message);
-      console.error('Description:', err.description);
-      console.error('Context:', err.context);
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+      transports: ["websocket"],
+      path: "/socket.io/",
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
     });
 
-    socketInstance.on('disconnect', (reason, details) => {
-      console.log('Disconnected:', reason);
-      console.log('Details:', details);
+    socketInstance.on("connect_error", (err: any) => {
+      console.error("Connection Error:", err.message);
+      console.error("Description:", err.description);
+      console.error("Context:", err.context);
     });
+
+    socketInstance.on("disconnect", (reason, details) => {});
 
     socketInstance.on("connect", () => {
-      console.log("✅ Connected to server with ID:", socketInstance.id);
       setIsConnected(true);
       setSubscriptionStatus("connected");
 
       if (session?.user?.id) {
-        console.log(
-          "📨 Auto-subscribing to notifications for user:",
-          session.user.id
-        );
         socketInstance.emit("subscribe_notifications", {
           user_id: session.user.id,
         });
@@ -374,8 +346,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socketInstance.on("disconnect", (reason) => {
-      console.log("❌ Disconnected from server:", reason);
-      console.log("Attempting to reconnect..." + reason);
       setIsConnected(false);
       setSubscriptionStatus("disconnected");
     });
@@ -386,7 +356,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socketInstance.on("reconnect", (attempt) => {
-      console.log(`♻️ Reconnected after ${attempt} attempts`);
       setSubscriptionStatus("reconnected");
       if (session?.user?.id) {
         socketInstance.emit("subscribe_notifications", {
@@ -410,12 +379,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socketInstance.on("subscription_confirmed", (data) => {
-      console.log("✅ Subscription confirmed:", data);
       setSubscriptionStatus("subscribed");
     });
 
     socketInstance.on("notification", (notification: any) => {
-      console.log("📨 FULL Notification received:", notification);
       if (notification && notification.data) {
         const fullNotification: Notification = {
           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -437,7 +404,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           timestamp: notification.timestamp || new Date().toISOString(),
         };
 
-        console.log("📝 Processed notification:", fullNotification);
         setNotifications((prev) => {
           const newNotifications = [...prev, fullNotification];
           return newNotifications.slice(-50);
@@ -452,15 +418,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for dashboard data updates (both hr_dashboard and admin_dashboard use 'reports_info')
     socketInstance.on("reports_info", (data) => {
-      console.log("📊 Dashboard data received:", data);
-
       // Handle both admin and HR dashboard data structures
       if (data.overallMetrics) {
-        console.log("✅ Valid dashboard data structure detected");
-
         if (isAdmin) {
           // Admin dashboard data handling
-          console.log("👑 Processing admin dashboard data");
 
           // For admin data, store the complete data structure
           setDashboardData(data);
@@ -468,21 +429,20 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           // Calculate total employees from department metrics
           const totalEmps = data.departmentMetrics
             ? Object.values(data.departmentMetrics).reduce(
-              (sum: number, metrics: any) =>
-                sum + (metrics.employee_count || 0),
-              0
-            )
+                (sum: number, metrics: any) =>
+                  sum + (metrics.employee_count || 0),
+                0
+              )
             : 0;
 
           setTotalEmployees(
             totalEmps ||
-            data.overallMetrics?.total_employee_users ||
-            data.overallMetrics?.total_reports ||
-            0
+              data.overallMetrics?.total_employee_users ||
+              data.overallMetrics?.total_reports ||
+              0
           );
         } else {
           // HR dashboard data handling
-          console.log("📊 Processing HR dashboard data");
 
           if (data.dashboardData && Array.isArray(data.dashboardData)) {
             setDashboardData(data.dashboardData);
@@ -491,14 +451,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             // Fallback: if dashboardData is not an array, try to use departmentMetrics
             const transformedData = data.departmentMetrics
               ? Object.entries(data.departmentMetrics).map(
-                ([name, metrics]: [string, any]) => ({
-                  name,
-                  completion: metrics.avg_retention_risk || 0,
-                  color: "#2563eb",
-                  completed_assessments: metrics.total_reports || 0,
-                  total_employees: metrics.employee_count || 0,
-                })
-              )
+                  ([name, metrics]: [string, any]) => ({
+                    name,
+                    completion: metrics.avg_retention_risk || 0,
+                    color: "#2563eb",
+                    completed_assessments: metrics.total_reports || 0,
+                    total_employees: metrics.employee_count || 0,
+                  })
+                )
               : [];
 
             setDashboardData(transformedData);
@@ -523,11 +483,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for internal mobility data updates (for HR users)
     socketInstance.on("mobility_info", (data) => {
       if (isAdmin) {
-        console.log("⏭️  Skipping mobility_info for admin user");
         return;
       }
 
-      console.log("🚶 Internal mobility data received:", data);
       if (
         data.monthlyMobilityTrends &&
         data.departmentMovementFlow &&
@@ -548,11 +506,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for internal mobility analysis data (for admin users)
     socketInstance.on("mobility_analysis", (data) => {
       if (!isAdmin) {
-        console.log("⏭️  Skipping mobility_analysis for non-admin user");
         return;
       }
 
-      console.log("📈 Mobility analysis data received:", data);
       if (data) {
         setMobilityAnalysis(data);
       } else if (data.error) {
@@ -563,11 +519,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for department_info data (for HR users)
     socketInstance.on("department_info", (data) => {
       if (isAdmin) {
-        console.log("⏭️  Skipping department_info for admin user");
         return;
       }
-
-      console.log("🏢 Department info data received:", data);
 
       if (data.error) {
         console.error("❌ Department info error:", data.error);
@@ -577,18 +530,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       // Handle department data for HR users
       if (data.departments && Array.isArray(data.departments)) {
         setDepartmentData(data.departments);
-        console.log("✅ Department data processed:", data.departments);
       }
 
       if (data.cardData) {
         setDepartmentCardData(data.cardData);
-        console.log("📊 Department card data:", data.cardData);
       }
     });
 
     // Listen for hr_notification event and save data in state
     socketInstance.on("hr_notification", (data) => {
-      console.log("📨 HR Notification received:", data);
       setHrNotifications((prev) => [...prev, data]);
     });
 
@@ -599,7 +549,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     setSocket(socketInstance);
 
     return () => {
-      console.log("🧹 Cleaning up Socket.IO connection");
       if (ringTimeoutRef.current) {
         clearTimeout(ringTimeoutRef.current);
       }

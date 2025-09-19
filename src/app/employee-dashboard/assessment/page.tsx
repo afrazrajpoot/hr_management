@@ -144,7 +144,6 @@ export default function Assessment() {
 
       // EMIT DASHBOARD UPDATE EVENT
       if (socket && isConnected && session?.user?.hrId) {
-        console.log("📊 Emitting dashboard update after assessment completion");
         socket.emit("hr_dashboard", { hrId: session.user.hrId });
       }
     } catch (err: any) {

@@ -66,12 +66,14 @@ export async function GET(request: Request) {
     }
     
     if (role && role !== "All Roles") {
-      whereClause.role = role;
+      whereClause.role = 'Employee';
     }
 
     // 5. Fetch total count of all employees with filters
     const totalEmployees = await prisma.user.count({
-      where: whereClause,
+      where: {
+        role:'Employee'
+      },
     });
 
     // 6. Fetch paginated employees with filters and include all details

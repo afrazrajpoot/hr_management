@@ -229,16 +229,11 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     const socket = (window as any).socket;
     if (socket) {
       socket.emit("subscribe_hr_notifications", { hr_id: hrId });
-      console.log(`HR joined room: hr_${hrId}`);
 
-      socket.on("hr_subscription_confirmed", (data: any) => {
-        console.log("HR subscription confirmed:", data);
-      });
+      socket.on("hr_subscription_confirmed", (data: any) => {});
 
       return () => {
-        socket.off("hr_subscription_confirmed");
         socket.emit("unsubscribe_hr_notifications", { hr_id: hrId });
-        console.log(`HR left room: hr_${hrId}`);
       };
     }
   }, [hrId, isConnected, fetchNotifications]);

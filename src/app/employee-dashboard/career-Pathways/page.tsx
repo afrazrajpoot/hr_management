@@ -27,7 +27,6 @@ import { useSession } from "next-auth/react";
 
 // Map API data to career recommendation structure
 const mapApiToCareerData = (apiData: any) => {
-  console.log("Mapping API Data:", apiData);
   if (!apiData?.recommendations) return [];
 
   return apiData.recommendations.map((job: any) => ({
@@ -105,18 +104,6 @@ export default function CareerPathways() {
     useCreateCareerPathwayRecommendationsMutation();
 
   // Debug session and mutation
-  console.log("Session:", {
-    status,
-    hrId: session?.user?.hrId,
-    id: session?.user?.id,
-  });
-  console.log("Mutation State:", {
-    isLoading,
-    isError,
-    isSuccess,
-    error,
-    data,
-  });
 
   useEffect(() => {
     if (
@@ -124,10 +111,6 @@ export default function CareerPathways() {
       session?.user?.hrId &&
       session?.user?.id
     ) {
-      console.log("Sending Payload:", {
-        recruiter_id: session.user.hrId,
-        employee_id: session.user.id,
-      });
       getRecommendations({
         recruiter_id: session.user.hrId,
         employee_id: session.user.id,
@@ -143,8 +126,6 @@ export default function CareerPathways() {
     if (!data?.recommendations) return [];
     return mapApiToCareerData(data);
   }, [data]);
-
-  console.log("allRecommendations:", allRecommendations);
 
   const filteredAndSortedRecommendations = useMemo(() => {
     if (!allRecommendations.length) return [];

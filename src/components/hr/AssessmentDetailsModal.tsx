@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import PDFReport from "../employee/PDFReport";
 
 const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
   if (!assessment) return null;
@@ -39,6 +40,9 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           <DialogDescription className="mt-4 text-lg">
             Comprehensive assessment insights and personalized career roadmap
           </DialogDescription>
+          <div className="w-full max-w-[10vw]">
+            <PDFReport assessment={assessment.report} />
+          </div>
         </DialogHeader>
 
         {/* Content Section */}

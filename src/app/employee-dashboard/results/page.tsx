@@ -132,7 +132,7 @@ export default function Results() {
     useState<Assessment | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
-  console.log(selectedAssessment, "selected assessment");
+
   useEffect(() => {
     if (data) {
       const assessmentsData = Array.isArray(data) ? data : data.data || [];

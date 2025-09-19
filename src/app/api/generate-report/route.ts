@@ -6,9 +6,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    console.log("====================================");
-    console.log(body, "request body");
-    console.log("====================================");
+
     const {
       executive_summary,
       genius_factor_profile,
@@ -26,9 +24,7 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("====================================");
-    console.log(user, "user");
-    console.log("====================================");
+ 
 
     const report = await prisma.individualEmployeeReport.create({
       data: {
@@ -48,9 +44,7 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("====================================");
-    console.log(report, "saved report");
-    console.log("====================================");
+
 
     return NextResponse.json({ status: "success", report });
   } catch (error: any) {

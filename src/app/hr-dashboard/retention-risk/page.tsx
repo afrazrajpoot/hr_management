@@ -439,11 +439,6 @@ export default function RetentionRisk() {
       (dept: any) => !analyzedDepartments.has(dept.name)
     );
 
-    if (departmentsToAnalyze.length === 0) {
-      console.log("All departments already have analysis data");
-      return;
-    }
-
     try {
       // Send only unanalyzed departments to the AI analysis endpoint
       await analyzeRetentionRisk(departmentsToAnalyze).unwrap();

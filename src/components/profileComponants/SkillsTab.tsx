@@ -143,10 +143,6 @@ const SkillsTab: React.FC<SkillsTabProps> = ({ isEditing, control }: any) => {
       ? control._formValues.skills || []
       : [];
 
-  useEffect(() => {
-    console.log(state);
-  }, [state]);
-
   // Get skill category color based on common skill types
 
   // Get proficiency level text

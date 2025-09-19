@@ -265,6 +265,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                   className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
                   onClick={() =>
                     handleViewReport({
+                      report,
                       id: report.id,
                       title: "Genius Factor Career Assessment",
                       employee: employee.name,

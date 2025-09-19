@@ -167,7 +167,6 @@ export default function Companies() {
         limit: "12",
         search: filteredSearchTerm,
       });
-      console.log("Fetching companies with params:", params.toString());
 
       const response = await fetch(`/api/admin/get-admin-companies?${params}`, {
         method: "GET",
@@ -181,7 +180,6 @@ export default function Companies() {
       }
 
       const data: ApiResponse = await response.json();
-      console.log("API Response:", data);
 
       // Check if data exists and is an array
       if (!data.data || !Array.isArray(data.data)) {
