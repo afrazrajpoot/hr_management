@@ -243,13 +243,12 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           <Calendar className="h-4 w-4" />
           <span>
             {status === "Completed"
-              ? `Completed: ${
-                  firstReport.createdAt
-                    ? new Date(firstReport.createdAt)
-                        .toISOString()
-                        .split("T")[0]
-                    : "Unknown"
-                }`
+              ? `Completed: ${firstReport.createdAt
+                ? new Date(firstReport.createdAt)
+                  .toISOString()
+                  .split("T")[0]
+                : "Unknown"
+              }`
               : "Not Started"}
           </span>
         </div>
@@ -284,6 +283,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                       avatar: employee.avatar,
                       executiveSummary: report.executiveSummary,
                       geniusFactorProfile: report.geniusFactorProfileJson,
+                      genius_factor_score: report?.risk_analysis.scores?.genius_factor_score,
                       currentRoleAlignment:
                         report.currentRoleAlignmentAnalysisJson,
                       careerOpportunities:
@@ -365,15 +365,13 @@ export default function Assessments() {
   const employeeData =
     data?.employees?.map((employee: any) => ({
       id: employee.id,
-      name: `${employee.firstName} ${
-        employee.lastName !== "Not provide" ? employee.lastName : ""
-      }`.trim(),
+      name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
+        }`.trim(),
       department: employee.department || "Unknown",
       position: employee.position || "Unknown",
       reports: employee.reports || [],
-      avatar: `${employee.firstName[0]}${
-        employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-      }`,
+      avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+        }`,
     })) || [];
 
   const filteredEmployees = employeeData.filter((employee: any) => {
@@ -410,22 +408,22 @@ export default function Assessments() {
   const inProgressCount = 0; // No in-progress reports in data
   const avgScore = completedCount
     ? Math.round(
-        employeeData.reduce(
-          (sum: number, emp: any) =>
-            sum +
-            emp.reports.reduce(
-              (rSum: number, report: any) =>
-                rSum +
-                parseInt(
-                  report.geniusFactorProfileJson.primary_genius_factor.match(
-                    /\d+/
-                  )?.[0] || "0"
-                ),
-              0
-            ),
-          0
-        ) / completedCount
-      )
+      employeeData.reduce(
+        (sum: number, emp: any) =>
+          sum +
+          emp.reports.reduce(
+            (rSum: number, report: any) =>
+              rSum +
+              parseInt(
+                report.geniusFactorProfileJson.primary_genius_factor.match(
+                  /\d+/
+                )?.[0] || "0"
+              ),
+            0
+          ),
+        0
+      ) / completedCount
+    )
     : 0;
 
   if (isLoading) {

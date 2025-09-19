@@ -58,7 +58,7 @@ interface DepartmentCardData {
   totalOutgoing: number;
 }
 
-interface CustomTooltipProps extends TooltipProps<number, string> {}
+interface CustomTooltipProps extends TooltipProps<number, string> { }
 
 const DepartmentDashboard = () => {
   const { departmentCardData, departmentData } = useSocket();
@@ -188,7 +188,7 @@ const DepartmentDashboard = () => {
       HR: "bg-orange-500",
       Finance: "bg-red-500",
     };
-    return colors[department] || "bg-gray-500";
+    return colors[department] || "bg-green-500";
   };
 
   // Custom tooltip for department distribution chart
