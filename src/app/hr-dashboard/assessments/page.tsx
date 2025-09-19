@@ -283,7 +283,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                       avatar: employee.avatar,
                       executiveSummary: report.executiveSummary,
                       geniusFactorProfile: report.geniusFactorProfileJson,
-                      genius_factor_score: report?.risk_analysis.scores?.genius_factor_score,
+                      genius_factor_score: report?.risk_analysis?.scores?.genius_factor_score,
                       currentRoleAlignment:
                         report.currentRoleAlignmentAnalysisJson,
                       careerOpportunities:
