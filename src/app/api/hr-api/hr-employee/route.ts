@@ -100,6 +100,7 @@ export async function GET(request: Request) {
         developmentActionPlanJson: true,
         personalizedResourcesJson: true,
         dataSourcesAndMethodologyJson: true,
+        risk_analysis: true,
       },
     });
 
