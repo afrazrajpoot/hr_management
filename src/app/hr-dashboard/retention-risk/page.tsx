@@ -400,16 +400,16 @@ export default function RetentionRisk() {
     const departmentRiskData =
       departmentData.length > 0
         ? departmentData.map((dept: any) => ({
-            department: dept.name || "Unknown Department",
-            low: dept.metrics?.retention_risk_distribution?.["Low (0-30)"] || 0,
-            medium:
-              dept.metrics?.retention_risk_distribution?.["Medium (31-60)"] ||
-              0,
-            high:
-              dept.metrics?.retention_risk_distribution?.["High (61-100)"] || 0,
-            total: dept.employee_count || 0,
-            color: dept.color || "#8884d8",
-          }))
+          department: dept.name || "Unknown Department",
+          low: dept.metrics?.retention_risk_distribution?.["Low (0-30)"] || 0,
+          medium:
+            dept.metrics?.retention_risk_distribution?.["Medium (31-60)"] ||
+            0,
+          high:
+            dept.metrics?.retention_risk_distribution?.["High (61-100)"] || 0,
+          total: dept.employee_count || 0,
+          color: dept.color || "#8884d8",
+        }))
         : fallbackRiskData.departmentRiskData;
 
     setRiskData({
@@ -572,8 +572,8 @@ export default function RetentionRisk() {
             change={
               riskData.totalEmployees > 0
                 ? `${Math.round(
-                    (riskData.totalAtRisk / riskData.totalEmployees) * 100
-                  )}% of workforce`
+                  (riskData.totalAtRisk / riskData.totalEmployees) * 100
+                )}% of workforce`
                 : "0% of workforce"
             }
             icon={AlertTriangle}
@@ -585,8 +585,8 @@ export default function RetentionRisk() {
             change={
               riskData.totalEmployees > 0
                 ? `${Math.round(
-                    (riskData.highRisk / riskData.totalEmployees) * 100
-                  )}% critical`
+                  (riskData.highRisk / riskData.totalEmployees) * 100
+                )}% critical`
                 : "0% critical"
             }
             icon={AlertTriangle}
@@ -720,7 +720,7 @@ export default function RetentionRisk() {
                 {analysisData?.summary ||
                   "Analysis of retention risks across departments."}
               </p>
-              <div className="flex items-center gap-2 mt-2">
+              {/* <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline">
                   Overall Risk Score:{" "}
                   {analysisResults.length > 0
@@ -733,7 +733,7 @@ export default function RetentionRisk() {
                     : "0.0"}
                   /100
                 </Badge>
-              </div>
+              </div> */}
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
@@ -788,8 +788,8 @@ export default function RetentionRisk() {
           messages={
             selectedDepartment
               ? chatConversations[
-                  `${session?.user?.id}_${selectedDepartment.department}`
-                ]?.messages || []
+                `${session?.user?.id}_${selectedDepartment.department}`
+              ]?.messages || []
               : []
           }
           onMessagesUpdate={updateChatMessages}

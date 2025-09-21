@@ -41,7 +41,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
             Comprehensive assessment insights and personalized career roadmap
           </DialogDescription>
           <div className="w-full max-w-[10vw]">
-            <PDFReport assessment={assessment.report} />
+            <PDFReport assessment={assessment.report} genius_factor_score={assessment.genius_factor_score} />
           </div>
         </DialogHeader>
 

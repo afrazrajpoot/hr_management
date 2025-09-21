@@ -42,8 +42,6 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
     switch (status) {
       case "Completed":
         return "bg-success text-success-foreground";
-      case "In Progress":
-        return "bg-warning text-warning-foreground";
       case "Not Started":
         return "bg-muted text-muted-foreground";
       default:
@@ -224,13 +222,12 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
           <Calendar className="h-4 w-4" />
           <span>
             {status === "Completed"
-              ? `Completed: ${
-                  firstReport.createdAt
-                    ? new Date(firstReport.createdAt)
-                        .toISOString()
-                        .split("T")[0]
-                    : "Unknown"
-                }`
+              ? `Completed: ${firstReport.createdAt
+                ? new Date(firstReport.createdAt)
+                  .toISOString()
+                  .split("T")[0]
+                : "Unknown"
+              }`
               : "Not Started"}
           </span>
         </div>
@@ -348,9 +345,8 @@ export default function Assessments() {
     () =>
       data?.employees?.map((employee: any) => ({
         id: employee.id,
-        name: `${employee.firstName} ${
-          employee.lastName !== "Not provide" ? employee.lastName : ""
-        }`.trim(),
+        name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
+          }`.trim(),
         email: employee.email,
         phoneNumber: employee.phoneNumber,
         department: Array.isArray(employee.department)
@@ -360,9 +356,8 @@ export default function Assessments() {
           ? employee.position.join(", ")
           : employee.position || "Unknown",
         reports: employee.reports || [],
-        avatar: `${employee.firstName[0]}${
-          employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-        }`,
+        avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+          }`,
         ...employee.employee,
         salary: employee.salary,
         role: employee.role,
@@ -512,11 +507,14 @@ export default function Assessments() {
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((dept: string) => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept === "all" ? "All Departments" : dept}
-                    </SelectItem>
-                  ))}
+                  {departments.map((dept, index) => {
+                    const departmentName = dept as string;
+                    return (
+                      <SelectItem key={`${departmentName}-${index}`} value={departmentName}>
+                        {departmentName === "all" ? "All Departments" : departmentName}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

@@ -230,7 +230,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     if (socket) {
       socket.emit("subscribe_hr_notifications", { hr_id: hrId });
 
-      socket.on("hr_subscription_confirmed", (data: any) => {});
+      socket.on("hr_subscription_confirmed", (data: any) => { });
 
       return () => {
         socket.emit("unsubscribe_hr_notifications", { hr_id: hrId });
@@ -280,13 +280,13 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
             )}
           </div>
           <div className="flex items-center gap-4">
-            <div className="relative">
+            {/* <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search employees, assessments..."
                 className="w-80 pl-10 card"
               />
-            </div>
+            </div> */}
             <DropdownMenu
               open={isNotificationOpen}
               onOpenChange={setIsNotificationOpen}
@@ -351,15 +351,13 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-3 hover:bg-muted/50 sidebar-menu-item  border-l-4 ${
-                          notification.status === "unread"
+                        className={`p-3 hover:bg-muted/50 sidebar-menu-item  border-l-4 ${notification.status === "unread"
                             ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
                             : "border-l-transparent"
-                        } ${
-                          notification.id.startsWith("socket-")
+                          } ${notification.id.startsWith("socket-")
                             ? "bg-amber-50/30 dark:bg-amber-950/20"
                             : ""
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1">

@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
-export default function PDFReport({ assessment }: any) {
+export default function PDFReport({ assessment, genius_factor_score }: any) {
   // Helper function to check if a field exists and has content
   const isFieldValid = (field: any): boolean => {
     if (field === undefined || field === null) return false;
@@ -193,7 +193,7 @@ export default function PDFReport({ assessment }: any) {
     doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
     doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
-    doc.text("GENIUS FACTOR", margin + 50, 30);
+    doc.text("GENIUS FACTOR AI", margin + 50, 30);
 
     doc.setFontSize(16);
     doc.setFont("helvetica", "normal");
@@ -208,21 +208,29 @@ export default function PDFReport({ assessment }: any) {
 
     // SCORE CARDS SECTION - Only show if alignment data exists
     const alignmentData = safeGet(assessment, 'currentRoleAlignmentAnalysisJson');
-    if (isFieldValid(alignmentData)) {
+    if (isFieldValid(alignmentData) || isFieldValid(genius_factor_score)) {
       const alignmentScore = safeGet(alignmentData, 'alignment_score');
       const riskLevel = safeGet(alignmentData, 'retention_risk_level');
 
-      if (isFieldValid(alignmentScore) || isFieldValid(riskLevel)) {
+      if (isFieldValid(alignmentScore) || isFieldValid(riskLevel) || isFieldValid(genius_factor_score)) {
         checkPageBreak(45);
+
+        // Calculate card width for 3 cards with spacing
+        const cardWidth = (contentWidth - 20) / 3; // 3 cards with 10px spacing between them
+
+        if (isFieldValid(genius_factor_score)) {
+          const geniusScoreColor = parseInt(genius_factor_score) >= 80 ? 'success' : parseInt(genius_factor_score) >= 60 ? 'warning' : 'danger';
+          addScoreCard("Genius Factor Score", `${genius_factor_score}%`, margin, cardWidth, geniusScoreColor);
+        }
 
         if (isFieldValid(alignmentScore)) {
           const scoreColor = parseInt(alignmentScore) >= 80 ? 'success' : parseInt(alignmentScore) >= 60 ? 'warning' : 'danger';
-          addScoreCard("Alignment Score", `${alignmentScore}%`, margin, 85, scoreColor);
+          addScoreCard("Alignment Score", `${alignmentScore}%`, margin + cardWidth + 10, cardWidth, scoreColor);
         }
 
         if (isFieldValid(riskLevel)) {
           const riskColor = riskLevel === 'Low' ? 'success' : riskLevel === 'Medium' ? 'warning' : 'danger';
-          addScoreCard("Retention Risk", riskLevel, margin + 95, 85, riskColor);
+          addScoreCard("Retention Risk", riskLevel, margin + (cardWidth + 10) * 2, cardWidth, riskColor);
         }
 
         yPos += 45;
@@ -486,6 +494,48 @@ export default function PDFReport({ assessment }: any) {
         }
       }
     }
+
+    // Add copyright notice at the end before footer
+    checkPageBreak(60); // Make sure we have enough space for copyright
+
+    // Add some space before copyright
+    yPos += 10;
+
+    // Add separator line
+    doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 15;
+
+    // Copyright header
+    doc.setTextColor(primaryBlue[0], primaryBlue[1], primaryBlue[2]);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("COPYRIGHT NOTICE", margin, yPos);
+    yPos += 10;
+
+    // Copyright text
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+
+    const copyrightText = "Genius Factor Academy, LLC © 2026 | All Rights Reserved.\n\nThis platform, including all software, algorithms, content, and data reporting outputs, is the exclusive property of Genius Factor Academy, LLC. Unauthorized reproduction, distribution, modification, reverse engineering, or derivative works are strictly prohibited. Use of this platform is subject to license only, and all rights not expressly granted are reserved.";
+
+    const maxWidth = contentWidth - 20;
+    const copyrightLines = doc.splitTextToSize(copyrightText, maxWidth);
+    const lineHeight = 3.5;
+
+    copyrightLines.forEach((line: string, index: number) => {
+      if (line.trim() === "") {
+        yPos += lineHeight / 2;
+      } else {
+        checkPageBreak(lineHeight + 5);
+        doc.text(line, margin + 10, yPos);
+        yPos += lineHeight;
+      }
+    });
+
+    yPos += 10; // Add some space after copyright
 
     addFooter();
 

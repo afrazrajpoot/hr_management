@@ -232,7 +232,7 @@ export default function Results() {
               Share Results
             </Button> */}
 
-            <PDFReport assessment={selectedAssessment} />
+            <PDFReport assessment={selectedAssessment} genius_factor_score={selectedAssessment?.geniusFactorScore} />
           </div>
         </div>
 

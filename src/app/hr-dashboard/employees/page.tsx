@@ -31,8 +31,6 @@ import Loader from "@/components/Loader";
 const assessmentStatuses = [
   "All Statuses",
   "Completed",
-  "In Progress",
-  "Pending",
   "Not Started",
 ];
 
@@ -246,21 +244,18 @@ export default function Employees() {
                           <Avatar className="h-10 w-10">
                             <AvatarImage src="/api/placeholder/40/40" />
                             <AvatarFallback>
-                              {`${employee.firstName[0]}${
-                                employee.lastName !== "Not provide"
-                                  ? employee.lastName[0]
-                                  : ""
-                              }`}
+                              {`${employee.firstName[0]}${employee.lastName !== "Not provide"
+                                ? employee.lastName[0]
+                                : ""
+                                }`}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{`${
-                              employee.firstName
-                            } ${
-                              employee.lastName !== "Not provide"
+                            <p className="font-medium">{`${employee.firstName
+                              } ${employee.lastName !== "Not provide"
                                 ? employee.lastName
                                 : ""
-                            }`}</p>
+                              }`}</p>
                             <p className="text-sm text-muted-foreground">
                               {employee.email}
                             </p>
@@ -268,12 +263,10 @@ export default function Employees() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {employee?.position.at(-1) || "N/A"}
+                        {employee?.position || "N/A"}
                       </td>
                       <td className="p-3">
-                        {employee?.department.at(-1) ||
-                          employee?.departement[0] ||
-                          "N/A"}
+                        {employee?.department || "N/A"}
                       </td>
                       <td className="p-3 font-medium">
                         ${employee.salary?.toLocaleString() || "N/A"}
