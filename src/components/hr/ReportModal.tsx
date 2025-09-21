@@ -425,7 +425,7 @@ const ReportModal = ({
 
                     <div>
                       <p className="font-medium text-sm">
-                        Data Sources and Methodology
+                        Methodology
                       </p>
                       <div className="space-y-2 text-sm">
                         <p>
@@ -433,17 +433,6 @@ const ReportModal = ({
                           {report.dataSourcesAndMethodologyJson?.methodology ||
                             "N/A"}
                         </p>
-                        <p>
-                          <span className="font-semibold">Data Sources:</span>
-                        </p>
-                        <ul className="list-disc pl-5">
-                          {(
-                            report.dataSourcesAndMethodologyJson
-                              ?.data_sources || []
-                          ).map((source: string, i: number) => (
-                            <li key={i}>{source}</li>
-                          ))}
-                        </ul>
                       </div>
                     </div>
                   </div>

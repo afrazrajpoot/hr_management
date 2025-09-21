@@ -35,6 +35,71 @@ import {
   Award,
   ArrowUpRight,
 } from "lucide-react";
+import { dashboardOptions } from "@/app/data";
+
+const getDepartmentColor = (departmentName: string): string => {
+  const departmentColors: { [key: string]: string } = {
+    // Technology & Development - Premium tech gradients
+    "IT": "#667EEA",           // Soft Purple Blue
+    "AI": "#764BA2",           // Rich Purple
+    "Development": "#5B73DB",  // Electric Blue
+    "Security": "#FF6B6B",     // Coral Red
+
+    // Business & Corporate - Luxury business tones
+    "Corporate": "#2D3748",    // Charcoal
+    "Finance": "#38A169",      // Success Green
+    "Sales": "#E53E3E",        // Vibrant Red
+    "Leadership": "#D69E2E",   // Gold
+    "Strategy": "#4A5568",     // Steel Gray
+
+    // Marketing & Communications - Creative & vibrant
+    "Marketing": "#ED64A6",    // Pink
+    "Media": "#FF8C42",        // Sunset Orange
+    "Content": "#4FD1C7",      // Turquoise
+    "Communications": "#4299E1", // Ocean Blue
+    "Editorial": "#C05621",    // Warm Brown
+
+    // Healthcare & Wellness - Calming natural tones
+    "Healthcare": "#48BB78",   // Healing Green
+    "Wellness": "#9AE6B4",     // Mint Green
+
+    // Research & Analytics - Sophisticated purples
+    "Research": "#805AD5",     // Amethyst
+    "Analytics": "#6B46C1",    // Deep Violet
+
+    // Policy & Sustainability - Earth & eco tones
+    "Policy": "#718096",       // Warm Gray
+    "Sustainability": "#38A169", // Eco Green
+
+    // Default and fallback colors
+    "No Data": "#A0AEC0",      // Soft Gray
+    "Unknown": "#718096",      // Neutral Gray
+  };
+
+  return departmentColors[departmentName] || "#718096"; // Default neutral for unknown departments
+};
+
+// Professional color palette for score ranges
+const getScoreRangeColor = (range: string): string => {
+  const scoreRangeColors: { [key: string]: string } = {
+    // Genius Factor Score Ranges (beautiful gradient progression)
+    "0-20": "#FF6B6B",     // Soft Coral (less harsh than red)
+    "21-40": "#FFB347",    // Peach Orange
+    "41-60": "#FFD93D",    // Sunny Yellow
+    "61-80": "#6BCF7F",    // Fresh Green
+    "81-100": "#4ECDC4",   // Mint Teal (premium feel)
+
+    // Retention Risk Ranges (sophisticated risk indicators)
+    "Low (0-30)": "#51CF66",      // Vibrant Green
+    "Medium (31-60)": "#FFD43B",  // Golden Yellow
+    "High (61-100)": "#FF8787",   // Soft Red
+    "Low": "#51CF66",             // Alternative format
+    "Medium": "#FFD43B",          // Alternative format  
+    "High": "#FF8787",            // Alternative format
+  };
+
+  return scoreRangeColors[range] || "#718096"; // Default neutral for unknown ranges
+};
 
 const StatCard = ({ title, value, change, icon: Icon, trend = "up" }: any) => (
   <Card className="card">
@@ -159,63 +224,101 @@ export default function Dashboard() {
   const avgGeniusFactor =
     departmentData.length > 0
       ? Math.round(
-          departmentData
-            .map(
-              (dept: any) => dept.metrics?.avg_scores?.genius_factor_score || 0
-            )
-            .reduce((sum: number, score: number) => sum + score, 0) /
-            departmentData.length
-        )
+        departmentData
+          .map(
+            (dept: any) => dept.metrics?.avg_scores?.genius_factor_score || 0
+          )
+          .reduce((sum: number, score: number) => sum + score, 0) /
+        departmentData.length
+      )
       : 0;
   const avgRetentionRisk =
     departmentData.length > 0
       ? Math.round(
-          departmentData.reduce(
-            (sum: number, dept: any) =>
-              sum + (dept.metrics?.avg_scores?.retention_risk_score || 0),
-            0
-          ) / departmentData.length
-        )
+        departmentData.reduce(
+          (sum: number, dept: any) =>
+            sum + (dept.metrics?.avg_scores?.retention_risk_score || 0),
+          0
+        ) / departmentData.length
+      )
       : 0;
 
-  // Prepare data for charts
+  // Prepare data for charts with department-specific colors
   const completionData = departmentData.map((dept: any) => ({
     name: dept.name,
     completion: dept.completion,
-    color: dept.color,
+    color: getDepartmentColor(dept.name),
     employee_count: dept.employee_count,
   }));
 
-  // Fix genius factor data mapping
-  const geniusFactorData: any = [];
+  // Fix genius factor data mapping - aggregate by range across all departments
+  const geniusFactorData: any[] = [];
+  const geniusRangeAggregation: { [key: string]: number } = {};
+
+  // Aggregate counts by range across all departments
   for (const dept of departmentData) {
     const distribution: any = dept.metrics?.genius_factor_distribution || {};
     for (const [range, count] of Object.entries(distribution)) {
-      if (count > 0 || !hasData) {
-        geniusFactorData.push({
-          department: dept.name,
-          range,
-          count,
-          color: dept.color,
-        });
+      if (typeof count === 'number') {
+        geniusRangeAggregation[range] = (geniusRangeAggregation[range] || 0) + count;
       }
     }
   }
 
-  // Fix retention risk data mapping
-  const retentionRiskData = [];
+  // Convert aggregated data to chart format
+  for (const [range, count] of Object.entries(geniusRangeAggregation)) {
+    if (count > 0 || !hasData) {
+      geniusFactorData.push({
+        range,
+        count,
+        color: getScoreRangeColor(range),
+      });
+    }
+  }
+
+  // If no data, add default ranges for demo
+  if (!hasData && geniusFactorData.length === 0) {
+    geniusFactorData.push(
+      { range: "0-20", count: 1, color: getScoreRangeColor("0-20") },
+      { range: "21-40", count: 2, color: getScoreRangeColor("21-40") },
+      { range: "41-60", count: 3, color: getScoreRangeColor("41-60") },
+      { range: "61-80", count: 2, color: getScoreRangeColor("61-80") },
+      { range: "81-100", count: 1, color: getScoreRangeColor("81-100") }
+    );
+  }
+
+  // Fix retention risk data mapping - aggregate by range across all departments
+  const retentionRiskData: any[] = [];
+  const riskRangeAggregation: { [key: string]: number } = {};
+
+  // Aggregate counts by range across all departments
   for (const dept of departmentData) {
     const distribution = dept.metrics?.retention_risk_distribution || {};
     for (const [range, count] of Object.entries(distribution)) {
-      if (count > 0 || !hasData) {
-        retentionRiskData.push({
-          department: dept.name,
-          range,
-          count,
-          color: dept.color,
-        });
+      if (typeof count === 'number') {
+        riskRangeAggregation[range] = (riskRangeAggregation[range] || 0) + count;
       }
     }
+  }
+
+  // Convert aggregated data to chart format
+  for (const [range, count] of Object.entries(riskRangeAggregation)) {
+    if (count > 0 || !hasData) {
+      retentionRiskData.push({
+        range,
+        count,
+        color: getScoreRangeColor(range),
+      });
+    }
+  }
+
+  // If no data, add default ranges for demo
+  if (!hasData && retentionRiskData.length === 0) {
+    retentionRiskData.push(
+      { range: "Low (0-30)", count: 1, color: getScoreRangeColor("Low (0-30)") },
+      { range: "Medium (31-60)", count: 2, color: getScoreRangeColor("Medium (31-60)") },
+      { range: "High (61-100)", count: 1, color: getScoreRangeColor("High (61-100)") }
+    );
   }
 
   // Fix mobility trend data - restructure to show by department
@@ -263,9 +366,9 @@ export default function Dashboard() {
       dept.metrics?.avg_scores?.skills_alignment_score || 0,
   }));
 
-  // Define colors for each department
+  // Define colors for each department using the professional color palette
   const departmentColors = departmentData.reduce((acc: any, dept: any) => {
-    acc[dept.name] = dept.color || "#8884d8"; // Default color if not provided
+    acc[dept.name] = getDepartmentColor(dept.name);
     return acc;
   }, {});
 
@@ -377,12 +480,18 @@ export default function Dashboard() {
 
                   <Bar
                     dataKey="completion"
-                    fill="#2563eb"
                     name="Completed Assessments"
                     radius={[6, 6, 0, 0]}
-                    stroke="#1d4ed8"
                     strokeWidth={1}
-                  />
+                  >
+                    {completionData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke={entry.color}
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -410,9 +519,17 @@ export default function Dashboard() {
                     <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Bar
                       dataKey="count"
-                      fill="hsl(var(--hr-chart-2))"
                       name="Assessments"
-                    />
+                      strokeWidth={1}
+                    >
+                      {geniusFactorData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke={entry.color}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -438,9 +555,17 @@ export default function Dashboard() {
                     <Tooltip content={<CustomTooltip />} cursor={false} />
                     <Bar
                       dataKey="count"
-                      fill="hsl(var(--hr-chart-3))"
                       name="Assessments"
-                    />
+                      strokeWidth={1}
+                    >
+                      {retentionRiskData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke={entry.color}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

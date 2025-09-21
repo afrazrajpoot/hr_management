@@ -1,5 +1,6 @@
 export const dashboardOptions = {
     "Departments": [
+        { option: "All Departments", value: "all" },
         { option: "IT", value: "IT" },
         { option: "Media", value: "Media" },
         { option: "Corporate", value: "Corporate" },

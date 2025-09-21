@@ -56,7 +56,8 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
   const completionRate = employee.reports.length > 0 ? 100 : 0;
 
   const totalReportPages = Math.ceil(employee.reports.length / reportsPerPage);
-  const paginatedReports = employee.reports.slice(
+  const sortedReports = employee.reports.slice().reverse(); // Sort newest first
+  const paginatedReports = sortedReports.slice(
     (currentPage - 1) * reportsPerPage,
     currentPage * reportsPerPage
   );
@@ -189,7 +190,11 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
             <div>
               <CardTitle className="text-lg">{employee.name}</CardTitle>
               <CardDescription>
-                {employee.position} • {employee.department}
+                {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
+                <span> {" - "} </span>
+                {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
+                  ? employee.department[employee.department.length - 1] : "N/A"
+                }
               </CardDescription>
             </div>
           </div>
@@ -235,6 +240,7 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
         {employee.reports.length > 0 && (
           <div className="space-y-4">
             <div className="space-y-2">
+              {/* sort , show in reverse */}
               {paginatedReports.map((report: any, index: number) => (
                 <Button
                   key={report.id}

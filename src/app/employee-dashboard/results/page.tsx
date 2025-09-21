@@ -37,6 +37,7 @@ import Link from "next/link";
 import PDFReport from "@/components/employee/PDFReport";
 import Loader from "@/components/Loader";
 import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
+import { useSession } from "next-auth/react";
 
 interface GeniusFactorProfile {
   description: string;
@@ -126,6 +127,7 @@ interface Assessment {
 
 export default function Results() {
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
+  const { data: session } = useSession();
 
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
@@ -232,7 +234,7 @@ export default function Results() {
               Share Results
             </Button> */}
 
-            <PDFReport assessment={selectedAssessment} genius_factor_score={selectedAssessment?.geniusFactorScore} />
+            <PDFReport assessment={selectedAssessment} employee={session?.user?.firstName + " " + session?.user?.lastName} genius_factor_score={selectedAssessment?.geniusFactorScore} />
           </div>
         </div>
 

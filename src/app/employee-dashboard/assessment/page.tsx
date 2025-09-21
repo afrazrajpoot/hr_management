@@ -348,7 +348,7 @@ export default function Assessment() {
 
               <div className="flex items-center space-x-2">
                 <Button variant="ghost" asChild>
-                  <Link href="/dashboard">Exit</Link>
+                  <Link href="/employee-dashboard">Exit</Link>
                 </Button>
 
                 {isLastQuestionInPart && isLastPart ? (

@@ -32,6 +32,7 @@ import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import AssessmentDetailsModal from "@/components/hr/AssessmentDetailsModal";
 import Loader from "@/components/Loader";
+import { dashboardOptions } from "@/app/data";
 
 const AssessmentCard = ({ employee, onViewDetails }: any) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,9 +59,10 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
     firstReport.currentAllignmentAnalysisJson?.alignment_score;
   const completionRate = employee.reports.length > 0 ? 100 : 0;
 
-  // Pagination logic for reports
+  // Pagination logic for reports - reverse to show newest first
   const totalReportPages = Math.ceil(employee.reports.length / reportsPerPage);
-  const paginatedReports = employee.reports.slice(
+  const sortedReports = employee.reports.slice().reverse(); // Sort newest first
+  const paginatedReports = sortedReports.slice(
     (currentPage - 1) * reportsPerPage,
     currentPage * reportsPerPage
   );
@@ -199,7 +201,11 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
             <div>
               <CardTitle className="text-lg">{employee.name}</CardTitle>
               <CardDescription>
-                {employee.position} • {employee.department}
+                {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
+                <span> {" - "} </span>
+                {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
+                  ? employee.department[employee.department.length - 1] : "N/A"
+                }
               </CardDescription>
             </div>
           </div>
@@ -484,7 +490,6 @@ export default function Assessments() {
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
                   <SelectItem value="Not Started">Not Started</SelectItem>
                 </SelectContent>
               </Select>
@@ -496,10 +501,12 @@ export default function Assessments() {
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
-                  {departments.map((dept: string) => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept === "all" ? "All Departments" : dept}
-                    </SelectItem>
+                  {dashboardOptions.Departments.map((dept: { option: string, value: string }) => (
+                    <>
+                      <SelectItem key={dept.value} value={dept.value}>
+                        {dept.option}
+                      </SelectItem>
+                    </>
                   ))}
                 </SelectContent>
               </Select>

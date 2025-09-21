@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
-export default function PDFReport({ assessment, genius_factor_score }: any) {
+export default function PDFReport({ assessment, genius_factor_score, employee }: any) {
   // Helper function to check if a field exists and has content
   const isFieldValid = (field: any): boolean => {
     if (field === undefined || field === null) return false;
@@ -168,7 +168,7 @@ export default function PDFReport({ assessment, genius_factor_score }: any) {
         doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
         doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
-        doc.text("Powered by Genius Factor AI, Exclusively Liscensed by Genius Factor Academy, LLC © 2026 | All Rights Reserved", margin, pageHeight - 12);
+        doc.text("Powered by Genius Factor AI, Exclusively Licensed by Genius Factor Academy, LLC © 2026 | All Rights Reserved", margin, pageHeight - 12);
         doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 12, { align: "right" });
         // doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - margin, pageHeight - 5, { align: "right" });
       }
@@ -186,7 +186,7 @@ export default function PDFReport({ assessment, genius_factor_score }: any) {
     doc.rect(0, 0, pageWidth, pageHeight, "F");
 
     doc.setFillColor(lightBlue[0], lightBlue[1], lightBlue[2]);
-    doc.rect(0, 0, pageWidth, 70, "F");
+    doc.rect(0, 0, pageWidth, 82, "F");
 
     doc.addImage('/logo.png', 'PNG', margin, 15, 40, 40);
 
@@ -202,9 +202,10 @@ export default function PDFReport({ assessment, genius_factor_score }: any) {
     doc.setTextColor(mediumGray[0], mediumGray[1], mediumGray[2]);
     doc.setFontSize(10);
     doc.text(`Assessment Date: ${assessment?.createdAt ? new Date(assessment.createdAt).toLocaleDateString() : 'N/A'}`, margin + 50, 52);
-    doc.text(`Department: ${assessment?.departement || 'N/A'}`, margin + 50, 62);
+    doc.text(`Employee: ${employee || 'N/A'}`, margin + 50, 62);
+    doc.text(`Department: ${assessment?.departement || 'N/A'}`, margin + 50, 72);
 
-    yPos = 85;
+    yPos = 95;
 
     // SCORE CARDS SECTION - Only show if alignment data exists
     const alignmentData = safeGet(assessment, 'currentRoleAlignmentAnalysisJson');

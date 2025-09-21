@@ -31,9 +31,14 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                 <p>{assessment.employee}</p>
               </div>
               <div className="text-lg font-medium flex items-center gap-2">
-                <span>{assessment.position}</span>
+                {typeof assessment.position === "string" ? assessment.position : assessment?.position[assessment.position.length - 1]}
+                <span> {" - "} </span>
+                {typeof assessment.department === "string" ? assessment.department : Array.isArray(assessment.department)
+                  ? assessment.department[assessment.department.length - 1] : "N/A"
+                }
+                {/* <span>{assessment.position}</span>
                 <span className="w-1 h-1 rounded-full"></span>
-                <span>{assessment.department}</span>
+                <span>{assessment.department}</span> */}
               </div>
             </div>
           </DialogTitle>
@@ -41,7 +46,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
             Comprehensive assessment insights and personalized career roadmap
           </DialogDescription>
           <div className="w-full max-w-[10vw]">
-            <PDFReport assessment={assessment.report} genius_factor_score={assessment.genius_factor_score} />
+            <PDFReport assessment={assessment.report} employee={assessment.employee} genius_factor_score={assessment.genius_factor_score} />
           </div>
         </DialogHeader>
 
@@ -718,21 +723,6 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                     </p>
                   </div>
 
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Data Sources
-                    </div>
-                    <div className="space-y-3">
-                      {assessment.dataSources.data_sources.map(
-                        (source: string, index: number) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0"></div>
-                            <span className="text-sm">{source}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>

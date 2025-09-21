@@ -86,15 +86,12 @@ export default function Employees() {
     ];
   }, []);
 
-  const uniqueRiskLevels = useMemo(() => {
-    const risks = new Set<string>();
-    data?.employees?.forEach((emp: any) => {
-      const risk =
-        emp.reports[0]?.currentRoleAlignmentAnalysisJson?.retention_risk_level;
-      if (risk) risks.add(risk);
-    });
-    return ["All Risk Levels", ...Array.from(risks)];
-  }, [data]);
+  const uniqueRiskLevels = [
+    { option: "All Risk Levels", value: "All Risk Levels" },
+    { option: "Low", value: "Low" },
+    { option: "Moderate", value: "Moderate" },
+    { option: "High", value: "High" },
+  ];
 
   const filteredEmployees = useMemo(() => {
     if (!data?.employees) return [];
@@ -187,9 +184,9 @@ export default function Employees() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {uniqueRiskLevels.map((risk) => (
-                    <SelectItem key={risk} value={risk}>
-                      {risk}
+                  {uniqueRiskLevels.map((risk: any) => (
+                    <SelectItem key={risk.option} value={risk.value}>
+                      {risk.option}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -229,7 +226,7 @@ export default function Employees() {
                     <th className="text-left p-3 font-medium">Department</th>
                     <th className="text-left p-3 font-medium">Salary</th>
                     <th className="text-left p-3 font-medium">Assessment</th>
-                    {/* <th className="text-left p-3 font-medium">Risk Level</th> */}
+                    <th className="text-left p-3 font-medium">Risk Level</th>
                     <th className="text-left p-3 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -263,10 +260,12 @@ export default function Employees() {
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {employee?.position || "N/A"}
+                        {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
                       </td>
                       <td className="p-3">
-                        {employee?.department || "N/A"}
+                        {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
+                          ? employee.department[employee.department.length - 1] : "N/A"
+                        }
                       </td>
                       <td className="p-3 font-medium">
                         ${employee.salary?.toLocaleString() || "N/A"}
@@ -280,7 +279,7 @@ export default function Employees() {
                           {employee.reports[0] ? "Completed" : "Not Started"}
                         </Badge>
                       </td>
-                      {/* <td className="p-3">
+                      <td className="p-3">
                         <Badge
                           className={getRiskColor(
                             employee.reports[0]
@@ -291,7 +290,7 @@ export default function Employees() {
                           {employee.reports[0]?.currentRoleAlignmentAnalysisJson
                             .retention_risk_level || "N/A"}
                         </Badge>
-                      </td> */}
+                      </td>
                       <td className="p-3">
                         <Button
                           variant="outline"

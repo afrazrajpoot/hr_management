@@ -220,7 +220,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardData.assessmentProgress.percentage.toFixed(0)}%
+                {Number(dashboardData.assessmentProgress.percentage) > 100 ? 100 : dashboardData.assessmentProgress.percentage.toFixed(0)}%
               </div>
               <p className="text-xs text-muted-foreground">
                 {dashboardData.assessmentProgress.current} of{" "}
