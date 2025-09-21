@@ -111,7 +111,7 @@ export default function Assessment() {
           data: partsData,
           userId: session?.user.id,
           hrId: session?.user?.hrId,
-          departement: session?.user?.departement?.at(-1) || "Healthcare",
+          departement: session?.user?.department?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
           allAnswers, // <-- Add this line
@@ -387,15 +387,14 @@ export default function Assessment() {
                 {currentPartQuestions.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      index === currentQuestionIndex
-                        ? "bg-primary dark:bg-primary"
-                        : index < currentQuestionIndex
+                    className={`w-3 h-3 rounded-full transition-colors ${index === currentQuestionIndex
+                      ? "bg-primary dark:bg-primary"
+                      : index < currentQuestionIndex
                         ? "bg-success dark:bg-success"
                         : answers[currentPartQuestions[index].id]
-                        ? "bg-warning dark:bg-warning"
-                        : "bg-muted dark:bg-muted"
-                    }`}
+                          ? "bg-warning dark:bg-warning"
+                          : "bg-muted dark:bg-muted"
+                      }`}
                   />
                 ))}
               </div>

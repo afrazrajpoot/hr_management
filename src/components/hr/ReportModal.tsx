@@ -23,9 +23,8 @@ const ReportModal = ({
   onClose,
 }: ReportModalProps) => {
   const fullName = `${firstName}${lastName ? ` ${lastName}` : ""}`;
-  const heading = `Reports for ${fullName}${
-    reports.length > 0 ? ` (${reports.length})` : ""
-  }`;
+  const heading = `Reports for ${fullName}${reports.length > 0 ? ` (${reports.length})` : ""
+    }`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -111,7 +110,7 @@ const ReportModal = ({
                             Secondary Genius Factor:
                           </span>{" "}
                           {report.geniusFactorProfileJson
-                            ?.secondary_genius_factor || "N/A"}
+                            ?.secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : report.geniusFactorProfileJson.secondary_genius_factor || "N/A"}
                         </p>
                       </div>
                     </div>
@@ -164,7 +163,7 @@ const ReportModal = ({
                             Retention Risk Level:
                           </span>{" "}
                           {report.currentRoleAlignmentAnalysisJson
-                            ?.retention_risk_level || "N/A"}
+                            ?.alignment_score || "N/A"}
                         </p>
                       </div>
                     </div>

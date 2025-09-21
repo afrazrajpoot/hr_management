@@ -135,18 +135,18 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                         <div className="text-lg font-bold mb-3">
                           {
                             assessment.geniusFactorProfile
-                              .secondary_genius_factor
+                              .secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : assessment.geniusFactorProfile.secondary_genius_factor
                           }
                         </div>
                         {assessment.geniusFactorProfile
                           .secondary_description && (
-                          <p className="leading-relaxed">
-                            {
-                              assessment.geniusFactorProfile
-                                .secondary_description
-                            }
-                          </p>
-                        )}
+                            <p className="leading-relaxed">
+                              {
+                                assessment.geniusFactorProfile
+                                  .secondary_description
+                              }
+                            </p>
+                          )}
                       </div>
                     )}
                   </div>
@@ -261,7 +261,7 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                         Alignment Score
                       </div>
                       <div className="text-4xl font-bold mb-2">
-                        {assessment.genius_factor_score}
+                        {assessment.currentRoleAlignment.alignment_score}%
                       </div>
                       <div className="w-full rounded-full h-3 bg-opacity-30">
                         <div

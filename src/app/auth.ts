@@ -151,6 +151,7 @@ export const authOptions: AuthOptions = {
           firstName: user.firstName,
           lastName: user.lastName,
           image: user.image,
+          department: user.department,
         };
       },
     }),
@@ -203,6 +204,7 @@ export const authOptions: AuthOptions = {
           token.firstName = user.firstName;
           token.lastName = user.lastName;
           token.image = user.image;
+          token.department = user.department;
         }
       }
 
@@ -260,6 +262,7 @@ export const authOptions: AuthOptions = {
         token.email = userInDb.email;
         token.picture = profile.picture;
         token.role = userInDb.role;
+        token.department = userInDb.department;
       }
 
       return token;
@@ -275,6 +278,7 @@ export const authOptions: AuthOptions = {
       session.user.hrId = token.hrId;
       session.user.firstName = token.firstName;
       session.user.lastName = token.lastName;
+      session.user.department = token.department;
       session.accessToken = token.accessToken;
 
       switch (token.role) {

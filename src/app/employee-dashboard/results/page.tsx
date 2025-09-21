@@ -221,8 +221,8 @@ export default function Results() {
             <p className="text-muted-foreground mt-1">
               {selectedAssessment
                 ? `Assessment completed on ${new Date(
-                    selectedAssessment.createdAt
-                  ).toLocaleDateString()}`
+                  selectedAssessment.createdAt
+                ).toLocaleDateString()}`
                 : "No assessments completed yet"}
             </p>
           </div>
@@ -319,7 +319,7 @@ export default function Results() {
                       <span className="font-medium text-black dark:text-white leading-6">
                         {
                           selectedAssessment.geniusFactorProfileJson
-                            .secondary_genius_factor
+                            .secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : selectedAssessment.geniusFactorProfileJson.secondary_genius_factor
                         }
                       </span>
                       {/* <span className="text-sm font-semibold text-black dark:text-white">N/A</span> */}
@@ -883,11 +883,10 @@ export default function Results() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedAssessment?.id === assessment.id
-                        ? "bg-primary/10 border-primary"
-                        : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
+                      ? "bg-primary/10 border-primary"
+                      : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
                     onClick={() => handleAssessmentClick(assessment)}
                   >
                     <div>
