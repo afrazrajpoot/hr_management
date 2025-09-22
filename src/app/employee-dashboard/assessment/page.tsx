@@ -56,17 +56,19 @@ export default function Assessment() {
 
   // Load progress from localStorage on mount
   useEffect(() => {
-    const savedProgress = localStorage.getItem(STORAGE_KEY);
-    if (savedProgress) {
-      try {
-        const parsedProgress = JSON.parse(savedProgress);
-        setAnswers(parsedProgress.answers || {});
-        setCurrentPartIndex(parsedProgress.currentPartIndex || 0);
-        setCurrentQuestionIndex(parsedProgress.currentQuestionIndex || 0);
-        setTimeSpent(parsedProgress.timeSpent || 0);
-      } catch (error) {
-        console.error("Failed to load saved progress:", error);
-        localStorage.removeItem(STORAGE_KEY);
+    if (typeof window !== "undefined") {
+      const savedProgress = localStorage.getItem(STORAGE_KEY);
+      if (savedProgress) {
+        try {
+          const parsedProgress = JSON.parse(savedProgress);
+          setAnswers(parsedProgress.answers || {});
+          setCurrentPartIndex(parsedProgress.currentPartIndex || 0);
+          setCurrentQuestionIndex(parsedProgress.currentQuestionIndex || 0);
+          setTimeSpent(parsedProgress.timeSpent || 0);
+        } catch (error) {
+          console.error("Failed to load saved progress:", error);
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
     }
   }, []);
