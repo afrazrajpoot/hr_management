@@ -39,7 +39,7 @@ interface Employee {
   position: string;
   salary: string;
   employeeId: string;
-  department?: string; // Added department to Employee interface
+  department?: string;
 }
 
 interface Department {
@@ -58,10 +58,116 @@ interface DepartmentCardData {
   totalOutgoing: number;
 }
 
-interface CustomTooltipProps extends TooltipProps<number, string> { }
+interface CustomTooltipProps extends TooltipProps<number, string> {}
+
+// Custom Tooltip for Pie Chart (Department Distribution)
+const PieChartTooltip = ({ active, payload }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="p-3 rounded-lg border bg-white/10 backdrop-blur-sm border-white/20">
+        <p className="text-white text-sm">
+          {`${payload[0].name}: ${payload[0].value} employees`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom Tooltip for Bar Chart (Ingoing vs Outgoing)
+const BarChartTooltip = ({
+  active,
+  payload,
+  label,
+}: CustomTooltipProps & { label?: string }) => {
+  if (active && payload && payload.length) {
+    const ingoingData = payload.find((p) => p.dataKey === "ingoing");
+    const outgoingData = payload.find((p) => p.dataKey === "outgoing");
+
+    return (
+      <div className="p-4 rounded-lg border bg-white/10 backdrop-blur-sm border-white/20 min-w-[180px]">
+        <div className="text-white text-sm font-medium mb-3 border-b border-white/20 pb-2">
+          {label} Department
+        </div>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center py-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+              <span className="text-green-400">Ingoing</span>
+            </div>
+            <span className="text-white font-medium">
+              {ingoingData?.value || 0}
+            </span>
+          </div>
+          <div className="flex justify-between items-center py-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <span className="text-red-400">Outgoing</span>
+            </div>
+            <span className="text-white font-medium">
+              {outgoingData?.value || 0}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-sm font-medium pt-2 border-t border-white/20">
+            <span className="text-gray-300">Net Change:</span>
+            <span
+              className={`${
+                (ingoingData?.value || 0) - (outgoingData?.value || 0) >= 0
+                  ? "text-green-400"
+                  : "text-red-400"
+              }`}
+            >
+              {(ingoingData?.value || 0) - (outgoingData?.value || 0) >= 0
+                ? "+"
+                : ""}
+              {(ingoingData?.value || 0) - (outgoingData?.value || 0)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom XAxis tick for better department label display
+const CustomXAxisTick = ({ x, y, payload }: any) => {
+  const departmentName = payload.value;
+
+  // Abbreviate long department names for better display
+  const getAbbreviatedName = (name: string) => {
+    if (name.length <= 8) return name;
+    const words = name.split(" ");
+    if (words.length > 1) {
+      return words.map((word) => word.substring(0, 3)).join(" ");
+    }
+    return name.substring(0, 8) + "...";
+  };
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={16}
+        textAnchor="middle"
+        fill="#9ca3af"
+        fontSize="11"
+        fontWeight="500"
+        transform="rotate(-45 0 0)"
+        style={{ transformOrigin: "center" }}
+      >
+        {getAbbreviatedName(departmentName)}
+      </text>
+    </g>
+  );
+};
 
 const DepartmentDashboard = () => {
-  const { departmentCardData, departmentData } = useSocket();
+  const { departmentCardData, departmentData, totalMobility } = useSocket();
+  console.log(totalMobility, "department data ");
+  console.log(departmentData, "department data ");
+
   const { data: session } = useSession();
 
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
@@ -156,23 +262,36 @@ const DepartmentDashboard = () => {
     departmentCardData || mockDepartmentCardData;
   const deptData: Department[] = departmentData || mockDepartmentData;
 
-  // Prepare data for department distribution chart
+  // Filter departments that have movement (ingoing or outgoing > 0)
+  const departmentsWithMovement = deptData.filter(
+    (dept) => dept.ingoing > 0 || dept.outgoing > 0
+  );
+
+  // Prepare data for department distribution chart (all departments)
   const departmentDistributionData = deptData.map((dept) => ({
     name: dept.department,
     value: dept.employeeCount,
   }));
 
-  // Prepare data for ingoing vs outgoing chart
-  const movementData = deptData.map((dept) => ({
+  // Prepare data for ingoing vs outgoing chart (only departments with movement)
+  const movementData = departmentsWithMovement.map((dept) => ({
     name: dept.department,
     ingoing: dept.ingoing,
     outgoing: dept.outgoing,
   }));
 
+  // Calculate totals from real data
+  const totalIngoing = totalMobility?.totalIngoing;
+  const totalOutgoing = totalMobility?.totalOutgoing;
+  const totalEmployees = deptData.reduce(
+    (sum, dept) => sum + dept.employeeCount,
+    0
+  );
+
   const COLORS = ["#3b82f6", "#9333ea", "#22c55e", "#f97316", "#ef4444"];
 
   const handleCardClick = (employee: Employee, department: string) => {
-    setSelectedEmployee({ ...employee, department }); // Include department in selected employee
+    setSelectedEmployee({ ...employee, department });
     setIsModalOpen(true);
   };
 
@@ -187,20 +306,17 @@ const DepartmentDashboard = () => {
       IT: "bg-green-500",
       HR: "bg-orange-500",
       Finance: "bg-red-500",
+      Operations: "bg-indigo-500",
+      Education: "bg-yellow-500",
+      Sustainability: "bg-teal-500",
+      Healthcare: "bg-pink-500",
+      Marketing: "bg-rose-500",
+      Consulting: "bg-cyan-500",
+      Sales: "bg-emerald-500",
+      Media: "bg-violet-500",
+      Engineering: "bg-amber-500",
     };
     return colors[department] || "bg-green-500";
-  };
-
-  // Custom tooltip for department distribution chart
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className=" p-3 rounded-lg border card">
-          <p className="text-white">{`${payload[0].name}: ${payload[0].value} employees`}</p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -213,18 +329,18 @@ const DepartmentDashboard = () => {
             <h1 className="text-3xl font-bold">Department Dashboard</h1>
           </div>
 
-          {/* Summary Cards */}
+          {/* Summary Cards - Using real data */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium dark:text-gray-400">
+                <CardTitle className="text-sm font-medium text-gray-400">
                   Total Departments
                 </CardTitle>
                 <Building2 className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  <p> {cardData.totalDepartments}</p>
+                  <p>{deptData.length}</p>
                 </div>
               </CardContent>
             </Card>
@@ -238,7 +354,7 @@ const DepartmentDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  <p>{cardData.totalEmployees}</p>
+                  <p>{totalEmployees}</p>
                 </div>
               </CardContent>
             </Card>
@@ -252,7 +368,7 @@ const DepartmentDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-400">
-                  {cardData.totalIngoing}
+                  {totalIngoing}
                 </div>
               </CardContent>
             </Card>
@@ -266,7 +382,7 @@ const DepartmentDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-400">
-                  {cardData.totalOutgoing}
+                  {totalOutgoing}
                 </div>
               </CardContent>
             </Card>
@@ -277,10 +393,10 @@ const DepartmentDashboard = () => {
             <Card className="card">
               <CardHeader>
                 <CardTitle className="text-white">
-                  <p> Department Distribution</p>
+                  Department Distribution
                 </CardTitle>
                 <CardDescription className="text-gray-400">
-                  <p> Employee count by department</p>
+                  Employee count by department
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -306,8 +422,7 @@ const DepartmentDashboard = () => {
                           />
                         ))}
                       </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                      {/* <Legend /> */}
+                      <Tooltip content={<PieChartTooltip />} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -316,15 +431,17 @@ const DepartmentDashboard = () => {
 
             <Card className="card">
               <CardHeader>
-                <CardTitle className="">
-                  <p> Ingoing vs Outgoing</p>
+                <CardTitle className="text-white">
+                  Employee Movement by Department
                 </CardTitle>
-                <CardDescription className="">
-                  <p> Department-wise movement comparison</p>
+                <CardDescription className="text-gray-400">
+                  Ingoing vs Outgoing (Departments with activity only)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
+                <div className="h-80">
+                  {" "}
+                  {/* Increased height for better visibility */}
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={movementData}
@@ -332,16 +449,52 @@ const DepartmentDashboard = () => {
                         top: 20,
                         right: 30,
                         left: 20,
-                        bottom: 5,
+                        bottom: 100, // More space for rotated labels
                       }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="#4b5563" />
-                      <XAxis dataKey="name" stroke="#9ca3af" />
-                      <YAxis stroke="#9ca3af" />
-                      <Tooltip content={<CustomTooltip />} cursor={false} />
-                      <Legend />
-                      <Bar dataKey="ingoing" fill="#22c55e" name="Ingoing" />
-                      <Bar dataKey="outgoing" fill="#ef4444" name="Outgoing" />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#9ca3af"
+                        tick={<CustomXAxisTick />}
+                        interval={0}
+                        height={80}
+                        tickLine={false}
+                        axisLine={false}
+                        fontSize={11}
+                        fontWeight={500}
+                      />
+                      <YAxis
+                        stroke="#9ca3af"
+                        tickLine={false}
+                        axisLine={false}
+                        tickCount={4}
+                      />
+                      <Tooltip
+                        content={<BarChartTooltip />}
+                        cursor={{ fill: "transparent" }}
+                      />
+                      <Legend
+                        wrapperStyle={{
+                          color: "white",
+                          paddingTop: "10px",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Bar
+                        dataKey="ingoing"
+                        fill="#22c55e"
+                        name="Ingoing"
+                        radius={[4, 4, 0, 0]}
+                        barSize={24}
+                      />
+                      <Bar
+                        dataKey="outgoing"
+                        fill="#ef4444"
+                        name="Outgoing"
+                        radius={[4, 4, 0, 0]}
+                        barSize={24}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -349,19 +502,21 @@ const DepartmentDashboard = () => {
             </Card>
           </div>
 
-          {/* Department Cards */}
+          {/* Department Cards - Show all departments */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold ">Departments</h2>
+            <h2 className="text-2xl font-semibold text-white">Departments</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {deptData.map((department, index) => (
                 <Card
                   key={index}
                   className="card transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 hover:scale-105 cursor-pointer"
                   onClick={() =>
-                    handleCardClick(
-                      department.employees[0],
-                      department.department
-                    )
+                    department.employees.length > 0
+                      ? handleCardClick(
+                          department.employees[0],
+                          department.department
+                        )
+                      : null
                   }
                 >
                   <CardHeader>
@@ -376,58 +531,71 @@ const DepartmentDashboard = () => {
                           {department.department}
                         </CardTitle>
                       </div>
-                      <Badge variant="secondary" className="card">
+                      <Badge
+                        variant="secondary"
+                        className="text-white bg-white/10 border-white/20"
+                      >
                         {department.employeeCount} employees
                       </Badge>
                     </div>
-                    <CardDescription className="card">
+                    <CardDescription className="text-gray-400">
                       Created: {department.createdAt}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex justify-between text-sm">
                       <span className="flex items-center space-x-1 text-green-400">
-                        <TrendingUp className="h-4 w-4 card" />
+                        <TrendingUp className="h-4 w-4" />
                         <span>Ingoing: {department.ingoing}</span>
                       </span>
                       <span className="flex items-center space-x-1 text-red-400">
-                        <TrendingDown className="h-4 w-4 card" />
+                        <TrendingDown className="h-4 w-4" />
                         <span>Outgoing: {department.outgoing}</span>
                       </span>
                     </div>
 
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-300">
-                        Employees:
-                      </h4>
-                      <div className="space-y-2">
-                        {department.employees?.map((employee, empIndex) => (
-                          <div
-                            key={empIndex}
-                            className="flex items-center justify-between p-2 card rounded-lg"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="card text-white text-xs">
-                                  {getInitials(
-                                    employee.firstName,
-                                    employee.lastName
-                                  )}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium text-white">
-                                  {employee.firstName} {employee.lastName}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {employee.position}
-                                </p>
-                              </div>
-                            </div>
+                    {department.employees &&
+                      department.employees.length > 0 && (
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-gray-300">
+                            Employees:
+                          </h4>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {department.employees
+                              .slice(0, 3)
+                              .map((employee, empIndex) => (
+                                <div
+                                  key={empIndex}
+                                  className="flex items-center justify-between p-2 rounded-lg bg-white/5"
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarFallback className="bg-white/10 text-white text-xs">
+                                        {getInitials(
+                                          employee.firstName,
+                                          employee.lastName
+                                        )}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="text-sm font-medium text-white">
+                                        {employee.firstName} {employee.lastName}
+                                      </p>
+                                      <p className="text-xs text-gray-400">
+                                        {employee.position}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            {department.employees.length > 3 && (
+                              <p className="text-xs text-gray-400 text-center">
+                                +{department.employees.length - 3} more
+                              </p>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      )}
                   </CardContent>
                 </Card>
               ))}

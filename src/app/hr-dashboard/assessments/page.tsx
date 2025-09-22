@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, JSX } from "react";
 import {
   Card,
   CardContent,
@@ -426,39 +426,18 @@ export default function Assessments() {
     setShowDetailsModal(true);
   };
 
-  // Calculate stats based on reports (using full data)
-  const assessmentCount = employeeData.reduce(
-    (sum: number, emp: any) => sum + emp.reports.length,
-    0
-  );
-  const completedCount = employeeData.filter(
-    (emp: any) => emp.reports.length > 0
-  ).length;
-  const notStartedCount = employeeData.filter(
-    (emp: any) => emp.reports.length === 0
-  ).length;
-  const inProgressCount = 0; // No in-progress reports in data
-
-  const avgScore =
-    assessmentCount > 0
-      ? Math.round(
-          employeeData.reduce(
-            (sum: number, emp: any) =>
-              sum +
-              emp.reports.reduce(
-                (rSum: number, report: any) =>
-                  rSum +
-                  parseInt(
-                    report.geniusFactorProfileJson.primary_genius_factor.match(
-                      /\d+/
-                    )?.[0] || "0"
-                  ),
-                0
-              ),
-            0
-          ) / assessmentCount
-        )
-      : 0;
+  // Use metrics from API response (full data, not paginated)
+  const metrics = useMemo(() => {
+    return (
+      data?.metrics || {
+        totalAssessments: 0,
+        completedCount: 0,
+        notStartedCount: 0,
+        inProgressCount: 0,
+        avgScore: 0,
+      }
+    );
+  }, [data?.metrics]);
 
   if (isLoading) {
     return (
@@ -542,7 +521,7 @@ export default function Assessments() {
           </CardContent>
         </Card>
 
-        {/* Assessment Stats */}
+        {/* Assessment Stats - Using API metrics */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="card">
             <CardContent className="p-6">
@@ -551,7 +530,9 @@ export default function Assessments() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Total Assessments
                   </p>
-                  <p className="text-2xl font-bold">{assessmentCount}</p>
+                  <p className="text-2xl font-bold">
+                    {metrics.totalAssessments}
+                  </p>
                 </div>
                 <FileText className="h-8 w-8 text-primary" />
               </div>
@@ -565,7 +546,7 @@ export default function Assessments() {
                     Completed
                   </p>
                   <p className="text-2xl font-bold text-success">
-                    {completedCount}
+                    {metrics.completedCount}
                   </p>
                 </div>
                 <div className="h-8 w-8 bg-success/10 rounded-lg flex items-center justify-center">
@@ -582,7 +563,7 @@ export default function Assessments() {
                     Not Started
                   </p>
                   <p className="text-2xl font-bold text-muted-foreground">
-                    {notStartedCount}
+                    {metrics.notStartedCount}
                   </p>
                 </div>
                 <div className="h-8 w-8 bg-muted/10 rounded-lg flex items-center justify-center">
@@ -600,7 +581,9 @@ export default function Assessments() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Avg Score
                   </p>
-                  <p className="text-2xl font-bold text-primary">{avgScore}</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {metrics.avgScore}
+                  </p>
                 </div>
                 <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center">
                   <span className="text-xs font-bold text-primary">★</span>
