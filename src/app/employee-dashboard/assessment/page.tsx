@@ -36,6 +36,7 @@ const questionsByPart = questions.map((part) => ({
 }));
 
 const API_URL = `${process.env.NEXT_PUBLIC_PYTHON_URL}/analyze/assessment`;
+const STORAGE_KEY = "assessment_progress";
 
 export default function Assessment() {
   const [currentPartIndex, setCurrentPartIndex] = useState(0);
@@ -49,14 +50,57 @@ export default function Assessment() {
     maxCount: number;
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for loading
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { socket, isConnected } = useSocket();
+  const { data: session } = useSession();
+
+  // Load progress from localStorage on mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem(STORAGE_KEY);
+    if (savedProgress) {
+      try {
+        const parsedProgress = JSON.parse(savedProgress);
+        setAnswers(parsedProgress.answers || {});
+        setCurrentPartIndex(parsedProgress.currentPartIndex || 0);
+        setCurrentQuestionIndex(parsedProgress.currentQuestionIndex || 0);
+        setTimeSpent(parsedProgress.timeSpent || 0);
+      } catch (error) {
+        console.error("Failed to load saved progress:", error);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  // Save progress to localStorage whenever state changes
+  useEffect(() => {
+    if (analysisResults) {
+      // Clear progress when assessment is completed
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+
+    const progressData = {
+      answers,
+      currentPartIndex,
+      currentQuestionIndex,
+      timeSpent,
+      timestamp: Date.now(),
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+  }, [
+    answers,
+    currentPartIndex,
+    currentQuestionIndex,
+    timeSpent,
+    analysisResults,
+  ]);
+
   const currentPart = questionsByPart[currentPartIndex];
   const currentPartQuestions = currentPart.questions;
   const totalQuestionsInPart = currentPartQuestions.length;
   const currentQ = currentPartQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100;
-  const { data: session } = useSession();
 
   // Timer effect
   useEffect(() => {
@@ -74,7 +118,7 @@ export default function Assessment() {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true); // Start loading
+    setIsSubmitting(true);
     try {
       // Prepare assessment data for API
       const partsData = questionsByPart.map((part) => {
@@ -114,9 +158,10 @@ export default function Assessment() {
           departement: session?.user?.department?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
-          allAnswers, // <-- Add this line
+          allAnswers,
         }),
       });
+
       if (response.ok) {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/generate-employee-career-recommendation`,
@@ -129,6 +174,7 @@ export default function Assessment() {
           }
         );
       }
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
@@ -136,6 +182,9 @@ export default function Assessment() {
       const result = await response.json();
       setAnalysisResults(result.results);
       setError(null);
+
+      // Clear localStorage after successful submission
+      localStorage.removeItem(STORAGE_KEY);
 
       // Show success toast
       toast.success("Assessment submitted successfully!", {
@@ -154,10 +203,10 @@ export default function Assessment() {
         description: err.message,
       });
     } finally {
-      setIsSubmitting(false); // Stop loading
+      setIsSubmitting(false);
       setTimeout(() => {
         navigate.push("/employee-dashboard/results");
-      }, 3000); // Redirect after 3 seconds
+      }, 3000);
     }
   };
 
@@ -180,6 +229,22 @@ export default function Assessment() {
     }
   };
 
+  // Reset progress function
+  const resetProgress = () => {
+    if (
+      confirm(
+        "Are you sure you want to restart the assessment? Your current progress will be lost."
+      )
+    ) {
+      setAnswers({});
+      setCurrentPartIndex(0);
+      setCurrentQuestionIndex(0);
+      setTimeSpent(0);
+      localStorage.removeItem(STORAGE_KEY);
+      toast.success("Assessment restarted successfully!");
+    }
+  };
+
   const isAnswered = !!answers[currentQ.id];
   const isPartComplete = currentPartQuestions.every((q) => !!answers[q.id]);
   const isAllComplete = questionsByPart.every((part) =>
@@ -190,6 +255,9 @@ export default function Assessment() {
     currentQuestionIndex === totalQuestionsInPart - 1;
   const isLastPart = currentPartIndex === questionsByPart.length - 1;
 
+  // Check if there's saved progress
+  const hasSavedProgress = localStorage.getItem(STORAGE_KEY) !== null;
+
   return (
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto ">
@@ -197,7 +265,7 @@ export default function Assessment() {
           <div
             className="fixed inset-0 z-50 flex items-center justify-center"
             style={{
-              background: "rgba(15, 23, 42, 0.45)", // navy/dark blue with opacity
+              background: "rgba(15, 23, 42, 0.45)",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
             }}
@@ -268,6 +336,17 @@ export default function Assessment() {
                     {Math.floor(timeSpent / 60)}:
                     {(timeSpent % 60).toString().padStart(2, "0")}
                   </div>
+                  {/* Reset Progress Button - only show if there's saved progress */}
+                  {hasSavedProgress && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={resetProgress}
+                      className="text-xs px-2 py-1"
+                    >
+                      Reset Progress
+                    </Button>
+                  )}
                 </div>
               </div>
 
@@ -387,14 +466,15 @@ export default function Assessment() {
                 {currentPartQuestions.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-colors ${index === currentQuestionIndex
-                      ? "bg-primary dark:bg-primary"
-                      : index < currentQuestionIndex
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      index === currentQuestionIndex
+                        ? "bg-primary dark:bg-primary"
+                        : index < currentQuestionIndex
                         ? "bg-success dark:bg-success"
                         : answers[currentPartQuestions[index].id]
-                          ? "bg-warning dark:bg-warning"
-                          : "bg-muted dark:bg-muted"
-                      }`}
+                        ? "bg-warning dark:bg-warning"
+                        : "bg-muted dark:bg-muted"
+                    }`}
                   />
                 ))}
               </div>
