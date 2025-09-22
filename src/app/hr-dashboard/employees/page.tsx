@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -18,21 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Eye, Loader2 } from "lucide-react";
+import { Search, Filter, Eye } from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
-import EmployeeModal from "@/components/hr/EmployeeModal";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 import { useSession } from "next-auth/react";
 import { dashboardOptions } from "@/app/data";
 import Loader from "@/components/Loader";
-// import EmployeeModal from "./EmployeeModal";
 
-const assessmentStatuses = [
-  "All Statuses",
-  "Completed",
-  "Not Started",
-];
+const assessmentStatuses = ["All Statuses", "Completed", "Not Started"];
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -63,7 +57,9 @@ const getRiskColor = (risk: string | undefined) => {
 };
 
 export default function Employees() {
-  const [searchTerm, setSearchTerm] = useState("");
+  // Separate states: immediate input vs debounced API value
+  const [searchInput, setSearchInput] = useState(""); // Immediate UI value
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // API value
   const [selectedDepartment, setSelectedDepartment] =
     useState("All Departments");
   const [selectedRisk, setSelectedRisk] = useState("All Risk Levels");
@@ -72,13 +68,38 @@ export default function Employees() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>({
-    page: currentPage,
-    limit,
-    search: searchTerm,
-    department: selectedDepartment,
-  });
-  const { data: sessionData } = useSession();
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Query parameters object - use debounced search
+  const queryParams = useMemo(
+    () => ({
+      page: currentPage,
+      limit,
+      search: debouncedSearch, // ✅ Use debounced value for API
+      department:
+        selectedDepartment === "All Departments" ? "" : selectedDepartment,
+      risk: selectedRisk === "All Risk Levels" ? "" : selectedRisk,
+      status: selectedStatus === "All Statuses" ? "" : selectedStatus,
+    }),
+    [
+      currentPage,
+      debouncedSearch,
+      selectedDepartment,
+      selectedRisk,
+      selectedStatus,
+    ]
+  );
+
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>(queryParams);
+
   const uniqueDepartments = useMemo(() => {
     return [
       { option: "All Departments", value: "All Departments" },
@@ -93,32 +114,34 @@ export default function Employees() {
     { option: "High", value: "High" },
   ];
 
-  const filteredEmployees = useMemo(() => {
-    if (!data?.employees) return [];
-
-    return data.employees.filter((employee: any) => {
-      const risk =
-        employee.reports[0]?.currentRoleAlignmentAnalysisJson
-          .retention_risk_level;
-      const matchesRisk =
-        selectedRisk === "All Risk Levels" || risk === selectedRisk;
-      const status = employee.reports[0] ? "Completed" : "Not Started";
-      const matchesStatus =
-        selectedStatus === "All Statuses" || status === selectedStatus;
-
-      return matchesRisk && matchesStatus;
-    });
-  }, [data, selectedRisk, selectedStatus]);
+  const filteredEmployees = data?.employees || [];
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedDepartment, selectedRisk, selectedStatus]);
-  // console.log(filteredEmployees[0].department[0], "filtered employees");
+  }, [debouncedSearch, selectedDepartment, selectedRisk, selectedStatus]);
+
+  // Handle search input change - IMMEDIATE UI update
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchInput(e.target.value); // ✅ Immediate update - no delay!
+    },
+    []
+  );
+
   const handleViewEmployee = (employee: any) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
   };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= (data?.pagination?.totalPages || 1)) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  // Debug: Log query params to see what's being sent
+  useEffect(() => {}, [queryParams]);
 
   if (isLoading) {
     return (
@@ -127,7 +150,11 @@ export default function Employees() {
       </HRLayout>
     );
   }
-  if (isError) return <div>Error loading employees</div>;
+
+  if (isError) {
+    console.error("Query error:", isError);
+    return <div>Error loading employees</div>;
+  }
 
   return (
     <HRLayout>
@@ -146,8 +173,8 @@ export default function Employees() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search employees..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput} // ✅ Immediate value - smooth typing!
+                onChange={handleSearchChange} // ✅ No debounce here
                 className="w-80 pl-10"
               />
             </div>
@@ -165,7 +192,10 @@ export default function Employees() {
 
               <Select
                 value={selectedDepartment}
-                onValueChange={setSelectedDepartment}
+                onValueChange={(value) => {
+                  setSelectedDepartment(value);
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select department" />
@@ -179,9 +209,15 @@ export default function Employees() {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedRisk} onValueChange={setSelectedRisk}>
+              <Select
+                value={selectedRisk}
+                onValueChange={(value) => {
+                  setSelectedRisk(value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-48">
-                  <SelectValue />
+                  <SelectValue placeholder="Select risk level" />
                 </SelectTrigger>
                 <SelectContent>
                   {uniqueRiskLevels.map((risk: any) => (
@@ -192,9 +228,15 @@ export default function Employees() {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <Select
+                value={selectedStatus}
+                onValueChange={(value) => {
+                  setSelectedStatus(value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-48">
-                  <SelectValue />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   {assessmentStatuses.map((status) => (
@@ -218,94 +260,118 @@ export default function Employees() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left p-3 font-medium">Employee</th>
-                    <th className="text-left p-3 font-medium">Position</th>
-                    <th className="text-left p-3 font-medium">Department</th>
-                    <th className="text-left p-3 font-medium">Salary</th>
-                    <th className="text-left p-3 font-medium">Assessment</th>
-                    <th className="text-left p-3 font-medium">Risk Level</th>
-                    <th className="text-left p-3 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEmployees.map((employee: any) => (
-                    <tr
-                      key={employee.id}
-                      className="border-b border-border last:border-0 hover:bg-muted/50"
-                    >
-                      <td className="p-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src="/api/placeholder/40/40" />
-                            <AvatarFallback>
-                              {`${employee.firstName[0]}${employee.lastName !== "Not provide"
-                                ? employee.lastName[0]
-                                : ""
-                                }`}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{`${employee.firstName
-                              } ${employee.lastName !== "Not provide"
-                                ? employee.lastName
-                                : ""
-                              }`}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {employee.email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3 text-muted-foreground">
-                        {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
-                      </td>
-                      <td className="p-3">
-                        {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
-                          ? employee.department[employee.department.length - 1] : "N/A"
-                        }
-                      </td>
-                      <td className="p-3 font-medium">
-                        ${employee.salary?.toLocaleString() || "N/A"}
-                      </td>
-                      <td className="p-3">
-                        <Badge
-                          className={getStatusColor(
-                            employee.reports[0] ? "Completed" : "Not Started"
-                          )}
-                        >
-                          {employee.reports[0] ? "Completed" : "Not Started"}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Badge
-                          className={getRiskColor(
-                            employee.reports[0]
-                              ?.currentRoleAlignmentAnalysisJson
-                              .retention_risk_level
-                          )}
-                        >
-                          {employee.reports[0]?.currentRoleAlignmentAnalysisJson
-                            .retention_risk_level || "N/A"}
-                        </Badge>
-                      </td>
-                      <td className="p-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleViewEmployee(employee)}
-                        >
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </Button>
-                      </td>
+              {filteredEmployees.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    No employees found matching your criteria.
+                  </p>
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-3 font-medium">Employee</th>
+                      <th className="text-left p-3 font-medium">Position</th>
+                      <th className="text-left p-3 font-medium">Department</th>
+                      <th className="text-left p-3 font-medium">Salary</th>
+                      <th className="text-left p-3 font-medium">Assessment</th>
+                      <th className="text-left p-3 font-medium">Risk Level</th>
+                      <th className="text-left p-3 font-medium">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredEmployees.map((employee: any) => (
+                      <tr
+                        key={employee.id}
+                        className="border-b border-border last:border-0 hover:bg-muted/50"
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src="/api/placeholder/40/40" />
+                              <AvatarFallback>
+                                {`${employee.firstName[0]}${
+                                  employee.lastName !== "Not provide"
+                                    ? employee.lastName[0]
+                                    : ""
+                                }`}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{`${
+                                employee.firstName
+                              } ${
+                                employee.lastName !== "Not provide"
+                                  ? employee.lastName
+                                  : ""
+                              }`}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {employee.email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 text-muted-foreground">
+                          {typeof employee.position === "string"
+                            ? employee.position
+                            : employee?.position?.[
+                                employee.position.length - 1
+                              ] ?? "N/A"}
+                        </td>
+                        <td className="p-3">
+                          {typeof employee.department === "string"
+                            ? employee.department
+                            : Array.isArray(employee.department)
+                            ? employee.department[
+                                employee.department.length - 1
+                              ]
+                            : "N/A"}
+                        </td>
+                        <td className="p-3 font-medium">
+                          ${employee.salary?.toLocaleString() || "N/A"}
+                        </td>
+                        <td className="p-3">
+                          <Badge
+                            className={getStatusColor(
+                              employee.reports?.length > 0
+                                ? "Completed"
+                                : "Not Started"
+                            )}
+                          >
+                            {employee.reports?.length > 0
+                              ? "Completed"
+                              : "Not Started"}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <Badge
+                            className={getRiskColor(
+                              employee.reports?.[0]
+                                ?.currentRoleAlignmentAnalysisJson
+                                ?.retention_risk_level
+                            )}
+                          >
+                            {employee.reports?.[0]
+                              ?.currentRoleAlignmentAnalysisJson
+                              ?.retention_risk_level || "N/A"}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => handleViewEmployee(employee)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -314,39 +380,36 @@ export default function Employees() {
         <EmployeeDetailModal
           employee={selectedEmployee}
           isOpen={isModalOpen}
-          // hrId={sessionData?.user?.id || ""}
           onClose={() => setIsModalOpen(false)}
         />
 
         {/* Pagination */}
-        {data?.pagination && (
+        {data?.pagination && data.pagination.totalEmployees > 0 && (
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-muted-foreground">
               Showing {(currentPage - 1) * limit + 1} to{" "}
               {Math.min(currentPage * limit, data.pagination.totalEmployees)} of{" "}
               {data.pagination.totalEmployees} employees
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || isLoading}
               >
                 Previous
               </Button>
-              <span className="flex items-center px-3 text-sm">
+              <span className="flex items-center px-3 text-sm font-medium">
                 Page {currentPage} of {data.pagination.totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, data.pagination.totalPages)
-                  )
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={
+                  currentPage >= data.pagination.totalPages || isLoading
                 }
-                disabled={currentPage === data.pagination.totalPages}
               >
                 Next
               </Button>

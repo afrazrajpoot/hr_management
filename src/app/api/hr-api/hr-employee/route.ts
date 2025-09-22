@@ -1,5 +1,5 @@
-import { authOptions } from "@/app/auth"; // Adjust path based on your project structure
-import { prisma } from "@/lib/prisma"; // Adjust path based on your project structure
+import { authOptions } from "@/app/auth";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -9,7 +9,6 @@ interface CustomSession {
 
 export async function GET(request: Request) {
   try {
-    // 1. Get the authenticated session
     const session: CustomSession | null = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
@@ -26,8 +25,9 @@ export async function GET(request: Request) {
     const risk = url.searchParams.get("risk") || "";
     const status = url.searchParams.get("status") || "";
 
-    // Build where clause for filters
+    // Build where clause for users (same as original)
     const whereClause: any = { hrId: session.user.id };
+    
     if (searchTerm) {
       whereClause.OR = [
         { firstName: { contains: searchTerm, mode: "insensitive" } },
@@ -36,20 +36,14 @@ export async function GET(request: Request) {
         { position: { hasSome: [searchTerm] } },
       ];
     }
+    
     if (department && department !== "All Departments") {
       whereClause.department = { hasSome: [department] };
     }
 
-    // 2. Fetch total count of employees with filters
-    const totalEmployees = await prisma.user.count({
+    // 1. Fetch all users with basic filters (we'll filter further for status/risk)
+    const allUsers = await prisma.user.findMany({
       where: whereClause,
-    });
-
-    // 3. Fetch paginated employees with filters
-    const employees = await prisma.user.findMany({
-      where: whereClause,
-      skip,
-      take: limit,
       select: {
         id: true,
         firstName: true,
@@ -73,18 +67,15 @@ export async function GET(request: Request) {
       },
     });
 
-    // 4. Log users with missing employee data for debugging
-    employees.forEach((emp: any) => {
-      if (!emp.employee) {
-        console.warn(
-          `User ${emp.id} (${emp.email}) has no employee record. employeeId: ${emp.employeeId}`
-        );
-      }
-    });
+    // 2. Get all user IDs from allUsers
+    const allUserIds = allUsers.map(user => user.id);
 
-    // 5. Fetch all reports under this HR (for now, fetch all; optimize later if needed)
-    const reports = await prisma.individualEmployeeReport.findMany({
-      where: { hrId: session.user.id },
+    // 3. Fetch all reports under this HR
+    let reports = await prisma.individualEmployeeReport.findMany({
+      where: { 
+        hrId: session.user.id,
+        userId: { in: allUserIds } // Only get reports for users we're considering
+      },
       select: {
         id: true,
         createdAt: true,
@@ -92,7 +83,7 @@ export async function GET(request: Request) {
         userId: true,
         hrId: true,
         executiveSummary: true,
-        departement: true, // Note: Typo in schema (should be `department`)
+        departement: true,
         geniusFactorProfileJson: true,
         currentRoleAlignmentAnalysisJson: true,
         internalCareerOpportunitiesJson: true,
@@ -102,33 +93,76 @@ export async function GET(request: Request) {
         dataSourcesAndMethodologyJson: true,
         risk_analysis: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    // 6. Group reports by userId
+    // 4. Apply risk filter to reports if specified
+    if (risk && risk !== "All Risk Levels") {
+      reports = reports.filter((report: any) => {
+        const riskLevel = report.currentRoleAlignmentAnalysisJson?.retention_risk_level;
+        return riskLevel === risk;
+      });
+    }
+
+    // Get user IDs that have reports
+    const usersWithReportsIds = [...new Set(reports.map((report: any) => report.userId))];
+
+    // 5. Group reports by userId (same as original)
     const grouped: Record<string, any> = {};
-    for (const emp of employees) {
+    for (const emp of allUsers) {
       grouped[emp.id] = { ...emp, reports: [] };
     }
+    
     for (const report of reports) {
       if (grouped[report.userId]) {
         grouped[report.userId].reports.push(report);
       }
     }
 
-    // ✅ Removed filtering, now return all employees (even without reports)
-    const result = Object.values(grouped);
+    // 6. Apply status filter - MODIFIED LOGIC
+    let filteredEmployees = Object.values(grouped);
 
-    // 7. Calculate total pages
-    const totalPages = Math.ceil(totalEmployees / limit);
+    if (status === "Completed") {
+      // Only employees with reports
+      filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length > 0);
+    } else if (status === "Not Started") {
+      // Only employees without reports
+      filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length === 0);
+    }
+    // If no status or "all", keep ALL employees (including those with and without reports)
 
-    // 8. Return the response with pagination info
+    // 7. Sort by ID for consistent ordering
+    filteredEmployees = filteredEmployees.sort((a: any, b: any) => a.id.localeCompare(b.id));
+
+    // 8. Calculate filtered total
+    const filteredTotalEmployees = filteredEmployees.length;
+
+    // 9. Apply pagination to filtered results
+    const paginatedEmployees = filteredEmployees.slice(skip, skip + limit);
+
+    // 10. Calculate total pages
+    const totalPages = Math.ceil(filteredTotalEmployees / limit);
+
+    // 11. Log for debugging
+    allUsers.forEach((emp: any) => {
+      if (!emp.employee) {
+        console.warn(
+          `User ${emp.id} (${emp.email}) has no employee record. employeeId: ${emp.employeeId}`
+        );
+      }
+    });
+
+    console.log('Status filter applied:', status, 'Total employees:', filteredTotalEmployees, 'With reports:', usersWithReportsIds.length);
+
     return NextResponse.json(
       {
-        employees: result,
+        employees: paginatedEmployees,
         pagination: {
           currentPage: page,
           totalPages,
-          totalEmployees,
+          totalEmployees: filteredTotalEmployees,
           limit,
         },
       },

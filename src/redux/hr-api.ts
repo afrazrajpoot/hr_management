@@ -8,7 +8,7 @@ export const hrApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Employee"], // ✅ define tag
+  tagTypes: ["Employee"],
   endpoints: (builder) => ({
     getHrEmployee: builder.query<
       {
@@ -20,13 +20,38 @@ export const hrApi = createApi({
           limit: number;
         };
       },
-      { page?: number; limit?: number; search?: string; department?: string }
+      { 
+        page?: number; 
+        limit?: number; 
+        search?: string; 
+        department?: string;
+        risk?: string;     // ✅ Added
+        status?: string;   // ✅ Added
+      }
     >({
-      query: ({ page = 1, limit = 10, search = "", department = "" }) =>
-        `/hr-api/hr-employee?page=${page}&limit=${limit}&search=${encodeURIComponent(
-          search
-        )}&department=${encodeURIComponent(department)}`,
-      providesTags: ["Employee"], // ✅ provides tag
+      query: ({ 
+        page = 1, 
+        limit = 10, 
+        search = "", 
+        department = "", 
+        risk = "",        // ✅ Added
+        status = ""       // ✅ Added
+      }) => {
+        // Build URL with all parameters
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+          ...(search && { search: encodeURIComponent(search) }),
+          ...(department && { department: encodeURIComponent(department) }),
+          ...(risk && { risk: encodeURIComponent(risk) }),
+          ...(status && { status: encodeURIComponent(status) }),
+        });
+
+        console.log('RTK Query URL:', `/hr-api/hr-employee?${params.toString()}`); // Debug log
+        
+        return `/hr-api/hr-employee?${params.toString()}`;
+      },
+      providesTags: ["Employee"],
     }),
     updateEmployee: builder.mutation<
       { message: string; department: any; user: { salary: number } },
@@ -48,7 +73,7 @@ export const hrApi = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Employee"], // ✅ invalidates cache
+      invalidatesTags: ["Employee"],
     }),
   }),
 });

@@ -1,5 +1,5 @@
 "use client";
-import { JSX, useState, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -96,7 +96,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               className={
                 currentPage === page
                   ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
+                  : "cursor-pointer hover:bg-muted"
               }
             >
               {page}
@@ -118,7 +118,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
             className={
               currentPage === 1
                 ? "bg-primary text-primary-foreground"
-                : "cursor-pointer"
+                : "cursor-pointer hover:bg-muted"
             }
           >
             1
@@ -147,7 +147,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               className={
                 currentPage === page
                   ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
+                  : "cursor-pointer hover:bg-muted"
               }
             >
               {page}
@@ -175,7 +175,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               className={
                 currentPage === totalReportPages
                   ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
+                  : "cursor-pointer hover:bg-muted"
               }
             >
               {totalReportPages}
@@ -189,8 +189,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
   };
 
   return (
-    <Card className="card hover:shadow-lg transition-all duration-200">
-      <CardHeader className="pb-3">
+    <Card className="card hover:shadow-lg transition-all duration-200 h-[400px] flex flex-col">
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -201,18 +201,22 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
             <div>
               <CardTitle className="text-lg">{employee.name}</CardTitle>
               <CardDescription>
-                {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
+                {typeof employee.position === "string"
+                  ? employee.position
+                  : employee?.position[employee.position.length - 1]}
                 <span> {" - "} </span>
-                {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
-                  ? employee.department[employee.department.length - 1] : "N/A"
-                }
+                {typeof employee.department === "string"
+                  ? employee.department
+                  : Array.isArray(employee.department)
+                  ? employee.department[employee.department.length - 1]
+                  : "N/A"}
               </CardDescription>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
+      <CardContent className="space-y-4 flex-1 flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">
@@ -224,7 +228,7 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           <Badge className={getStatusColor(status)}>{status}</Badge>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 flex-shrink-0">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">
               Completion Rate
@@ -234,203 +238,227 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           <Progress value={completionRate} className="h-2" />
         </div>
 
-        {/* {status === "Completed" && (
-          <div className="flex justify-between items-center pt-2 border-t">
-            <span className="text-sm text-muted-foreground">
-              Genius Factor Score
-            </span>
-            <span className={`text-lg font-bold ${getScoreColor(geniusScore)}`}>
-              {geniusScore}/100
-            </span>
-          </div>
-        )} */}
-
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-shrink-0">
           <Calendar className="h-4 w-4" />
           <span>
             {status === "Completed"
-              ? `Completed: ${firstReport.createdAt
-                ? new Date(firstReport.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-                : "Unknown"
-              }`
+              ? `Completed: ${
+                  firstReport.createdAt
+                    ? new Date(firstReport.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : "Unknown"
+                }`
               : "Not Started"}
           </span>
         </div>
 
-        {employee.reports.length > 0 && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              {paginatedReports.map((report: any, index: number) => (
-                <Button
-                  key={report.id}
-                  variant="default"
-                  size="sm"
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
-                  onClick={() =>
-                    handleViewReport({
-                      report,
-                      id: report.id,
-                      title: "Genius Factor Career Assessment",
-                      employee: employee.name,
-                      department: report.departement,
-                      position: employee.position,
-                      dateCompleted: report.createdAt
-                        ? new Date(report.createdAt).toISOString().split("T")[0]
-                        : "Unknown",
-                      status: "Completed",
-                      geniusScore: parseInt(
-                        report.geniusFactorProfileJson.primary_genius_factor.match(
-                          /\d+/
-                        )?.[0] || "0"
-                      ),
-                      completionRate: 100,
-                      avatar: employee.avatar,
-                      executiveSummary: report.executiveSummary,
-                      geniusFactorProfile: report.geniusFactorProfileJson,
-                      genius_factor_score: report?.risk_analysis?.scores?.genius_factor_score,
-                      currentRoleAlignment:
-                        report.currentRoleAlignmentAnalysisJson,
-                      careerOpportunities:
-                        report.internalCareerOpportunitiesJson,
-                      retentionStrategies:
-                        report.retentionAndMobilityStrategiesJson,
-                      developmentPlan: report.developmentActionPlanJson,
-                      personalizedResources: report.personalizedResourcesJson,
-                      dataSources: report.dataSourcesAndMethodologyJson,
-                    })
-                  }
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Report #{(currentPage - 1) * reportsPerPage + index + 1}
-                </Button>
-              ))}
+        {/* Reports Section with Scrollable Container */}
+        <div className="flex-1 overflow-y-auto pr-2">
+          {employee.reports.length > 0 ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {paginatedReports.map((report: any, index: number) => (
+                  <Button
+                    key={report.id}
+                    variant="default"
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
+                    onClick={() =>
+                      handleViewReport({
+                        report,
+                        id: report.id,
+                        title: "Genius Factor Career Assessment",
+                        employee: employee.name,
+                        department: report.departement,
+                        position: employee.position,
+                        dateCompleted: report.createdAt
+                          ? new Date(report.createdAt)
+                              .toISOString()
+                              .split("T")[0]
+                          : "Unknown",
+                        status: "Completed",
+                        geniusScore: parseInt(
+                          report.geniusFactorProfileJson.primary_genius_factor.match(
+                            /\d+/
+                          )?.[0] || "0"
+                        ),
+                        completionRate: 100,
+                        avatar: employee.avatar,
+                        executiveSummary: report.executiveSummary,
+                        geniusFactorProfile: report.geniusFactorProfileJson,
+                        genius_factor_score:
+                          report?.risk_analysis?.scores?.genius_factor_score,
+                        currentRoleAlignment:
+                          report.currentRoleAlignmentAnalysisJson,
+                        careerOpportunities:
+                          report.internalCareerOpportunitiesJson,
+                        retentionStrategies:
+                          report.retentionAndMobilityStrategiesJson,
+                        developmentPlan: report.developmentActionPlanJson,
+                        personalizedResources: report.personalizedResourcesJson,
+                        dataSources: report.dataSourcesAndMethodologyJson,
+                      })
+                    }
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Report #
+                    {(currentPage - 1) * reportsPerPage + index + 1}
+                  </Button>
+                ))}
+              </div>
+              {totalReportPages > 1 && (
+                <div className="mt-4 flex-shrink-0">
+                  <Pagination className="w-full">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            handleReportPageChange(Math.max(1, currentPage - 1))
+                          }
+                          className={
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer hover:bg-muted"
+                          }
+                        />
+                      </PaginationItem>
+                      {getPaginationItems()}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            handleReportPageChange(
+                              Math.min(totalReportPages, currentPage + 1)
+                            )
+                          }
+                          className={
+                            currentPage === totalReportPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer hover:bg-muted"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </div>
-            {totalReportPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() =>
-                        handleReportPageChange(Math.max(1, currentPage - 1))
-                      }
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                  {getPaginationItems()}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        handleReportPageChange(
-                          Math.min(totalReportPages, currentPage + 1)
-                        )
-                      }
-                      className={
-                        currentPage === totalReportPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <span className="text-sm">No reports available</span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 };
 
 export default function Assessments() {
-  const [searchTerm, setSearchTerm] = useState("");
+  // Separate states for smooth typing
+  const [searchValue, setSearchValue] = useState(""); // Immediate UI value
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // API value
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedAssessment, setSelectedAssessment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>({
-    page: currentPage,
-    limit,
-    search: searchTerm,
-    department: departmentFilter === "all" ? "" : departmentFilter,
-  });
+
+  // Query parameters with all filters
+  const queryParams = useMemo(
+    () => ({
+      page: currentPage,
+      limit,
+      search: debouncedSearch,
+      department: departmentFilter === "all" ? "" : departmentFilter,
+      status: statusFilter === "all" ? "" : statusFilter,
+    }),
+    [currentPage, debouncedSearch, departmentFilter, statusFilter]
+  );
+
+  const { isLoading, isError, data } = useGetHrEmployeeQuery<any>(queryParams);
+
+  // Debounce search with 300ms delay (smooth typing)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchValue);
+    }, 300); // 300ms for better UX
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, departmentFilter]);
+  }, [debouncedSearch, departmentFilter, statusFilter]);
 
   // Transform API data into employee format with grouped reports
   const employeeData =
     data?.employees?.map((employee: any) => ({
       id: employee.id,
-      name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
-        }`.trim(),
+      name: `${employee.firstName} ${
+        employee.lastName !== "Not provide" ? employee.lastName : ""
+      }`.trim(),
       department: employee.department || "Unknown",
       position: employee.position || "Unknown",
       reports: employee.reports || [],
-      avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-        }`,
+      avatar: `${employee.firstName[0]}${
+        employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+      }`,
     })) || [];
 
-  const filteredEmployees = employeeData.filter((employee: any) => {
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "Completed" && employee.reports.length > 0) ||
-      (statusFilter === "Not Started" && employee.reports.length === 0);
+  // UI-side filtering for "Not Started" - only show employees without reports
+  const filteredEmployees = useMemo(() => {
+    if (statusFilter === "Not Started") {
+      // Only show employees without any reports
+      return employeeData.filter(
+        (employee: any) => employee.reports.length === 0
+      );
+    }
 
-    return matchesStatus;
-  });
+    // For "all" and "Completed", show all employees from API
+    return employeeData;
+  }, [employeeData, statusFilter]);
 
   const handleViewDetails = (assessment: any) => {
     setSelectedAssessment(assessment);
     setShowDetailsModal(true);
   };
 
-  // Extract all departments from employee data
-  const departments: any = [
-    ...new Set(
-      data?.employees?.map((emp: any) => emp.department).filter(Boolean)
-    ),
-    "all",
-  ];
-
-  // Calculate stats based on reports
+  // Calculate stats based on reports (using full data)
   const assessmentCount = employeeData.reduce(
     (sum: number, emp: any) => sum + emp.reports.length,
     0
   );
-  const completedCount = employeeData.reduce(
-    (sum: number, emp: any) => sum + emp.reports.length,
-    0
-  );
+  const completedCount = employeeData.filter(
+    (emp: any) => emp.reports.length > 0
+  ).length;
+  const notStartedCount = employeeData.filter(
+    (emp: any) => emp.reports.length === 0
+  ).length;
   const inProgressCount = 0; // No in-progress reports in data
-  const avgScore = completedCount
-    ? Math.round(
-      employeeData.reduce(
-        (sum: number, emp: any) =>
-          sum +
-          emp.reports.reduce(
-            (rSum: number, report: any) =>
-              rSum +
-              parseInt(
-                report.geniusFactorProfileJson.primary_genius_factor.match(
-                  /\d+/
-                )?.[0] || "0"
+
+  const avgScore =
+    assessmentCount > 0
+      ? Math.round(
+          employeeData.reduce(
+            (sum: number, emp: any) =>
+              sum +
+              emp.reports.reduce(
+                (rSum: number, report: any) =>
+                  rSum +
+                  parseInt(
+                    report.geniusFactorProfileJson.primary_genius_factor.match(
+                      /\d+/
+                    )?.[0] || "0"
+                  ),
+                0
               ),
             0
-          ),
-        0
-      ) / completedCount
-    )
-    : 0;
+          ) / assessmentCount
+        )
+      : 0;
 
   if (isLoading) {
     return (
@@ -477,8 +505,8 @@ export default function Assessments() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search assessments..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchValue} // ✅ Immediate UI response
+                    onChange={(e) => setSearchValue(e.target.value)} // ✅ No debounce here
                     className="pl-10"
                   />
                 </div>
@@ -501,13 +529,13 @@ export default function Assessments() {
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
-                  {dashboardOptions.Departments.map((dept: { option: string, value: string }) => (
-                    <>
+                  {dashboardOptions.Departments.map(
+                    (dept: { option: string; value: string }) => (
                       <SelectItem key={dept.value} value={dept.value}>
                         {dept.option}
                       </SelectItem>
-                    </>
-                  ))}
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -551,14 +579,16 @@ export default function Assessments() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    In Progress
+                    Not Started
                   </p>
-                  <p className="text-2xl font-bold text-warning">
-                    {inProgressCount}
+                  <p className="text-2xl font-bold text-muted-foreground">
+                    {notStartedCount}
                   </p>
                 </div>
-                <div className="h-8 w-8 bg-warning/10 rounded-lg flex items-center justify-center">
-                  <span className="text-xs font-bold text-warning">⏳</span>
+                <div className="h-8 w-8 bg-muted/10 rounded-lg flex items-center justify-center">
+                  <span className="text-xs font-bold text-muted-foreground">
+                    ⏳
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -628,13 +658,15 @@ export default function Assessments() {
         )}
 
         {/* No results */}
-        {filteredEmployees.length === 0 && (
+        {filteredEmployees.length === 0 && !isLoading && (
           <Card className="card">
             <CardContent className="p-12 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No employees found</h3>
               <p className="text-muted-foreground">
-                Try adjusting your search criteria.
+                {statusFilter === "Not Started"
+                  ? "No employees without assessments found."
+                  : "Try adjusting your search criteria."}
               </p>
             </CardContent>
           </Card>
