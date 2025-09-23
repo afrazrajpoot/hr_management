@@ -89,8 +89,8 @@ const RiskStatCard = ({
                   trend === "up"
                     ? "destructive"
                     : trend === "down"
-                    ? "default"
-                    : "secondary"
+                      ? "default"
+                      : "secondary"
                 }
                 className="gap-1"
               >
@@ -531,25 +531,27 @@ export default function RetentionRisk() {
           </div>
 
           {/* Conditionally render the Analyze with AI button */}
-          {hasUnanalyzedDepartments && (
-            <Button
-              onClick={handleAnalyzeWithAI}
-              disabled={isAnalysisLoading || !dashboardData}
-              className="gap-2"
-            >
-              {isAnalysisLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Brain className="h-4 w-4" />
-                  Analyze with AI
-                </>
-              )}
-            </Button>
-          )}
+          {/* {hasUnanalyzedDepartments && (
+           
+          )} */}
+
+          <Button
+            onClick={handleAnalyzeWithAI}
+            disabled={isAnalysisLoading || !dashboardData}
+            className="gap-2"
+          >
+            {isAnalysisLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Brain className="h-4 w-4" />
+                Analyze with AI
+              </>
+            )}
+          </Button>
         </div>
 
         {error && (
