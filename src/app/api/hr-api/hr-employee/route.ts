@@ -85,6 +85,7 @@ export async function GET(request: Request) {
         executiveSummary: true,
         departement: true,
         geniusFactorProfileJson: true,
+        geniusFactorScore: true,
         currentRoleAlignmentAnalysisJson: true,
         internalCareerOpportunitiesJson: true,
         retentionAndMobilityStrategiesJson: true,
@@ -121,7 +122,48 @@ export async function GET(request: Request) {
       }
     }
 
-    // 6. Apply status filter - MODIFIED LOGIC
+    let allEmployeesData = Object.values(grouped);
+
+    // 6. Apply status filter for metrics calculation (use full dataset)
+    let filteredEmployeesForMetrics = allEmployeesData;
+
+    if (status === "Completed") {
+      filteredEmployeesForMetrics = filteredEmployeesForMetrics.filter((employee: any) => employee.reports.length > 0);
+    } else if (status === "Not Started") {
+      filteredEmployeesForMetrics = filteredEmployeesForMetrics.filter((employee: any) => employee.reports.length === 0);
+    }
+    // If no status or "all", keep ALL employees for metrics
+
+    // Calculate metrics using full filtered dataset (not paginated)
+    const totalAssessments = filteredEmployeesForMetrics.reduce(
+      (sum: number, emp: any) => sum + emp.reports.length,
+      0
+    );
+    const totalCompletedEmployees = filteredEmployeesForMetrics.filter(
+      (emp: any) => emp.reports.length > 0
+    ).length;
+    const totalNotStartedEmployees = filteredEmployeesForMetrics.filter(
+      (emp: any) => emp.reports.length === 0
+    ).length;
+    
+    // FIXED: Calculate avgScore using genius_factor_score from risk_analysis.scores
+    let totalGeniusScore = 0;
+    let totalReportsWithScore = 0;
+    
+    filteredEmployeesForMetrics.forEach((emp: any) => {
+      emp.reports.forEach((report: any) => {
+        // Use genius_factor_score from risk_analysis.scores
+        const geniusFactorScore = report?.geniusFactorScore || 0;
+        if (geniusFactorScore > 0) { // Only count valid scores
+          totalGeniusScore += geniusFactorScore;
+          totalReportsWithScore += 1;
+        }
+      });
+    });
+
+    const avgScore = totalReportsWithScore > 0 ? Math.round(totalGeniusScore / totalReportsWithScore) : 0;
+
+    // 7. Apply status filter for employee list (same as original)
     let filteredEmployees = Object.values(grouped);
 
     if (status === "Completed") {
@@ -133,19 +175,19 @@ export async function GET(request: Request) {
     }
     // If no status or "all", keep ALL employees (including those with and without reports)
 
-    // 7. Sort by ID for consistent ordering
+    // 8. Sort by ID for consistent ordering
     filteredEmployees = filteredEmployees.sort((a: any, b: any) => a.id.localeCompare(b.id));
 
-    // 8. Calculate filtered total
+    // 9. Calculate filtered total for pagination
     const filteredTotalEmployees = filteredEmployees.length;
 
-    // 9. Apply pagination to filtered results
+    // 10. Apply pagination to filtered results
     const paginatedEmployees = filteredEmployees.slice(skip, skip + limit);
 
-    // 10. Calculate total pages
+    // 11. Calculate total pages
     const totalPages = Math.ceil(filteredTotalEmployees / limit);
 
-    // 11. Log for debugging
+    // 12. Log for debugging
     allUsers.forEach((emp: any) => {
       if (!emp.employee) {
         console.warn(
@@ -155,9 +197,18 @@ export async function GET(request: Request) {
     });
 
     console.log('Status filter applied:', status, 'Total employees:', filteredTotalEmployees, 'With reports:', usersWithReportsIds.length);
+    console.log('Metrics calculated:', { 
+      totalAssessments, 
+      totalCompletedEmployees, 
+      totalNotStartedEmployees, 
+      avgScore,
+      totalReportsWithScore,
+      totalGeniusScore 
+    });
 
     return NextResponse.json(
       {
+        // Paginated employees list
         employees: paginatedEmployees,
         pagination: {
           currentPage: page,
@@ -165,6 +216,14 @@ export async function GET(request: Request) {
           totalEmployees: filteredTotalEmployees,
           limit,
         },
+        // Full metrics data (not paginated)
+        metrics: {
+          totalAssessments,
+          completedCount: totalCompletedEmployees,
+          notStartedCount: totalNotStartedEmployees,
+          inProgressCount: 0, // No in-progress reports in data
+          avgScore,
+        }
       },
       { status: 200 }
     );

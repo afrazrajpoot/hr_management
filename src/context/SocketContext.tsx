@@ -183,6 +183,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [hrNotifications, setHrNotifications] = useState<Notification[]>([]);
   const { data: session } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [totalMobility, setTotalMobility] = useState({});
   const ringTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if user is admin
@@ -521,6 +522,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (isAdmin) {
         return;
       }
+      console.log("Received department info:", data);
 
       if (data.error) {
         console.error("❌ Department info error:", data.error);
@@ -529,6 +531,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Handle department data for HR users
       if (data.departments && Array.isArray(data.departments)) {
+        setTotalMobility(data.mobilityTotals);
         setDepartmentData(data.departments);
       }
 
@@ -578,6 +581,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         departmentData,
         departmentCardData,
         hrNotifications,
+        totalMobility,
       }}
     >
       {children}

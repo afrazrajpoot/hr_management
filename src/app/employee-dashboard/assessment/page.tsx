@@ -43,6 +43,8 @@ export default function Assessment() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [timeSpent, setTimeSpent] = useState(0);
+  const [hasSavedProgress, setHasSavedProgress] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const navigate = useRouter();
   const [analysisResults, setAnalysisResults] = useState<Array<{
     part: string;
@@ -51,11 +53,17 @@ export default function Assessment() {
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { socket, isConnected } = useSocket();
   const { data: session } = useSession();
 
   // Load progress from localStorage on mount
   useEffect(() => {
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
+
     const savedProgress = localStorage.getItem(STORAGE_KEY);
     if (savedProgress) {
       try {
@@ -64,18 +72,36 @@ export default function Assessment() {
         setCurrentPartIndex(parsedProgress.currentPartIndex || 0);
         setCurrentQuestionIndex(parsedProgress.currentQuestionIndex || 0);
         setTimeSpent(parsedProgress.timeSpent || 0);
+        setHasSavedProgress(true); // ✅ Set to true when progress is loaded
       } catch (error) {
         console.error("Failed to load saved progress:", error);
         localStorage.removeItem(STORAGE_KEY);
+        setHasSavedProgress(false);
       }
+    } else {
+      setHasSavedProgress(false);
     }
+    setIsLoading(false);
   }, []);
 
   // Save progress to localStorage whenever state changes
   useEffect(() => {
+    if (typeof window === "undefined" || isLoading) return;
+
+    // Don't save if we have analysis results (assessment is complete)
     if (analysisResults) {
-      // Clear progress when assessment is completed
       localStorage.removeItem(STORAGE_KEY);
+      setHasSavedProgress(false);
+      return;
+    }
+
+    // Don't save empty progress on initial load
+    if (
+      Object.keys(answers).length === 0 &&
+      timeSpent === 0 &&
+      currentPartIndex === 0 &&
+      currentQuestionIndex === 0
+    ) {
       return;
     }
 
@@ -88,12 +114,14 @@ export default function Assessment() {
     };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progressData));
+    setHasSavedProgress(true); // ✅ Set to true when progress is saved
   }, [
     answers,
     currentPartIndex,
     currentQuestionIndex,
     timeSpent,
     analysisResults,
+    isLoading,
   ]);
 
   const currentPart = questionsByPart[currentPartIndex];
@@ -185,6 +213,7 @@ export default function Assessment() {
 
       // Clear localStorage after successful submission
       localStorage.removeItem(STORAGE_KEY);
+      setHasSavedProgress(false); // ✅ Clear the flag
 
       // Show success toast
       toast.success("Assessment submitted successfully!", {
@@ -231,6 +260,7 @@ export default function Assessment() {
 
   // Reset progress function
   const resetProgress = () => {
+    if (typeof window === "undefined") return;
     if (
       confirm(
         "Are you sure you want to restart the assessment? Your current progress will be lost."
@@ -241,6 +271,7 @@ export default function Assessment() {
       setCurrentQuestionIndex(0);
       setTimeSpent(0);
       localStorage.removeItem(STORAGE_KEY);
+      setHasSavedProgress(false); // ✅ Clear the flag
       toast.success("Assessment restarted successfully!");
     }
   };
@@ -255,8 +286,16 @@ export default function Assessment() {
     currentQuestionIndex === totalQuestionsInPart - 1;
   const isLastPart = currentPartIndex === questionsByPart.length - 1;
 
-  // Check if there's saved progress
-  const hasSavedProgress = localStorage.getItem(STORAGE_KEY) !== null;
+  // Show loading state while checking localStorage
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="p-6 max-w-4xl mx-auto flex justify-center items-center h-64">
+          <Loader />
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -312,6 +351,7 @@ export default function Assessment() {
                   setAnswers({});
                   setCurrentPartIndex(0);
                   setCurrentQuestionIndex(0);
+                  setHasSavedProgress(false); // ✅ Clear the flag
                 }}
               >
                 Restart Assessment
