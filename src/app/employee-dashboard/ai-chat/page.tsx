@@ -29,7 +29,7 @@ export default function ChatPage() {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/chat/${session.user.id}`,
+          `https://api.geniusfactor.ai/chat/${session.user.id}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
