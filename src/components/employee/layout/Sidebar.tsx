@@ -12,6 +12,7 @@ import {
   Sun,
   LogOut,
   User,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,11 @@ const navigation = [
     name: "Profile",
     href: "/employee-dashboard/profile",
     icon: User,
+  },
+  {
+    name: "Ai Chat",
+    href: "/employee-dashboard/ai-chat",
+    icon: Bot,
   },
 ];
 

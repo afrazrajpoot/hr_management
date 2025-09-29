@@ -229,3 +229,13 @@ model AnalysisResult {
   @@index([department_name])
   @@index([created_at])
 }
+
+
+model EmployeeChat {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  response  String?
+  createdAt DateTime @default(now())
+
+}
