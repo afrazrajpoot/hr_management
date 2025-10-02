@@ -204,7 +204,7 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 100 &&
+        document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
         !isLoading
       ) {
@@ -267,7 +267,7 @@ export default function CareerPathways() {
       <div className="p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Career Pathways</h1>
+            <h1 className="text-3xl font-bold">Career Pathways Assistant</h1>
             <p className="text-muted-foreground mt-1">
               AI-powered career recommendations based on your Genius Factor
               profile
@@ -379,11 +379,10 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${
-                          savedJobs.includes(career.id)
-                            ? "fill-current text-primary"
-                            : ""
-                        }`}
+                        className={`w-4 h-4 ${savedJobs.includes(career.id)
+                          ? "fill-current text-primary"
+                          : ""
+                          }`}
                       />
                     </Button>
                   </div>

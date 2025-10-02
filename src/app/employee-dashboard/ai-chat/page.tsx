@@ -188,10 +188,10 @@ export default function ChatPage() {
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold tracking-tight">
-                HR Assistant
+                Genius Factor AI
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Ask me anything about HR policies and procedures
+                Ask me anything about any policies and procedures
               </p>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default function ChatPage() {
                         <Bot className="h-16 w-16 text-primary" />
                       </div>
                       <h3 className="text-xl font-semibold mb-2">
-                        Welcome to HR Assistant
+                        Welcome to Genius Factor AI Assistant
                       </h3>
                       <p className="text-muted-foreground max-w-md text-sm">
                         Start a conversation by typing a message below. I'm here
@@ -219,14 +219,12 @@ export default function ChatPage() {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`flex gap-3 items-start ${
-                        msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                      }`}
+                      className={`flex gap-3 items-start ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                        }`}
                     >
                       <div
-                        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
-                          msg.role === "user" ? "bg-primary" : "bg-muted border"
-                        }`}
+                        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-primary" : "bg-muted border"
+                          }`}
                       >
                         {msg.role === "user" ? (
                           <User className="h-5 w-5 text-primary-foreground" />
@@ -236,11 +234,10 @@ export default function ChatPage() {
                       </div>
 
                       <div
-                        className={`flex-1 max-w-[75%] rounded-2xl px-5 py-3 ${
-                          msg.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
-                        }`}
+                        className={`flex-1 max-w-[75%] rounded-2xl px-5 py-3 ${msg.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                          }`}
                       >
                         <div className="whitespace-pre-wrap break-words leading-relaxed">
                           {msg.content}

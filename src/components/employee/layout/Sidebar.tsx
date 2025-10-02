@@ -56,7 +56,7 @@ const navigation = [
     icon: User,
   },
   {
-    name: "Ai Chat",
+    name: "Genius Factor AI",
     href: "/employee-dashboard/ai-chat",
     icon: Bot,
   },
