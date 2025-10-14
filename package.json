@@ -43,6 +43,8 @@
     "fast-xml-parser": "^5.2.5",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.12",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.2",
     "jszip": "^3.10.1",

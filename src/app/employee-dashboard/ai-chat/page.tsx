@@ -97,7 +97,8 @@ export default function ChatPage() {
     ]);
 
     try {
-      const response = await fetch(`https://api.geniusfactor.ai/chat`, {
+      // const response = await fetch(`https://api.geniusfactor.ai/chat`, {
+      const response = await fetch(`http://127.0.0.1:8000/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -219,12 +220,14 @@ export default function ChatPage() {
                   {messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`flex gap-3 items-start ${msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                        }`}
+                      className={`flex gap-3 items-start ${
+                        msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                      }`}
                     >
                       <div
-                        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${msg.role === "user" ? "bg-primary" : "bg-muted border"
-                          }`}
+                        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
+                          msg.role === "user" ? "bg-primary" : "bg-muted border"
+                        }`}
                       >
                         {msg.role === "user" ? (
                           <User className="h-5 w-5 text-primary-foreground" />
@@ -234,10 +237,11 @@ export default function ChatPage() {
                       </div>
 
                       <div
-                        className={`flex-1 max-w-[75%] rounded-2xl px-5 py-3 ${msg.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                          }`}
+                        className={`flex-1 max-w-[75%] rounded-2xl px-5 py-3 ${
+                          msg.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}
                       >
                         <div className="whitespace-pre-wrap break-words leading-relaxed">
                           {msg.content}

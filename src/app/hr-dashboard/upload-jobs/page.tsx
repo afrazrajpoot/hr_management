@@ -3,6 +3,22 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import HRLayout from "@/components/hr/HRLayout";
 import { useSession } from "next-auth/react";
@@ -12,13 +28,36 @@ import {
   CheckCircle,
   Briefcase,
   FileSpreadsheet,
+  Plus,
+  Sparkles,
+  X,
 } from "lucide-react";
+
+interface JobFormData {
+  title: string;
+  description: string;
+  location: string;
+  salary: string;
+  type: string;
+  skills: string; // Comma-separated for input, will be parsed to array
+}
 
 export default function UploadJobsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploadedJobs, setUploadedJobs] = useState<any[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [formData, setFormData] = useState<JobFormData>({
+    title: "",
+    description: "",
+    location: "",
+    salary: "",
+    type: "FULL_TIME",
+    skills: "",
+  });
+  const [generateLoading, setGenerateLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
   const { data: session } = useSession<any>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,10 +90,10 @@ export default function UploadJobsPage() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
     if (session?.user.id) {
-      formData.append("recruiter_id", session.user.id);
+      formDataUpload.append("recruiter_id", session.user.id);
     }
 
     try {
@@ -63,7 +102,7 @@ export default function UploadJobsPage() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/jobs/upload`,
         {
           method: "POST",
-          body: formData,
+          body: formDataUpload,
         }
       );
 
@@ -77,6 +116,105 @@ export default function UploadJobsPage() {
       toast.error(error.message || "Failed to upload jobs");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, type: value }));
+  };
+
+  const generateDescription = async () => {
+    if (!formData.title) {
+      toast.error("Please enter a job title first");
+      return;
+    }
+
+    setGenerateLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/generate-description`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: formData.title,
+            location: formData.location || null,
+            salary: formData.salary ? parseInt(formData.salary) : null,
+            type: formData.type,
+            skills: formData.skills,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to generate description");
+
+      const { description } = await res.json();
+      setFormData((prev) => ({ ...prev, description }));
+      toast.success("Description generated successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate description");
+    } finally {
+      setGenerateLoading(false);
+    }
+  };
+
+  const handleCreateJob = async () => {
+    if (!formData.title || !formData.description) {
+      toast.error("Title and description are required");
+      return;
+    }
+
+    const skillsArray = formData.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s);
+
+    const createData = {
+      title: formData.title,
+      description: formData.description,
+      location: formData.location || null,
+      salary: formData.salary ? parseInt(formData.salary) : null,
+      type: formData.type,
+      skills: skillsArray.length > 0 ? skillsArray : null,
+      recruiterId: session?.user.id,
+    };
+
+    try {
+      setCreateLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/create`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(createData),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to create job");
+
+      const data = await res.json();
+      toast.success("Job created successfully!");
+      setFormData({
+        title: "",
+        description: "",
+        location: "",
+        salary: "",
+        type: "FULL_TIME",
+        skills: "",
+      });
+      setIsCreateModalOpen(false);
+      // Optionally refresh jobs list here
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create job");
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -101,11 +239,40 @@ export default function UploadJobsPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Briefcase className="w-8 h-8 text-primary mr-2" />
-            <h1 className="text-3xl font-bold">Upload Jobs</h1>
+            <h1 className="text-3xl font-bold">Upload & Create Jobs</h1>
           </div>
           <p className="text-muted-foreground">
-            Upload your job listings in CSV, Excel, ODT, or PDF format
+            Upload bulk jobs or create a single job listing manually
           </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <Button
+            onClick={handleUpload}
+            disabled={loading || !file}
+            className="flex-1"
+          >
+            {loading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <span>Upload Bulk Jobs</span>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Upload className="w-4 h-4" />
+                <span>Upload Bulk Jobs</span>
+              </div>
+            )}
+          </Button>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            variant="outline"
+            className="flex-1"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Job Manually
+          </Button>
         </div>
 
         {/* Upload Area */}
@@ -156,24 +323,6 @@ export default function UploadJobsPage() {
               )}
             </div>
           </div>
-
-          <Button
-            onClick={handleUpload}
-            disabled={loading || !file}
-            className="w-full h-12"
-          >
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                <span>Uploading...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Upload className="w-4 h-4" />
-                <span>Upload Jobs</span>
-              </div>
-            )}
-          </Button>
         </div>
 
         {/* Uploaded Jobs List */}
@@ -224,6 +373,134 @@ export default function UploadJobsPage() {
             <p>• PDF documents</p>
           </div>
         </div>
+
+        {/* Create Job Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Job</DialogTitle>
+              <DialogDescription>
+                Fill in the details to create a new job posting.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Job Title *</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Senior Software Engineer"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Job Description *</Label>
+                <div className="relative">
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Enter job description..."
+                    rows={4}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={generateDescription}
+                    disabled={!formData.title || generateLoading}
+                    className="absolute bottom-2 right-2 h-8 w-8 p-0"
+                  >
+                    <Sparkles
+                      className={`w-4 h-4 ${
+                        generateLoading ? "animate-spin" : ""
+                      }`}
+                    />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Click the sparkles icon to generate description with AI
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Remote or Lahore, PK"
+                />
+              </div>
+              <div>
+                <Label htmlFor="salary">Salary (Optional)</Label>
+                <Input
+                  id="salary"
+                  name="salary"
+                  type="number"
+                  value={formData.salary}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 50000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="type">Job Type</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={handleSelectChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FULL_TIME">Full Time</SelectItem>
+                    <SelectItem value="PART_TIME">Part Time</SelectItem>
+                    <SelectItem value="CONTRACT">Contract</SelectItem>
+                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="skills">Skills (comma-separated)</Label>
+                <Input
+                  id="skills"
+                  name="skills"
+                  value={formData.skills}
+                  onChange={handleInputChange}
+                  placeholder="e.g., JavaScript, React, Node.js"
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateJob}
+                disabled={
+                  !formData.title || !formData.description || createLoading
+                }
+              >
+                {createLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    <span>Creating Job...</span>
+                  </div>
+                ) : (
+                  "Create Job"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </HRLayout>
   );

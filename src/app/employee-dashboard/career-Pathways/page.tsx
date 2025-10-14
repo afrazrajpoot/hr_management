@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,15 @@ import {
   MapPin,
   Bookmark,
   ExternalLink,
+  CheckCircle,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useDebounce } from "@/custom-hooks/useDebounce";
 import JobDetailsModal from "@/components/employee/JobDetailsModal";
@@ -94,33 +102,69 @@ export default function CareerPathways() {
   });
 
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<string[]>([]); // Track applied jobs locally
+  const [applyingJobIds, setApplyingJobIds] = useState(new Set<string>());
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const limit = 6;
   const { data: session, status } = useSession<any>();
   const debouncedSearch = useDebounce(filters.search, 500);
+  const hasFetchedRef = useRef(false);
 
   const [getRecommendations, { data, isLoading, isError, error, isSuccess }] =
     useCreateCareerPathwayRecommendationsMutation();
 
-  // Debug session and mutation
+  // Fetch applied jobs on component mount
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      if (status === "authenticated" && session?.user?.id) {
+        try {
+          setIsLoadingApplications(true);
+          const response = await fetch("/api/apply-job");
+          if (response.ok) {
+            const { applications } = await response.json();
+            const appliedJobIds = applications.map((app: any) => app.jobId);
+            setAppliedJobs(appliedJobIds);
+          } else {
+            console.error("Failed to fetch applied jobs");
+          }
+        } catch (err) {
+          console.error("Error fetching applied jobs:", err);
+        } finally {
+          setIsLoadingApplications(false);
+        }
+      }
+    };
 
+    fetchAppliedJobs();
+  }, [status, session?.user?.id]);
+
+  // Debug session and mutation
   useEffect(() => {
     if (
       status === "authenticated" &&
       session?.user?.hrId &&
-      session?.user?.id
+      session?.user?.id &&
+      !hasFetchedRef.current
     ) {
+      hasFetchedRef.current = true;
       getRecommendations({
         recruiter_id: session.user.hrId,
         employee_id: session.user.id,
       });
-    } else {
+    } else if (
+      status !== "authenticated" ||
+      !session?.user?.hrId ||
+      !session?.user?.id
+    ) {
       console.warn(
         "Cannot fetch recommendations: Session not ready or missing data"
       );
+      hasFetchedRef.current = false; // Reset if session becomes invalid
     }
-  }, [getRecommendations, status, session]);
+  }, [getRecommendations, status, session?.user?.hrId, session?.user?.id]);
 
   const allRecommendations = useMemo(() => {
     if (!data?.recommendations) return [];
@@ -204,7 +248,7 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 100 &&
+          document.documentElement.offsetHeight - 100 &&
         data?.hasMore &&
         !isLoading
       ) {
@@ -221,6 +265,52 @@ export default function CareerPathways() {
         ? prev.filter((id) => id !== jobId)
         : [...prev, jobId]
     );
+  };
+
+  // Handle apply for a job
+  const handleApply = async (
+    jobId: string,
+    jobTitle: string,
+    matchScore: number
+  ) => {
+    if (appliedJobs.includes(jobId)) {
+      alert("You have already applied for this job.");
+      return;
+    }
+
+    setApplyingJobIds((prev) => new Set([...prev, jobId]));
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/applications`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job_id: jobId,
+            hr_id: session?.user?.hrId,
+            user_id: session?.user?.id,
+            score: matchScore,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setAppliedJobs((prev) => [...prev, jobId]);
+        setShowSuccessModal(true);
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error || "Failed to apply"}`);
+      }
+    } catch (err) {
+      alert("Failed to apply. Please try again.");
+    } finally {
+      setApplyingJobIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+    }
   };
 
   const handleFilterChange = (key: string, value: any) => {
@@ -244,7 +334,7 @@ export default function CareerPathways() {
     setSelectedJob(null);
   };
 
-  if (isLoading && page === 1) {
+  if ((isLoading && page === 1) || isLoadingApplications) {
     return (
       <AppLayout>
         <Loader />
@@ -379,10 +469,11 @@ export default function CareerPathways() {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Bookmark
-                        className={`w-4 h-4 ${savedJobs.includes(career.id)
-                          ? "fill-current text-primary"
-                          : ""
-                          }`}
+                        className={`w-4 h-4 ${
+                          savedJobs.includes(career.id)
+                            ? "fill-current text-primary"
+                            : ""
+                        }`}
                       />
                     </Button>
                   </div>
@@ -423,7 +514,7 @@ export default function CareerPathways() {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex items-center justify-between pt-4 border-t space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -432,6 +523,27 @@ export default function CareerPathways() {
                     View Details
                     <ExternalLink className="w-3 h-3 ml-2" />
                   </Button>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      handleApply(career.id, career.title, career.matchScore)
+                    }
+                    disabled={
+                      appliedJobs.includes(career.id) ||
+                      applyingJobIds.has(career.id)
+                    }
+                  >
+                    {applyingJobIds.has(career.id) ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        <span>Applying...</span>
+                      </div>
+                    ) : appliedJobs.includes(career.id) ? (
+                      "Applied"
+                    ) : (
+                      "Apply Now"
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -439,6 +551,25 @@ export default function CareerPathways() {
         </div>
 
         <JobDetailsModal job={selectedJob} onClose={closeJobDetails} />
+
+        {/* Success Modal */}
+        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <span>Application Submitted!</span>
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                Your application for the position has been successfully
+                submitted. You'll hear back from the recruiter soon.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center">
+              <Button onClick={() => setShowSuccessModal(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {isLoading && (
           <div className="text-center py-4">

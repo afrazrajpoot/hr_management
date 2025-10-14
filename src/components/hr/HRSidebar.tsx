@@ -103,6 +103,11 @@ export default function HRSidebar({
       icon: FileText,
     },
     {
+      name: "Jobs",
+      href: "/hr-dashboard/jobs",
+      icon: FileText,
+    },
+    {
       name: "Profile",
       href: "/hr-dashboard/profile",
       icon: User,
