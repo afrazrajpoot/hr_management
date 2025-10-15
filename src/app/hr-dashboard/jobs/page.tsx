@@ -43,13 +43,20 @@ interface Job {
   applications: Application[];
 }
 
+interface SelectedRecommendation {
+  recommendation: string | null;
+  applicationId: string;
+  userId: string;
+  jobId: string;
+}
+
 export default function HRJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedRecommendation, setSelectedRecommendation] = useState<
-    string | null
-  >(null);
+  const [selectedRecommendation, setSelectedRecommendation] =
+    useState<SelectedRecommendation | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -75,14 +82,137 @@ export default function HRJobsPage() {
     }
   };
 
-  const openRecommendationModal = (recommendation: string | null) => {
+  const openRecommendationModal = (
+    recommendation: string | null,
+    applicationId: string,
+    userId: string,
+    jobId: string
+  ) => {
     if (recommendation) {
-      setSelectedRecommendation(recommendation);
+      setSelectedRecommendation({
+        recommendation,
+        applicationId,
+        userId,
+        jobId,
+      });
     }
   };
 
   const closeRecommendationModal = () => {
     setSelectedRecommendation(null);
+  };
+
+  const refreshRecommendation = async () => {
+    if (!selectedRecommendation) return;
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/applications`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: selectedRecommendation.userId,
+            jobId: selectedRecommendation.jobId,
+            application_id: selectedRecommendation.applicationId,
+            hrId: session?.user?.id,
+          }),
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedRecommendation({
+          ...selectedRecommendation,
+          recommendation: data.application.aiRecommendation,
+        });
+        await fetchJobs();
+      } else {
+        console.error("Failed to refresh recommendation");
+      }
+    } catch (err) {
+      console.error("Error refreshing recommendation:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Helper function to clean and render text
+  const cleanAndRenderText = (text: string | null) => {
+    if (!text) {
+      return (
+        <p className="text-muted-foreground">No recommendation available.</p>
+      );
+    }
+
+    try {
+      // Remove markdown headers, asterisks, and emoji
+      let cleanedText = text
+        .replace(/^#{1,6}\s+/gm, "") // Remove # headers
+        .replace(/\*\*/g, "") // Remove bold **text**
+        .replace(/\*/g, "") // Remove single asterisks
+        .replace(/^- /gm, "• ") // Convert dashes to bullets
+        .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝/g, "") // Remove emojis
+        .replace(/\n\n+/g, "\n\n"); // Clean multiple newlines
+
+      // Split into lines and render
+      const lines = cleanedText.split("\n").filter((line) => line.trim());
+
+      return (
+        <div className="space-y-4 text-sm leading-8">
+          {lines.map((line, idx) => {
+            const trimmedLine = line.trim();
+
+            // Section headers (bold looking lines)
+            if (
+              trimmedLine.match(
+                /^(Summary|Strengths|Improvements|Weaknesses|Overall|Recommendation|Match Analysis|Key Points)/i
+              )
+            ) {
+              return (
+                <div key={idx}>
+                  <h3 className="font-semibold text-base text-blue-900 dark:text-blue-200 mb-3 mt-4">
+                    {trimmedLine}
+                  </h3>
+                </div>
+              );
+            }
+
+            // Bullet points
+            if (trimmedLine.startsWith("•")) {
+              return (
+                <div key={idx} className="flex gap-3 ml-6 leading-8">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">
+                    •
+                  </span>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {trimmedLine.substring(1).trim()}
+                  </p>
+                </div>
+              );
+            }
+
+            // Regular paragraphs
+            return (
+              <p
+                key={idx}
+                className="text-gray-700 dark:text-gray-300 leading-8"
+              >
+                {trimmedLine}
+              </p>
+            );
+          })}
+        </div>
+      );
+    } catch (err) {
+      console.error("Error rendering text:", err);
+      return (
+        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto">
+          {text}
+        </pre>
+      );
+    }
   };
 
   if (status === "loading" || isLoading) {
@@ -207,7 +337,12 @@ export default function HRJobsPage() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() =>
-                                  openRecommendationModal(app.aiRecommendation)
+                                  openRecommendationModal(
+                                    app.aiRecommendation,
+                                    app.id,
+                                    app.user.id,
+                                    job.id
+                                  )
                                 }
                               >
                                 AI Recommendation
@@ -230,17 +365,28 @@ export default function HRJobsPage() {
           open={!!selectedRecommendation}
           onOpenChange={closeRecommendationModal}
         >
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>AI Recommendation</DialogTitle>
-              <DialogDescription>
-                Generated analysis of the candidate's fit for the role.
-              </DialogDescription>
+              <div className="flex items-center justify-between w-full pr-6">
+                <div>
+                  <DialogTitle>AI Recommendation</DialogTitle>
+                  <DialogDescription>
+                    Generated analysis of the candidate's fit for the role.
+                  </DialogDescription>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={refreshRecommendation}
+                  disabled={isRefreshing}
+                  className="flex-shrink-0"
+                >
+                  {isRefreshing ? "Refreshing..." : "Refresh"}
+                </Button>
+              </div>
             </DialogHeader>
-            <div className="mt-4">
-              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto">
-                {selectedRecommendation || "No recommendation available."}
-              </pre>
+            <div className="mt-6 bg-white dark:bg-slate-950 p-8 rounded-lg border border-blue-100 dark:border-blue-900 shadow-sm">
+              {cleanAndRenderText(selectedRecommendation?.recommendation)}
             </div>
           </DialogContent>
         </Dialog>

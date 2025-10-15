@@ -40,6 +40,8 @@ interface JobFormData {
   salary: string;
   type: string;
   skills: string; // Comma-separated for input, will be parsed to array
+  companyName: string;
+  companyAbout: string;
 }
 
 export default function UploadJobsPage() {
@@ -55,9 +57,13 @@ export default function UploadJobsPage() {
     salary: "",
     type: "FULL_TIME",
     skills: "",
+    companyName: "",
+    companyAbout: "",
   });
   const [generateLoading, setGenerateLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewDescription, setPreviewDescription] = useState("");
   const { data: session } = useSession<any>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,6 +136,19 @@ export default function UploadJobsPage() {
     setFormData((prev) => ({ ...prev, type: value }));
   };
 
+  const processDescriptionForDisplay = (desc: string): string => {
+    let processed = desc
+      // Remove hashtags for headers
+      .replace(/^(#{1,6})\s+/gm, "")
+      // Replace asterisks and dashes for bullets with a bullet symbol, remove extra *
+      .replace(/^\s*[\*\-]\s+/gm, "• ")
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Wrap **bold** in <strong>
+      .replace(/\*(?!\s)/g, "") // Remove standalone *
+      .replace(/#/g, ""); // Remove any remaining #
+
+    return processed;
+  };
+
   const generateDescription = async () => {
     if (!formData.title) {
       toast.error("Please enter a job title first");
@@ -149,6 +168,8 @@ export default function UploadJobsPage() {
             salary: formData.salary ? parseInt(formData.salary) : null,
             type: formData.type,
             skills: formData.skills,
+            company_name: formData.companyName || null,
+            company_about: formData.companyAbout || null,
           }),
         }
       );
@@ -156,13 +177,20 @@ export default function UploadJobsPage() {
       if (!res.ok) throw new Error("Failed to generate description");
 
       const { description } = await res.json();
-      setFormData((prev) => ({ ...prev, description }));
-      toast.success("Description generated successfully!");
+      setPreviewDescription(description);
+      setIsPreviewModalOpen(true);
+      toast.success("Description generated! Preview below.");
     } catch (error: any) {
       toast.error(error.message || "Failed to generate description");
     } finally {
       setGenerateLoading(false);
     }
+  };
+
+  const handleUseDescription = () => {
+    setFormData((prev) => ({ ...prev, description: previewDescription }));
+    setIsPreviewModalOpen(false);
+    toast.success("Description applied to the form!");
   };
 
   const handleCreateJob = async () => {
@@ -208,6 +236,8 @@ export default function UploadJobsPage() {
         salary: "",
         type: "FULL_TIME",
         skills: "",
+        companyName: "",
+        companyAbout: "",
       });
       setIsCreateModalOpen(false);
       // Optionally refresh jobs list here
@@ -376,14 +406,14 @@ export default function UploadJobsPage() {
 
         {/* Create Job Modal */}
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Job</DialogTitle>
               <DialogDescription>
                 Fill in the details to create a new job posting.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="title">Job Title *</Label>
                 <Input
@@ -392,7 +422,84 @@ export default function UploadJobsPage() {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g., Senior Software Engineer"
+                  className="mt-2"
                   required
+                />
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Remote or Lahore, PK"
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="salary">Salary (Optional)</Label>
+                <Input
+                  id="salary"
+                  name="salary"
+                  type="number"
+                  value={formData.salary}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 50000"
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="companyName">Company Name</Label>
+                <Input
+                  id="companyName"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Tech Innovators Inc."
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="companyAbout">About Company</Label>
+                <Textarea
+                  id="companyAbout"
+                  name="companyAbout"
+                  value={formData.companyAbout}
+                  onChange={handleInputChange}
+                  placeholder="Brief description of the company..."
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="type" className="mb-2">
+                  Job Type
+                </Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={handleSelectChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FULL_TIME">Full Time</SelectItem>
+                    <SelectItem value="PART_TIME">Part Time</SelectItem>
+                    <SelectItem value="CONTRACT">Contract</SelectItem>
+                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="skills">Skills (comma-separated)</Label>
+                <Input
+                  id="skills"
+                  name="skills"
+                  value={formData.skills}
+                  onChange={handleInputChange}
+                  placeholder="e.g., JavaScript, React, Node.js"
+                  className="mt-2"
                 />
               </div>
               <div className="space-y-2">
@@ -426,54 +533,6 @@ export default function UploadJobsPage() {
                   Click the sparkles icon to generate description with AI
                 </p>
               </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Remote or Lahore, PK"
-                />
-              </div>
-              <div>
-                <Label htmlFor="salary">Salary (Optional)</Label>
-                <Input
-                  id="salary"
-                  name="salary"
-                  type="number"
-                  value={formData.salary}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 50000"
-                />
-              </div>
-              <div>
-                <Label htmlFor="type">Job Type</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={handleSelectChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select job type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="FULL_TIME">Full Time</SelectItem>
-                    <SelectItem value="PART_TIME">Part Time</SelectItem>
-                    <SelectItem value="CONTRACT">Contract</SelectItem>
-                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="skills">Skills (comma-separated)</Label>
-                <Input
-                  id="skills"
-                  name="skills"
-                  value={formData.skills}
-                  onChange={handleInputChange}
-                  placeholder="e.g., JavaScript, React, Node.js"
-                />
-              </div>
             </div>
             <DialogFooter className="mt-6">
               <Button
@@ -497,6 +556,55 @@ export default function UploadJobsPage() {
                 ) : (
                   "Create Job"
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Preview Description Modal */}
+        <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-[90vw]">
+            <DialogHeader>
+              <DialogTitle>Job Description Preview</DialogTitle>
+              <DialogDescription>
+                Review the generated description in a professional layout. You
+                can apply it to the form or close to edit manually.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[60vh] overflow-y-auto p-6 rounded-lg border shadow-sm">
+              <div className="mb-6 p-4 bg-muted/20 rounded-md">
+                <h2 className="text-2xl font-bold mb-2">{formData.title}</h2>
+                <p className="text-lg text-muted-foreground mb-1">
+                  {formData.location || "Remote"} | {formData.type} |{" "}
+                  {formData.salary
+                    ? `$${parseInt(formData.salary).toLocaleString()}`
+                    : "Competitive Salary"}
+                </p>
+                {formData.companyName && (
+                  <p className="text-lg font-semibold">
+                    {formData.companyName}
+                  </p>
+                )}
+              </div>
+              <div
+                className="prose prose-sm max-w-none whitespace-pre-wrap leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: processDescriptionForDisplay(
+                    previewDescription
+                  ).replace(/\n/g, "<br>"),
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPreviewModalOpen(false)}
+              >
+                Close Preview
+              </Button>
+              <Button type="button" onClick={handleUseDescription}>
+                Use This Description
               </Button>
             </DialogFooter>
           </DialogContent>
