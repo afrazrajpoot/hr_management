@@ -116,6 +116,15 @@ export default function CareerPathways() {
   const [getRecommendations, { data, isLoading, isError, error, isSuccess }] =
     useCreateCareerPathwayRecommendationsMutation();
 
+  // Truncate description for card preview
+  const truncateDescription = (
+    description: string,
+    maxLength: number = 120
+  ) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength).trim() + "...";
+  };
+
   // Fetch applied jobs on component mount
   useEffect(() => {
     const fetchAppliedJobs = async () => {
@@ -480,8 +489,8 @@ export default function CareerPathways() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {career.description}
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {truncateDescription(career.description)}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center">

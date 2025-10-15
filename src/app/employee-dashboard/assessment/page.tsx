@@ -228,9 +228,9 @@ export default function Assessment() {
       setError(`Failed to analyze assessment: ${err.message}`);
       setAnalysisResults(null);
       // Show error toast
-      toast.error("Failed to submit assessment", {
-        description: err.message,
-      });
+      // toast.error("Failed to submit assessment", {
+      //   description: err.message,
+      // });
     } finally {
       setIsSubmitting(false);
       setTimeout(() => {
