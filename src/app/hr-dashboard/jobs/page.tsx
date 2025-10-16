@@ -385,7 +385,7 @@ export default function HRJobsPage() {
                 </Button>
               </div>
             </DialogHeader>
-            <div className="mt-6 bg-white dark:bg-slate-950 p-8 rounded-lg border border-blue-100 dark:border-blue-900 shadow-sm">
+            <div className="mt-6 p-8 rounded-lg border  shadow-sm">
               {cleanAndRenderText(selectedRecommendation?.recommendation)}
             </div>
           </DialogContent>
