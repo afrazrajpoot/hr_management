@@ -20,9 +20,18 @@ import {
 interface JobDetailsModalProps {
   job: any | null;
   onClose: () => void;
+  onApply?: (jobId: string, jobTitle: string, matchScore: number) => void;
+  appliedJobs: string[];
+  applyingJobIds: Set<string>;
 }
 
-const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
+const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
+  job,
+  onClose,
+  onApply,
+  appliedJobs,
+  applyingJobIds,
+}) => {
   // Define displayable fields with their labels and icons
   const fieldConfig: {
     [key: string]: {
@@ -85,6 +94,21 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
     }
   };
 
+  const isApplied = appliedJobs.includes(job.id || "");
+  const isApplying = applyingJobIds.has(job.id || "");
+
+  const handleApplyClick = () => {
+    if (!onApply) {
+      alert("Apply functionality not implemented");
+      return;
+    }
+    if (isApplied) {
+      alert("You have already applied for this job.");
+      return;
+    }
+    onApply(job.id || "", job.title || "", job.matchScore || 0);
+  };
+
   return (
     <Dialog open={!!job} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
@@ -119,9 +143,49 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
                 <Briefcase className="w-5 h-5 mr-2 text-primary" />
                 Description
               </h4>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {job.description}
-              </p>
+              <div className="text-muted-foreground leading-relaxed space-y-3">
+                {job.description
+                  .split("\n")
+                  .map((paragraph: string, idx: number) => {
+                    const trimmed = paragraph.trim().replace(/\*\*/g, "");
+                    if (!trimmed) return null;
+
+                    // Check if it's a bullet point
+                    if (trimmed.match(/^[\-\*\•]/)) {
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-start space-x-2 ml-4"
+                        >
+                          <span className="text-primary mt-1.5">•</span>
+                          <span>{trimmed.replace(/^[\-\*\•]\s*/, "")}</span>
+                        </div>
+                      );
+                    }
+
+                    // Check if it's a heading (all caps or ends with colon)
+                    if (
+                      trimmed === trimmed.toUpperCase() ||
+                      trimmed.endsWith(":")
+                    ) {
+                      return (
+                        <h5
+                          key={idx}
+                          className="font-bold text-foreground mt-4 first:mt-0"
+                        >
+                          {trimmed}
+                        </h5>
+                      );
+                    }
+
+                    // Regular paragraph
+                    return (
+                      <p key={idx} className="text-sm">
+                        {trimmed}
+                      </p>
+                    );
+                  })}
+              </div>
             </div>
           )}
 
@@ -193,9 +257,19 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose }) => {
           </Button>
           <Button
             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8 flex-1 sm:flex-none transition-all duration-200"
-            onClick={() => alert("Apply functionality not implemented")}
+            onClick={handleApplyClick}
+            disabled={isApplied || isApplying}
           >
-            Apply Now
+            {isApplying ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <span>Applying...</span>
+              </div>
+            ) : isApplied ? (
+              "Applied"
+            ) : (
+              "Apply Now"
+            )}
           </Button>
         </div>
       </DialogContent>

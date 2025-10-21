@@ -559,7 +559,13 @@ export default function CareerPathways() {
           ))}
         </div>
 
-        <JobDetailsModal job={selectedJob} onClose={closeJobDetails} />
+        <JobDetailsModal
+          job={selectedJob}
+          onClose={closeJobDetails}
+          onApply={handleApply}
+          appliedJobs={appliedJobs}
+          applyingJobIds={applyingJobIds}
+        />
 
         {/* Success Modal */}
         <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>

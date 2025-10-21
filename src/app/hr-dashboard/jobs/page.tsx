@@ -56,6 +56,7 @@ export default function HRJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedRecommendation, setSelectedRecommendation] =
     useState<SelectedRecommendation | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { data: session, status } = useSession();
 
@@ -102,6 +103,14 @@ export default function HRJobsPage() {
     setSelectedRecommendation(null);
   };
 
+  const openJobDescriptionModal = (job: Job) => {
+    setSelectedJob(job);
+  };
+
+  const closeJobDescriptionModal = () => {
+    setSelectedJob(null);
+  };
+
   const refreshRecommendation = async () => {
     if (!selectedRecommendation) return;
     setIsRefreshing(true);
@@ -138,7 +147,29 @@ export default function HRJobsPage() {
     }
   };
 
-  // Helper function to clean and render text
+  // Helper function to clean markdown from text
+  const cleanMarkdown = (text: string | null): string => {
+    if (!text) return "";
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove **bold**
+      .replace(/\*(.*?)\*/g, "$1") // Remove *italic*
+      .replace(/^#{1,6}\s+/gm, "") // Remove # headers
+      .replace(/^- /gm, "• ") // Convert - to •
+      .replace(/^\* /gm, "• ") // Convert * to •
+      .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝|📍|💼|🌟/g, "") // Remove common emojis
+      .replace(/\n\n+/g, "\n\n") // Clean multiple newlines
+      .trim();
+  };
+
+  // Helper function to format short description
+  const formatShortDescription = (text: string | null): string => {
+    if (!text) return "";
+    const cleaned = cleanMarkdown(text);
+    const lines = cleaned.split("\n");
+    return lines.slice(0, 2).join("\n");
+  };
+
+  // Helper function to clean and render AI recommendation text
   const cleanAndRenderText = (text: string | null) => {
     if (!text) {
       return (
@@ -215,6 +246,119 @@ export default function HRJobsPage() {
     }
   };
 
+  // Helper function to format job description professionally
+  const formatDescription = (text: string | null) => {
+    if (!text) {
+      return <p className="text-muted-foreground">No description available.</p>;
+    }
+
+    try {
+      let cleanedText = cleanMarkdown(text);
+
+      // Split into lines
+      const lines = cleanedText.split("\n").filter((line) => line.trim());
+
+      return (
+        <div className="space-y-6 text-sm leading-relaxed">
+          {lines.map((line, idx) => {
+            const trimmedLine = line.trim();
+
+            // Section headers (lines that look like titles, e.g., "Job Summary", "About the Role")
+            if (
+              trimmedLine.match(
+                /^(Job Summary|About the Role|Key Responsibilities|Qualifications|What We Offer|Our Commitment|How to Apply)/i
+              )
+            ) {
+              return (
+                <div key={idx}>
+                  <h3 className="font-semibold text-base text-foreground mb-3 mt-6 border-b pb-1">
+                    {trimmedLine}
+                  </h3>
+                </div>
+              );
+            }
+
+            // Bullet points (•, -, *)
+            if (trimmedLine.match(/^(•|-|\*)\s/)) {
+              // Group consecutive bullets into a list
+              let bulletLines: string[] = [trimmedLine];
+              let nextIdx = idx + 1;
+              while (
+                nextIdx < lines.length &&
+                lines[nextIdx].trim().match(/^(•|-|\*)\s/)
+              ) {
+                bulletLines.push(lines[nextIdx].trim());
+                nextIdx++;
+              }
+              idx = nextIdx - 1; // Adjust index for the loop
+
+              return (
+                <ul
+                  key={idx}
+                  className="ml-6 space-y-2 list-disc text-gray-700 dark:text-gray-300"
+                >
+                  {bulletLines.map((bullet, bulletIdx) => {
+                    const bulletText = bullet
+                      .replace(/^(•|-|\*)\s*/, "")
+                      .trim();
+                    if (!bulletText) return null;
+                    return <li key={bulletIdx}>{bulletText}</li>;
+                  })}
+                </ul>
+              );
+            }
+
+            // Numbered lists
+            if (trimmedLine.match(/^\d+\.\s/)) {
+              // Group consecutive numbered items
+              let numLines: string[] = [trimmedLine];
+              let nextIdx = idx + 1;
+              while (
+                nextIdx < lines.length &&
+                lines[nextIdx].trim().match(/^\d+\.\s/)
+              ) {
+                numLines.push(lines[nextIdx].trim());
+                nextIdx++;
+              }
+              idx = nextIdx - 1; // Adjust index
+
+              return (
+                <ol
+                  key={idx}
+                  className="ml-6 space-y-2 list-decimal text-gray-700 dark:text-gray-300"
+                >
+                  {numLines.map((numItem, numIdx) => {
+                    const numText = numItem.replace(/^\d+\.\s*/, "").trim();
+                    if (!numText) return null;
+                    return <li key={numIdx}>{numText}</li>;
+                  })}
+                </ol>
+              );
+            }
+
+            // Regular paragraphs (non-empty lines not matching above)
+            if (trimmedLine) {
+              return (
+                <p key={idx} className="text-gray-700 dark:text-gray-300">
+                  {trimmedLine}
+                </p>
+              );
+            }
+
+            return null;
+          })}
+        </div>
+      );
+    } catch (err) {
+      console.error("Error formatting description:", err);
+      return (
+        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto">
+          {text}
+        </pre>
+      );
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <HRLayout>
@@ -262,103 +406,136 @@ export default function HRJobsPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {jobs.map((job) => (
-              <Card key={job.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-2">
-                        <span>{job.type.replace("_", " ")}</span>
-                        {job.location && <span>• {job.location}</span>}
-                        {job.salary && (
-                          <span>• ${job.salary.toLocaleString()}</span>
-                        )}
-                        <span>
-                          • {new Date(job.createdAt).toLocaleDateString()}
-                        </span>
+            {jobs.map((job) => {
+              const firstTwoLines = formatShortDescription(job.description);
+              const hasMoreLines = job.description.split("\n").length > 2;
+              return (
+                <Card key={job.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl">{job.title}</CardTitle>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-2">
+                          <span>{job.type.replace("_", " ")}</span>
+                          {job.location && <span>• {job.location}</span>}
+                          {job.salary && (
+                            <span>• ${job.salary.toLocaleString()}</span>
+                          )}
+                          <span>
+                            • {new Date(job.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
+                      <Badge
+                        variant={
+                          job.status === "OPEN" ? "default" : "secondary"
+                        }
+                      >
+                        {job.status}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={job.status === "OPEN" ? "default" : "secondary"}
-                    >
-                      {job.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {job.description}
-                  </p>
-                  <div className="space-y-4">
-                    <h4 className="font-medium flex items-center space-x-2">
-                      <User className="w-4 h-4" />
-                      <span>Applications ({job.applications.length})</span>
-                    </h4>
-                    {job.applications.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No applications yet.
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <p className="text-sm text-muted-foreground whitespace-pre-line">
+                        {firstTwoLines}
                       </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {job.applications.map((app) => (
-                          <div
-                            key={app.id}
-                            className="flex items-center justify-between p-3 border rounded-lg"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="flex-shrink-0">
-                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                                  <User className="w-4 h-4 text-background" />
+                      {hasMoreLines && (
+                        <Button
+                          size="sm"
+                          variant="link"
+                          onClick={() => openJobDescriptionModal(job)}
+                          className="p-0 h-auto -mt-1"
+                        >
+                          Read more
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="font-medium flex items-center space-x-2">
+                        <User className="w-4 h-4" />
+                        <span>Applications ({job.applications.length})</span>
+                      </h4>
+                      {job.applications.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No applications yet.
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {job.applications.map((app) => (
+                            <div
+                              key={app.id}
+                              className="flex items-center justify-between p-3 border rounded-lg"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="flex-shrink-0">
+                                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                                    <User className="w-4 h-4 text-background" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {app.user.firstName} {app.user.lastName}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {app.user.email} •{" "}
+                                    {app.user.position[0] || "N/A"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Dept: {app.user.department[0] || "N/A"} •
+                                    Applied:{" "}
+                                    {new Date(
+                                      app.createdAt
+                                    ).toLocaleDateString()}
+                                  </p>
+                                  {app.scoreMatch && (
+                                    <Badge variant="outline" className="mt-1">
+                                      Match Score: {app.scoreMatch}%
+                                    </Badge>
+                                  )}
                                 </div>
                               </div>
-                              <div>
-                                <p className="font-medium">
-                                  {app.user.firstName} {app.user.lastName}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {app.user.email} •{" "}
-                                  {app.user.position[0] || "N/A"}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Dept: {app.user.department[0] || "N/A"} •
-                                  Applied:{" "}
-                                  {new Date(app.createdAt).toLocaleDateString()}
-                                </p>
-                                {app.scoreMatch && (
-                                  <Badge variant="outline" className="mt-1">
-                                    Match Score: {app.scoreMatch}%
-                                  </Badge>
-                                )}
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    openRecommendationModal(
+                                      app.aiRecommendation,
+                                      app.id,
+                                      app.user.id,
+                                      job.id
+                                    )
+                                  }
+                                >
+                                  AI Recommendation
+                                </Button>
+                                <Button size="sm">Contact</Button>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  openRecommendationModal(
-                                    app.aiRecommendation,
-                                    app.id,
-                                    app.user.id,
-                                    job.id
-                                  )
-                                }
-                              >
-                                AI Recommendation
-                              </Button>
-                              <Button size="sm">Contact</Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
+
+        {/* Job Description Modal */}
+        <Dialog open={!!selectedJob} onOpenChange={closeJobDescriptionModal}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{selectedJob?.title}</DialogTitle>
+              <DialogDescription>Full job description.</DialogDescription>
+            </DialogHeader>
+            <div className="mt-6">
+              {formatDescription(selectedJob?.description)}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* AI Recommendation Modal */}
         <Dialog
