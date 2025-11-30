@@ -21,6 +21,11 @@ model User {
   image         String?
   position      String[] 
 
+  // Auth fields
+  verificationToken String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
   department    String[]    // 👈 now it's an array of strings
   hrId          String?
   salary        String?

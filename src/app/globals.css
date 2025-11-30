@@ -263,7 +263,7 @@ html {
     color-scheme: light;
 }
 
-.dark html {
+html.dark {
     color-scheme: dark;
 }
 

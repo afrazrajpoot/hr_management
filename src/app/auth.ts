@@ -6,32 +6,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-
-// Force IPv4 and robust connection settings
-const createHttpsAgent = () => {
-  const https = require('https');
-  return new https.Agent({
-    family: 4, // IPv4 only
-    timeout: 45000, // 45 seconds
-    keepAlive: true,
-    keepAliveMsecs: 30000,
-    maxSockets: 50,
-    maxFreeSockets: 10,
-    scheduling: 'fifo',
-  });
-};
-
-// Override DNS to always prefer IPv4
-const dns = require('dns');
-const originalLookup = dns.lookup;
-dns.lookup = function (hostname: string, options: any, callback?: any) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-  options = { ...options, family: 4, all: false };
-  return originalLookup.call(this, hostname, options, callback);
-};
+import { sendVerificationEmail } from '@/lib/mail';
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -69,7 +44,8 @@ export const authOptions: AuthOptions = {
 
         if (!user) {
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
-      
+          const verificationToken = crypto.randomBytes(32).toString('hex');
+
           user = await prisma.user.create({
             data: {
               email: credentials.email,
@@ -78,8 +54,18 @@ export const authOptions: AuthOptions = {
               phoneNumber: credentials.phoneNumber || '',
               password: hashedPassword,
               role,
+              verificationToken,
             },
           });
+
+          // Send verification email - simplified
+          try {
+
+            await sendVerificationEmail(user.email!, verificationToken);
+          } catch (error) {
+            console.error('Failed to send verification email:', error);
+            // Don't throw error - user creation should still succeed
+          }
         } else {
           if (!user.password) {
             console.error('User has no password set:', credentials.email);
@@ -94,7 +80,6 @@ export const authOptions: AuthOptions = {
 
           // Update user fields if provided
           if (credentials.firstName || credentials.lastName || credentials.phoneNumber) {
-          
             user = await prisma.user.update({
               where: { email: credentials.email },
               data: {
@@ -159,21 +144,14 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      httpOptions: {
-        timeout: 45000,
-        family: 4,
-        agent: createHttpsAgent(),
-      },
+      // Remove all custom httpOptions - let NextAuth handle it
       authorization: {
         params: {
           prompt: 'consent',
           access_type: 'offline',
           response_type: 'code',
-          state: crypto.randomBytes(16).toString('hex'),
         },
       },
-      token: 'https://oauth2.googleapis.com/token',
-      userinfo: 'https://www.googleapis.com/oauth2/v2/userinfo',
     }),
   ],
   pages: {
@@ -220,22 +198,15 @@ export const authOptions: AuthOptions = {
           userInDb = await prisma.user.create({
             data: {
               email: profile.email,
-              firstName: profile.name || profile.email.split('@')[0],
-              lastName: '',
+              firstName: profile.given_name || profile.name || profile.email.split('@')[0],
+              lastName: profile.family_name || '',
               phoneNumber: '',
               password: hashedPassword,
               role: 'Employee',
               image: profile.picture,
-              emailVerified: null,
+              emailVerified: new Date(),
             },
           });
-        } else {
-          if (userInDb.role !== 'Employee') {
-            userInDb = await prisma.user.update({
-              where: { id: userInDb.id },
-              data: { role: 'Employee' },
-            });
-          }
         }
 
         await prisma.account.upsert({
