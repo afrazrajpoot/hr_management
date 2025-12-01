@@ -368,7 +368,7 @@ const SignInForm = () => {
                   </Label>
                 </div>
                 <Link
-                  href="/forgot-password"
+                  href="/auth/forgot-password"
                   className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-300"
                 >
                   Forgot password?
