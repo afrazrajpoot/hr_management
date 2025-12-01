@@ -15,12 +15,13 @@ model User {
   email         String?     @unique
   password      String?
   role          String?
+  paid          Boolean     @default(false)  // 👈 Added field with default false
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   emailVerified DateTime?
   image         String?
   position      String[] 
-
+  
   // Auth fields
   verificationToken String?
   resetToken       String?

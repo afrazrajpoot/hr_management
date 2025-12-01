@@ -125,6 +125,21 @@ interface Assessment {
   risk_analysis: any;
 }
 
+const isValid = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') {
+    const lower = value.toLowerCase().trim();
+    return lower !== '' && lower !== 'not specified' && lower !== 'none identified' && lower !== 'n/a';
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0 && value.some(item => isValid(item));
+  }
+  if (typeof value === 'object') {
+    return Object.keys(value).length > 0 && Object.values(value).some(item => isValid(item));
+  }
+  return true;
+};
+
 export default function Results() {
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
   const { data: session } = useSession();
@@ -249,10 +264,7 @@ export default function Results() {
                       Overall Genius Score
                     </h2>
                     <div className="text-4xl font-bold text-primary mb-2">
-                      {
-                        selectedAssessment?.risk_analysis?.scores
-                          ?.genius_factor_score
-                      }
+                      {selectedAssessment.geniusFactorScore}
                       /100
                     </div>
                     <p className="text-muted-foreground">
@@ -264,10 +276,7 @@ export default function Results() {
                         }
                       </strong>{" "}
                       with a score of{" "}
-                      {
-                        selectedAssessment?.risk_analysis?.scores
-                          ?.genius_factor_score
-                      }
+                      {selectedAssessment.geniusFactorScore}
                     </p>
                   </div>
                   <div className="hidden sm:block">
@@ -338,53 +347,57 @@ export default function Results() {
 
               {/* Strengths & Growth Areas */}
               <div className="space-y-6">
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <Award className="w-5 h-5 mr-2" />
-                      Key Strengths
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 gap-2">
-                      {selectedAssessment.geniusFactorProfileJson.key_strengths.map(
-                        (strength, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center p-2 rounded-lg bg-green-50/50 dark:bg-green-900/50 border border-green-200 dark:border-green-800"
-                          >
-                            <Target className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
-                            <span className="text-sm">{strength}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                {isValid(selectedAssessment.geniusFactorProfileJson.key_strengths) && (
+                  <Card className="card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-black dark:text-white">
+                        <Award className="w-5 h-5 mr-2" />
+                        Key Strengths
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 gap-2">
+                        {selectedAssessment.geniusFactorProfileJson.key_strengths?.map(
+                          (strength, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center p-2 rounded-lg bg-green-50/50 dark:bg-green-900/50 border border-green-200 dark:border-green-800"
+                            >
+                              <Target className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                              <span className="text-sm">{strength}</span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <TrendingUp className="w-5 h-5 mr-2" />
-                      Growth Opportunities
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 gap-2">
-                      {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents.map(
-                        (area, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center p-2 rounded-lg bg-amber-50/50 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800"
-                          >
-                            <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2" />
-                            <span className="text-sm">{area}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents) && (
+                  <Card className="card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-black dark:text-white">
+                        <TrendingUp className="w-5 h-5 mr-2" />
+                        Growth Opportunities
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 gap-2">
+                        {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents?.map(
+                          (area, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center p-2 rounded-lg bg-amber-50/50 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800"
+                            >
+                              <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2" />
+                              <span className="text-sm">{area}</span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
 
@@ -444,407 +457,17 @@ export default function Results() {
               </Card>
 
               {/* Energy Sources */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Energy Sources
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="list-disc pl-5 space-y-2">
-                    {selectedAssessment.geniusFactorProfileJson.energy_sources.map(
-                      (source, index) => (
-                        <li key={index} className="text-sm">
-                          {source}
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Current Role Alignment Analysis */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <AlertCircle className="w-5 h-5 mr-2" />
-                    Current Role Alignment Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm">
-                    {
-                      selectedAssessment.currentRoleAlignmentAnalysisJson
-                        .assessment
-                    }
-                  </p>
-                  <div className="flex items-center">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    <span>
-                      Alignment Score:{" "}
-                      {
-                        selectedAssessment.currentRoleAlignmentAnalysisJson
-                          .alignment_score
-                      }
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Strengths Utilized:
-                    </h4>
+              {isValid(selectedAssessment.geniusFactorProfileJson.energy_sources) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      Energy Sources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized.map(
-                        (strength, index) => (
-                          <li key={index} className="text-sm">
-                            {strength}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div className="flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    <span>
-                      Retention Risk Level:{" "}
-                      {
-                        selectedAssessment.currentRoleAlignmentAnalysisJson
-                          .retention_risk_level
-                      }
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Underutilized Talents:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents.map(
-                        (talent, index) => (
-                          <li key={index} className="text-sm">
-                            {talent}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Internal Career Opportunities */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <Globe className="w-5 h-5 mr-2" />
-                    Internal Career Opportunities
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Career Pathways:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {Object.entries(
-                        selectedAssessment.internalCareerOpportunitiesJson
-                          .career_pathways
-                      ).map(([track, path], index) => (
-                        <li key={index} className="text-sm">
-                          <strong>{track}:</strong> {path}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex items-center">
-                    <Globe className="w-4 h-4 mr-2" />
-                    <span>
-                      Primary Industry:{" "}
-                      {
-                        selectedAssessment.internalCareerOpportunitiesJson
-                          .primary_industry
-                      }
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Globe className="w-4 h-4 mr-2" />
-                    <span>
-                      Secondary Industry:{" "}
-                      {
-                        selectedAssessment.internalCareerOpportunitiesJson
-                          .secondary_industry
-                      }
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Transition Timeline:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {Object?.entries(
-                        selectedAssessment?.internalCareerOpportunitiesJson
-                          ?.transition_timeline
-                      ).map(([key, value], index) => (
-                        <li key={index} className="text-sm">
-                          {key.replace("_", " ")}: {value}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Recommended Departments:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.internalCareerOpportunitiesJson.recommended_departments.map(
-                        (dept, index) => (
-                          <li key={index} className="text-sm">
-                            {dept}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Specific Role Suggestions:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions.map(
-                        (role, index) => (
-                          <li key={index} className="text-sm">
-                            {role}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Required Skill Development:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.internalCareerOpportunitiesJson.required_skill_development.map(
-                        (skill, index) => (
-                          <li key={index} className="text-sm">
-                            {skill}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Retention and Mobility Strategies */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Retention and Mobility Strategies
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Development Support:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.retentionAndMobilityStrategiesJson.development_support.map(
-                        (item, index) => (
-                          <li key={index} className="text-sm">
-                            {item}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Retention Strategies:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies.map(
-                        (item, index) => (
-                          <li key={index} className="text-sm">
-                            {item}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Internal Mobility Recommendations:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations.map(
-                        (item, index) => (
-                          <li key={index} className="text-sm">
-                            {item}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Development Action Plan */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Development Action Plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      30-Day Goals:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.developmentActionPlanJson.thirty_day_goals.map(
-                        (goal, index) => (
-                          <li key={index} className="text-sm">
-                            {goal}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      90-Day Goals:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.developmentActionPlanJson.ninety_day_goals.map(
-                        (goal, index) => (
-                          <li key={index} className="text-sm">
-                            {goal}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      6-Month Goals:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.developmentActionPlanJson.six_month_goals.map(
-                        (goal, index) => (
-                          <li key={index} className="text-sm">
-                            {goal}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Networking Strategy:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.developmentActionPlanJson.networking_strategy.map(
-                        (strategy, index) => (
-                          <li key={index} className="text-sm">
-                            {strategy}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Personalized Resources */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Personalized Resources
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Affirmations:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.personalizedResourcesJson.affirmations.map(
-                        (affirmation, index) => (
-                          <li key={index} className="text-sm">
-                            {affirmation}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Learning Resources:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.personalizedResourcesJson.learning_resources.map(
-                        (resource, index) => (
-                          <li key={index} className="text-sm">
-                            {resource}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Reflection Questions:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.personalizedResourcesJson.reflection_questions.map(
-                        (question, index) => (
-                          <li key={index} className="text-sm">
-                            {question}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Mindfulness Practices:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.personalizedResourcesJson.mindfulness_practices.map(
-                        (practice, index) => (
-                          <li key={index} className="text-sm">
-                            {practice}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Data Sources and Methodology */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <MapPin className="w-5 h-5 mr-2" />
-                    Data Sources and Methodology
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm">
-                    {
-                      selectedAssessment.dataSourcesAndMethodologyJson
-                        .methodology
-                    }
-                  </p>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-black dark:text-white">
-                      Data Sources:
-                    </h4>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.dataSourcesAndMethodologyJson.data_sources.map(
+                      {selectedAssessment.geniusFactorProfileJson.energy_sources?.map(
                         (source, index) => (
                           <li key={index} className="text-sm">
                             {source}
@@ -852,9 +475,445 @@ export default function Results() {
                         )
                       )}
                     </ul>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Current Role Alignment Analysis */}
+              {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Current Role Alignment Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.assessment) && (
+                      <p className="text-sm">
+                        {selectedAssessment.currentRoleAlignmentAnalysisJson.assessment}
+                      </p>
+                    )}
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.alignment_score) && (
+                      <div className="flex items-center">
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        <span>
+                          Alignment Score:{" "}
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.alignment_score}
+                        </span>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Strengths Utilized:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized?.map(
+                            (strength, index) => (
+                              <li key={index} className="text-sm">
+                                {strength}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level) && (
+                      <div className="flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-2" />
+                        <span>
+                          Retention Risk Level:{" "}
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level}
+                        </span>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Underutilized Talents:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents?.map(
+                            (talent, index) => (
+                              <li key={index} className="text-sm">
+                                {talent}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Internal Career Opportunities */}
+              {isValid(selectedAssessment.internalCareerOpportunitiesJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <Globe className="w-5 h-5 mr-2" />
+                      Internal Career Opportunities
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.career_pathways) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Career Pathways:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {Object.entries(
+                            selectedAssessment.internalCareerOpportunitiesJson
+                              .career_pathways || {}
+                          ).map(([track, path], index) => (
+                            <li key={index} className="text-sm">
+                              <strong>{track}:</strong> {path}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.primary_industry) && (
+                      <div className="flex items-center">
+                        <Globe className="w-4 h-4 mr-2" />
+                        <span>
+                          Primary Industry:{" "}
+                          {selectedAssessment.internalCareerOpportunitiesJson.primary_industry}
+                        </span>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.secondary_industry) && (
+                      <div className="flex items-center">
+                        <Globe className="w-4 h-4 mr-2" />
+                        <span>
+                          Secondary Industry:{" "}
+                          {selectedAssessment.internalCareerOpportunitiesJson.secondary_industry}
+                        </span>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.transition_timeline) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Transition Timeline:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {Object?.entries(
+                            selectedAssessment?.internalCareerOpportunitiesJson
+                              ?.transition_timeline || {}
+                          ).map(([key, value], index) => (
+                            <li key={index} className="text-sm">
+                              {key.replace("_", " ")}: {value}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.recommended_departments) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Recommended Departments:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.internalCareerOpportunitiesJson.recommended_departments?.map(
+                            (dept, index) => (
+                              <li key={index} className="text-sm">
+                                {dept}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Specific Role Suggestions:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions?.map(
+                            (role, index) => (
+                              <li key={index} className="text-sm">
+                                {role}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.required_skill_development) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Required Skill Development:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.internalCareerOpportunitiesJson.required_skill_development?.map(
+                            (skill, index) => (
+                              <li key={index} className="text-sm">
+                                {skill}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Retention and Mobility Strategies */}
+              {isValid(selectedAssessment.retentionAndMobilityStrategiesJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Retention and Mobility Strategies
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.development_support) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Development Support:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.development_support?.map(
+                            (item, index) => (
+                              <li key={index} className="text-sm">
+                                {item}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Retention Strategies:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies?.map(
+                            (item, index) => (
+                              <li key={index} className="text-sm">
+                                {item}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Internal Mobility Recommendations:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations?.map(
+                            (item, index) => (
+                              <li key={index} className="text-sm">
+                                {item}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Development Action Plan */}
+              {isValid(selectedAssessment.developmentActionPlanJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Development Action Plan
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.developmentActionPlanJson.thirty_day_goals) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          30-Day Goals:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.developmentActionPlanJson.thirty_day_goals?.map(
+                            (goal, index) => (
+                              <li key={index} className="text-sm">
+                                {goal}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.developmentActionPlanJson.ninety_day_goals) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          90-Day Goals:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.developmentActionPlanJson.ninety_day_goals?.map(
+                            (goal, index) => (
+                              <li key={index} className="text-sm">
+                                {goal}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.developmentActionPlanJson.six_month_goals) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          6-Month Goals:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.developmentActionPlanJson.six_month_goals?.map(
+                            (goal, index) => (
+                              <li key={index} className="text-sm">
+                                {goal}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.developmentActionPlanJson.networking_strategy) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Networking Strategy:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.developmentActionPlanJson.networking_strategy?.map(
+                            (strategy, index) => (
+                              <li key={index} className="text-sm">
+                                {strategy}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Personalized Resources */}
+              {isValid(selectedAssessment.personalizedResourcesJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <BookOpen className="w-5 h-5 mr-2" />
+                      Personalized Resources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.personalizedResourcesJson.affirmations) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Affirmations:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.personalizedResourcesJson.affirmations?.map(
+                            (affirmation, index) => (
+                              <li key={index} className="text-sm">
+                                {affirmation}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.personalizedResourcesJson.learning_resources) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Learning Resources:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.personalizedResourcesJson.learning_resources?.map(
+                            (resource, index) => (
+                              <li key={index} className="text-sm">
+                                {resource}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.personalizedResourcesJson.reflection_questions) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Reflection Questions:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.personalizedResourcesJson.reflection_questions?.map(
+                            (question, index) => (
+                              <li key={index} className="text-sm">
+                                {question}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {isValid(selectedAssessment.personalizedResourcesJson.mindfulness_practices) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Mindfulness Practices:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.personalizedResourcesJson.mindfulness_practices?.map(
+                            (practice, index) => (
+                              <li key={index} className="text-sm">
+                                {practice}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Data Sources and Methodology */}
+              {isValid(selectedAssessment.dataSourcesAndMethodologyJson) && (
+                <Card className="card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-black dark:text-white">
+                      <MapPin className="w-5 h-5 mr-2" />
+                      Data Sources and Methodology
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson.methodology) && (
+                      <p className="text-sm">
+                        {selectedAssessment.dataSourcesAndMethodologyJson.methodology}
+                      </p>
+                    )}
+                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson.data_sources) && (
+                      <div>
+                        <h4 className="font-semibold mb-2 text-black dark:text-white">
+                          Data Sources:
+                        </h4>
+                        <ul className="list-disc pl-5 space-y-2">
+                          {selectedAssessment.dataSourcesAndMethodologyJson.data_sources?.map(
+                            (source, index) => (
+                              <li key={index} className="text-sm">
+                                {source}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </>
         ) : (

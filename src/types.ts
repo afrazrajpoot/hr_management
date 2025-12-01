@@ -7,6 +7,9 @@ declare module 'next-auth' {
       name: string;
       email: string;
       role: string;
+      paid: boolean;
+      hrId?: string | null;
+      department?: string[];
     };
     accessToken?: string;
     error?: string;
@@ -16,5 +19,6 @@ declare module 'next-auth' {
     id: string;
     name: string;
     role: string;
+    paid: boolean;
   }
 }

@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { sendVerificationEmail } from '@/lib/mail';
 
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as any,
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -137,6 +137,7 @@ export const authOptions: AuthOptions = {
           lastName: user.lastName,
           image: user.image,
           department: user.department,
+          paid: user.paid,
         };
       },
     }),
@@ -162,7 +163,8 @@ export const authOptions: AuthOptions = {
     maxAge: 7 * 24 * 60 * 60,
   },
   callbacks: {
-    async jwt({ token, user, account, profile }: any) {
+    async jwt({ token, user, account, profile, trigger, session }: any) {
+      // Initial sign in
       if (user && account?.provider === 'credentials') {
         const dbAccount = await prisma.account.findUnique({
           where: {
@@ -189,9 +191,11 @@ export const authOptions: AuthOptions = {
           token.image = user.image;
           token.department = user.department;
           token.emailVerified = dbUser?.emailVerified;
+          token.paid = dbUser?.paid;
         }
       }
 
+      // Google sign in
       if (account?.provider === 'google' && profile) {
         let userInDb = await prisma.user.findUnique({
           where: { email: profile.email },
@@ -211,6 +215,7 @@ export const authOptions: AuthOptions = {
               role: 'Employee',
               image: profile.picture,
               emailVerified: new Date(),
+              paid: false,
             },
           });
         }
@@ -241,6 +246,30 @@ export const authOptions: AuthOptions = {
         token.role = userInDb.role;
         token.department = userInDb.department;
         token.emailVerified = userInDb.emailVerified;
+        token.paid = userInDb.paid;
+      }
+
+      // Subsequent calls - fetch fresh data if we have a userId
+      if (!user && token.userId) {
+        const freshUser = await prisma.user.findUnique({
+          where: { id: token.userId },
+        });
+
+        if (freshUser) {
+          token.emailVerified = freshUser.emailVerified;
+          token.role = freshUser.role;
+          token.department = freshUser.department;
+          token.firstName = freshUser.firstName;
+          token.lastName = freshUser.lastName;
+          token.image = freshUser.image;
+          token.paid = freshUser.paid;
+          // Add other fields that might change and need to be reflected immediately
+        }
+      }
+
+      // Handle session update triggers (e.g. from useSession().update())
+      if (trigger === "update" && session) {
+        return { ...token, ...session.user };
       }
 
       return token;
@@ -258,6 +287,7 @@ export const authOptions: AuthOptions = {
       session.user.lastName = token.lastName;
       session.user.department = token.department;
       session.user.emailVerified = token.emailVerified;
+      session.user.paid = token.paid;
       session.accessToken = token.accessToken;
 
       switch (token.role) {

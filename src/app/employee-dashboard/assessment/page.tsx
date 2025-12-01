@@ -182,10 +182,11 @@ export default function Assessment() {
         body: JSON.stringify({
           data: partsData,
           userId: session?.user.id,
-          hrId: session?.user?.hrId,
+          hrId: session?.user?.hrId || 'individual_user',
           departement: session?.user?.department?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
+          is_paid: false,
           allAnswers,
         }),
       });
