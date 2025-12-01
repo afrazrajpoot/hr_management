@@ -186,7 +186,7 @@ export default function Assessment() {
           departement: session?.user?.department?.at(-1) || "Healthcare",
           employeeName: session?.user.name,
           employeeEmail: session?.user.email,
-          is_paid: false,
+          is_paid:session?.user.paid || false,
           allAnswers,
         }),
       });

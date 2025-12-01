@@ -42,6 +42,7 @@ export const authOptions: AuthOptions = {
           where: { email: credentials.email },
         });
 
+        // User doesn't exist - CREATE NEW USER (initial signup)
         if (!user) {
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
           const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -55,18 +56,20 @@ export const authOptions: AuthOptions = {
               password: hashedPassword,
               role,
               verificationToken,
+              emailVerified: null, // Email not verified yet for new users
             },
           });
 
-          // Send verification email - simplified
+          // Send verification email ONLY for new user signup
           try {
-
             await sendVerificationEmail(user.email!, verificationToken);
           } catch (error) {
             console.error('Failed to send verification email:', error);
             // Don't throw error - user creation should still succeed
           }
-        } else {
+        }
+        // User exists - LOGIN (not first time)
+        else {
           if (!user.password) {
             console.error('User has no password set:', credentials.email);
             throw new Error('Invalid credentials');
@@ -138,6 +141,7 @@ export const authOptions: AuthOptions = {
           image: user.image,
           department: user.department,
           paid: user.paid,
+          emailVerified: user.emailVerified, // Pass email verification status
         };
       },
     }),
@@ -214,7 +218,7 @@ export const authOptions: AuthOptions = {
               password: hashedPassword,
               role: 'Employee',
               image: profile.picture,
-              emailVerified: new Date(),
+              emailVerified: new Date(), // Google users are auto-verified
               paid: false,
             },
           });
@@ -289,6 +293,15 @@ export const authOptions: AuthOptions = {
       session.user.emailVerified = token.emailVerified;
       session.user.paid = token.paid;
       session.accessToken = token.accessToken;
+
+      // Add email verification check for redirect logic
+      if (!session.user.emailVerified) {
+        // Only require verification for credential-based users
+        // Google users are auto-verified
+        session.requiresVerification = true;
+        session.redirectTo = '/auth/verify-email';
+        return session;
+      }
 
       switch (token.role) {
         case 'Employee':
