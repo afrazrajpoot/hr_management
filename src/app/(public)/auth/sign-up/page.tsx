@@ -81,12 +81,7 @@ const SignUpForm = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    if (status === "authenticated" && (session as any).redirectTo) {
-      toast.success("Sign-up successful! Redirecting...");
-      router.push((session as any).redirectTo);
-    }
-  }, [status, session, router]);
+
 
   const checkPasswordStrength = (password: string) => {
     let strength = 0;
@@ -139,7 +134,9 @@ const SignUpForm = () => {
         setError(result.error);
         toast.error(result.error);
       } else {
-        toast.success("Account created successfully!");
+        toast.success("Account created successfully! Please verify your email.");
+        // Redirect to email verification page
+        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       }
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";

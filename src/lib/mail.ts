@@ -4,52 +4,71 @@ import { google } from 'googleapis';
 
 const OAuth2 = google.auth.OAuth2;
 
-// Create OAuth2 client
+// Create OAuth2 client with timeout
 const createTransporter = async () => {
-    const oauth2Client = new OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URL
+  // Skip email in development if credentials not configured
+  if (process.env.NODE_ENV === 'development' && !process.env.GOOGLE_CLIENT_ID) {
+    console.warn('⚠️  Email service not configured - skipping in development mode');
+    return null;
+  }
+
+  const oauth2Client = new OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URL
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+  });
+
+  try {
+    // Add timeout to prevent hanging
+    const accessTokenPromise = oauth2Client.getAccessToken();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('OAuth2 request timeout')), 5000)
     );
 
-    oauth2Client.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+    const accessToken = await Promise.race([accessTokenPromise, timeoutPromise]) as any;
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: process.env.GOOGLE_SENDER_EMAIL,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        accessToken: accessToken.token || '',
+      },
     });
 
-    try {
-        const accessToken = await oauth2Client.getAccessToken();
-
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                type: 'OAuth2',
-                user: process.env.GOOGLE_SENDER_EMAIL,
-                clientId: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-                accessToken: accessToken.token || '',
-            },
-        });
-
-        return transporter;
-    } catch (error) {
-        console.error('Error creating email transporter:', error);
-        throw new Error('Failed to create email transporter');
-    }
+    return transporter;
+  } catch (error) {
+    console.error('Error creating email transporter:', error);
+    throw new Error('Failed to create email transporter');
+  }
 };
 
 // Send verification email
 export const sendVerificationEmail = async (email: string, token: string) => {
-    try {
-        const transporter = await createTransporter();
+  try {
+    const transporter = await createTransporter();
 
-        const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
+    // Skip if no transporter (development mode)
+    if (!transporter) {
+      console.log('📧 Development mode: Email would be sent to:', email);
+      console.log('🔗 Verification link: ' + `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`);
+      return { messageId: 'dev-mode-skip' };
+    }
 
-        const mailOptions = {
-            from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
-            to: email,
-            subject: 'Verify Your Email Address',
-            html: `
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
+
+    const mailOptions = {
+      from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
+      to: email,
+      subject: 'Verify Your Email Address',
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -118,7 +137,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
           </body>
         </html>
       `,
-            text: `
+      text: `
         Verify Your Email Address
         
         Thank you for signing up for Genius Factor!
@@ -132,29 +151,36 @@ export const sendVerificationEmail = async (email: string, token: string) => {
         
         © ${new Date().getFullYear()} Genius Factor. All rights reserved.
       `,
-        };
+    };
 
-        const result = await transporter.sendMail(mailOptions);
-        console.log('Verification email sent successfully:', result.messageId);
-        return result;
-    } catch (error) {
-        console.error('Error sending verification email:', error);
-        throw error;
-    }
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Verification email sent successfully:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    throw error;
+  }
 };
 
 // Send password reset email
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-    try {
-        const transporter = await createTransporter();
+  try {
+    const transporter = await createTransporter();
 
-        const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
+    // Skip if no transporter (development mode)
+    if (!transporter) {
+      console.log('📧 Development mode: Password reset email would be sent to:', email);
+      console.log('🔗 Reset link: ' + `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`);
+      return { messageId: 'dev-mode-skip' };
+    }
 
-        const mailOptions = {
-            from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
-            to: email,
-            subject: 'Reset Your Password',
-            html: `
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
+
+    const mailOptions = {
+      from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
+      to: email,
+      subject: 'Reset Your Password',
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -219,7 +245,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
           </body>
         </html>
       `,
-            text: `
+      text: `
         Reset Your Password
         
         We received a request to reset your password for your Genius Factor account.
@@ -233,27 +259,33 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
         
         © ${new Date().getFullYear()} Genius Factor. All rights reserved.
       `,
-        };
+    };
 
-        const result = await transporter.sendMail(mailOptions);
-        console.log('Password reset email sent successfully:', result.messageId);
-        return result;
-    } catch (error) {
-        console.error('Error sending password reset email:', error);
-        throw error;
-    }
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent successfully:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw error;
+  }
 };
 
 // Send welcome email
 export const sendWelcomeEmail = async (email: string, firstName: string) => {
-    try {
-        const transporter = await createTransporter();
+  try {
+    const transporter = await createTransporter();
 
-        const mailOptions = {
-            from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
-            to: email,
-            subject: 'Welcome to Genius Factor!',
-            html: `
+    // Skip if no transporter (development mode)
+    if (!transporter) {
+      console.log('📧 Development mode: Welcome email would be sent to:', email);
+      return { messageId: 'dev-mode-skip' };
+    }
+
+    const mailOptions = {
+      from: `"Genius Factor" <${process.env.GOOGLE_SENDER_EMAIL}>`,
+      to: email,
+      subject: 'Welcome to Genius Factor!',
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -311,13 +343,13 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
           </body>
         </html>
       `,
-        };
+    };
 
-        const result = await transporter.sendMail(mailOptions);
-        console.log('Welcome email sent successfully:', result.messageId);
-        return result;
-    } catch (error) {
-        console.error('Error sending welcome email:', error);
-        throw error;
-    }
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Welcome email sent successfully:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+    throw error;
+  }
 };

@@ -34,6 +34,7 @@ const SignInForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [justSignedIn, setJustSignedIn] = useState(false); // Track if user just signed in
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -63,13 +64,14 @@ const SignInForm = () => {
     }
   }, [searchParams]);
 
-  // Handle redirection based on session.redirectTo
+  // Handle redirection based on session.redirectTo - only if user just signed in
   useEffect(() => {
-    if (status === "authenticated" && (session as any).redirectTo) {
+    if (status === "authenticated" && justSignedIn && (session as any).redirectTo) {
       toast.success("Sign-in successful! Redirecting..."); // Show success toast
       router.push((session as any).redirectTo);
+      setJustSignedIn(false); // Reset flag
     }
-  }, [status, session, router]);
+  }, [status, session, router, justSignedIn]);
 
   // Load email from localStorage on component mount
   useEffect(() => {
@@ -102,6 +104,7 @@ const SignInForm = () => {
         setError("Invalid credentials. Please try again.");
         toast.error("Invalid credentials. Please try again."); // Show error toast
       } else {
+        setJustSignedIn(true); // Set flag to trigger redirect
         toast.success("Sign-in successful!"); // Show success toast
       }
     } catch (error) {

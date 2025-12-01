@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Update user to mark email as verified and clear verification token
-        await prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
                 emailVerified: new Date(),
@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             message: 'Email verified successfully',
-            verified: true
+            verified: true,
+            role: updatedUser.role,
         });
     } catch (error) {
         console.error('Email verification error:', error);

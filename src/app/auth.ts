@@ -174,6 +174,11 @@ export const authOptions: AuthOptions = {
         });
 
         if (dbAccount) {
+          // Fetch fresh user data to get emailVerified status
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+          });
+
           token.refreshExpiresAt = dbAccount.refresh_expires_at;
           token.userId = user.id;
           token.role = user.role;
@@ -183,6 +188,7 @@ export const authOptions: AuthOptions = {
           token.lastName = user.lastName;
           token.image = user.image;
           token.department = user.department;
+          token.emailVerified = dbUser?.emailVerified;
         }
       }
 
@@ -234,6 +240,7 @@ export const authOptions: AuthOptions = {
         token.picture = profile.picture;
         token.role = userInDb.role;
         token.department = userInDb.department;
+        token.emailVerified = userInDb.emailVerified;
       }
 
       return token;
@@ -250,6 +257,7 @@ export const authOptions: AuthOptions = {
       session.user.firstName = token.firstName;
       session.user.lastName = token.lastName;
       session.user.department = token.department;
+      session.user.emailVerified = token.emailVerified;
       session.accessToken = token.accessToken;
 
       switch (token.role) {

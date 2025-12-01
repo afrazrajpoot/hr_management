@@ -7,7 +7,7 @@ function redirectToSignIn(req: Request) {
 
 export default withAuth((req) => {
   const token: any = (req as any).nextauth?.token;
- 
+
   if (!token) return redirectToSignIn(req);
 
   const now = Math.floor(Date.now() / 1000);
@@ -17,15 +17,31 @@ export default withAuth((req) => {
   if (token.refreshExpiresAt && token.refreshExpiresAt < now)
     return redirectToSignIn(req);
 
-  if (req.nextUrl.pathname.startsWith("/dashboard") && token.role !== "Admin") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+  // Check if email is verified for protected routes
+  // Skip verification check if user just verified (verified=true param)
+  // This handles the case where JWT token hasn't refreshed yet after verification
+  const isJustVerified = req.nextUrl.searchParams.get('verified') === 'true';
+  if (!token.emailVerified && !isJustVerified) {
+    return NextResponse.redirect(new URL("/auth/verify-email", req.url));
   }
+
+  // Role-based access control - redirect to appropriate dashboard
+  if (req.nextUrl.pathname.startsWith("/dashboard") && token.role !== "Admin") {
+    // Non-admin trying to access admin dashboard
+    const redirectPath = token.role === "HR" ? "/hr-dashboard" : "/employee-dashboard";
+    return NextResponse.redirect(new URL(redirectPath, req.url));
+  }
+
   if (req.nextUrl.pathname.startsWith("/employee-dashboard") && token.role !== "Employee") {
-    return NextResponse.redirect(new URL("/employee-dashboard", req.url));
+    // Non-employee trying to access employee dashboard
+    const redirectPath = token.role === "Admin" ? "/dashboard" : "/hr-dashboard";
+    return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 
   if (req.nextUrl.pathname.startsWith("/hr-dashboard") && token.role !== "HR") {
-    return NextResponse.redirect(new URL("/hr-dashboard", req.url));
+    // Non-HR trying to access HR dashboard
+    const redirectPath = token.role === "Admin" ? "/dashboard" : "/employee-dashboard";
+    return NextResponse.redirect(new URL(redirectPath, req.url));
   }
 
   return NextResponse.next();
