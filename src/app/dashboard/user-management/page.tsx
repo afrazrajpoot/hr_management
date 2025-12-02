@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { HRLayout } from '@/components/admin/layout/admin-layout';
-import { Search, Download, Eye, Edit, UserCheck, Building, DollarSign, Calendar, Mail, Phone, Users, Briefcase, Shield, Save, X, Info } from 'lucide-react';
+import { Search, Download, Eye, Edit, UserCheck, Building, DollarSign, Calendar, Mail, Phone, Users, Briefcase, Shield, Save, X, Info, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ export default function AdminHRUsersPage() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [editForm, setEditForm] = useState({
     paid: false,
     amount: 0,
@@ -85,6 +86,7 @@ export default function AdminHRUsersPage() {
 
   const handleSaveEdit = async (userId: string) => {
     try {
+      setSaving(true);
       const response = await fetch(`/api/admin/get-companies`, {
         method: 'PATCH',
         headers: {
@@ -123,17 +125,15 @@ export default function AdminHRUsersPage() {
       }));
 
       setEditingUserId(null);
-      
-    //   toast({
-    //     title: "Success",
-    //     description: "User updated successfully",
-    //   });
+      toast.success('User updated successfully', {
+        description: `Updated payment status, amount, and quota for ${result.user.firstName} ${result.user.lastName}`,
+      });
     } catch (err: any) {
-    //   toast({
-    //     title: "Error",
-    //     description: err.message || "Failed to update user",
-    //     variant: "destructive",
-    //   });
+      toast.error('Failed to update user', {
+        description: err.message || 'An error occurred while updating the user',
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -149,54 +149,13 @@ export default function AdminHRUsersPage() {
     return (
       <HRLayout>
         <div className="container mx-auto px-4 py-8">
-          <div className="space-y-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <Skeleton className="h-10 w-64 mb-2" />
-                <Skeleton className="h-4 w-96" />
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <div className="text-center">
+                <h3 className="text-lg font-semibold">Loading HR Users</h3>
+                <p className="text-sm text-muted-foreground mt-1">Please wait while we fetch the data...</p>
               </div>
-              <Skeleton className="h-10 w-32" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Skeleton className="h-4 w-24 mb-2" />
-                        <Skeleton className="h-8 w-16" />
-                      </div>
-                      <Skeleton className="h-12 w-12 rounded-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div>
-                          <Skeleton className="h-5 w-32 mb-1" />
-                          <Skeleton className="h-3 w-48" />
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Skeleton className="h-20 w-full" />
-                    <div className="grid grid-cols-2 gap-3">
-                      <Skeleton className="h-16 w-full" />
-                      <Skeleton className="h-16 w-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           </div>
         </div>
@@ -422,9 +381,18 @@ export default function AdminHRUsersPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => handleEditClick(user)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="ghost" onClick={() => handleEditClick(user)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit user payment status, amount, and quota</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   </CardHeader>
@@ -534,11 +502,31 @@ export default function AdminHRUsersPage() {
                         </div>
                         
                         <div className="flex gap-2 pt-2">
-                          <Button size="sm" onClick={() => handleSaveEdit(user.id)} className="gap-1">
-                            <Save className="h-3 w-3" />
-                            Save
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleSaveEdit(user.id)} 
+                            className="gap-1"
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <>
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="h-3 w-3" />
+                                Save
+                              </>
+                            )}
                           </Button>
-                          <Button size="sm" variant="outline" onClick={handleCancelEdit} className="gap-1">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={handleCancelEdit} 
+                            className="gap-1"
+                            disabled={saving}
+                          >
                             <X className="h-3 w-3" />
                             Cancel
                           </Button>
