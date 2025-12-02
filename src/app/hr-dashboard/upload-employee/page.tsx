@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import HRLayout from "@/components/hr/HRLayout";
 import { useSession } from "next-auth/react";
@@ -17,7 +15,6 @@ import {
 export default function UploadEmployeesPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  // const [uploadedEmployees, setUploadedEmployees] = useState<any[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const { data: session } = useSession<any>();
 
@@ -59,10 +56,22 @@ export default function UploadEmployeesPage() {
 
     try {
       setLoading(true);
+      
+      // Add Authorization header with FastAPI token from session
+      const headers: Record<string, string> = {};
+      
+      if (session?.user?.fastApiToken) {
+        headers["Authorization"] = `Bearer ${session.user.fastApiToken}`;
+        console.log("✅ Sending FastAPI token:", session.user.fastApiToken.substring(0, 30) + "...");
+      } else {
+        console.log("⚠️ No FastAPI token found in session");
+      }
+      
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/employees/upload`,
         {
           method: "POST",
+          headers: headers, // Add headers here
           body: formData,
         }
       );
@@ -70,8 +79,14 @@ export default function UploadEmployeesPage() {
       if (!res.ok) throw new Error("Upload failed");
 
       const data = await res.json();
-      // setUploadedEmployees();
-      toast.success(`Uploaded ${data.inserted} employees successfully!`);
+      console.log(data,'my data');
+      
+      // Check if it's an error response
+      if (data.error) {
+        toast.error(data.details || data.error || "Upload failed");
+      } else {
+        toast.success(data?.details || 'Successfully uploaded employees');
+      }
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Failed to upload employees");
@@ -175,6 +190,16 @@ export default function UploadEmployeesPage() {
             )}
           </Button>
         </div>
+        
+        {/* Debug info (optional - remove in production) */}
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+          <p>Session status: {session ? "Authenticated" : "Not authenticated"}</p>
+          <p>FastAPI token: {session?.user?.fastApiToken ? "Available" : "Not available"}</p>
+          {session?.user?.fastApiToken && (
+            <p className="truncate">Token: {session.user.fastApiToken.substring(0, 30)}...</p>
+          )}
+        </div>
+        
         {/* Help Text */}
         <div className="mt-8 p-4 border rounded-lg bg-muted/30">
           <h3 className="font-medium mb-2">Supported file formats:</h3>

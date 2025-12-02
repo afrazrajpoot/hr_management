@@ -1,11 +1,9 @@
-// /app/api/users/hr-users/route.ts - With pagination and advanced filters
+// /app/api/users/hr-users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 import { prisma } from '@/lib/prisma';
-// import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-
 
 export async function GET(request: NextRequest) {
     try {
@@ -16,12 +14,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Authorization - Only ADMIN can access
-        const currentUser = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { id: true, role: true, email: true, firstName: true, lastName: true }
-        });
-
-        if (!currentUser || currentUser.role !== 'ADMIN') {
+        if (session.user.role !== 'Admin') {
             return NextResponse.json(
                 { error: 'Forbidden. Admin access required.' },
                 { status: 403 }
@@ -65,7 +58,7 @@ export async function GET(request: NextRequest) {
             };
         }
 
-        // Company filter
+        // Company filter (has hrId or not)
         if (hasCompany === 'true') {
             where.hrId = { not: null };
         } else if (hasCompany === 'false') {
@@ -79,8 +72,8 @@ export async function GET(request: NextRequest) {
             where.paid = false;
         }
 
-        // Get companies first if filtering by company
-        let companyHrIds: string[] = [];
+        // Get specific company's HR IDs if filtering by company
+        let companyUserIds: string[] = [];
         if (companyId) {
             const company = await prisma.company.findUnique({
                 where: { id: companyId },
@@ -88,23 +81,12 @@ export async function GET(request: NextRequest) {
             });
 
             if (company && company.hrId.length > 0) {
-                companyHrIds = company.hrId;
-                where.hrId = { in: companyHrIds };
+                companyUserIds = company.hrId; // This contains user IDs
+                where.id = { in: companyUserIds };
             } else {
-                // If company has no HR IDs, return empty result
                 return NextResponse.json({
                     success: true,
-                    requestedBy: {
-                        id: currentUser.id,
-                        name: `${currentUser.firstName} ${currentUser.lastName}`,
-                        email: currentUser.email,
-                        role: currentUser.role
-                    },
-                    statistics: {
-                        totalHrUsers: 0,
-                        totalPages: 0,
-                        currentPage: page
-                    },
+                    message: 'No HR users found for this company',
                     data: {
                         users: [],
                         companies: [],
@@ -135,12 +117,6 @@ export async function GET(request: NextRequest) {
                             hireDate: true,
                             avatar: true
                         }
-                    },
-                    _count: {
-                        select: {
-                            jobs: true,
-                            applications: true
-                        }
                     }
                 },
                 orderBy: {
@@ -152,34 +128,64 @@ export async function GET(request: NextRequest) {
             prisma.user.count({ where })
         ]);
 
-        // Get all hrIds from the current page results
-        const currentPageHrIds = hrUsers
-            .map((user: any) => user.hrId)
-            .filter((hrId: any): hrId is string => hrId !== null && hrId !== undefined);
+        // Count jobs and applications
+        const usersWithCounts = await Promise.all(
+            hrUsers.map(async (user) => {
+                const [jobCount, applicationCount] = await Promise.all([
+                    prisma.job.count({ where: { recruiterId: user.id } }),
+                    prisma.application.count({ where: { userId: user.id } })
+                ]);
 
-        // Fetch companies for these HR users
-        let companies: any = [];
-        if (currentPageHrIds.length > 0) {
-            companies = await prisma.company.findMany({
-                where: {
-                    hrId: {
-                        hasSome: currentPageHrIds
-                    }
-                }
-            });
-        }
+                return {
+                    ...user,
+                    jobCount,
+                    applicationCount
+                };
+            })
+        );
 
-        // Create company map
-        const companyMap = new Map<string, any>();
-        companies.forEach((company: any) => {
-            company.hrId.forEach((hrId: string) => {
-                companyMap.set(hrId, company);
-            });
+        // Get all user IDs
+        const userIds = usersWithCounts.map(user => user.id);
+
+        // Fetch all companies
+        const allCompanies = await prisma.company.findMany({
+            select: {
+                id: true,
+                companyDetail: true,
+                hrId: true,
+                createdAt: true,
+                updatedAt: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        // Create a map of userId to company
+        const userIdToCompanyMap = new Map<string, any>();
+        allCompanies.forEach(company => {
+            if (company.hrId && Array.isArray(company.hrId)) {
+                company.hrId.forEach(userId => {
+                    userIdToCompanyMap.set(userId, company);
+                });
+            }
         });
 
         // Combine user data with company info
-        const usersWithCompany = hrUsers.map((user: any) => {
-            const company = user.hrId ? companyMap.get(user.hrId) : null;
+        const usersWithCompany = usersWithCounts.map(user => {
+            const company = userIdToCompanyMap.get(user.id);
+
+            // Parse companyDetail
+            let companyDetail = {};
+            if (company?.companyDetail) {
+                try {
+                    companyDetail = typeof company.companyDetail === 'string'
+                        ? JSON.parse(company.companyDetail)
+                        : company.companyDetail;
+                } catch (error) {
+                    companyDetail = {};
+                }
+            }
 
             return {
                 id: user.id,
@@ -198,54 +204,101 @@ export async function GET(request: NextRequest) {
                 updatedAt: user.updatedAt,
                 image: user.image,
                 employee: user.employee,
-                jobCount: user._count.jobs,
-                applicationCount: user._count.applications,
+                jobCount: user.jobCount,
+                applicationCount: user.applicationCount,
                 company: company ? {
                     id: company.id,
-                    name: company.companyDetail?.name || 'Unnamed Company',
-                    companyDetail: company.companyDetail,
-                    hrIds: company.hrId
-                } : null
+                    companyDetail: companyDetail,
+                    name: companyDetail?.name || 'Unnamed Company',
+                    hrIds: company.hrId,
+                    createdAt: company.createdAt,
+                    updatedAt: company.updatedAt
+                } : null,
+                hasCompany: !!company
             };
         });
 
-        // Get all companies for filter dropdown (optional)
-        const allCompanies = await prisma.company.findMany({
-            select: {
-                id: true,
-                companyDetail: true,
-                hrId: true,
-                _count: {
-                    select: {
-                        // We can't directly count users through company, but we can map later
-                    }
+        // Calculate HR user count for each company
+        const companiesWithStats = allCompanies.map(company => {
+            const hrUsersInCompany = usersWithCompany.filter(
+                user => company.hrId && company.hrId.includes(user.id)
+            );
+
+            let companyDetail = {};
+            if (company.companyDetail) {
+                try {
+                    companyDetail = typeof company.companyDetail === 'string'
+                        ? JSON.parse(company.companyDetail)
+                        : company.companyDetail;
+                } catch (error) {
+                    companyDetail = {};
                 }
-            },
-            orderBy: {
-                createdAt: 'desc'
+            }
+
+            return {
+                id: company.id,
+                companyDetail: companyDetail,
+                name: companyDetail?.name || 'Unnamed Company',
+                hrIds: company.hrId,
+                hrUserCount: hrUsersInCompany.length,
+                createdAt: company.createdAt,
+                updatedAt: company.updatedAt
+            };
+        });
+
+        // Group users by company
+        const usersByCompany: Record<string, any> = {};
+        usersWithCompany.forEach(user => {
+            if (user.company) {
+                const companyId = user.company.id;
+                if (!usersByCompany[companyId]) {
+                    usersByCompany[companyId] = {
+                        company: user.company,
+                        users: [],
+                        userCount: 0
+                    };
+                }
+                usersByCompany[companyId].users.push(user);
+                usersByCompany[companyId].userCount++;
+            } else {
+                if (!usersByCompany['no-company']) {
+                    usersByCompany['no-company'] = {
+                        company: null,
+                        users: [],
+                        userCount: 0
+                    };
+                }
+                usersByCompany['no-company'].users.push(user);
+                usersByCompany['no-company'].userCount++;
             }
         });
 
-        // Enhance companies with user counts
-        const companiesWithCounts = allCompanies.map((company: any) => {
-            const hrUserCount = usersWithCompany.filter(
-                (u: any) => u.hrId && company.hrId.includes(u.hrId)
-            ).length;
+        // Statistics
+        const statistics = {
+            totalHrUsers: totalCount,
+            currentPageCount: usersWithCompany.length,
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page,
+            withCompany: usersWithCompany.filter(u => u.hasCompany).length,
+            withoutCompany: usersWithCompany.filter(u => !u.hasCompany).length,
+            paidUsers: usersWithCompany.filter(u => u.paid).length,
+            unpaidUsers: usersWithCompany.filter(u => !u.paid).length,
+            totalCompanies: companiesWithStats.length,
+            totalJobs: usersWithCompany.reduce((sum, user) => sum + user.jobCount, 0),
+            totalApplications: usersWithCompany.reduce((sum, user) => sum + user.applicationCount, 0)
+        };
 
-            return {
-                ...company,
-                hrUserCount
-            };
-        });
+        // Current user info
+        const currentUser = {
+            id: session.user.id,
+            name: session.user.name || `${session.user.firstName || ''} ${session.user.lastName || ''}`.trim(),
+            email: session.user.email || '',
+            role: session.user.role
+        };
 
         return NextResponse.json({
             success: true,
-            requestedBy: {
-                id: currentUser.id,
-                name: `${currentUser.firstName} ${currentUser.lastName}`,
-                email: currentUser.email,
-                role: currentUser.role
-            },
+            requestedBy: currentUser,
             filters: {
                 search,
                 department,
@@ -255,19 +308,10 @@ export async function GET(request: NextRequest) {
                 sortBy,
                 sortOrder
             },
-            statistics: {
-                totalHrUsers: totalCount,
-                currentPageCount: hrUsers.length,
-                totalPages: Math.ceil(totalCount / limit),
-                currentPage: page,
-                withCompany: hrUsers.filter((u: any) => u.hrId).length,
-                withoutCompany: hrUsers.filter((u: any) => !u.hrId).length,
-                paidUsers: hrUsers.filter((u: any) => u.paid).length,
-                unpaidUsers: hrUsers.filter((u: any) => !u.paid).length
-            },
+            statistics,
             data: {
                 users: usersWithCompany,
-                companies: companiesWithCounts
+                companies: companiesWithStats
             },
             pagination: {
                 total: totalCount,
@@ -281,17 +325,78 @@ export async function GET(request: NextRequest) {
 
     } catch (error: any) {
         console.error('Admin HR users API error:', error);
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Internal server error',
+                message: error.message
+            },
+            { status: 500 }
+        );
+    }
+}
+
+// PATCH endpoint to update user quota, amount, and paid status
+export async function PATCH(request: NextRequest) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user || session.user.role !== 'Admin') {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const body = await request.json();
+        const { userId, paid, amount, quota } = body;
+
+        if (!userId) {
+            return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+        }
+
+        // Validate input
+        const updateData: any = {};
+        if (typeof paid === 'boolean') updateData.paid = paid;
+        if (typeof amount === 'number') updateData.amount = amount;
+        if (typeof quota === 'number') updateData.quota = quota;
+
+        if (Object.keys(updateData).length === 0) {
+            return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+        }
+
+        // Update user
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                paid: true,
+                amount: true,
+                quota: true,
+                updatedAt: true
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: 'User updated successfully',
+            user: updatedUser
+        }, { status: 200 });
+
+    } catch (error: any) {
+        console.error('Update user error:', error);
+
+        if (error.code === 'P2025') {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
 
         return NextResponse.json(
             {
                 success: false,
                 error: 'Internal server error',
-                message: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                message: error.message
             },
             { status: 500 }
         );
-    } finally {
-        await prisma.$disconnect();
     }
 }

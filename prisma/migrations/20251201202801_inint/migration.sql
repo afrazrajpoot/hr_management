@@ -16,15 +16,20 @@ CREATE TABLE "public"."User" (
     "email" TEXT,
     "password" TEXT,
     "role" TEXT,
+    "paid" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "position" TEXT[],
+    "verificationToken" TEXT,
+    "resetToken" TEXT,
+    "resetTokenExpiry" TIMESTAMP(3),
     "department" TEXT[],
     "hrId" TEXT,
     "salary" TEXT,
     "employeeId" TEXT,
+    "appliedJobIds" TEXT[],
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -145,6 +150,7 @@ CREATE TABLE "public"."Job" (
     "salary" INTEGER,
     "type" "public"."JobType" NOT NULL DEFAULT 'FULL_TIME',
     "status" "public"."JobStatus" NOT NULL DEFAULT 'OPEN',
+    "skills" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "recruiterId" TEXT NOT NULL,
@@ -155,11 +161,13 @@ CREATE TABLE "public"."Job" (
 -- CreateTable
 CREATE TABLE "public"."Application" (
     "id" TEXT NOT NULL,
-    "coverLetter" TEXT,
-    "resumeUrl" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
     "jobId" TEXT NOT NULL,
-    "candidateId" TEXT NOT NULL,
+    "hrId" TEXT,
+    "aiRecommendation" TEXT,
+    "scoreMatch" TEXT,
 
     CONSTRAINT "Application_pkey" PRIMARY KEY ("id")
 );
@@ -212,6 +220,17 @@ CREATE TABLE "public"."AnalysisResult" (
     CONSTRAINT "AnalysisResult_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."EmployeeChat" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "response" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "EmployeeChat_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 
@@ -258,7 +277,7 @@ ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY 
 ALTER TABLE "public"."Job" ADD CONSTRAINT "Job_recruiterId_fkey" FOREIGN KEY ("recruiterId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "public"."Job"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "public"."Job"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

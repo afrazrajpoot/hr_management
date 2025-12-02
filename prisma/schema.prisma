@@ -15,19 +15,25 @@ model User {
   email         String?     @unique
   password      String?
   role          String?
-  paid          Boolean     @default(false)  // 👈 Added field with default false
+  paid          Boolean     @default(false)
+  amount        Float?      @default(0.0)
+  quota         Float?      @default(0.0)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   emailVerified DateTime?
   image         String?
-  position      String[] 
+  position      String[]
+  
+  // FastAPI authentication
+  fastApiToken      String?
+  fastApiTokenExpiry DateTime?
   
   // Auth fields
   verificationToken String?
   resetToken       String?
   resetTokenExpiry DateTime?
 
-  department    String[]    // 👈 now it's an array of strings
+  department    String[]
   hrId          String?
   salary        String?
   accounts      Account[]
@@ -39,10 +45,24 @@ model User {
   jobs          Job[]       @relation("RecruiterJobs")
 
   // Applications submitted by this user (Candidate/Employee)
-  applications  Application[] 
+  applications  Application[]
 
   // Denormalized array of applied job IDs for employees
   appliedJobIds String[]
+  
+  @@map("users")
+}
+
+// Optional: Store FastAPI sessions separately
+model FastAPISession {
+  id        String   @id @default(uuid())
+  user_id   String
+  email     String
+  token     String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  
+  @@unique([user_id])
 }
 model Department {
   id      String   @id @default(uuid())

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "public"."User" ADD COLUMN     "amount" DOUBLE PRECISION DEFAULT 0.0,
+ADD COLUMN     "quota" DOUBLE PRECISION DEFAULT 0.0;

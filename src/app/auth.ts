@@ -1,3 +1,4 @@
+// lib/auth.ts
 import { AuthOptions } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -56,16 +57,14 @@ export const authOptions: AuthOptions = {
               password: hashedPassword,
               role,
               verificationToken,
-              emailVerified: null, // Email not verified yet for new users
+              emailVerified: null,
             },
           });
 
-          // Send verification email ONLY for new user signup
           try {
             await sendVerificationEmail(user.email!, verificationToken);
           } catch (error) {
             console.error('Failed to send verification email:', error);
-            // Don't throw error - user creation should still succeed
           }
         }
         // User exists - LOGIN (not first time)
@@ -92,6 +91,51 @@ export const authOptions: AuthOptions = {
               },
             });
           }
+        }
+
+        // Generate FastAPI JWT token for the user
+        let fastApiToken = null;
+        try {
+          const fastApiUrl = process.env.NEXT_PUBLIC_PYTHON_URL || 'http://127.0.0.1:8000';
+          console.log('🔑 Generating FastAPI token for:', user.email);
+
+          const fastApiResponse = await fetch(`${fastApiUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: user.id,
+              email: user.email,
+              role: user.role,
+              hr_id: user.hrId,
+              first_name: user.firstName,
+              last_name: user.lastName,
+            }),
+          });
+
+          console.log('🔑 FastAPI login response status:', fastApiResponse.status);
+
+          if (fastApiResponse.ok) {
+            const fastApiData = await fastApiResponse.json();
+            fastApiToken = fastApiData.token;
+            console.log('🔑 FastAPI token generated successfully');
+            console.log('🔑 Token preview:', fastApiToken?.substring(0, 30) + '...');
+
+            // Store FastAPI token in user record
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                fastApiToken: fastApiToken,
+                fastApiTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              },
+            });
+          } else {
+            const errorText = await fastApiResponse.text();
+            console.error('🔑 FastAPI login failed:', errorText);
+          }
+        } catch (error) {
+          console.error('🔑 Failed to generate FastAPI token:', error);
         }
 
         const accessToken = jwt.sign(
@@ -141,7 +185,8 @@ export const authOptions: AuthOptions = {
           image: user.image,
           department: user.department,
           paid: user.paid,
-          emailVerified: user.emailVerified, // Pass email verification status
+          emailVerified: user.emailVerified,
+          fastApiToken: fastApiToken,
         };
       },
     }),
@@ -149,7 +194,6 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      // Remove all custom httpOptions - let NextAuth handle it
       authorization: {
         params: {
           prompt: 'consent',
@@ -180,7 +224,6 @@ export const authOptions: AuthOptions = {
         });
 
         if (dbAccount) {
-          // Fetch fresh user data to get emailVerified status
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
           });
@@ -196,6 +239,7 @@ export const authOptions: AuthOptions = {
           token.department = user.department;
           token.emailVerified = dbUser?.emailVerified;
           token.paid = dbUser?.paid;
+          token.fastApiToken = user.fastApiToken || dbUser?.fastApiToken;
         }
       }
 
@@ -218,10 +262,45 @@ export const authOptions: AuthOptions = {
               password: hashedPassword,
               role: 'Employee',
               image: profile.picture,
-              emailVerified: new Date(), // Google users are auto-verified
+              emailVerified: new Date(),
               paid: false,
             },
           });
+        }
+
+        // Generate FastAPI token for Google user
+        let fastApiToken = null;
+        try {
+          const fastApiUrl = process.env.NEXT_PUBLIC_PYTHON_URL || 'http://127.0.0.1:8000';
+          const fastApiResponse = await fetch(`${fastApiUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: userInDb.id,
+              email: userInDb.email,
+              role: userInDb.role,
+              hr_id: userInDb.hrId,
+              first_name: userInDb.firstName,
+              last_name: userInDb.lastName,
+            }),
+          });
+
+          if (fastApiResponse.ok) {
+            const fastApiData = await fastApiResponse.json();
+            fastApiToken = fastApiData.token;
+
+            await prisma.user.update({
+              where: { id: userInDb.id },
+              data: {
+                fastApiToken: fastApiToken,
+                fastApiTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              },
+            });
+          }
+        } catch (error) {
+          console.error('Failed to generate FastAPI token for Google user:', error);
         }
 
         await prisma.account.upsert({
@@ -251,6 +330,7 @@ export const authOptions: AuthOptions = {
         token.department = userInDb.department;
         token.emailVerified = userInDb.emailVerified;
         token.paid = userInDb.paid;
+        token.fastApiToken = fastApiToken || userInDb.fastApiToken;
       }
 
       // Subsequent calls - fetch fresh data if we have a userId
@@ -267,11 +347,10 @@ export const authOptions: AuthOptions = {
           token.lastName = freshUser.lastName;
           token.image = freshUser.image;
           token.paid = freshUser.paid;
-          // Add other fields that might change and need to be reflected immediately
+          token.fastApiToken = freshUser.fastApiToken;
         }
       }
 
-      // Handle session update triggers (e.g. from useSession().update())
       if (trigger === "update" && session) {
         return { ...token, ...session.user };
       }
@@ -292,12 +371,10 @@ export const authOptions: AuthOptions = {
       session.user.department = token.department;
       session.user.emailVerified = token.emailVerified;
       session.user.paid = token.paid;
+      session.user.fastApiToken = token.fastApiToken;
       session.accessToken = token.accessToken;
 
-      // Add email verification check for redirect logic
       if (!session.user.emailVerified) {
-        // Only require verification for credential-based users
-        // Google users are auto-verified
         session.requiresVerification = true;
         session.redirectTo = '/auth/verify-email';
         return session;
@@ -315,61 +392,6 @@ export const authOptions: AuthOptions = {
           break;
         default:
           session.redirectTo = '/auth/sign-in';
-      }
-
-      if (token.userId && session.user.email && !token.picture) {
-        const account = await prisma.account.findUnique({
-          where: {
-            provider_providerAccountId: {
-              provider: 'credentials',
-              providerAccountId: token.userId.toString(),
-            },
-          },
-        });
-
-        if (!account) {
-          session.error = 'NoAccount';
-          return session;
-        }
-
-        if (Date.now() < (account.expires_at ?? 0) * 1000) {
-          session.accessToken = account.access_token;
-          return session;
-        } else {
-          if (!account.refresh_token || Date.now() > (account.refresh_expires_at ?? 0) * 1000) {
-            session.error = 'RefreshTokenExpired';
-            return session;
-          }
-
-          try {
-            const newAccessToken = jwt.sign(
-              { userId: token.userId, role: token.role },
-              process.env.JWT_SECRET!,
-              { expiresIn: '15m' }
-            );
-            const newAccessExpires = Math.floor(Date.now() / 1000 + 15 * 60);
-            const newRefreshToken = crypto.randomBytes(40).toString('base64url');
-            const newRefreshExpires = Math.floor(Date.now() / 1000 + 7 * 24 * 60 * 60);
-
-            await prisma.account.update({
-              where: { id: account.id },
-              data: {
-                access_token: newAccessToken,
-                expires_at: newAccessExpires,
-                refresh_token: newRefreshToken,
-                refresh_expires_at: newRefreshExpires,
-              },
-            });
-
-            session.accessToken = newAccessToken;
-            session.refreshExpiresAt = newRefreshExpires;
-            return session;
-          } catch (error) {
-            console.error('Error refreshing token:', error);
-            session.error = 'RefreshError';
-            return session;
-          }
-        }
       }
 
       return session;
