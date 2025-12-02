@@ -37,7 +37,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
   // Handle loading state
   if (status === "loading") {
     return (
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-6">
+      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-sidebar-border bg-sidebar backdrop-blur-sm px-6">
         <SidebarTrigger className="h-8 w-8" />
         <div className="flex-1">
           <div className="flex flex-col">
@@ -80,7 +80,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
       : "U";
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-6">
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-sidebar-border bg-sidebar backdrop-blur-sm px-6">
       <SidebarTrigger className="h-8 w-8" />
 
       <div className="flex-1">
