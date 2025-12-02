@@ -294,7 +294,7 @@ export default function CareerPathways() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/applications`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
           body: JSON.stringify({
             job_id: jobId,
             hr_id: session?.user?.hrId,

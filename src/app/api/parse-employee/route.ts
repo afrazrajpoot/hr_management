@@ -5,12 +5,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 
 export async function POST(req: NextRequest) {
-   
+
   try {
-      const session: any = await getServerSession(authOptions);
-      if (!session?.user?.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    const session: any = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const formData = await req.formData();
     const files = formData.getAll('files') as File[];
 
@@ -18,9 +18,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'error', message: 'No files provided' }, { status: 400 });
     }
 
-    // Call the external parsing API
+    // Call the external parsing API with FastAPI token
     const res = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.user.fastApiToken}`
+      },
       body: formData,
     });
 
@@ -61,8 +64,8 @@ export async function POST(req: NextRequest) {
         // Create new user
         const user = await prisma.user.create({
           data: {
-            firstName: employee.firstName|| employee.Name ||'Not provide',
-            lastName: employee.lastName||'Not provide',
+            firstName: employee.firstName || employee.Name || 'Not provide',
+            lastName: employee.lastName || 'Not provide',
             email: employee.Email || 'Not provide',
             password: hashedPassword,
             role: 'Employee',

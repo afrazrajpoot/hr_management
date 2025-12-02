@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { HRLayout } from '@/components/admin/layout/admin-layout';
-import { Search, Download, Eye, Edit, UserCheck, Building, DollarSign, Calendar, Mail, Phone, Users, Briefcase, Shield, Save, X } from 'lucide-react';
+import { Search, Download, Eye, Edit, UserCheck, Building, DollarSign, Calendar, Mail, Phone, Users, Briefcase, Shield, Save, X, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 
 
@@ -234,7 +240,6 @@ export default function AdminHRUsersPage() {
 
   return (
     <HRLayout>
-      {/* <Toaster /> */}
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-8">
           {/* Header */}
@@ -450,10 +455,24 @@ export default function AdminHRUsersPage() {
                     {editingUserId === user.id ? (
                       <div className="space-y-4 rounded-lg border p-4">
                         <div className="flex items-center justify-between">
-                          <Label htmlFor={`paid-${user.id}`} className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4" />
-                            Payment Status
-                          </Label>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor={`paid-${user.id}`} className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4" />
+                              Payment Status
+                            </Label>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs">
+                                    Toggle to mark user as paid/unpaid. Paid users have full access to all features.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                           <Switch
                             id={`paid-${user.id}`}
                             checked={editForm.paid}
@@ -462,24 +481,55 @@ export default function AdminHRUsersPage() {
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor={`amount-${user.id}`}>Amount ($)</Label>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor={`amount-${user.id}`}>Amount ($)</Label>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs">
+                                    The amount paid by the user. This affects revenue calculations.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                           <Input
                             id={`amount-${user.id}`}
                             type="number"
                             value={editForm.amount}
                             onChange={(e) => setEditForm(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
                             placeholder="Enter amount"
+                            min="0"
+                            step="0.01"
                           />
                         </div>
                         
                         <div className="space-y-2">
-                          <Label htmlFor={`quota-${user.id}`}>Quota</Label>
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor={`quota-${user.id}`}>Quota</Label>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs">
+                                    Number of job posts allowed. Set to 0 for unlimited access.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                           <Input
                             id={`quota-${user.id}`}
                             type="number"
                             value={editForm.quota}
-                            onChange={(e) => setEditForm(prev => ({ ...prev, quota: parseFloat(e.target.value) || 0 }))}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, quota: parseInt(e.target.value) || 0 }))}
                             placeholder="Enter quota"
+                            min="0"
                           />
                         </div>
                         
@@ -510,17 +560,57 @@ export default function AdminHRUsersPage() {
 
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Payment Status</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Payment Status</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="max-w-xs">
+                                      {user.paid 
+                                        ? 'User has paid and has full access to all features'
+                                        : 'User has not paid. Limited access to features.'}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                             <Badge variant={user.paid ? "default" : "destructive"}>
                               {user.paid ? 'Paid' : 'Unpaid'}
                             </Badge>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Amount</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Amount</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Amount paid by the user</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                             <span className="font-semibold">${user.amount || 0}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Quota</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">Quota</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Number of job posts allowed</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                             <span className="font-semibold">{user.quota || 0}</span>
                           </div>
                           <div className="flex items-center justify-between">

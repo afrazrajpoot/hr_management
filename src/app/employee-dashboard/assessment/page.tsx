@@ -174,22 +174,23 @@ export default function Assessment() {
         }))
       );
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          data: partsData,
-          userId: session?.user.id,
-          hrId: session?.user?.hrId || 'individual_user',
-          departement: session?.user?.department?.at(-1) || "Healthcare",
-          employeeName: session?.user.name,
-          employeeEmail: session?.user.email,
-          is_paid:session?.user.paid || false,
-          allAnswers,
-        }),
-      });
+  const response = await fetch(API_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
+  },
+  body: JSON.stringify({
+    data: partsData,
+    userId: session?.user.id,
+    hrId: session?.user?.hrId || 'individual_user',
+    departement: session?.user?.department?.at(-1) || "Healthcare",
+    employeeName: session?.user.name,
+    employeeEmail: session?.user.email,
+    is_paid: session?.user.paid || false,
+    allAnswers,
+  }),
+});
 
       if (response.ok) {
         const res = await fetch(
@@ -198,6 +199,7 @@ export default function Assessment() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
             },
             body: JSON.stringify({ employeeId: session?.user?.id }),
           }

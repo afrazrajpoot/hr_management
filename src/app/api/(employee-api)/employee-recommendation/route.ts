@@ -3,18 +3,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/app/auth";
 import { getServerSession } from "next-auth";
 
-async function getRecommendations(employeeId: string, recruiterId: string) {
+async function getRecommendations(employeeId: string, recruiterId: string, fastApiToken: string | null) {
   const fastApiUrl = `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/recommend-companies`;
+
+  // Prepare headers with FastAPI token if available
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (fastApiToken) {
+    headers["Authorization"] = `Bearer ${fastApiToken}`;
+  }
 
   const response = await fetch(fastApiUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recruiter_id: recruiterId, employee_id: employeeId }),
+    headers: headers,
+    body: JSON.stringify({
+      recruiter_id: recruiterId,
+      employee_id: employeeId
+    }),
   });
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`FastAPI request failed: ${text}`);
+    throw new Error(`FastAPI request failed: ${response.status} ${text}`);
   }
 
   const data = await response.json();
@@ -50,9 +62,19 @@ export async function POST(req: NextRequest) {
   };
 
   try {
+    // Get FastAPI token from session
+    const fastApiToken = session.user.fastApiToken;
+
+    if (!fastApiToken) {
+      console.warn("No FastAPI token found in session");
+      // You might want to handle this case differently - either return an error
+      // or try to get recommendations without the token
+    }
+
     const recommendations = await getRecommendations(
       session.user.id,
-      session.user.hrId
+      session.user.hrId,
+      fastApiToken
     );
 
     const startIndex = (filters.page - 1) * filters.limit;
@@ -69,10 +91,17 @@ export async function POST(req: NextRequest) {
       limit: filters.limit,
       hasMore: endIndex < recommendations.length,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error in recommendations API:", err);
+
+    // Provide more detailed error information
+    const errorMessage = err.message || "Failed to get recommendations";
+
     return NextResponse.json(
-      { error: "Failed to get recommendations" },
+      {
+        error: "Failed to get recommendations",
+        details: errorMessage
+      },
       { status: 500 }
     );
   }

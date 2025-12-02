@@ -42,6 +42,11 @@ const mainNavItems = [
     url: "/dashboard/risk-analysis",
     icon: TrendingDown,
   },
+   {
+    title: "User Management",
+    url: "/dashboard/user-management",
+    icon: User,
+  },
   { title: "Mobility", url: "/dashboard/mobility", icon: ArrowUpDown },
 ];
 

@@ -109,6 +109,10 @@ export default function UploadJobsPage() {
         {
           method: "POST",
           body: formDataUpload,
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
+          },
         }
       );
 
@@ -161,7 +165,7 @@ export default function UploadJobsPage() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/generate-description`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
           body: JSON.stringify({
             title: formData.title,
             location: formData.location || null,
@@ -220,7 +224,7 @@ export default function UploadJobsPage() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/create`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
           body: JSON.stringify(createData),
         }
       );

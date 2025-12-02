@@ -121,6 +121,7 @@ export default function HRJobsPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
           },
           body: JSON.stringify({
             userId: selectedRecommendation.userId,
