@@ -124,11 +124,28 @@ export default function Assessment() {
     isLoading,
   ]);
 
-  const currentPart = questionsByPart[currentPartIndex];
-  const currentPartQuestions = currentPart.questions;
+  // Determine visible questions based on paid status
+  const visibleQuestions = session?.user?.paid 
+    ? questionsByPart 
+    : questionsByPart.slice(0, 1);
+
+  const currentPart = visibleQuestions[currentPartIndex];
+  // Guard against invalid index if user status changes or state is stale
+  if (!currentPart) {
+     // This might happen if a user was on part 2 and then became unpaid (unlikely in session but good safety)
+     // or if initial state is somehow out of bounds.
+     // We'll handle it gracefully in render or by resetting index if needed.
+  }
+  
+  const currentPartQuestions = currentPart?.questions || [];
   const totalQuestionsInPart = currentPartQuestions.length;
   const currentQ = currentPartQuestions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100;
+  
+  // Calculate total progress across visible parts
+  // Note: The original progress calculation was just for the current part? 
+  // Line 131: const progress = ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100;
+  // It seems to be per-part progress.
+  const progress = totalQuestionsInPart > 0 ? ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100 : 0;
 
   // Timer effect
   useEffect(() => {
@@ -149,7 +166,7 @@ export default function Assessment() {
     setIsSubmitting(true);
     try {
       // Prepare assessment data for API
-      const partsData = questionsByPart.map((part) => {
+      const partsData = visibleQuestions.map((part) => {
         const optionCounts: Record<string, number> = {};
         part.questions.forEach((q) => {
           if (answers[q.id]) {
@@ -164,7 +181,7 @@ export default function Assessment() {
       });
 
       // Build detailed answers array
-      const allAnswers = questionsByPart.flatMap((part) =>
+      const allAnswers = visibleQuestions.flatMap((part) =>
         part.questions.map((q) => ({
           id: q.id,
           part: part.part,
@@ -245,7 +262,7 @@ export default function Assessment() {
   const handleNext = () => {
     if (currentQuestionIndex < totalQuestionsInPart - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-    } else if (currentPartIndex < questionsByPart.length - 1) {
+    } else if (currentPartIndex < visibleQuestions.length - 1) {
       setCurrentPartIndex((prev) => prev + 1);
       setCurrentQuestionIndex(0);
     }
@@ -255,7 +272,7 @@ export default function Assessment() {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     } else if (currentPartIndex > 0) {
-      const prevPart = questionsByPart[currentPartIndex - 1];
+      const prevPart = visibleQuestions[currentPartIndex - 1];
       setCurrentPartIndex(currentPartIndex - 1);
       setCurrentQuestionIndex(prevPart.questions.length - 1);
     }
@@ -281,13 +298,13 @@ export default function Assessment() {
 
   const isAnswered = !!answers[currentQ.id];
   const isPartComplete = currentPartQuestions.every((q) => !!answers[q.id]);
-  const isAllComplete = questionsByPart.every((part) =>
+  const isAllComplete = visibleQuestions.every((part) =>
     part.questions.every((q) => !!answers[q.id])
   );
 
   const isLastQuestionInPart =
     currentQuestionIndex === totalQuestionsInPart - 1;
-  const isLastPart = currentPartIndex === questionsByPart.length - 1;
+  const isLastPart = currentPartIndex === visibleQuestions.length - 1;
 
   // Show loading state while checking localStorage
   if (isLoading) {

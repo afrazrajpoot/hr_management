@@ -535,7 +535,9 @@ export default function RetentionRisk() {
            
           )} */}
 
-          <Button
+        
+        {
+           session?.user?.paid &&  <Button
             onClick={handleAnalyzeWithAI}
             disabled={isAnalysisLoading || !dashboardData}
             className="gap-2"
@@ -552,6 +554,7 @@ export default function RetentionRisk() {
               </>
             )}
           </Button>
+        }
         </div>
 
         {error && (

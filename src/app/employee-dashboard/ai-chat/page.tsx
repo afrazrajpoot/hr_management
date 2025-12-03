@@ -15,7 +15,12 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "Please subscribe to access the AI assistant.",
+    },
+  ]);
   const [input, setInput] = useState("");
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
@@ -25,14 +30,23 @@ export default function ChatPage() {
   // Fetch chat history when component mounts or session changes
   useEffect(() => {
     const fetchChatHistory = async () => {
-      if (!session?.user?.id) return;
+      if (!session?.user?.id || session?.user?.paid == false) return;
 
       try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+
+        // Add FastAPI token to headers if available
+        if (session.user.fastApiToken) {
+          headers["Authorization"] = `Bearer ${session.user.fastApiToken}`;
+        }
+
         const response = await fetch(
           `https://api.geniusfactor.ai/chat/${session.user.id}`,
           {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers,
           }
         );
 
@@ -73,13 +87,37 @@ export default function ChatPage() {
     };
 
     fetchChatHistory();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, session?.user?.paid, session?.user?.fastApiToken]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const sendMessage = async () => {
+    // Check if user is paid before allowing message sending
+    if (session?.user?.paid == false) {
+      setInput("");
+      setMessages([
+        {
+          role: "assistant",
+          content: "This feature requires a subscription. Please subscribe to access the AI assistant.",
+        },
+      ]);
+      return;
+    }
+
+    // Check if FastAPI token is available
+    if (!session?.user?.fastApiToken) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Authentication error: No API token found. Please log in again.",
+        },
+      ]);
+      return;
+    }
+
     if (!input.trim() || isLoading) return;
 
     const newMessage: Message = { role: "user", content: input };
@@ -97,10 +135,14 @@ export default function ChatPage() {
     ]);
 
     try {
-      // const response = await fetch(`https://api.geniusfactor.ai/chat`, {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.user.fastApiToken}`,
+      };
+
       const response = await fetch(`http://127.0.0.1:8000/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           user_id: session?.user.id,
           message: input,
@@ -108,6 +150,9 @@ export default function ChatPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized: Invalid or expired token");
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -153,14 +198,20 @@ export default function ChatPage() {
     } catch (error) {
       console.error("Chat error:", error);
 
+      let errorMessage = "Error: Failed to connect to the server. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes("Unauthorized")) {
+          errorMessage = "Authentication error: Your session has expired. Please log in again.";
+        }
+      }
+
       setMessages((prev) => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
         if (lastMessage.role === "assistant") {
           newMessages[newMessages.length - 1] = {
             role: "assistant",
-            content:
-              "Error: Failed to connect to the server. Please try again.",
+            content: errorMessage,
             isStreaming: false,
           };
         }
@@ -202,7 +253,7 @@ export default function ChatPage() {
             <CardContent className="flex-1 flex flex-col p-0 min-h-0">
               <ScrollArea className="flex-1 min-h-0">
                 <div className="p-6 space-y-4">
-                  {messages.length === 0 && (
+                  {messages.length === 0 && session?.user?.paid == true && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                       <div className="p-5 bg-primary/5 rounded-full mb-5">
                         <Bot className="h-16 w-16 text-primary" />
@@ -264,18 +315,28 @@ export default function ChatPage() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message here..."
-                    disabled={isLoading}
+                    disabled={isLoading || session?.user?.paid == false}
                     className="flex-1 min-h-[48px] text-base rounded-xl resize-none"
                   />
                   <Button
                     onClick={sendMessage}
-                    disabled={isLoading || !input.trim()}
+                    disabled={isLoading || !input.trim() || session?.user?.paid == false || !session?.user?.fastApiToken}
                     size="lg"
                     className="h-12 w-12 p-0 rounded-xl shrink-0"
                   >
                     <Send className="h-5 w-5" />
                   </Button>
                 </div>
+                {session?.user?.paid == false && (
+                  <p className="text-sm text-red-500 mt-2 text-center">
+                    ⚠️ Please subscribe to access the AI assistant.
+                  </p>
+                )}
+                {session?.user?.paid == true && !session?.user?.fastApiToken && (
+                  <p className="text-sm text-yellow-600 mt-2 text-center">
+                    ⚠️ Authentication token missing. Please log in again.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
