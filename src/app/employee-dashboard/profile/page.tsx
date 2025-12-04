@@ -208,6 +208,7 @@ const EmployeeProfilePage: React.FC = () => {
                 employee={employee}
                 isEditing={isEditing}
                 control={control}
+                userHrId={session?.user?.hrId}
               />
             </TabsContent>
 

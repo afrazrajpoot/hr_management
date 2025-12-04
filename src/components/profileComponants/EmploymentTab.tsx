@@ -16,17 +16,22 @@ interface EmploymentTabProps {
   employee: Employee;
   isEditing: boolean;
   control: any;
+  userHrId?: string | null;
 }
 
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
   employee,
   isEditing,
   control,
-}: any) => {
+  userHrId,
+}) => {
   // Get field display value
-  const getFieldValue = (fieldName: string) => {
-    return employee?.[fieldName] || "";
+  const getFieldValue = (fieldName: string): any => {
+    return employee?.[fieldName as keyof Employee] || "";
   };
+
+  // Allow editing only if userHrId is null or undefined
+  const canEditEmployment = !userHrId;
 
   return (
     <motion.div
@@ -57,6 +62,11 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               </CardTitle>
               <CardDescription className="text-base mt-1">
                 View your employment and workplace information
+                {!canEditEmployment && (
+                  <span className="block text-xs text-muted-foreground mt-1">
+                    (Managed by HR - Read Only)
+                  </span>
+                )}
               </CardDescription>
             </div>
           </div>
@@ -84,10 +94,10 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                 >
                   <InfoField
                     {...field}
-                    isEditing={isEditing}
+                    isEditing={isEditing && canEditEmployment}
                     control={control}
                     defaultValue={getFieldValue(field.field)}
-                    disabled={true} // Always disabled, regardless of isEditing
+                    disabled={!canEditEmployment}
                   />
                 </motion.div>
               ))}
