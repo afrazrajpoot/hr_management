@@ -112,17 +112,17 @@ interface Assessment {
   updatedAt: string;
   userId: string;
   executiveSummary: string;
-  hrId: string;
-  departement: string;
+  hrId?: string;
+  departement?: string;
   geniusFactorScore: number;
   geniusFactorProfileJson: GeniusFactorProfile;
-  currentRoleAlignmentAnalysisJson: CurrentRoleAlignmentAnalysis;
-  internalCareerOpportunitiesJson: InternalCareerOpportunities;
-  retentionAndMobilityStrategiesJson: RetentionAndMobilityStrategies;
-  developmentActionPlanJson: DevelopmentActionPlan;
-  personalizedResourcesJson: PersonalizedResources;
-  dataSourcesAndMethodologyJson: DataSourcesAndMethodology;
-  risk_analysis: any;
+  currentRoleAlignmentAnalysisJson?: CurrentRoleAlignmentAnalysis;
+  internalCareerOpportunitiesJson?: InternalCareerOpportunities;
+  retentionAndMobilityStrategiesJson?: RetentionAndMobilityStrategies;
+  developmentActionPlanJson?: DevelopmentActionPlan;
+  personalizedResourcesJson?: PersonalizedResources;
+  dataSourcesAndMethodologyJson?: DataSourcesAndMethodology;
+  risk_analysis?: any;
 }
 
 const isValid = (value: any): boolean => {
@@ -319,7 +319,7 @@ export default function Results() {
                       className="h-2"
                     />
                     <p className="text-sm text-black dark:text-white leading-relaxed">
-                      {selectedAssessment.geniusFactorProfileJson.description}
+                      {selectedAssessment.geniusFactorProfileJson?.description}
                     </p>
                   </div>
                   <div className="space-y-2">
@@ -330,7 +330,7 @@ export default function Results() {
                       <span className="font-medium text-black dark:text-white leading-6">
                         {
                           selectedAssessment.geniusFactorProfileJson
-                            .secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : selectedAssessment.geniusFactorProfileJson.secondary_genius_factor
+                            ?.secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : selectedAssessment.geniusFactorProfileJson?.secondary_genius_factor
                         }
                       </span>
                       {/* <span className="text-sm font-semibold text-black dark:text-white">N/A</span> */}
@@ -338,7 +338,7 @@ export default function Results() {
                     <p className="text-sm text-black dark:text-white leading-relaxed">
                       {
                         selectedAssessment.geniusFactorProfileJson
-                          .secondary_description
+                          ?.secondary_description
                       }
                     </p>
                   </div>
@@ -347,7 +347,7 @@ export default function Results() {
 
               {/* Strengths & Growth Areas */}
               <div className="space-y-6">
-                {isValid(selectedAssessment.geniusFactorProfileJson.key_strengths) && (
+                {isValid(selectedAssessment.geniusFactorProfileJson?.key_strengths) && (
                   <Card className="card">
                     <CardHeader>
                       <CardTitle className="flex items-center text-black dark:text-white">
@@ -357,7 +357,7 @@ export default function Results() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 gap-2">
-                        {selectedAssessment.geniusFactorProfileJson.key_strengths?.map(
+                        {selectedAssessment.geniusFactorProfileJson?.key_strengths?.map(
                           (strength, index) => (
                             <div
                               key={index}
@@ -373,7 +373,7 @@ export default function Results() {
                   </Card>
                 )}
 
-                {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents) && (
+                {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents) && (
                   <Card className="card">
                     <CardHeader>
                       <CardTitle className="flex items-center text-black dark:text-white">
@@ -383,7 +383,7 @@ export default function Results() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 gap-2">
-                        {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents?.map(
+                        {selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents?.map(
                           (area, index) => (
                             <div
                               key={index}
@@ -419,7 +419,8 @@ export default function Results() {
               </Card>
 
               {/* Department and HR Info */}
-              <Card className="card">
+           {
+            session?.user?.hrId == 'individual_user'|| session?.user?.hrId==null?" ":   <Card className="card">
                 <CardHeader>
                   <CardTitle className="flex items-center text-black dark:text-white">
                     <Users className="w-5 h-5 mr-2" />
@@ -429,11 +430,11 @@ export default function Results() {
                 <CardContent className="space-y-2">
                   <div className="flex items-center">
                     <Briefcase className="w-4 h-4 mr-2" />
-                    <span>Department: {selectedAssessment.departement}</span>
+                    <span>Department: {selectedAssessment.departement || 'N/A'}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="w-4 h-4 mr-2" />
-                    <span>HR ID: {selectedAssessment.hrId}</span>
+                    <span>HR ID: {selectedAssessment.hrId || 'N/A'}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
@@ -455,9 +456,10 @@ export default function Results() {
                   </div>
                 </CardContent>
               </Card>
+           }
 
               {/* Energy Sources */}
-              {isValid(selectedAssessment.geniusFactorProfileJson.energy_sources) && (
+              {isValid(selectedAssessment.geniusFactorProfileJson?.energy_sources) && (
                 <Card className="card">
                   <CardHeader>
                     <CardTitle className="flex items-center text-black dark:text-white">
@@ -467,7 +469,7 @@ export default function Results() {
                   </CardHeader>
                   <CardContent>
                     <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.geniusFactorProfileJson.energy_sources?.map(
+                      {selectedAssessment.geniusFactorProfileJson?.energy_sources?.map(
                         (source, index) => (
                           <li key={index} className="text-sm">
                             {source}
@@ -489,27 +491,27 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.assessment) && (
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.assessment) && (
                       <p className="text-sm">
-                        {selectedAssessment.currentRoleAlignmentAnalysisJson.assessment}
+                        {selectedAssessment.currentRoleAlignmentAnalysisJson?.assessment}
                       </p>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.alignment_score) && (
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score) && (
                       <div className="flex items-center">
                         <BarChart3 className="w-4 h-4 mr-2" />
                         <span>
                           Alignment Score:{" "}
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.alignment_score}
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score}
                         </span>
                       </div>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized) && (
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.strengths_utilized) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Strengths Utilized:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized?.map(
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.strengths_utilized?.map(
                             (strength, index) => (
                               <li key={index} className="text-sm">
                                 {strength}
@@ -519,22 +521,22 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level) && (
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level) && (
                       <div className="flex items-center">
                         <AlertCircle className="w-4 h-4 mr-2" />
                         <span>
                           Retention Risk Level:{" "}
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level}
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level}
                         </span>
                       </div>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents) && (
+                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Underutilized Talents:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents?.map(
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents?.map(
                             (talent, index) => (
                               <li key={index} className="text-sm">
                                 {talent}
@@ -558,7 +560,7 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.career_pathways) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.career_pathways) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Career Pathways:
@@ -566,7 +568,7 @@ export default function Results() {
                         <ul className="list-disc pl-5 space-y-2">
                           {Object.entries(
                             selectedAssessment.internalCareerOpportunitiesJson
-                              .career_pathways || {}
+                              ?.career_pathways || {}
                           ).map(([track, path], index) => (
                             <li key={index} className="text-sm">
                               <strong>{track}:</strong> {path}
@@ -575,25 +577,25 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.primary_industry) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.primary_industry) && (
                       <div className="flex items-center">
                         <Globe className="w-4 h-4 mr-2" />
                         <span>
                           Primary Industry:{" "}
-                          {selectedAssessment.internalCareerOpportunitiesJson.primary_industry}
+                          {selectedAssessment.internalCareerOpportunitiesJson?.primary_industry}
                         </span>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.secondary_industry) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.secondary_industry) && (
                       <div className="flex items-center">
                         <Globe className="w-4 h-4 mr-2" />
                         <span>
                           Secondary Industry:{" "}
-                          {selectedAssessment.internalCareerOpportunitiesJson.secondary_industry}
+                          {selectedAssessment.internalCareerOpportunitiesJson?.secondary_industry}
                         </span>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.transition_timeline) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.transition_timeline) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Transition Timeline:
@@ -610,13 +612,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.recommended_departments) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.recommended_departments) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Recommended Departments:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson.recommended_departments?.map(
+                          {selectedAssessment.internalCareerOpportunitiesJson?.recommended_departments?.map(
                             (dept, index) => (
                               <li key={index} className="text-sm">
                                 {dept}
@@ -626,13 +628,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.specific_role_suggestions) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Specific Role Suggestions:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions?.map(
+                          {selectedAssessment.internalCareerOpportunitiesJson?.specific_role_suggestions?.map(
                             (role, index) => (
                               <li key={index} className="text-sm">
                                 {role}
@@ -642,13 +644,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson.required_skill_development) && (
+                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.required_skill_development) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Required Skill Development:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson.required_skill_development?.map(
+                          {selectedAssessment.internalCareerOpportunitiesJson?.required_skill_development?.map(
                             (skill, index) => (
                               <li key={index} className="text-sm">
                                 {skill}
@@ -672,13 +674,13 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.development_support) && (
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.development_support) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Development Support:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.development_support?.map(
+                          {selectedAssessment.retentionAndMobilityStrategiesJson?.development_support?.map(
                             (item, index) => (
                               <li key={index} className="text-sm">
                                 {item}
@@ -688,13 +690,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies) && (
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.retention_strategies) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Retention Strategies:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies?.map(
+                          {selectedAssessment.retentionAndMobilityStrategiesJson?.retention_strategies?.map(
                             (item, index) => (
                               <li key={index} className="text-sm">
                                 {item}
@@ -704,13 +706,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations) && (
+                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.internal_mobility_recommendations) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Internal Mobility Recommendations:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations?.map(
+                          {selectedAssessment.retentionAndMobilityStrategiesJson?.internal_mobility_recommendations?.map(
                             (item, index) => (
                               <li key={index} className="text-sm">
                                 {item}
@@ -734,13 +736,13 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.developmentActionPlanJson.thirty_day_goals) && (
+                    {isValid(selectedAssessment.developmentActionPlanJson?.thirty_day_goals) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           30-Day Goals:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson.thirty_day_goals?.map(
+                          {selectedAssessment.developmentActionPlanJson?.thirty_day_goals?.map(
                             (goal, index) => (
                               <li key={index} className="text-sm">
                                 {goal}
@@ -750,13 +752,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.developmentActionPlanJson.ninety_day_goals) && (
+                    {isValid(selectedAssessment.developmentActionPlanJson?.ninety_day_goals) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           90-Day Goals:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson.ninety_day_goals?.map(
+                          {selectedAssessment.developmentActionPlanJson?.ninety_day_goals?.map(
                             (goal, index) => (
                               <li key={index} className="text-sm">
                                 {goal}
@@ -766,13 +768,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.developmentActionPlanJson.six_month_goals) && (
+                    {isValid(selectedAssessment.developmentActionPlanJson?.six_month_goals) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           6-Month Goals:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson.six_month_goals?.map(
+                          {selectedAssessment.developmentActionPlanJson?.six_month_goals?.map(
                             (goal, index) => (
                               <li key={index} className="text-sm">
                                 {goal}
@@ -782,13 +784,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.developmentActionPlanJson.networking_strategy) && (
+                    {isValid(selectedAssessment.developmentActionPlanJson?.networking_strategy) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Networking Strategy:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson.networking_strategy?.map(
+                          {selectedAssessment.developmentActionPlanJson?.networking_strategy?.map(
                             (strategy, index) => (
                               <li key={index} className="text-sm">
                                 {strategy}
@@ -812,13 +814,13 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.personalizedResourcesJson.affirmations) && (
+                    {isValid(selectedAssessment.personalizedResourcesJson?.affirmations) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Affirmations:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson.affirmations?.map(
+                          {selectedAssessment.personalizedResourcesJson?.affirmations?.map(
                             (affirmation, index) => (
                               <li key={index} className="text-sm">
                                 {affirmation}
@@ -828,13 +830,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.personalizedResourcesJson.learning_resources) && (
+                    {isValid(selectedAssessment.personalizedResourcesJson?.learning_resources) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Learning Resources:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson.learning_resources?.map(
+                          {selectedAssessment.personalizedResourcesJson?.learning_resources?.map(
                             (resource, index) => (
                               <li key={index} className="text-sm">
                                 {resource}
@@ -844,13 +846,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.personalizedResourcesJson.reflection_questions) && (
+                    {isValid(selectedAssessment.personalizedResourcesJson?.reflection_questions) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Reflection Questions:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson.reflection_questions?.map(
+                          {selectedAssessment.personalizedResourcesJson?.reflection_questions?.map(
                             (question, index) => (
                               <li key={index} className="text-sm">
                                 {question}
@@ -860,13 +862,13 @@ export default function Results() {
                         </ul>
                       </div>
                     )}
-                    {isValid(selectedAssessment.personalizedResourcesJson.mindfulness_practices) && (
+                    {isValid(selectedAssessment.personalizedResourcesJson?.mindfulness_practices) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Mindfulness Practices:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson.mindfulness_practices?.map(
+                          {selectedAssessment.personalizedResourcesJson?.mindfulness_practices?.map(
                             (practice, index) => (
                               <li key={index} className="text-sm">
                                 {practice}
@@ -890,18 +892,18 @@ export default function Results() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson.methodology) && (
+                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson?.methodology) && (
                       <p className="text-sm">
-                        {selectedAssessment.dataSourcesAndMethodologyJson.methodology}
+                        {selectedAssessment.dataSourcesAndMethodologyJson?.methodology}
                       </p>
                     )}
-                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson.data_sources) && (
+                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson?.data_sources) && (
                       <div>
                         <h4 className="font-semibold mb-2 text-black dark:text-white">
                           Data Sources:
                         </h4>
                         <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.dataSourcesAndMethodologyJson.data_sources?.map(
+                          {selectedAssessment.dataSourcesAndMethodologyJson?.data_sources?.map(
                             (source, index) => (
                               <li key={index} className="text-sm">
                                 {source}
