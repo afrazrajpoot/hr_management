@@ -135,7 +135,7 @@ export default function Dashboard() {
           const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
             { employeeId: session.user.id },
-            { headers: { "Content-Type": "application/json" } }
+            { headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session.user.fastApiToken}` } }
           );
           setApiData(res.data);
         } catch (error) {

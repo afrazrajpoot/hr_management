@@ -17,6 +17,7 @@ export async function GET() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
         },
         body: JSON.stringify({ employeeId: session.user.id }),
       }

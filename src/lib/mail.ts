@@ -23,10 +23,10 @@ const createTransporter = async () => {
   });
 
   try {
-    // Add timeout to prevent hanging
+    // Add timeout to prevent hanging (increased to 10s for slow networks)
     const accessTokenPromise = oauth2Client.getAccessToken();
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('OAuth2 request timeout')), 5000)
+      setTimeout(() => reject(new Error('OAuth2 request timeout after 10 seconds')), 10000)
     );
 
     const accessToken = await Promise.race([accessTokenPromise, timeoutPromise]) as any;
@@ -45,8 +45,10 @@ const createTransporter = async () => {
 
     return transporter;
   } catch (error) {
-    console.error('Error creating email transporter:', error);
-    throw new Error('Failed to create email transporter');
+    console.error('❌ Error creating email transporter:', error);
+    console.error('📧 Email service unavailable - continuing without email');
+    // Return null instead of throwing to allow graceful degradation
+    return null;
   }
 };
 
@@ -55,11 +57,12 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   try {
     const transporter = await createTransporter();
 
-    // Skip if no transporter (development mode)
+    // Skip if no transporter (development mode or transporter creation failed)
     if (!transporter) {
-      console.log('📧 Development mode: Email would be sent to:', email);
+      console.log('📧 Email service unavailable - verification link logged below:');
+      console.log('📧 Email would be sent to:', email);
       console.log('🔗 Verification link: ' + `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`);
-      return { messageId: 'dev-mode-skip' };
+      return { messageId: 'no-transporter', success: false };
     }
 
     const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
@@ -154,11 +157,13 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent successfully:', result.messageId);
-    return result;
+    console.log('✅ Verification email sent successfully:', result.messageId);
+    return { ...result, success: true };
   } catch (error) {
-    console.error('Error sending verification email:', error);
-    throw error;
+    console.error('❌ Error sending verification email:', error);
+    console.log('📧 User can still proceed to verification page');
+    // Return error info instead of throwing to allow user flow to continue
+    return { messageId: 'error', success: false, error };
   }
 };
 
@@ -262,11 +267,12 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent successfully:', result.messageId);
-    return result;
+    console.log('✅ Password reset email sent successfully:', result.messageId);
+    return { ...result, success: true };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
-    throw error;
+    console.error('❌ Error sending password reset email:', error);
+    // Return error info instead of throwing
+    return { messageId: 'error', success: false, error };
   }
 };
 
@@ -346,10 +352,11 @@ export const sendWelcomeEmail = async (email: string, firstName: string) => {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('Welcome email sent successfully:', result.messageId);
-    return result;
+    console.log('✅ Welcome email sent successfully:', result.messageId);
+    return { ...result, success: true };
   } catch (error) {
-    console.error('Error sending welcome email:', error);
-    throw error;
+    console.error('❌ Error sending welcome email:', error);
+    // Return error info instead of throwing
+    return { messageId: 'error', success: false, error };
   }
 };

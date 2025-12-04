@@ -31,7 +31,17 @@ export async function POST(req: Request) {
             },
         });
 
-        await sendPasswordResetEmail(user.email!, resetToken);
+        try {
+            const emailResult = await sendPasswordResetEmail(user.email!, resetToken);
+            if (emailResult.success) {
+                console.log('✅ Password reset email sent successfully');
+            } else {
+                console.warn('⚠️ Password reset email failed to send');
+            }
+        } catch (error) {
+            console.error('❌ Unexpected error sending password reset email:', error);
+            // Don't throw - still return success to user for security
+        }
 
         return NextResponse.json({ message: "If an account exists with this email, a password reset link has been sent." });
     } catch (error) {

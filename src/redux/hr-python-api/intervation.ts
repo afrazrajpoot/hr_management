@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getSession } from "next-auth/react";
 
 export interface DepartmentMetrics {
   avg_scores: {
@@ -59,6 +60,17 @@ export const retentionApi = createApi({
   reducerPath: "retentionApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.geniusfactor.ai",
+    prepareHeaders: async (headers) => {
+      // Get the session to retrieve the FastAPI token
+      const session: any = await getSession();
+
+      if (session?.user?.fastApiToken) {
+        // Add the FastAPI token as a Bearer token in the Authorization header
+        headers.set("Authorization", `Bearer ${session.user.fastApiToken}`);
+      }
+
+      return headers;
+    },
   }),
   tagTypes: ["RetentionAnalysis"],
   endpoints: (builder) => ({

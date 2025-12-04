@@ -1,5 +1,6 @@
 // lib/features/employee/employeeApiSlice.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getSession } from "next-auth/react";
 
 interface RecommendedCourse {
   title: string;
@@ -32,7 +33,15 @@ export const employeePythonApi = createApi({
   reducerPath: "employeePythonApi",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.geniusfactor.ai",
-    prepareHeaders: (headers) => {
+    prepareHeaders: async (headers) => {
+      // Get the session to retrieve the FastAPI token
+      const session: any = await getSession();
+
+      if (session?.user?.fastApiToken) {
+        // Add the FastAPI token as a Bearer token in the Authorization header
+        headers.set("Authorization", `Bearer ${session.user.fastApiToken}`);
+      }
+
       return headers;
     },
   }),

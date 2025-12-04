@@ -124,28 +124,32 @@ export default function Assessment() {
     isLoading,
   ]);
 
-  // Determine visible questions based on paid status
-  const visibleQuestions = session?.user?.paid 
-    ? questionsByPart 
-    : questionsByPart.slice(0, 1);
+  // Show all questions to all users regardless of paid status
+  const visibleQuestions = questionsByPart;
 
   const currentPart = visibleQuestions[currentPartIndex];
-  // Guard against invalid index if user status changes or state is stale
-  if (!currentPart) {
-     // This might happen if a user was on part 2 and then became unpaid (unlikely in session but good safety)
-     // or if initial state is somehow out of bounds.
-     // We'll handle it gracefully in render or by resetting index if needed.
-  }
   
+  // Guard against invalid index if user status changes or state is stale
+  // Reset to first part if current part is invalid
+  useEffect(() => {
+    if (!currentPart && visibleQuestions.length > 0 && !isLoading) {
+      setCurrentPartIndex(0);
+      setCurrentQuestionIndex(0);
+    }
+  }, [currentPart, visibleQuestions.length, isLoading]);
+
   const currentPartQuestions = currentPart?.questions || [];
   const totalQuestionsInPart = currentPartQuestions.length;
   const currentQ = currentPartQuestions[currentQuestionIndex];
-  
+
   // Calculate total progress across visible parts
-  // Note: The original progress calculation was just for the current part? 
+  // Note: The original progress calculation was just for the current part?
   // Line 131: const progress = ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100;
   // It seems to be per-part progress.
-  const progress = totalQuestionsInPart > 0 ? ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100 : 0;
+  const progress =
+    totalQuestionsInPart > 0
+      ? ((currentQuestionIndex + 1) / totalQuestionsInPart) * 100
+      : 0;
 
   // Timer effect
   useEffect(() => {
@@ -164,6 +168,7 @@ export default function Assessment() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setError(null); // Clear any previous errors
     try {
       // Prepare assessment data for API
       const partsData = visibleQuestions.map((part) => {
@@ -191,45 +196,80 @@ export default function Assessment() {
         }))
       );
 
-  const response = await fetch(API_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
-  },
-  body: JSON.stringify({
-    data: partsData,
-    userId: session?.user.id,
-    hrId: session?.user?.hrId || 'individual_user',
-    departement: session?.user?.department?.at(-1) || "Healthcare",
-    employeeName: session?.user.name,
-    employeeEmail: session?.user.email,
-    is_paid: session?.user.paid || false,
-    allAnswers,
-  }),
-});
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
+        },
+        body: JSON.stringify({
+          data: partsData,
+          userId: session?.user.id,
+          hrId: session?.user?.hrId || "individual_user",
+          departement: session?.user?.department?.at(-1) || "Healthcare",
+          employeeName: session?.user.name,
+          employeeEmail: session?.user.email,
+          is_paid: session?.user.paid || false,
+          allAnswers,
+        }),
+      });
 
-      if (response.ok) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      // Debug: Log the full response to understand its structure
+      console.log("API Response:", result);
+      console.log("Has results property?", "results" in result);
+      console.log("Result keys:", Object.keys(result));
+      
+      // Handle different response structures flexibly
+      // The API might return { results: [...] } or just the array directly
+      let analysisData = null;
+      
+      if (result && result.results) {
+        // Standard format: { results: [...] }
+        analysisData = result.results;
+      } else if (Array.isArray(result)) {
+        // Direct array format: [...]
+        analysisData = result;
+      } else if (result && typeof result === 'object') {
+        // Fallback: use the result as-is if it's an object
+        analysisData = result;
+      }
+      
+      if (!analysisData) {
+        console.error("Invalid API response:", result);
+        throw new Error("Invalid response from API - no valid data received");
+      }
+
+      setAnalysisResults(analysisData);
+      setError(null);
+
+      // Generate career recommendation after successful assessment
+      try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/generate-employee-career-recommendation`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
+              Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
             },
             body: JSON.stringify({ employeeId: session?.user?.id }),
           }
         );
+        
+        if (!res.ok) {
+          console.error("Failed to generate career recommendation:", res.status);
+        }
+      } catch (recError) {
+        console.error("Error generating career recommendation:", recError);
+        // Don't throw - this is a secondary operation
       }
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const result = await response.json();
-      setAnalysisResults(result.results);
-      setError(null);
 
       // Clear localStorage after successful submission
       localStorage.removeItem(STORAGE_KEY);
@@ -296,7 +336,7 @@ export default function Assessment() {
     }
   };
 
-  const isAnswered = !!answers[currentQ.id];
+  const isAnswered = !!answers[currentQ?.id];
   const isPartComplete = currentPartQuestions.every((q) => !!answers[q.id]);
   const isAllComplete = visibleQuestions.every((part) =>
     part.questions.every((q) => !!answers[q.id])
@@ -386,7 +426,7 @@ export default function Assessment() {
                 <div>
                   <h1 className="text-3xl font-bold">Career Assessment</h1>
                   <p className="text-muted-foreground">
-                    {currentPart.part} - Question {currentQuestionIndex + 1} of{" "}
+                    {currentPart?.part} - Question {currentQuestionIndex + 1} of{" "}
                     {totalQuestionsInPart}
                   </p>
                 </div>
@@ -419,60 +459,57 @@ export default function Assessment() {
               </div>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-                {error}
-              </div>
-            )}
+
 
             {/* Current Part Card */}
-            <Card className="card-elevated mb-6 card">
-              <CardHeader>
-                <CardTitle className="text-xl">{currentPart.part}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-lg font-semibold">
-                      {currentQ.category}
-                    </div>
-                    <span className="text-sm text-muted-foreground bg-gray-50/50 dark:bg-gray-800/50 px-2 py-1 rounded">
-                      Multiple Choice
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {currentQ.section}
-                  </div>
-                  <div className="text-lg leading-relaxed">
-                    {currentQ.question}
-                  </div>
-                  <RadioGroup
-                    value={answers[currentQ.id] || ""}
-                    onValueChange={handleAnswerChange}
-                    className="space-y-3"
-                  >
-                    {currentQ.options.map((option, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
-                      >
-                        <RadioGroupItem
-                          value={option}
-                          id={`option-${currentQ.id}-${index}`}
-                        />
-                        <Label
-                          htmlFor={`option-${currentQ.id}-${index}`}
-                          className="flex-1 cursor-pointer"
-                        >
-                          {option}
-                        </Label>
+            {currentQ && (
+              <Card className="card-elevated mb-6 card">
+                <CardHeader>
+                  <CardTitle className="text-xl">{currentPart?.part}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-lg font-semibold">
+                        {currentQ.category}
                       </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              </CardContent>
-            </Card>
+                      <span className="text-sm text-muted-foreground bg-gray-50/50 dark:bg-gray-800/50 px-2 py-1 rounded">
+                        Multiple Choice
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {currentQ.section}
+                    </div>
+                    <div className="text-lg leading-relaxed">
+                      {currentQ.question}
+                    </div>
+                    <RadioGroup
+                      value={answers[currentQ.id] || ""}
+                      onValueChange={handleAnswerChange}
+                      className="space-y-3"
+                    >
+                      {currentQ.options?.map((option, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          <RadioGroupItem
+                            value={option}
+                            id={`option-${currentQ.id}-${index}`}
+                          />
+                          <Label
+                            htmlFor={`option-${currentQ.id}-${index}`}
+                            className="flex-1 cursor-pointer"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Navigation */}
             <div className="flex items-center justify-between">

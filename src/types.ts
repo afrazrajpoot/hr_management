@@ -10,6 +10,7 @@ declare module 'next-auth' {
       paid: boolean;
       hrId?: string | null;
       department?: string[];
+      fastApiToken?: string;
     };
     accessToken?: string;
     error?: string;

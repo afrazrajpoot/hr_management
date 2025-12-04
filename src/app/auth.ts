@@ -62,9 +62,15 @@ export const authOptions: AuthOptions = {
           });
 
           try {
-            await sendVerificationEmail(user.email!, verificationToken);
+            const emailResult = await sendVerificationEmail(user.email!, verificationToken);
+            if (emailResult.success) {
+              console.log('✅ Verification email sent successfully');
+            } else {
+              console.warn('⚠️ Verification email failed to send, but user can still verify via link');
+            }
           } catch (error) {
-            console.error('Failed to send verification email:', error);
+            console.error('❌ Unexpected error sending verification email:', error);
+            // Don't throw - allow user to proceed to verification page
           }
         }
         // User exists - LOGIN (not first time)

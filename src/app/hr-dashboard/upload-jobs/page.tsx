@@ -110,7 +110,7 @@ export default function UploadJobsPage() {
           method: "POST",
           body: formDataUpload,
           headers: {
-            "Content-Type": "multipart/form-data",
+            // Don't set Content-Type for FormData - browser will set it automatically with boundary
             "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
           },
         }
