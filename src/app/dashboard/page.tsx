@@ -126,6 +126,7 @@ export default function HROverview() {
 
   // Extract data from dashboardData or use empty defaults
   const metrics = dashboardData?.overallMetrics || {};
+  console.log(metrics)
   const hrMetrics = dashboardData?.hrMetrics || {};
   const chartData = dashboardData?.chartData || {};
 
