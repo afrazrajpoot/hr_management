@@ -5,6 +5,27 @@ import { getQuestionsByPart } from "@/lib/assessment-questions";
 import type { PartWithQuestions } from "@/types/assessment-types";
 import { authOptions } from "@/app/auth";
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Function to shuffle options for all questions
+function shuffleAllQuestionsOptions(questionsByPart: PartWithQuestions[]): PartWithQuestions[] {
+    return questionsByPart.map(part => ({
+        ...part,
+        questions: part.questions.map(question => ({
+            ...question,
+            options: shuffleArray(question.options)
+        }))
+    }));
+}
+
 /**
  * GET /api/assessment-questions
  * Returns all assessment questions grouped by part
@@ -141,12 +162,15 @@ export async function GET() {
             );
         }
 
-        // All checks passed, return assessment questions
+        // All checks passed, get assessment questions and shuffle options
         const questionsByPart: PartWithQuestions[] = getQuestionsByPart();
+        
+        // Shuffle options for all questions
+        const shuffledQuestions = shuffleAllQuestionsOptions(questionsByPart);
 
         return NextResponse.json({
             success: true,
-            data: questionsByPart,
+            data: shuffledQuestions,
             userStatus: {
                 paid: user.paid,
                 hasEmployeeProfile: true,
