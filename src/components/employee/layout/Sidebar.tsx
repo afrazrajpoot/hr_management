@@ -94,7 +94,7 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen transition-all duration-300 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 border-r border-gray-700/50 relative",
+        "flex flex-col h-screen transition-all duration-300 sidebar-container relative",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -104,21 +104,21 @@ export function AppSidebar() {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between p-4 border-b border-gray-700/50">
+      <div className="sidebar-header flex items-center justify-between p-4">
         {!isCollapsed ? (
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+            <div className="sidebar-logo-wrapper">
               <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="font-bold text-xl gradient-text-primary">
                 GeniusFactor
               </h1>
               <p className="text-xs text-gray-400">Career Intelligence</p>
             </div>
           </div>
         ) : (
-          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg mx-auto">
+          <div className="sidebar-logo-wrapper mx-auto">
             <Brain className="w-6 h-6 text-white" />
           </div>
         )}
@@ -145,10 +145,10 @@ export function AppSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "group flex items-center rounded-xl transition-all duration-300 overflow-hidden",
+                "sidebar-nav-item group flex items-center",
                 isActive
-                  ? "bg-gradient-to-r shadow-lg scale-[1.02]"
-                  : "hover:bg-gray-700/50 hover:scale-[1.01]",
+                  ? "sidebar-nav-item-active"
+                  : "",
                 isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
               )}
               style={
@@ -163,10 +163,10 @@ export function AppSidebar() {
             >
               <div
                 className={cn(
-                  "p-2 rounded-lg transition-all duration-300",
+                  "sidebar-nav-icon-wrapper",
                   isActive
-                    ? "bg-white/20"
-                    : "bg-gray-700/50 group-hover:bg-gray-600/50"
+                    ? "sidebar-nav-icon-wrapper-active"
+                    : "sidebar-nav-icon-wrapper-inactive"
                 )}
               >
                 <item.icon
@@ -207,7 +207,7 @@ export function AppSidebar() {
           <div className="relative">
             <div
               className={cn(
-                "flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-gray-800/50 to-gray-900/50 border border-gray-700/50 cursor-pointer hover:border-gray-600/50 transition-all duration-300",
+                "sidebar-notification-wrapper flex items-center gap-2 p-3 cursor-pointer",
                 isCollapsed ? "justify-center" : "justify-between"
               )}
               onClick={() => setShowNotifications(!showNotifications)}
@@ -230,7 +230,7 @@ export function AppSidebar() {
                   <div
                     className={cn(
                       "flex items-center gap-1 text-xs",
-                      isConnected ? "text-emerald-400" : "text-amber-400"
+                      isConnected ? "sidebar-status-online" : "sidebar-status-connecting"
                     )}
                   >
                     <div
@@ -406,7 +406,7 @@ export function AppSidebar() {
           <div className="pt-4 mt-4 border-t border-gray-700/50">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="sidebar-user-avatar w-10 h-10 flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-900"></div>
@@ -423,7 +423,7 @@ export function AppSidebar() {
       </div>
 
       {/* Decorative element */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
+      <div className="sidebar-decorative-bottom"></div>
     </div>
   );
 }

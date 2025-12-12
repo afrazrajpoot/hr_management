@@ -213,11 +213,11 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 min-h-screen">
+      <div className="p-6 space-y-8 gradient-bg-primary min-h-screen">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold gradient-text-primary">
               Welcome back, {apiData?.data?.name || "User"}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
@@ -227,7 +227,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
             <Button 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+              className="btn-gradient-primary text-white px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
               asChild
             >
               <Link href="/employee-dashboard/assessment">
@@ -241,12 +241,12 @@ export default function Dashboard() {
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Progress Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+          <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+              <div className="icon-wrapper-blue">
                 <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0">
+              <Badge className="badge-blue">
                 Progress
               </Badge>
             </div>
@@ -259,19 +259,19 @@ export default function Dashboard() {
             </p>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+                className="progress-bar-primary"
                 style={{ width: `${dashboardData.assessmentProgress.percentage}%` }}
               ></div>
             </div>
           </div>
 
           {/* Completed Assessments */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+          <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+              <div className="icon-wrapper-green">
                 <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-0">
+              <Badge className="badge-green">
                 Achieved
               </Badge>
             </div>
@@ -288,12 +288,12 @@ export default function Dashboard() {
           </div>
 
           {/* Average Score */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+          <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20">
+              <div className="icon-wrapper-amber">
                 <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
-              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0">
+              <Badge className="badge-amber">
                 Performance
               </Badge>
             </div>
@@ -321,12 +321,12 @@ export default function Dashboard() {
           </div>
 
           {/* Career Matches */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+          <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+              <div className="icon-wrapper-purple">
                 <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-0">
+              <Badge className="badge-purple">
                 Opportunities
               </Badge>
             </div>
@@ -344,14 +344,14 @@ export default function Dashboard() {
         </div>
 
         {/* AI Career Recommendation */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-8 shadow-xl">
+        <div className="ai-recommendation-card">
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full -translate-y-32 translate-x-32"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full translate-y-24 -translate-x-24"></div>
+          <div className="decorative-gradient-blur-blue top-0 right-0 -translate-y-32 translate-x-32"></div>
+          <div className="decorative-gradient-blur-purple bottom-0 left-0 translate-y-24 -translate-x-24"></div>
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg">
+              <div className="ai-recommendation-icon-wrapper">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -415,18 +415,18 @@ export default function Dashboard() {
           {/* Recent Assessments */}
           <div 
             id="recent-assessments"
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700"
+            className="card-primary card-hover"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+                <div className="icon-wrapper-blue">
                   <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Recent Assessments
                 </h2>
               </div>
-              <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              <Badge className="badge-blue">
                 {dashboardData.recentAssessments.length} total
               </Badge>
             </div>
@@ -436,7 +436,7 @@ export default function Dashboard() {
                 paginatedAssessments.map((assessment) => (
                   <div
                     key={assessment.id}
-                    className="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-200 hover:shadow-md bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900"
+                    className="assessment-item group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -463,11 +463,11 @@ export default function Dashboard() {
                       <div className="flex items-center gap-3">
                         {assessment.score && (
                           <div className="text-right">
-                            <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <div className="text-lg font-bold gradient-text-primary">
                               {assessment.score}%
                             </div>
                             <Badge 
-                              className={`text-xs ${assessment.score > 70 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}
+                              className={`text-xs ${assessment.score > 70 ? 'badge-green' : 'badge-amber'}`}
                             >
                               Score
                             </Badge>
@@ -476,7 +476,7 @@ export default function Dashboard() {
                         {assessment.status === "In Progress" && (
                           <Button 
                             size="sm" 
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0"
+                            className="btn-gradient-primary text-white border-0"
                             asChild
                           >
                             <Link href="/employee-dashboard/assessment">
@@ -531,7 +531,7 @@ export default function Dashboard() {
                           isActive={currentPage === page}
                           className={`${
                             currentPage === page
-                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                              ? "btn-gradient-primary text-white"
                               : "cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30"
                           }`}
                         >
@@ -571,17 +571,17 @@ export default function Dashboard() {
           </div>
 
           {/* Career Recommendations */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+          <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+                <div className="icon-wrapper-purple">
                   <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   AI Career Recommendations
                 </h2>
               </div>
-              <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+              <Badge className="badge-purple">
                 {dashboardData.recentRecommendations.length} matches
               </Badge>
             </div>
@@ -591,7 +591,7 @@ export default function Dashboard() {
                 dashboardData.recentRecommendations.map((rec, index) => (
                   <div
                     key={index}
-                    className="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 transition-all duration-200 hover:shadow-md bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900"
+                    className="assessment-item group"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
@@ -618,7 +618,7 @@ export default function Dashboard() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <div className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <div className="text-lg font-bold gradient-text-primary">
                           {rec.matchScore}%
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -661,12 +661,12 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 p-8 shadow-xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full -translate-y-32 translate-x-32"></div>
+        <div className="quick-actions-card">
+          <div className="decorative-gradient-blur-blue top-0 right-0 -translate-y-32 translate-x-32"></div>
           
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg">
+              <div className="ai-recommendation-icon-wrapper">
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -683,7 +683,7 @@ export default function Dashboard() {
               {/* Take Assessment */}
               <Link
                 href="/employee-dashboard/assessment"
-                className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-blue-400/50 hover:bg-white/20 transition-all duration-200"
+                className="quick-action-item group"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-200">
@@ -701,7 +701,7 @@ export default function Dashboard() {
               {/* View Results */}
               <Link
                 href="/employee-dashboard/results"
-                className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-green-400/50 hover:bg-white/20 transition-all duration-200"
+                className="quick-action-item group"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-green-500 to-green-600 group-hover:from-green-600 group-hover:to-green-700 transition-all duration-200">
@@ -719,7 +719,7 @@ export default function Dashboard() {
               {/* Career Paths */}
               <Link
                 href="/employee-dashboard/career-pathways"
-                className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-purple-400/50 hover:bg-white/20 transition-all duration-200"
+                className="quick-action-item group"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 group-hover:from-purple-600 group-hover:to-purple-700 transition-all duration-200">
@@ -737,7 +737,7 @@ export default function Dashboard() {
               {/* Development */}
               <Link
                 href="/employee-dashboard/development"
-                className="group bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:border-amber-400/50 hover:bg-white/20 transition-all duration-200"
+                className="quick-action-item group"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 transition-all duration-200">
