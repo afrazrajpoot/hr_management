@@ -431,23 +431,15 @@ export default function HRJobsPage() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  Your Job Postings
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  Manage job listings and review applicant submissions
-                </p>
-              </div>
               <div className="flex items-center gap-3">
                 <Button onClick={fetchJobs} variant="outline" className="gap-2">
                   <RefreshCw className="w-4 h-4" />
                   Refresh
                 </Button>
-                <Button className="btn-gradient-primary gap-2">
+                {/* <Button className="btn-gradient-primary gap-2">
                   <Briefcase className="w-4 h-4" />
                   Post New Job
-                </Button>
+                </Button> */}
               </div>
             </div>
 
@@ -531,14 +523,14 @@ export default function HRJobsPage() {
               <h3 className="text-2xl font-semibold mb-3">
                 No jobs posted yet
               </h3>
-              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              {/* <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                 Create your first job posting to start receiving applications
                 from qualified candidates.
-              </p>
-              <Button className="btn-gradient-primary gap-2">
+              </p> */}
+              {/* <Button className="btn-gradient-primary gap-2">
                 <Briefcase className="w-4 h-4" />
                 Create Your First Job Posting
-              </Button>
+              </Button> */}
             </div>
           ) : (
             <div className="space-y-6">
@@ -609,7 +601,7 @@ export default function HRJobsPage() {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+                        {/* <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
                           <Button variant="outline" size="sm" className="gap-2">
                             <Users className="w-4 h-4" />
                             Manage
@@ -621,7 +613,7 @@ export default function HRJobsPage() {
                             <FileText className="w-4 h-4" />
                             View All Applicants
                           </Button>
-                        </div>
+                        </div> */}
                       </div>
 
                       {/* Applications Section */}
@@ -730,10 +722,10 @@ export default function HRJobsPage() {
                                         <Sparkles className="w-4 h-4" />
                                         AI Analysis
                                       </Button>
-                                      <Button size="sm" className="gap-2">
+                                      {/* <Button size="sm" className="gap-2">
                                         <Mail className="w-4 h-4" />
                                         Contact
-                                      </Button>
+                                      </Button> */}
                                     </div>
                                   </div>
                                 </div>

@@ -18,13 +18,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Eye, Users, Target, Shield, Zap, ChevronRight, Download, Plus, MoreVertical, TrendingUp, BarChart3 } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Eye,
+  Users,
+  Target,
+  Shield,
+  Zap,
+  ChevronRight,
+  Download,
+  Plus,
+  MoreVertical,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
 import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import EmployeeDetailModal from "@/components/hr/EmployeeDetailModal";
 import { useSession } from "next-auth/react";
 import { dashboardOptions } from "@/app/data";
 import Loader from "@/components/Loader";
+import Link from "next/link";
 
 const assessmentStatuses = ["All Statuses", "Completed", "Not Started"];
 
@@ -119,14 +134,17 @@ export default function Employees() {
   // Calculate stats
   const totalEmployees = data?.pagination?.totalEmployees || 0;
   const completedAssessments = filteredEmployees.filter(
-    emp => emp.reports?.length > 0
+    (emp: any) => emp.reports?.length > 0
   ).length;
-  const completionRate = totalEmployees > 0 
-    ? Math.round((completedAssessments / totalEmployees) * 100) 
-    : 0;
-  
+  const completionRate =
+    totalEmployees > 0
+      ? Math.round((completedAssessments / totalEmployees) * 100)
+      : 0;
+
   const highRiskEmployees = filteredEmployees.filter(
-    emp => emp.reports?.[0]?.currentRoleAlignmentAnalysisJson?.retention_risk_level === "High"
+    (emp: any) =>
+      emp.reports?.[0]?.currentRoleAlignmentAnalysisJson
+        ?.retention_risk_level === "High"
   ).length;
 
   // Reset to page 1 when filters change
@@ -173,7 +191,7 @@ export default function Employees() {
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
           <div className="decorative-gradient-blur-blue -top-20 -right-20" />
           <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
-          
+
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div>
               <div className="flex items-center gap-3 mb-3">
@@ -190,16 +208,18 @@ export default function Employees() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
+              {/* <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
                 <Download className="h-4 w-4" />
                 Export Report
-              </button>
-              <button className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium">
-                <Plus className="h-4 w-4" />
-                Add Employee
-              </button>
+              </button> */}
+              <Link href="/hr-dashboard/upload-employee">
+                <button className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium">
+                  <Plus className="h-4 w-4" />
+                  Add Employee
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -214,7 +234,9 @@ export default function Employees() {
                     <div className="icon-wrapper-blue">
                       <Users className="h-4 w-4 text-primary" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Employees
+                    </p>
                   </div>
                   <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                     {totalEmployees}
@@ -235,7 +257,9 @@ export default function Employees() {
                     <div className="icon-wrapper-green">
                       <Target className="h-4 w-4 text-success" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Assessment Rate</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Assessment Rate
+                    </p>
                   </div>
                   <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
                     {completionRate}%
@@ -256,7 +280,9 @@ export default function Employees() {
                     <div className="icon-wrapper-amber">
                       <Shield className="h-4 w-4 text-warning" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">High Risk</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      High Risk
+                    </p>
                   </div>
                   <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
                     {highRiskEmployees}
@@ -277,11 +303,16 @@ export default function Employees() {
                     <div className="icon-wrapper-purple">
                       <Zap className="h-4 w-4 text-purple-600" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">Active Filters</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Active Filters
+                    </p>
                   </div>
                   <div className="text-2xl font-bold text-foreground">
-                    {[selectedDepartment, selectedRisk, selectedStatus]
-                      .filter(item => !item.includes("All")).length}
+                    {
+                      [selectedDepartment, selectedRisk, selectedStatus].filter(
+                        (item) => !item.includes("All")
+                      ).length
+                    }
                   </div>
                 </div>
                 <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
@@ -293,7 +324,7 @@ export default function Employees() {
         </div>
 
         {/* Search & Filters Section */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Quick Stats & Search */}
           <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
             <CardHeader>
@@ -379,37 +410,6 @@ export default function Employees() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Quick Actions */}
-          <Card className="quick-actions-card border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription className="text-white/70">
-                Common HR tasks
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[
-                { icon: Plus, label: "Bulk Add Employees", color: "from-primary to-purple-600" },
-                { icon: Download, label: "Export to Excel", color: "from-success to-green-500" },
-                { icon: BarChart3, label: "Generate Report", color: "from-warning to-amber-500" },
-                { icon: Shield, label: "Risk Analysis", color: "from-blue-500 to-cyan-500" },
-              ].map((action, index) => (
-                <button
-                  key={index}
-                  className="quick-action-item w-full text-left flex items-center justify-between p-3 hover:scale-[1.02] transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                      <action.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-white font-medium">{action.label}</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </button>
-              ))}
-            </CardContent>
-          </Card>
         </div>
 
         {/* Employee Table */}
@@ -437,21 +437,36 @@ export default function Employees() {
                   <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                     <Users className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">No employees found</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    No employees found
+                  </h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    Try adjusting your search or filter criteria to find what you're looking for.
+                    Try adjusting your search or filter criteria to find what
+                    you're looking for.
                   </p>
                 </div>
               ) : (
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left p-4 font-medium text-muted-foreground">Employee</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Department</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Position</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Risk Level</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Actions</th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Employee
+                      </th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Department
+                      </th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Position
+                      </th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Risk Level
+                      </th>
+                      <th className="text-left p-4 font-medium text-muted-foreground">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -487,8 +502,8 @@ export default function Employees() {
                           </div>
                         </td>
                         <td className="p-4">
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="bg-muted/50 border-muted-foreground/30 text-foreground"
                           >
                             {typeof employee.department === "string"
@@ -571,11 +586,19 @@ export default function Employees() {
         {data?.pagination && data.pagination.totalEmployees > 0 && (
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-xl bg-card border border-border">
             <div className="text-sm text-muted-foreground">
-              Showing <span className="font-bold text-foreground">{(currentPage - 1) * limit + 1}</span> to{" "}
+              Showing{" "}
+              <span className="font-bold text-foreground">
+                {(currentPage - 1) * limit + 1}
+              </span>{" "}
+              to{" "}
               <span className="font-bold text-foreground">
                 {Math.min(currentPage * limit, data.pagination.totalEmployees)}
               </span>{" "}
-              of <span className="font-bold text-foreground">{data.pagination.totalEmployees}</span> employees
+              of{" "}
+              <span className="font-bold text-foreground">
+                {data.pagination.totalEmployees}
+              </span>{" "}
+              employees
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -589,30 +612,41 @@ export default function Employees() {
                 Previous
               </Button>
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, data.pagination.totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  if (data.pagination.totalPages <= 5) {
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`min-w-8 h-8 ${currentPage === pageNum ? 'btn-gradient-primary' : 'border-border'}`}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
+                {Array.from(
+                  { length: Math.min(5, data.pagination.totalPages) },
+                  (_, i) => {
+                    const pageNum = i + 1;
+                    if (data.pagination.totalPages <= 5) {
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={
+                            currentPage === pageNum ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`min-w-8 h-8 ${
+                            currentPage === pageNum
+                              ? "btn-gradient-primary"
+                              : "border-border"
+                          }`}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    }
+                    return null;
                   }
-                  return null;
-                })}
+                )}
                 {data.pagination.totalPages > 5 && (
                   <>
                     <span className="px-2 text-muted-foreground">...</span>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handlePageChange(data.pagination.totalPages)}
+                      onClick={() =>
+                        handlePageChange(data.pagination.totalPages)
+                      }
                       className="min-w-8 h-8 border-border"
                     >
                       {data.pagination.totalPages}

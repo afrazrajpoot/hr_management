@@ -151,7 +151,7 @@ export default function UploadEmployeesPage() {
   return (
     <HRLayout>
       <div className="min-h-screen gradient-bg-primary p-4 md:p-8">
-        <div className="max-w-6xl mx-auto">
+        <div className=" mx-auto">
           {/* Header with decorative elements */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 mb-8">
             <div className="decorative-gradient-blur-blue -top-20 -right-20" />
@@ -176,12 +176,12 @@ export default function UploadEmployeesPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* <div className="flex items-center gap-3">
                   <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
                     <Download className="h-4 w-4" />
                     Download Template
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function UploadEmployeesPage() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Upload Area - Main Section */}
             <div className="lg:col-span-2 space-y-6">
               {/* Upload Card */}
@@ -398,92 +398,6 @@ export default function UploadEmployeesPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar - Quick Actions */}
-            <div className="space-y-6">
-              {/* Quick Actions */}
-              <div className="quick-actions-card border-0 shadow-xl">
-                <div className="p-6">
-                  <h3 className="text-white font-bold mb-4">Quick Actions</h3>
-                  <div className="space-y-3">
-                    {[
-                      {
-                        icon: Download,
-                        label: "Download Template",
-                        color: "from-primary to-purple-600",
-                      },
-                      {
-                        icon: Users,
-                        label: "View Upload History",
-                        color: "from-success to-green-500",
-                      },
-                      {
-                        icon: Shield,
-                        label: "Security Settings",
-                        color: "from-warning to-amber-500",
-                      },
-                      {
-                        icon: Zap,
-                        label: "AI Processing",
-                        color: "from-blue-500 to-cyan-500",
-                      },
-                    ].map((action, index) => (
-                      <button
-                        key={index}
-                        className="quick-action-item w-full text-left flex items-center justify-between p-3 hover:scale-[1.02] transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`h-10 w-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
-                          >
-                            <action.icon className="h-5 w-5 text-white" />
-                          </div>
-                          <span className="text-white font-medium">
-                            {action.label}
-                          </span>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Upload Tips */}
-              <div className="card-primary border-0 shadow-xl">
-                <div className="p-6">
-                  <h3 className="font-bold text-foreground mb-4">
-                    Upload Tips
-                  </h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5"></div>
-                      <span className="text-muted-foreground">
-                        Ensure column headers are properly named
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-success mt-1.5"></div>
-                      <span className="text-muted-foreground">
-                        Keep file size under 100MB for best performance
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-warning mt-1.5"></div>
-                      <span className="text-muted-foreground">
-                        Review data formatting before upload
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-2 text-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-purple-600 mt-1.5"></div>
-                      <span className="text-muted-foreground">
-                        AI will auto-correct common formatting issues
-                      </span>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>

@@ -47,7 +47,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from "lucide-react";
-import { dashboardOptions } from "@/app/data";
+import Link from "next/link";
 
 const getDepartmentColor = (departmentName: string): string => {
   const departmentColors: { [key: string]: string } = {
@@ -1009,33 +1009,47 @@ export default function Dashboard() {
               {[
                 {
                   icon: Users,
-                  label: "Add New Employee",
+                  label: "Employee",
                   color: "bg-blue-500/20",
+                  link: "/hr-dashboard/employees",
                 },
                 {
                   icon: Award,
-                  label: "Run Assessment",
+                  label: "Assessments",
                   color: "bg-purple-500/20",
+                  link: "/hr-dashboard/assessments",
                 },
                 {
                   icon: AlertTriangle,
-                  label: "Risk Alerts",
+                  label: "Retention Risk",
                   color: "bg-amber-500/20",
+                  link: "/hr-dashboard/retention-risk",
                 },
-                { icon: Target, label: "Set Goals", color: "bg-green-500/20" },
-                { icon: Zap, label: "Quick Report", color: "bg-primary/20" },
+                {
+                  icon: Target,
+                  label: "Internal Mobility",
+                  color: "bg-green-500/20",
+                  link: "/hr-dashboard/internal-mobility",
+                },
+                {
+                  icon: Zap,
+                  label: "Department Insights",
+                  color: "bg-primary/20",
+                  link: "/hr-dashboard/departments",
+                },
               ].map((action, index) => (
-                <button
+                <Link
                   key={index}
+                  href={action.link}
                   className="quick-action-item w-full text-left flex items-center gap-3 p-3 hover:scale-[1.02] transition-transform"
                 >
                   <div
-                    className={`${action.color} h-10 w-10 rounded-lg flex items-center justify-center`}
+                    className={`${action.color} h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0`}
                   >
                     <action.icon className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-white font-medium">{action.label}</span>
-                </button>
+                </Link>
               ))}
 
               <div className="pt-4 mt-4 border-t border-white/20">

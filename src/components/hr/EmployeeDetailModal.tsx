@@ -27,6 +27,10 @@ import {
   MapPin,
   Phone,
   Calendar,
+  Sparkles,
+  TrendingUp,
+  MoveRight,
+  Crown,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useUpdateEmployeeMutation } from "@/redux/hr-api";
@@ -94,7 +98,6 @@ export default function EmployeeDetailModal({
   if (!employee) return null;
 
   const onSubmit = async (data: FormData) => {
-    // Custom validation for transfer or promotion
     if (!data.transfer && !data.promotion) {
       setError("promotion", {
         type: "manual",
@@ -126,7 +129,6 @@ export default function EmployeeDetailModal({
 
   const toggleEdit = () => {
     if (isEditing) {
-      // Reset form to original employee data when canceling edit
       reset({
         department: getLastItem(employee.department) || "",
         position: getLastItem(employee.position) || "",
@@ -140,54 +142,85 @@ export default function EmployeeDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden card">
-        <DialogHeader className="relative pb-6 border-b">
-          <div className="absolute inset-0 rounded-t-lg"></div>
-          <DialogTitle className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full flex items-center justify-center">
-                <User className="h-5 w-5" />
+      <DialogContent className="max-w-4xl max-h-[95vh] card-primary rounded-2xl border-0 shadow-2xl p-0 flex flex-col overflow-hidden">
+        <div className="decorative-gradient-blur-blue -top-32 -right-32 opacity-50 pointer-events-none" />
+        <div className="decorative-gradient-blur-purple -bottom-32 -left-32 opacity-30 pointer-events-none" />
+
+        <DialogHeader className="relative pb-6 border-b bg-gradient-to-r from-primary/5 to-accent/5 rounded-t-2xl flex-shrink-0">
+          <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-r from-primary/10 to-accent/10" />
+          <DialogTitle className="flex items-center justify-between relative z-10 p-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="h-14 w-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                  <User className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-success border-2 border-card flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 text-success-foreground" />
+                </div>
               </div>
               <div>
-                <h2 className="text-2xl font-bold">Employee Profile</h2>
-                <p className="text-sm">
-                  {employee.firstName}{" "}
-                  {employee.lastName !== "Not provide" ? employee.lastName : ""}
-                </p>
+                <h2 className="text-2xl font-bold gradient-text-primary">
+                  Employee Profile
+                </h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-lg font-semibold">
+                    {employee.firstName}{" "}
+                    {employee.lastName !== "Not provide"
+                      ? employee.lastName
+                      : ""}
+                  </p>
+                  {employee.employee?.id && (
+                    <Badge variant="outline" className="badge-blue text-xs">
+                      ID: {employee.employee.id}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 onClick={toggleEdit}
                 disabled={isLoading}
                 variant={isEditing ? "outline" : "default"}
-                className="transition-all duration-200"
+                className={`transition-all duration-200 ${
+                  isEditing
+                    ? "border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+                    : "btn-gradient-primary shadow-lg hover:shadow-xl"
+                } font-medium px-6`}
               >
                 {isEditing ? (
                   <>
                     <XCircle className="h-4 w-4 mr-2" />
-                    Cancel
+                    Cancel Edit
                   </>
                 ) : (
                   <>
                     <Edit3 className="h-4 w-4 mr-2" />
-                    Edit
+                    Edit Profile
                   </>
                 )}
+              </Button>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full hover:bg-destructive/10 hover:text-destructive"
+              >
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[calc(95vh-8rem)] pr-2">
+        <div className="overflow-y-auto overflow-x-hidden flex-1 p-6">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-6 p-1">
+            <div className="space-y-6">
               {/* Basic Information */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader className="border-b">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                      <User className="h-4 w-4" />
+              <Card className="card-primary border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                <CardHeader className="border-b pb-4">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="icon-wrapper-blue">
+                      <User className="h-5 w-5 text-primary" />
                     </div>
                     <span>Basic Information</span>
                   </CardTitle>
@@ -196,18 +229,26 @@ export default function EmployeeDetailModal({
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="group">
                       <div className="flex items-center gap-2 mb-2">
-                        <Mail className="h-4 w-4" />
-                        <p className="text-sm font-medium">Email</p>
+                        <div className="icon-wrapper-purple p-2">
+                          <Mail className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Email
+                        </p>
                       </div>
-                      <p className="font-semibold px-3 py-2 rounded-lg">
+                      <p className="font-semibold px-3 py-2.5 rounded-lg bg-muted/50">
                         {employee.email}
                       </p>
                     </div>
 
                     <div className="group">
                       <div className="flex items-center gap-2 mb-2">
-                        <Briefcase className="h-4 w-4" />
-                        <p className="text-sm font-medium">Position</p>
+                        <div className="icon-wrapper-amber p-2">
+                          <Briefcase className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Position
+                        </p>
                       </div>
                       {isEditing ? (
                         <Controller
@@ -220,14 +261,15 @@ export default function EmployeeDetailModal({
                               onValueChange={field.onChange}
                               disabled={isLoading}
                             >
-                              <SelectTrigger className="w-full">
+                              <SelectTrigger className="w-full border-input focus:ring-ring">
                                 <SelectValue placeholder="Select a position" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="bg-card border-input">
                                 {dashboardOptions.Positions.map((option) => (
                                   <SelectItem
                                     key={option.value}
                                     value={option.value}
+                                    className="hover:bg-muted"
                                   >
                                     {option.option}
                                   </SelectItem>
@@ -237,13 +279,14 @@ export default function EmployeeDetailModal({
                           )}
                         />
                       ) : (
-                        <p className="font-semibold px-3 py-2 rounded-lg">
+                        <div className="font-semibold px-3 py-2.5 rounded-lg bg-muted/50 flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-amber-600" />
                           {getLastItem(employee.position) || "N/A"}
-                        </p>
+                        </div>
                       )}
                       {errors.position && (
-                        <p className="text-sm mt-1 flex items-center gap-1">
-                          <XCircle className="h-3 w-3" />
+                        <p className="text-sm mt-2 flex items-center gap-1.5 text-destructive bg-destructive/10 px-3 py-1.5 rounded-lg">
+                          <XCircle className="h-3.5 w-3.5" />
                           {errors.position.message}
                         </p>
                       )}
@@ -251,8 +294,12 @@ export default function EmployeeDetailModal({
 
                     <div className="group">
                       <div className="flex items-center gap-2 mb-2">
-                        <Building2 className="h-4 w-4" />
-                        <p className="text-sm font-medium">Department</p>
+                        <div className="icon-wrapper-green p-2">
+                          <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Department
+                        </p>
                       </div>
                       {isEditing ? (
                         <Controller
@@ -265,14 +312,17 @@ export default function EmployeeDetailModal({
                               onValueChange={field.onChange}
                               disabled={isLoading}
                             >
-                              <SelectTrigger className="w-full">
+                              <SelectTrigger className="w-full border-input focus:ring-ring">
                                 <SelectValue placeholder="Select department" />
                               </SelectTrigger>
-                              <SelectContent>
-                                {dashboardOptions.Departments.map((option) => (
+                              <SelectContent className="bg-card border-input">
+                                {dashboardOptions.Departments.filter(
+                                  (option) => option.value !== "all"
+                                ).map((option) => (
                                   <SelectItem
                                     key={option.value}
                                     value={option.value}
+                                    className="hover:bg-muted"
                                   >
                                     {option.option}
                                   </SelectItem>
@@ -282,13 +332,14 @@ export default function EmployeeDetailModal({
                           )}
                         />
                       ) : (
-                        <p className="font-semibold px-3 py-2 rounded-lg">
+                        <div className="font-semibold px-3 py-2.5 rounded-lg bg-muted/50 flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-green-600" />
                           {getLastItem(employee.department) || "N/A"}
-                        </p>
+                        </div>
                       )}
                       {errors.department && (
-                        <p className="text-sm mt-1 flex items-center gap-1">
-                          <XCircle className="h-3 w-3" />
+                        <p className="text-sm mt-2 flex items-center gap-1.5 text-destructive bg-destructive/10 px-3 py-1.5 rounded-lg">
+                          <XCircle className="h-3.5 w-3.5" />
                           {errors.department.message}
                         </p>
                       )}
@@ -296,8 +347,12 @@ export default function EmployeeDetailModal({
 
                     <div className="group">
                       <div className="flex items-center gap-2 mb-2">
-                        <DollarSign className="h-4 w-4" />
-                        <p className="text-sm font-medium">Salary</p>
+                        <div className="icon-wrapper-blue p-2">
+                          <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Salary
+                        </p>
                       </div>
                       {isEditing ? (
                         <Controller
@@ -305,96 +360,145 @@ export default function EmployeeDetailModal({
                           control={control}
                           rules={{ required: "Salary is required" }}
                           render={({ field }) => (
-                            <Input
-                              {...field}
-                              type="number"
-                              disabled={isLoading}
-                            />
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                              <Input
+                                {...field}
+                                type="number"
+                                disabled={isLoading}
+                                className="pl-10 border-input focus:ring-ring"
+                                placeholder="Enter salary"
+                              />
+                            </div>
                           )}
                         />
                       ) : (
-                        <p className="font-semibold px-3 py-2 rounded-lg">
-                          ${employee.salary}
-                        </p>
+                        <div className="font-semibold px-3 py-2.5 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-primary" />$
+                          {Number(employee.salary).toLocaleString()}
+                        </div>
                       )}
                       {errors.salary && (
-                        <p className="text-sm mt-1 flex items-center gap-1">
-                          <XCircle className="h-3 w-3" />
+                        <p className="text-sm mt-2 flex items-center gap-1.5 text-destructive bg-destructive/10 px-3 py-1.5 rounded-lg">
+                          <XCircle className="h-3.5 w-3.5" />
                           {errors.salary.message}
                         </p>
                       )}
                     </div>
 
-                    {/* <div className="group">
+                    <div className="group">
                       <div className="flex items-center gap-2 mb-2">
-                        <Award className="h-4 w-4" />
-                        <p className="text-sm font-medium">Employee ID</p>
+                        <div className="icon-wrapper-green p-2">
+                          <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Status
+                        </p>
                       </div>
-                      <p className="font-semibold px-3 py-2 rounded-lg">
-                        {employee.employee?.id || "N/A"}
-                      </p>
-                    </div> */}
+                      <Badge className="badge-green px-3 py-1.5">Active</Badge>
+                    </div>
                   </div>
 
                   {isEditing && (
-                    <div className="mt-6 p-4 rounded-xl border">
-                      <h4 className="font-semibold mb-4 flex items-center gap-2">
-                        <Edit3 className="h-4 w-4" />
-                        Action Required
+                    <div className="mt-8 p-5 rounded-xl border border-input bg-gradient-to-br from-primary/5 to-accent/5">
+                      <h4 className="font-semibold mb-4 flex items-center gap-2 text-lg">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        Required Actions
                       </h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Select at least one action to proceed with the update
+                      </p>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3 p-3 rounded-lg border">
-                          <Controller
-                            name="transfer"
-                            control={control}
-                            render={({ field }) => (
-                              <Checkbox
-                                id="transfer"
-                                checked={field.value}
-                                onCheckedChange={(checked) => {
-                                  field.onChange(checked);
-                                  handleInputChange();
-                                }}
-                                disabled={isLoading}
-                              />
-                            )}
-                          />
-                          <label
-                            htmlFor="transfer"
-                            className="text-sm font-medium cursor-pointer"
-                          >
-                            Transfer Request
-                          </label>
+                        <div
+                          className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
+                            control._formValues.transfer
+                              ? "border-primary bg-primary/5"
+                              : "border-input hover:border-primary/50 hover:bg-primary/5"
+                          }`}
+                        >
+                          <div className="icon-wrapper-blue p-2">
+                            <MoveRight className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <Controller
+                              name="transfer"
+                              control={control}
+                              render={({ field }) => (
+                                <div className="flex items-center gap-3">
+                                  <Checkbox
+                                    id="transfer"
+                                    checked={field.value}
+                                    onCheckedChange={(checked) => {
+                                      field.onChange(checked);
+                                      handleInputChange();
+                                    }}
+                                    disabled={isLoading}
+                                    className="h-5 w-5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                  />
+                                  <label
+                                    htmlFor="transfer"
+                                    className="text-sm font-medium cursor-pointer flex-1"
+                                  >
+                                    Transfer Request
+                                  </label>
+                                </div>
+                              )}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Move employee to another department
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 rounded-lg border">
-                          <Controller
-                            name="promotion"
-                            control={control}
-                            render={({ field }) => (
-                              <Checkbox
-                                id="promotion"
-                                checked={field.value}
-                                onCheckedChange={(checked) => {
-                                  field.onChange(checked);
-                                  handleInputChange();
-                                }}
-                                disabled={isLoading}
-                              />
-                            )}
-                          />
-                          <label
-                            htmlFor="promotion"
-                            className="text-sm font-medium cursor-pointer"
-                          >
-                            Promotion Request
-                          </label>
+                        <div
+                          className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
+                            control._formValues.promotion
+                              ? "border-accent bg-accent/5"
+                              : "border-input hover:border-accent/50 hover:bg-accent/5"
+                          }`}
+                        >
+                          <div className="icon-wrapper-green p-2">
+                            <Crown className="h-5 w-5 text-accent" />
+                          </div>
+                          <div className="flex-1">
+                            <Controller
+                              name="promotion"
+                              control={control}
+                              render={({ field }) => (
+                                <div className="flex items-center gap-3">
+                                  <Checkbox
+                                    id="promotion"
+                                    checked={field.value}
+                                    onCheckedChange={(checked) => {
+                                      field.onChange(checked);
+                                      handleInputChange();
+                                    }}
+                                    disabled={isLoading}
+                                    className="h-5 w-5 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                                  />
+                                  <label
+                                    htmlFor="promotion"
+                                    className="text-sm font-medium cursor-pointer flex-1"
+                                  >
+                                    Promotion Request
+                                  </label>
+                                </div>
+                              )}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Advance employee to higher position
+                            </p>
+                          </div>
                         </div>
                       </div>
                       {errors.promotion && (
-                        <p className="text-sm mt-3 flex items-center gap-1 p-2 rounded-lg">
-                          <XCircle className="h-4 w-4" />
-                          {errors.promotion.message}
-                        </p>
+                        <div className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                          <p className="text-sm flex items-center gap-2 text-destructive">
+                            <XCircle className="h-4 w-4" />
+                            {errors.promotion.message}
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
@@ -402,15 +506,23 @@ export default function EmployeeDetailModal({
               </Card>
 
               {isEditing && (
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    onClick={toggleEdit}
+                    variant="outline"
+                    className="px-6 py-2.5 border-input hover:bg-muted"
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="px-8 py-2"
+                    className="px-8 py-2.5 btn-gradient-primary shadow-lg hover:shadow-xl font-medium"
                   >
                     {isLoading ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
                         Updating...
                       </>
                     ) : (
@@ -425,11 +537,11 @@ export default function EmployeeDetailModal({
 
               {/* Skills */}
               {employee.employee?.skills?.length > 0 && (
-                <Card className="border-0 shadow-lg">
-                  <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                        <BookOpen className="h-4 w-4" />
+                <Card className="card-primary border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                  <CardHeader className="border-b pb-4">
+                    <CardTitle className="flex items-center gap-3 text-xl">
+                      <div className="icon-wrapper-purple">
+                        <BookOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <span>Skills & Expertise</span>
                     </CardTitle>
@@ -441,13 +553,29 @@ export default function EmployeeDetailModal({
                           skill: { name: string; proficiency: number },
                           index: number
                         ) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="px-3 py-1 text-sm font-medium"
-                          >
-                            {skill ? skill?.name : "N/A"}
-                          </Badge>
+                          <div key={index} className="relative group">
+                            <Badge
+                              variant="secondary"
+                              className="px-4 py-2 text-sm font-medium badge-purple group-hover:scale-105 transition-transform duration-200"
+                            >
+                              {skill ? skill?.name : "N/A"}
+                              {skill?.proficiency && (
+                                <span className="ml-2 text-xs opacity-75">
+                                  ({skill.proficiency}/10)
+                                </span>
+                              )}
+                            </Badge>
+                            {skill?.proficiency && (
+                              <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="progress-bar-primary h-full"
+                                  style={{
+                                    width: `${skill.proficiency * 10}%`,
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         )
                       )}
                     </div>
@@ -457,11 +585,11 @@ export default function EmployeeDetailModal({
 
               {/* Education */}
               {employee.employee?.education?.length > 0 && (
-                <Card className="border-0 shadow-lg">
-                  <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                        <GraduationCap className="h-4 w-4" />
+                <Card className="card-primary border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                  <CardHeader className="border-b pb-4">
+                    <CardTitle className="flex items-center gap-3 text-xl">
+                      <div className="icon-wrapper-blue">
+                        <GraduationCap className="h-5 w-5 text-primary" />
                       </div>
                       <span>Education</span>
                     </CardTitle>
@@ -472,16 +600,34 @@ export default function EmployeeDetailModal({
                         (edu: any, index: number) => (
                           <div
                             key={index}
-                            className="p-4 rounded-xl border hover:shadow-md transition-shadow duration-200"
+                            className="assessment-item p-4 rounded-xl border border-input hover:border-primary/50 transition-all duration-200 group"
                           >
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-semibold">{edu.degree}</h4>
-                              <Badge variant="outline">GPA: {edu.gpa}</Badge>
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="icon-wrapper-blue p-2">
+                                  <GraduationCap className="h-4 w-4 text-primary" />
+                                </div>
+                                <h4 className="font-semibold text-lg group-hover:text-primary transition-colors">
+                                  {edu.degree}
+                                </h4>
+                              </div>
+                              <Badge className="badge-green">
+                                GPA: {edu.gpa}
+                              </Badge>
                             </div>
-                            <p className="font-medium">{edu.institution}</p>
-                            <div className="flex items-center gap-2 mt-2 text-sm">
-                              <Calendar className="h-3 w-3" />
-                              <span>Graduated: {edu.year}</span>
+                            <p className="font-medium text-muted-foreground mb-2">
+                              {edu.institution}
+                            </p>
+                            <div className="flex items-center gap-3 mt-3 text-sm">
+                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary">
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>Graduated: {edu.year}</span>
+                              </div>
+                              {edu.field && (
+                                <Badge variant="outline" className="px-3 py-1">
+                                  {edu.field}
+                                </Badge>
+                              )}
                             </div>
                           </div>
                         )
@@ -493,11 +639,11 @@ export default function EmployeeDetailModal({
 
               {/* Experience */}
               {employee.employee?.experience?.length > 0 && (
-                <Card className="border-0 shadow-lg">
-                  <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                        <Clock className="h-4 w-4" />
+                <Card className="card-primary border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
+                  <CardHeader className="border-b pb-4">
+                    <CardTitle className="flex items-center gap-3 text-xl">
+                      <div className="icon-wrapper-green">
+                        <Clock className="h-5 w-5 text-accent" />
                       </div>
                       <span>Work Experience</span>
                     </CardTitle>
@@ -508,16 +654,44 @@ export default function EmployeeDetailModal({
                         (exp: any, index: number) => (
                           <div
                             key={index}
-                            className="p-4 rounded-xl border hover:shadow-md transition-shadow duration-200"
+                            className="assessment-item p-4 rounded-xl border border-input hover:border-accent/50 transition-all duration-200 group"
                           >
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-semibold">{exp.position}</h4>
-                              <Badge variant="outline">{exp.duration}</Badge>
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="icon-wrapper-green p-2">
+                                  <Briefcase className="h-4 w-4 text-accent" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-lg group-hover:text-accent transition-colors">
+                                    {exp.position}
+                                  </h4>
+                                  <p className="font-medium text-muted-foreground">
+                                    {exp.company}
+                                  </p>
+                                </div>
+                              </div>
+                              <Badge className="badge-blue">
+                                {exp.duration}
+                              </Badge>
                             </div>
-                            <p className="font-medium mb-2">{exp.company}</p>
-                            <p className="text-sm leading-relaxed">
+                            <p className="text-sm leading-relaxed bg-muted/30 p-3 rounded-lg">
                               {exp.description}
                             </p>
+                            {exp.technologies && (
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {exp.technologies.map(
+                                  (tech: string, i: number) => (
+                                    <Badge
+                                      key={i}
+                                      variant="secondary"
+                                      className="px-2 py-1 text-xs badge-amber"
+                                    >
+                                      {tech}
+                                    </Badge>
+                                  )
+                                )}
+                              </div>
+                            )}
                           </div>
                         )
                       )}

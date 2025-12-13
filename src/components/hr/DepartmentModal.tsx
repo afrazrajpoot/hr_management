@@ -159,14 +159,14 @@ export default function DepartmentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden border-0 p-0">
+      <DialogContent className="max-w-6xl max-h-[95vh] border-0 p-0 flex flex-col">
         {/* Decorative Background */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="decorative-gradient-blur-blue top-0 left-0 w-96 h-96"></div>
           <div className="decorative-gradient-blur-purple bottom-0 right-0 w-80 h-80"></div>
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(95vh-8rem)] p-8 gradient-bg-primary">
+        <div className="overflow-y-auto flex-1 p-8 gradient-bg-primary">
           <div className="space-y-8">
             {/* Department Overview Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

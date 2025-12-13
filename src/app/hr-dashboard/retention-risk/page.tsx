@@ -629,10 +629,10 @@ export default function RetentionRisk() {
                   )}
                 </button>
               )}
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
+              {/* <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
                 <Download className="h-4 w-4" />
                 Export Report
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

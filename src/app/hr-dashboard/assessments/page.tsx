@@ -687,7 +687,7 @@ export default function Assessments() {
         </div>
 
         {/* Search & Filters Section */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-2">
           <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
             <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
               <CardTitle className="flex items-center gap-2 text-foreground">
@@ -762,7 +762,7 @@ export default function Assessments() {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="quick-actions-card border-0 shadow-xl">
+          {/* <Card className="quick-actions-card border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="text-white">Assessment Tools</CardTitle>
               <CardDescription className="text-white/70">
@@ -810,7 +810,7 @@ export default function Assessments() {
                 </button>
               ))}
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Employee Assessment Grid */}
