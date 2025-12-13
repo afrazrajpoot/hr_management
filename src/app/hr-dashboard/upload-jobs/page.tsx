@@ -31,6 +31,17 @@ import {
   Plus,
   Sparkles,
   X,
+  Users,
+  Target,
+  Zap,
+  BarChart3,
+  ChevronRight,
+  Download,
+  Cloud,
+  Shield,
+  Database,
+  Award,
+  ArrowUpRight,
 } from "lucide-react";
 
 interface JobFormData {
@@ -110,8 +121,7 @@ export default function UploadJobsPage() {
           method: "POST",
           body: formDataUpload,
           headers: {
-            // Don't set Content-Type for FormData - browser will set it automatically with boundary
-            "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
+            Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
           },
         }
       );
@@ -142,13 +152,11 @@ export default function UploadJobsPage() {
 
   const processDescriptionForDisplay = (desc: string): string => {
     let processed = desc
-      // Remove hashtags for headers
       .replace(/^(#{1,6})\s+/gm, "")
-      // Replace asterisks and dashes for bullets with a bullet symbol, remove extra *
       .replace(/^\s*[\*\-]\s+/gm, "• ")
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Wrap **bold** in <strong>
-      .replace(/\*(?!\s)/g, "") // Remove standalone *
-      .replace(/#/g, ""); // Remove any remaining #
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(?!\s)/g, "")
+      .replace(/#/g, "");
 
     return processed;
   };
@@ -165,7 +173,10 @@ export default function UploadJobsPage() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/generate-description`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
+          },
           body: JSON.stringify({
             title: formData.title,
             location: formData.location || null,
@@ -224,7 +235,10 @@ export default function UploadJobsPage() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/jobs/create`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
+          },
           body: JSON.stringify(createData),
         }
       );
@@ -244,7 +258,6 @@ export default function UploadJobsPage() {
         companyAbout: "",
       });
       setIsCreateModalOpen(false);
-      // Optionally refresh jobs list here
     } catch (error: any) {
       toast.error(error.message || "Failed to create job");
     } finally {
@@ -258,361 +271,769 @@ export default function UploadJobsPage() {
       case "csv":
       case "xlsx":
       case "xls":
-        return <FileSpreadsheet className="w-6 h-6 text-green-400" />;
+        return <FileSpreadsheet className="w-8 h-8 text-success" />;
       case "pdf":
-        return <FileText className="w-6 h-6 text-red-400" />;
+        return <FileText className="w-8 h-8 text-destructive" />;
       default:
-        return <FileText className="w-6 h-6 text-blue-400" />;
+        return <FileText className="w-8 h-8 text-primary" />;
     }
   };
 
+  // Quick stats
+  const quickStats = [
+    {
+      icon: Users,
+      label: "Bulk Upload",
+      value: "100+",
+      color: "from-primary to-purple-600",
+    },
+    {
+      icon: Database,
+      label: "AI Processing",
+      value: "Instant",
+      color: "from-success to-green-500",
+    },
+    {
+      icon: Shield,
+      label: "Secure",
+      value: "256-bit",
+      color: "from-warning to-amber-500",
+    },
+    {
+      icon: Award,
+      label: "Smart Parse",
+      value: "Auto",
+      color: "from-blue-500 to-cyan-500",
+    },
+  ];
+
+  // Quick actions
+  const quickActions = [
+    {
+      icon: Download,
+      label: "Download Template",
+      color: "from-primary to-purple-600",
+    },
+    {
+      icon: Target,
+      label: "AI Job Generator",
+      color: "from-success to-green-500",
+    },
+    {
+      icon: BarChart3,
+      label: "Market Analysis",
+      color: "from-warning to-amber-500",
+    },
+    { icon: Zap, label: "Quick Post", color: "from-blue-500 to-cyan-500" },
+  ];
+
   return (
     <HRLayout>
-      <div className="p-8 max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Briefcase className="w-8 h-8 text-primary mr-2" />
-            <h1 className="text-3xl font-bold">Upload & Create Jobs</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Upload bulk jobs or create a single job listing manually
-          </p>
-        </div>
+      <div className="min-h-screen gradient-bg-primary p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header with decorative elements */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 mb-8">
+            <div className="decorative-gradient-blur-blue -top-20 -right-20" />
+            <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Button
-            onClick={handleUpload}
-            disabled={loading || !file}
-            className="flex-1"
-          >
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                <span>Upload Bulk Jobs</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Upload className="w-4 h-4" />
-                <span>Upload Bulk Jobs</span>
-              </div>
-            )}
-          </Button>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            variant="outline"
-            className="flex-1"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Job Manually
-          </Button>
-        </div>
-
-        {/* Upload Area */}
-        <div className="space-y-6">
-          <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragActive
-                ? "border-primary bg-primary/5"
-                : file
-                ? "border-green-500 bg-green-500/5"
-                : "border-border hover:border-primary/50"
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              id="file"
-              onChange={handleFileChange}
-              accept=".csv,.xls,.xlsx,.odt,.ods,.pdf"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-            />
-
-            <div className="flex flex-col items-center space-y-4">
-              {file ? (
-                <div className="flex items-center space-x-3">
-                  {getFileIcon(file.name)}
-                  <div>
-                    <p className="font-medium">{file.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="sidebar-logo-wrapper">
+                      <Briefcase className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                        Job Management Portal
+                      </h1>
+                      <p className="text-muted-foreground mt-2">
+                        Upload bulk jobs or create individual listings with
+                        AI-powered assistance
+                      </p>
+                    </div>
                   </div>
-                  <CheckCircle className="w-5 h-5 text-green-500" />
                 </div>
-              ) : (
-                <>
-                  <Upload className="w-12 h-12 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Choose a file or drag it here</p>
-                    <p className="text-sm text-muted-foreground">
-                      CSV, Excel, ODT, PDF files supported
-                    </p>
+
+                <div className="flex items-center gap-3">
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
+                    <Download className="h-4 w-4" />
+                    Template
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {quickStats.map((stat, index) => (
+              <div
+                key={index}
+                className="card-primary card-hover border-0 shadow-lg"
+              >
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-12 w-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}
+                    >
+                      <stat.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-foreground">
+                        {stat.value}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {stat.label}
+                      </div>
+                    </div>
                   </div>
-                </>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Content Area */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Action Buttons */}
+              <div className="card-primary border-0 shadow-xl">
+                <div className="p-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      onClick={handleUpload}
+                      disabled={loading || !file}
+                      className="flex-1 h-14 btn-gradient-primary text-lg font-medium"
+                    >
+                      {loading ? (
+                        <div className="flex items-center space-x-3">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-3">
+                          <Upload className="w-5 h-5" />
+                          <span>Upload Bulk Jobs</span>
+                          <ArrowUpRight className="w-4 h-4 opacity-80" />
+                        </div>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      variant="outline"
+                      className="flex-1 h-14 border-primary text-primary hover:bg-primary/10 text-lg"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Create Job
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload Area */}
+              <div className="card-primary border-0 shadow-xl overflow-hidden">
+                <div className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-foreground">
+                        Upload Your Job Data
+                      </h2>
+                      <p className="text-muted-foreground mt-1">
+                        Drag and drop or click to browse job files
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-success"></div>
+                      <span className="text-xs text-muted-foreground">
+                        Ready
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div
+                    className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
+                      dragActive
+                        ? "border-primary bg-gradient-to-r from-primary/5 to-primary/10"
+                        : file
+                        ? "border-success bg-gradient-to-r from-success/5 to-success/10"
+                        : "border-border hover:border-primary/50 bg-gradient-to-r from-transparent to-primary/5"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      id="file"
+                      onChange={handleFileChange}
+                      accept=".csv,.xls,.xlsx,.odt,.ods,.pdf"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+
+                    <div className="flex flex-col items-center justify-center p-12 text-center">
+                      {file ? (
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-success/20 to-green-600/20 flex items-center justify-center mb-2">
+                            {getFileIcon(file.name)}
+                          </div>
+                          <div className="text-center">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-bold text-foreground text-lg">
+                                {file.name}
+                              </p>
+                              <CheckCircle className="w-5 h-5 text-success" />
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB • Ready
+                              to upload
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="h-2 w-2 rounded-full bg-success animate-pulse"></div>
+                            <span className="text-xs text-success">
+                              File validated
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center mb-4">
+                            <Cloud className="w-10 h-10 text-primary" />
+                          </div>
+                          <div className="mb-4">
+                            <p className="font-bold text-foreground text-lg mb-1">
+                              Choose a file or drag it here
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              CSV, Excel, ODT, or PDF files • Max 100MB
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                            <span>Secure cloud processing</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Jobs List */}
+              {uploadedJobs.length > 0 && (
+                <div className="card-primary border-0 shadow-xl">
+                  <div className="bg-gradient-to-r from-success/5 to-transparent border-b border-border p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="icon-wrapper-green">
+                          <CheckCircle className="h-5 w-5 text-success" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-foreground">
+                            Uploaded Jobs
+                          </h3>
+                          <p className="text-muted-foreground mt-1">
+                            {uploadedJobs.length} jobs successfully processed
+                          </p>
+                        </div>
+                      </div>
+                      <Badge className="badge-green">
+                        {uploadedJobs.length} Jobs
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="space-y-3">
+                      {uploadedJobs.map((job, index) => (
+                        <div
+                          key={job.id}
+                          className="flex items-center p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors group"
+                        >
+                          <div className="icon-wrapper-blue mr-3">
+                            <Briefcase className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-foreground group-hover:text-primary transition-colors">
+                              {job.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              ID: {job.id}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-success/5 to-transparent">
+                      <p className="text-center text-sm">
+                        <span className="font-bold text-success">
+                          {uploadedJobs.length}
+                        </span>{" "}
+                        job{uploadedJobs.length !== 1 ? "s" : ""} successfully
+                        added to your listings
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
-        </div>
 
-        {/* Uploaded Jobs List */}
-        {uploadedJobs.length > 0 && (
-          <div className="mt-8 space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <CheckCircle className="w-5 h-5 text-green-500" />
-              Uploaded Jobs ({uploadedJobs.length})
-            </div>
-
-            <div className="space-y-2">
-              {uploadedJobs.map((job, index) => (
-                <div
-                  key={job.id}
-                  className="flex items-center p-3 border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <Briefcase className="w-4 h-4 text-muted-foreground mr-3" />
-                  <div className="flex-1">
-                    <p className="font-medium">{job.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      ID: {job.id}
-                    </p>
+              {/* File Requirements */}
+              <div className="card-primary border-0 shadow-xl">
+                <div className="p-6">
+                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Database className="h-5 w-5 text-primary" />
+                    Supported Formats
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="icon-wrapper-green">
+                          <FileSpreadsheet className="h-4 w-4 text-success" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            Spreadsheets
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            .csv, .xlsx, .xls
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="icon-wrapper-blue">
+                          <FileText className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            Documents
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            .pdf, .odt
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="icon-wrapper-amber">
+                          <Shield className="h-4 w-4 text-warning" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            Security
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            256-bit encryption
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                        <div className="icon-wrapper-purple">
+                          <Sparkles className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            AI Processing
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Smart job parsing
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
                 </div>
-              ))}
+              </div>
             </div>
 
-            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <p className="text-sm text-center">
-                <span className="font-medium text-green-600">
-                  {uploadedJobs.length}
-                </span>{" "}
-                job{uploadedJobs.length !== 1 ? "s" : ""} successfully added to
-                your listings
-              </p>
+            {/* Sidebar - Quick Actions */}
+            <div className="space-y-6">
+              {/* Quick Actions */}
+              <div className="quick-actions-card border-0 shadow-xl">
+                <div className="p-6">
+                  <h3 className="text-white font-bold mb-4">Quick Actions</h3>
+                  <div className="space-y-3">
+                    {quickActions.map((action, index) => (
+                      <button
+                        key={index}
+                        className="quick-action-item w-full text-left flex items-center justify-between p-3 hover:scale-[1.02] transition-all group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-10 w-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                          >
+                            <action.icon className="h-5 w-5 text-white" />
+                          </div>
+                          <span className="text-white font-medium">
+                            {action.label}
+                          </span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload Tips */}
+              <div className="card-primary border-0 shadow-xl">
+                <div className="p-6">
+                  <h3 className="font-bold text-foreground mb-4">
+                    Best Practices
+                  </h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5"></div>
+                      <span className="text-muted-foreground">
+                        Use consistent column headers
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-success mt-1.5"></div>
+                      <span className="text-muted-foreground">
+                        Keep file size under 100MB
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-warning mt-1.5"></div>
+                      <span className="text-muted-foreground">
+                        Review data formatting
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm">
+                      <div className="h-1.5 w-1.5 rounded-full bg-purple-600 mt-1.5"></div>
+                      <span className="text-muted-foreground">
+                        AI auto-corrects formatting
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Help Text */}
-        <div className="mt-8 p-4 border rounded-lg bg-muted/30">
-          <h3 className="font-medium mb-2">Supported file formats:</h3>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <p>• CSV files with job data</p>
-            <p>• Excel spreadsheets (.xlsx, .xls)</p>
-            <p>• OpenDocument text files (.odt)</p>
-            <p>• PDF documents</p>
-          </div>
-        </div>
+          {/* Create Job Modal */}
+          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-0 shadow-2xl">
+              <div className="relative">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
+                <DialogHeader className="pt-6">
+                  <DialogTitle className="text-2xl font-bold text-foreground">
+                    Create New Job
+                  </DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
+                    Fill in the details to create a new job posting with AI
+                    assistance
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
 
-        {/* Create Job Modal */}
-        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Job</DialogTitle>
-              <DialogDescription>
-                Fill in the details to create a new job posting.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="title">Job Title *</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Senior Software Engineer"
-                  className="mt-2"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Remote or Lahore, PK"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="salary">Salary (Optional)</Label>
-                <Input
-                  id="salary"
-                  name="salary"
-                  type="number"
-                  value={formData.salary}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 50000"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Tech Innovators Inc."
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="companyAbout">About Company</Label>
-                <Textarea
-                  id="companyAbout"
-                  name="companyAbout"
-                  value={formData.companyAbout}
-                  onChange={handleInputChange}
-                  placeholder="Brief description of the company..."
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="type" className="mb-2">
-                  Job Type
-                </Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={handleSelectChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select job type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="FULL_TIME">Full Time</SelectItem>
-                    <SelectItem value="PART_TIME">Part Time</SelectItem>
-                    <SelectItem value="CONTRACT">Contract</SelectItem>
-                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="skills">Skills (comma-separated)</Label>
-                <Input
-                  id="skills"
-                  name="skills"
-                  value={formData.skills}
-                  onChange={handleInputChange}
-                  placeholder="e.g., JavaScript, React, Node.js"
-                  className="mt-2"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Job Description *</Label>
-                <div className="relative">
+              <div className="space-y-6 py-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label
+                        htmlFor="title"
+                        className="flex items-center gap-2 mb-2"
+                      >
+                        <Target className="h-4 w-4 text-primary" />
+                        Job Title *
+                      </Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Senior Software Engineer"
+                        className="border-border/50 focus:border-primary"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="location" className="mb-2">
+                        Location
+                      </Label>
+                      <Input
+                        id="location"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Remote or Lahore, PK"
+                        className="border-border/50 focus:border-primary"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="salary" className="mb-2">
+                        Salary (Optional)
+                      </Label>
+                      <Input
+                        id="salary"
+                        name="salary"
+                        type="number"
+                        value={formData.salary}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 50000"
+                        className="border-border/50 focus:border-primary"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="type" className="mb-2">
+                        Job Type
+                      </Label>
+                      <Select
+                        value={formData.type}
+                        onValueChange={handleSelectChange}
+                      >
+                        <SelectTrigger className="border-border/50">
+                          <SelectValue placeholder="Select job type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="FULL_TIME">Full Time</SelectItem>
+                          <SelectItem value="PART_TIME">Part Time</SelectItem>
+                          <SelectItem value="CONTRACT">Contract</SelectItem>
+                          <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="companyName" className="mb-2">
+                        Company Name
+                      </Label>
+                      <Input
+                        id="companyName"
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Tech Innovators Inc."
+                        className="border-border/50 focus:border-primary"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="companyAbout" className="mb-2">
+                        About Company
+                      </Label>
+                      <Textarea
+                        id="companyAbout"
+                        name="companyAbout"
+                        value={formData.companyAbout}
+                        onChange={handleInputChange}
+                        placeholder="Brief description of the company..."
+                        rows={3}
+                        className="border-border/50 focus:border-primary"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="skills" className="mb-2">
+                        Skills (comma-separated)
+                      </Label>
+                      <Input
+                        id="skills"
+                        name="skills"
+                        value={formData.skills}
+                        onChange={handleInputChange}
+                        placeholder="e.g., JavaScript, React, Node.js"
+                        className="border-border/50 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="description"
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4 text-primary" />
+                      Job Description *
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={generateDescription}
+                      disabled={!formData.title || generateLoading}
+                      className="gap-2"
+                    >
+                      <Sparkles
+                        className={`h-4 w-4 ${
+                          generateLoading ? "animate-spin" : ""
+                        }`}
+                      />
+                      AI Generate
+                    </Button>
+                  </div>
                   <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="Enter job description..."
-                    rows={4}
+                    placeholder="Enter job description or use AI to generate one..."
+                    rows={6}
+                    className="border-border/50 focus:border-primary"
                     required
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={generateDescription}
-                    disabled={!formData.title || generateLoading}
-                    className="absolute bottom-2 right-2 h-8 w-8 p-0"
-                  >
-                    <Sparkles
-                      className={`w-4 h-4 ${
-                        generateLoading ? "animate-spin" : ""
-                      }`}
-                    />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Click the sparkles icon to generate description with AI
-                </p>
-              </div>
-            </div>
-            <DialogFooter className="mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsCreateModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateJob}
-                disabled={
-                  !formData.title || !formData.description || createLoading
-                }
-              >
-                {createLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                    <span>Creating Job...</span>
-                  </div>
-                ) : (
-                  "Create Job"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Preview Description Modal */}
-        <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-[90vw]">
-            <DialogHeader>
-              <DialogTitle>Job Description Preview</DialogTitle>
-              <DialogDescription>
-                Review the generated description in a professional layout. You
-                can apply it to the form or close to edit manually.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="max-h-[60vh] overflow-y-auto p-6 rounded-lg border shadow-sm">
-              <div className="mb-6 p-4 bg-muted/20 rounded-md">
-                <h2 className="text-2xl font-bold mb-2">{formData.title}</h2>
-                <p className="text-lg text-muted-foreground mb-1">
-                  {formData.location || "Remote"} | {formData.type} |{" "}
-                  {formData.salary
-                    ? `$${parseInt(formData.salary).toLocaleString()}`
-                    : "Competitive Salary"}
-                </p>
-                {formData.companyName && (
-                  <p className="text-lg font-semibold">
-                    {formData.companyName}
+                  <p className="text-xs text-muted-foreground">
+                    Click the AI Generate button to create a professional job
+                    description automatically
                   </p>
-                )}
+                </div>
               </div>
-              <div
-                className="prose prose-sm max-w-none whitespace-pre-wrap leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: processDescriptionForDisplay(
-                    previewDescription
-                  ).replace(/\n/g, "<br>"),
-                }}
-              />
+
+              <DialogFooter className="mt-6 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="border-border hover:border-primary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateJob}
+                  disabled={
+                    !formData.title || !formData.description || createLoading
+                  }
+                  className="btn-gradient-primary"
+                >
+                  {createLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Creating Job...</span>
+                    </div>
+                  ) : (
+                    "Create Job"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Preview Description Modal */}
+          <Dialog
+            open={isPreviewModalOpen}
+            onOpenChange={setIsPreviewModalOpen}
+          >
+            <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-[90vw] border-0 shadow-2xl">
+              <div className="relative">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
+                <DialogHeader className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <DialogTitle className="text-2xl font-bold text-foreground">
+                        AI-Generated Description Preview
+                      </DialogTitle>
+                      <DialogDescription className="text-muted-foreground">
+                        Review the professionally crafted job description
+                      </DialogDescription>
+                    </div>
+                    <div className="icon-wrapper-purple">
+                      <Sparkles className="h-5 w-5 text-purple-600" />
+                    </div>
+                  </div>
+                </DialogHeader>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto p-6 rounded-xl border border-border bg-card mt-4">
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent">
+                  <h2 className="text-2xl font-bold mb-2 text-foreground">
+                    {formData.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                      <span>{formData.location || "Remote"}</span>
+                    </div>
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-success"></div>
+                      <span>{formData.type.replace("_", " ")}</span>
+                    </div>
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <div className="h-1.5 w-1.5 rounded-full bg-warning"></div>
+                      <span>
+                        {formData.salary
+                          ? `$${parseInt(formData.salary).toLocaleString()}`
+                          : "Competitive Salary"}
+                      </span>
+                    </div>
+                  </div>
+                  {formData.companyName && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-purple-600"></div>
+                      <span className="font-semibold text-foreground">
+                        {formData.companyName}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className="prose prose-sm max-w-none leading-relaxed text-foreground"
+                  dangerouslySetInnerHTML={{
+                    __html: processDescriptionForDisplay(
+                      previewDescription
+                    ).replace(/\n/g, "<br>"),
+                  }}
+                />
+              </div>
+
+              <DialogFooter className="mt-6 gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsPreviewModalOpen(false)}
+                  className="border-border hover:border-primary"
+                >
+                  Close Preview
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleUseDescription}
+                  className="btn-gradient-primary"
+                >
+                  Use This Description
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-success"></div>
+                  <span>Secure job uploads</span>
+                </div>
+                <span>•</span>
+                <span>AI-powered descriptions</span>
+                <span>•</span>
+                <span>Instant processing</span>
+              </div>
+              <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+                Need Help? <ChevronRight className="h-3 w-3" />
+              </button>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsPreviewModalOpen(false)}
-              >
-                Close Preview
-              </Button>
-              <Button type="button" onClick={handleUseDescription}>
-                Use This Description
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       </div>
     </HRLayout>
   );

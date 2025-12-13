@@ -19,6 +19,15 @@ import {
   Loader2,
   Brain,
   Bot,
+  Shield,
+  Activity,
+  Zap,
+  ChevronRight,
+  Sparkles,
+  BarChart3,
+  MessageSquare,
+  TargetIcon,
+  AlertCircle,
 } from "lucide-react";
 import {
   BarChart,
@@ -75,24 +84,35 @@ const RiskStatCard = ({
   change,
   icon: Icon,
   trend = "neutral",
+  description,
 }: any) => (
-  <Card className="card">
+  <Card className="card-primary card-hover border-0 shadow-lg group">
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-2xl font-bold">{value}</span>
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className={`icon-wrapper-${
+                trend === "up" ? "amber" : trend === "down" ? "green" : "blue"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              {value}
+            </span>
             {change && (
               <Badge
-                variant={
+                className={`gap-1 ${
                   trend === "up"
-                    ? "destructive"
+                    ? "badge-amber"
                     : trend === "down"
-                      ? "default"
-                      : "secondary"
-                }
-                className="gap-1"
+                    ? "badge-green"
+                    : "badge-blue"
+                }`}
               >
                 {trend === "up" ? (
                   <TrendingUp className="h-3 w-3" />
@@ -103,9 +123,12 @@ const RiskStatCard = ({
               </Badge>
             )}
           </div>
+          {description && (
+            <p className="text-xs text-muted-foreground mt-3">{description}</p>
+          )}
         </div>
-        <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="h-6 w-6 text-primary" />
+        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <Icon className="h-7 w-7" />
         </div>
       </div>
     </CardContent>
@@ -126,65 +149,130 @@ const RecommendationCard = ({ recommendation, onClick }: any) => {
     }
   };
 
+  const getRiskBadgeClass = (riskLevel: string) => {
+    switch (riskLevel.toLowerCase()) {
+      case "high":
+        return "badge-red";
+      case "medium":
+        return "badge-amber";
+      case "low":
+        return "badge-green";
+      default:
+        return "badge-blue";
+    }
+  };
+
   return (
     <Card
-      className="cursor-pointer transition-shadow hover:shadow-md card"
+      className="card-primary card-hover group border-0 shadow-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
       onClick={onClick}
     >
-      <CardHeader>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
+
+      <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg">
-              {recommendation.department}
-            </CardTitle>
-            <CardDescription className="mt-2">
-              Retention Score: {recommendation.retention_score.toFixed(1)}/100
-            </CardDescription>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors">
+                  {recommendation.department}
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Retention Analysis
+                </CardDescription>
+              </div>
+            </div>
           </div>
-          <Button variant="default" className="flex items-center gap-2">
-            <Bot className="w-4 h-4" />
-            Chat with Genius Factor AI
-          </Button>
+          <Badge
+            className={`${getRiskBadgeClass(recommendation.risk_level)} gap-1`}
+          >
+            <Shield className="h-3 w-3" />
+            {recommendation.risk_level} Risk
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <h4 className="text-sm font-medium mb-2">Mobility Opportunities</h4>
-          <ul className="text-sm space-y-1">
-            {recommendation.mobility_opportunities.map(
-              (item: string, i: number) => (
-                <li key={i} className="flex items-start">
-                  <TrendingUp className="h-4 w-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
-                  <span>{item}</span>
+      <CardContent className="space-y-6">
+        {/* Score Section */}
+        <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-xl p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="icon-wrapper-purple">
+                <TargetIcon className="h-4 w-4 text-purple-600" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">
+                Retention Score
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-2xl font-bold text-purple-600">
+                {recommendation.retention_score.toFixed(1)}
+              </div>
+              <span className="text-xs text-muted-foreground">/100</span>
+            </div>
+          </div>
+          <Progress
+            value={recommendation.retention_score}
+            className="h-2 mt-3 progress-bar-primary"
+          />
+        </div>
+
+        {/* Mobility Opportunities */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="icon-wrapper-green">
+              <TrendingUp className="h-4 w-4 text-success" />
+            </div>
+            <h4 className="text-sm font-medium text-foreground">
+              Mobility Opportunities
+            </h4>
+          </div>
+          <ul className="space-y-2">
+            {recommendation.mobility_opportunities
+              .slice(0, 2)
+              .map((item: string, i: number) => (
+                <li key={i} className="text-sm flex items-start gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-success mt-1.5 flex-shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
                 </li>
-              )
-            )}
+              ))}
           </ul>
         </div>
 
-        <div>
-          <h4 className="text-sm font-medium mb-2">Recommendations</h4>
-          <ul className="text-sm space-y-1">
-            {recommendation.recommendations.map((item: string, i: number) => (
-              <li key={i} className="flex items-start">
-                <Lightbulb className="h-4 w-4 text-warning mr-2 mt-0.5 flex-shrink-0" />
-                <span>{item}</span>
-              </li>
-            ))}
+        {/* Action Items */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="icon-wrapper-blue">
+              <Target className="h-4 w-4 text-primary" />
+            </div>
+            <h4 className="text-sm font-medium text-foreground">
+              Priority Actions
+            </h4>
+          </div>
+          <ul className="space-y-2">
+            {recommendation.action_items
+              .slice(0, 2)
+              .map((item: string, i: number) => (
+                <li key={i} className="text-sm flex items-start gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <span className="text-muted-foreground">{item}</span>
+                </li>
+              ))}
           </ul>
         </div>
 
-        <div>
-          <h4 className="text-sm font-medium mb-2">Action Items</h4>
-          <ul className="text-sm space-y-1">
-            {recommendation.action_items.map((item: string, i: number) => (
-              <li key={i} className="flex items-start">
-                <Target className="h-4 w-4 text-success mr-2 mt-0.5 flex-shrink-0" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Chat Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full mt-4 text-primary hover:text-primary hover:bg-primary/10 gap-2 group"
+        >
+          <Bot className="h-4 w-4" />
+          Chat with AI Assistant
+          <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+        </Button>
       </CardContent>
     </Card>
   );
@@ -197,19 +285,19 @@ const fallbackRiskData = {
       level: "Low Risk",
       count: 0,
       percentage: 0,
-      color: "hsl(var(--hr-chart-2))",
+      color: "hsl(var(--success))",
     },
     {
       level: "Medium Risk",
       count: 0,
       percentage: 0,
-      color: "hsl(var(--hr-chart-3))",
+      color: "hsl(var(--warning))",
     },
     {
       level: "High Risk",
       count: 0,
       percentage: 0,
-      color: "hsl(var(--hr-chart-5))",
+      color: "hsl(var(--destructive))",
     },
   ],
   departmentRiskData: [
@@ -219,7 +307,7 @@ const fallbackRiskData = {
       medium: 0,
       high: 0,
       total: 0,
-      color: "#8884d8",
+      color: "hsl(var(--primary))",
     },
   ],
   totalAtRisk: 0,
@@ -233,27 +321,11 @@ const fallbackRiskData = {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
 
-  const isDark =
-    typeof window !== "undefined" &&
-    document.documentElement.classList.contains("dark");
-
   return (
-    <div
-      style={{
-        background: isDark ? "#1f2937" : "#fff",
-        color: isDark ? "#fff" : "#000",
-        border: "1px solid",
-        borderColor: isDark ? "#374151" : "#e5e7eb",
-        borderRadius: 8,
-        padding: "12px 16px",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-        minWidth: 180,
-        zIndex: 1000,
-      }}
-    >
-      {label && <div className="font-semibold mb-2">{label}</div>}
+    <div className="bg-card text-card-foreground border border-border rounded-xl p-4 shadow-xl backdrop-blur-sm min-w-[180px]">
+      {label && <div className="font-bold mb-2 text-foreground">{label}</div>}
       {payload.map((entry: any, idx: number) => (
-        <div key={idx} style={{ color: entry.color, marginBottom: 4 }}>
+        <div key={idx} className="text-sm mb-1" style={{ color: entry.color }}>
           {entry.name}: <span className="font-bold">{entry.value}</span>
           {entry.payload && entry.payload.percentage !== undefined && (
             <span className="ml-2 text-xs opacity-80">
@@ -375,7 +447,7 @@ export default function RetentionRisk() {
         count: lowRisk,
         percentage:
           totalEmployees > 0 ? Math.round((lowRisk / totalEmployees) * 100) : 0,
-        color: "hsl(var(--hr-chart-2))",
+        color: "hsl(var(--success))",
       },
       {
         level: "Medium Risk",
@@ -384,7 +456,7 @@ export default function RetentionRisk() {
           totalEmployees > 0
             ? Math.round((mediumRisk / totalEmployees) * 100)
             : 0,
-        color: "hsl(var(--hr-chart-3))",
+        color: "hsl(var(--warning))",
       },
       {
         level: "High Risk",
@@ -393,23 +465,23 @@ export default function RetentionRisk() {
           totalEmployees > 0
             ? Math.round((highRisk / totalEmployees) * 100)
             : 0,
-        color: "hsl(var(--hr-chart-5))",
+        color: "hsl(var(--destructive))",
       },
     ];
 
     const departmentRiskData =
       departmentData.length > 0
         ? departmentData.map((dept: any) => ({
-          department: dept.name || "Unknown Department",
-          low: dept.metrics?.retention_risk_distribution?.["Low (0-30)"] || 0,
-          medium:
-            dept.metrics?.retention_risk_distribution?.["Medium (31-60)"] ||
-            0,
-          high:
-            dept.metrics?.retention_risk_distribution?.["High (61-100)"] || 0,
-          total: dept.employee_count || 0,
-          color: dept.color || "#8884d8",
-        }))
+            department: dept.name || "Unknown Department",
+            low: dept.metrics?.retention_risk_distribution?.["Low (0-30)"] || 0,
+            medium:
+              dept.metrics?.retention_risk_distribution?.["Medium (31-60)"] ||
+              0,
+            high:
+              dept.metrics?.retention_risk_distribution?.["High (61-100)"] || 0,
+            total: dept.employee_count || 0,
+            color: dept.color || "hsl(var(--primary))",
+          }))
         : fallbackRiskData.departmentRiskData;
 
     setRiskData({
@@ -504,67 +576,80 @@ export default function RetentionRisk() {
   if (isLoading) {
     return (
       <HRLayout>
-        <Loader />
+        <div className="min-h-screen gradient-bg-primary flex items-center justify-center">
+          <Loader />
+        </div>
       </HRLayout>
     );
   }
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 ">
-        {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Retention Risk Insights
-            </h1>
-            <p className="text-muted-foreground">
-              {riskData.departmentCount > 0 ? (
-                <>
-                  Analyze retention risks across {riskData.departmentCount}{" "}
-                  departments and {riskData.totalEmployees} employees
-                </>
-              ) : (
-                "No data available. Showing demo metrics."
+      <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
+        {/* Header with decorative elements */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+          <div className="decorative-gradient-blur-blue -top-20 -right-20" />
+          <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="sidebar-logo-wrapper">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                    Retention Risk Intelligence
+                  </h1>
+                  <p className="text-muted-foreground mt-2">
+                    AI-powered risk analysis across {riskData.departmentCount}{" "}
+                    departments • {riskData.totalEmployees} employees
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {hasUnanalyzedDepartments && session?.user?.paid && (
+                <button
+                  onClick={handleAnalyzeWithAI}
+                  disabled={isAnalysisLoading || !dashboardData}
+                  className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium"
+                >
+                  {isAnalysisLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-4 w-4" />
+                      Run AI Analysis
+                    </>
+                  )}
+                </button>
               )}
-            </p>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
+                <Download className="h-4 w-4" />
+                Export Report
+              </button>
+            </div>
           </div>
-
-          {/* Conditionally render the Analyze with AI button */}
-          {/* {hasUnanalyzedDepartments && (
-           
-          )} */}
-
-        
-        {
-           session?.user?.paid &&  <Button
-            onClick={handleAnalyzeWithAI}
-            disabled={isAnalysisLoading || !dashboardData}
-            className="gap-2"
-          >
-            {isAnalysisLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4" />
-                Analyze with AI
-              </>
-            )}
-          </Button>
-        }
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div className="bg-destructive/15 border border-destructive/50 text-destructive rounded-md p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              <span>
-                Failed to generate AI analysis:{" "}
-                {(error as any).data?.detail || "Unknown error"}
-              </span>
+          <div className="bg-gradient-to-r from-destructive/10 to-transparent border border-destructive/30 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="icon-wrapper-red">
+                <AlertCircle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h4 className="font-medium text-foreground">Analysis Failed</h4>
+                <p className="text-sm text-muted-foreground">
+                  {(error as any).data?.detail || "Unknown error occurred"}
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -572,80 +657,98 @@ export default function RetentionRisk() {
         {/* Risk Overview Stats */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <RiskStatCard
-            title="Total At Risk"
+            title="At Risk Employees"
             value={riskData.totalAtRisk}
-            change={
-              riskData.totalEmployees > 0
-                ? `${Math.round(
-                  (riskData.totalAtRisk / riskData.totalEmployees) * 100
-                )}% of workforce`
-                : "0% of workforce"
-            }
+            change={`${
+              Math.round(
+                (riskData.totalAtRisk / riskData.totalEmployees) * 100
+              ) || 0
+            }%`}
             icon={AlertTriangle}
-            trend="neutral"
+            trend={riskData.totalAtRisk > 0 ? "up" : "neutral"}
+            description="Employees with medium to high retention risk"
           />
+
           <RiskStatCard
             title="High Risk"
             value={riskData.highRisk}
-            change={
-              riskData.totalEmployees > 0
-                ? `${Math.round(
-                  (riskData.highRisk / riskData.totalEmployees) * 100
-                )}% critical`
-                : "0% critical"
-            }
+            change="Critical priority"
             icon={AlertTriangle}
-            trend="neutral"
+            trend="up"
+            description="Immediate attention required"
           />
+
           <RiskStatCard
             title="Retention Rate"
             value={`${riskData.retentionRate}%`}
             change={`${100 - riskData.retentionRate}% at risk`}
             icon={Users}
             trend={riskData.retentionRate > 90 ? "down" : "up"}
+            description="Overall employee retention"
           />
+
           <RiskStatCard
             title="Avg Risk Score"
             value={riskData.avgRiskScore}
-            change={`/100 scale`}
+            change="/100 scale"
             icon={Target}
             trend={Number(riskData.avgRiskScore) < 30 ? "down" : "up"}
+            description="Average retention risk score"
           />
         </div>
 
         {/* Risk Distribution & Department Breakdown */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Risk Distribution Pie Chart */}
-          <Card className="card">
-            <CardHeader>
-              <CardTitle>Risk Level Distribution</CardTitle>
-              <CardDescription>
-                Current breakdown of employee retention risk levels
-              </CardDescription>
+          <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-success/5 to-transparent border-b border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <PieChart className="h-5 w-5 text-success" />
+                    Risk Level Distribution
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Breakdown of employee retention risk levels
+                  </CardDescription>
+                </div>
+                <Badge className="badge-green">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Risk Overview
+                </Badge>
+              </div>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={riskData.riskDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={5}
-                    dataKey="count"
-                    label={({ percentage }) => `${percentage}%`}
-                  >
-                    {riskData.riskDistributionData.map(
-                      (entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      )
-                    )}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} cursor={false} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
+            <CardContent className="p-6">
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={riskData.riskDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={3}
+                      dataKey="count"
+                      label={({ percentage }) => `${percentage}%`}
+                      labelLine={false}
+                    >
+                      {riskData.riskDistributionData.map(
+                        (entry: any, index: number) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color}
+                            stroke="hsl(var(--background))"
+                            strokeWidth={2}
+                          />
+                        )
+                      )}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap justify-center gap-4 mt-6">
                 {riskData.riskDistributionData.map(
                   (item: any, index: number) => (
                     <div key={index} className="flex items-center gap-2">
@@ -653,10 +756,12 @@ export default function RetentionRisk() {
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-sm">{item.level}</span>
-                      <span className="text-sm font-medium">
-                        ({item.count})
+                      <span className="text-sm font-medium text-foreground">
+                        {item.level}
                       </span>
+                      <Badge variant="outline" className="text-xs">
+                        {item.count} employees
+                      </Badge>
                     </div>
                   )
                 )}
@@ -665,83 +770,127 @@ export default function RetentionRisk() {
           </Card>
 
           {/* Department Risk Breakdown */}
-          <Card className="card">
-            <CardHeader>
-              <CardTitle>Risk by Department</CardTitle>
-              <CardDescription>
-                Retention risk levels across departments
-              </CardDescription>
+          <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                    Risk by Department
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Retention risk levels across departments
+                  </CardDescription>
+                </div>
+                <Badge className="badge-blue">
+                  <Activity className="h-3 w-3 mr-1" />
+                  Department Analysis
+                </Badge>
+              </div>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={riskData.departmentRiskData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis
-                    dataKey="department"
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} cursor={false} />
-                  <Bar
-                    dataKey="low"
-                    stackId="a"
-                    fill="hsl(var(--hr-chart-2))"
-                    name="Low Risk"
-                  />
-                  <Bar
-                    dataKey="medium"
-                    stackId="a"
-                    fill="hsl(var(--hr-chart-3))"
-                    name="Medium Risk"
-                  />
-                  <Bar
-                    dataKey="high"
-                    stackId="a"
-                    fill="hsl(var(--hr-chart-5))"
-                    name="High Risk"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardContent className="p-6">
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={riskData.departmentRiskData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                      strokeOpacity={0.3}
+                    />
+                    <XAxis
+                      dataKey="department"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      tick={{
+                        fill: "hsl(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      tick={{
+                        fill: "hsl(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
+                      axisLine={false}
+                    />
+                    <Tooltip content={<CustomTooltip />} cursor={false} />
+                    <Bar
+                      dataKey="low"
+                      stackId="a"
+                      fill="hsl(var(--success))"
+                      name="Low Risk"
+                      radius={[2, 2, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="medium"
+                      stackId="a"
+                      fill="hsl(var(--warning))"
+                      name="Medium Risk"
+                      radius={[2, 2, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="high"
+                      stackId="a"
+                      fill="hsl(var(--destructive))"
+                      name="High Risk"
+                      radius={[2, 2, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* AI Analysis Results */}
         {analysisResults.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Brain className="h-5 w-5 text-primary" />
-              <h2 className="text-2xl font-bold">AI-Powered Recommendations</h2>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="ai-recommendation-icon-wrapper">
+                    <Brain className="h-6 w-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    AI-Powered Recommendations
+                  </h2>
+                </div>
+                <p className="text-muted-foreground">
+                  Personalized retention strategies and risk mitigation plans
+                </p>
+              </div>
+              <Badge className="bg-primary/20 text-primary border-primary/30">
+                {analysisResults.length} Departments Analyzed
+              </Badge>
             </div>
 
-            <div className="mb-6 p-4 rounded-lg card">
-              <p className="text-sm text-muted-foreground">Overall Summary</p>
-              <p className="font-medium">
-                {analysisData?.summary ||
-                  "Analysis of retention risks across departments."}
-              </p>
-              {/* <div className="flex items-center gap-2 mt-2">
-                <Badge variant="outline">
-                  Overall Risk Score:{" "}
-                  {analysisResults.length > 0
-                    ? (
-                        analysisResults.reduce(
-                          (sum, result) => sum + (result.risk_score || 0),
-                          0
-                        ) / analysisResults.length
-                      ).toFixed(1)
-                    : "0.0"}
-                  /100
-                </Badge>
-              </div> */}
-            </div>
+            {/* Summary Card */}
+            <Card className="ai-recommendation-card border-0 shadow-xl">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="icon-wrapper-purple flex-shrink-0">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground mb-2">
+                      AI Analysis Summary
+                    </h4>
+                    <p className="text-muted-foreground">
+                      {analysisData?.summary ||
+                        "Analysis of retention risks across departments."}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            {/* Recommendations Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {analysisResults.map((result, index) => (
                 <RecommendationCard
                   key={index}
@@ -755,33 +904,58 @@ export default function RetentionRisk() {
 
         {/* Empty State */}
         {analysisResults.length === 0 && (
-          <div className="text-center py-12 rounded-lg card">
-            <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-medium mb-2">Run AI Analysis</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Get personalized retention risk recommendations by running our AI
-              analysis on your department data.
-            </p>
-            {hasUnanalyzedDepartments && (
-              <Button
-                onClick={handleAnalyzeWithAI}
-                disabled={!dashboardData || isAnalysisLoading}
-              >
-                {isAnalysisLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Analyze with AI
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
+          <Card className="ai-recommendation-card border-0 shadow-xl text-center">
+            <CardContent className="p-12">
+              <div className="h-20 w-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center">
+                <Brain className="h-10 w-10 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-3">
+                Unlock AI Insights
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-8">
+                Get personalized retention risk recommendations by running our
+                AI analysis on your department data. Discover hidden risks and
+                actionable strategies.
+              </p>
+              {hasUnanalyzedDepartments && (
+                <button
+                  onClick={handleAnalyzeWithAI}
+                  disabled={!dashboardData || isAnalysisLoading}
+                  className="btn-gradient-primary flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium mx-auto"
+                >
+                  {isAnalysisLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="h-5 w-5" />
+                      Run AI Analysis
+                    </>
+                  )}
+                </button>
+              )}
+            </CardContent>
+          </Card>
         )}
+
+        {/* Footer */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500" />
+              <span>Real-time risk monitoring</span>
+            </div>
+            <span>•</span>
+            <span>{riskData.departmentCount} departments analyzed</span>
+            <span>•</span>
+            <span>Last updated: Just now</span>
+          </div>
+          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+            Need Help? <ChevronRight className="h-3 w-3" />
+          </button>
+        </div>
 
         {/* Chat Popup */}
         <ChatPopup
@@ -793,8 +967,8 @@ export default function RetentionRisk() {
           messages={
             selectedDepartment
               ? chatConversations[
-                `${session?.user?.id}_${selectedDepartment.department}`
-              ]?.messages || []
+                  `${session?.user?.id}_${selectedDepartment.department}`
+                ]?.messages || []
               : []
           }
           onMessagesUpdate={updateChatMessages}
@@ -803,3 +977,20 @@ export default function RetentionRisk() {
     </HRLayout>
   );
 }
+
+// Missing import for Download icon
+const Download = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+    />
+  </svg>
+);

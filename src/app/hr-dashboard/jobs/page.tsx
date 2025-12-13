@@ -11,7 +11,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { User, Briefcase, Calendar } from "lucide-react";
+import {
+  User,
+  Briefcase,
+  Calendar,
+  RefreshCw,
+  Mail,
+  FileText,
+  ChevronRight,
+  Users,
+  MapPin,
+  DollarSign,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 import HRLayout from "@/components/hr/HRLayout";
 import Loader from "@/components/Loader";
 import { useSession } from "next-auth/react";
@@ -121,7 +134,7 @@ export default function HRJobsPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session?.user?.fastApiToken || ''}`
+            Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
           },
           body: JSON.stringify({
             userId: selectedRecommendation.userId,
@@ -152,13 +165,13 @@ export default function HRJobsPage() {
   const cleanMarkdown = (text: string | null): string => {
     if (!text) return "";
     return text
-      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove **bold**
-      .replace(/\*(.*?)\*/g, "$1") // Remove *italic*
-      .replace(/^#{1,6}\s+/gm, "") // Remove # headers
-      .replace(/^- /gm, "• ") // Convert - to •
-      .replace(/^\* /gm, "• ") // Convert * to •
-      .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝|📍|💼|🌟/g, "") // Remove common emojis
-      .replace(/\n\n+/g, "\n\n") // Clean multiple newlines
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/^- /gm, "• ")
+      .replace(/^\* /gm, "• ")
+      .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝|📍|💼|🌟/g, "")
+      .replace(/\n\n+/g, "\n\n")
       .trim();
   };
 
@@ -174,63 +187,56 @@ export default function HRJobsPage() {
   const cleanAndRenderText = (text: string | null) => {
     if (!text) {
       return (
-        <p className="text-muted-foreground">No recommendation available.</p>
+        <div className="text-center py-8">
+          <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <p className="text-muted-foreground">No recommendation available.</p>
+        </div>
       );
     }
 
     try {
-      // Remove markdown headers, asterisks, and emoji
       let cleanedText = text
-        .replace(/^#{1,6}\s+/gm, "") // Remove # headers
-        .replace(/\*\*/g, "") // Remove bold **text**
-        .replace(/\*/g, "") // Remove single asterisks
-        .replace(/^- /gm, "• ") // Convert dashes to bullets
-        .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝/g, "") // Remove emojis
-        .replace(/\n\n+/g, "\n\n"); // Clean multiple newlines
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/\*\*/g, "")
+        .replace(/\*/g, "")
+        .replace(/^- /gm, "• ")
+        .replace(/🟢|✅|⚙️|📊|🎯|⭐|❌|✨|📈|🔍|💡|📝/g, "")
+        .replace(/\n\n+/g, "\n\n");
 
-      // Split into lines and render
       const lines = cleanedText.split("\n").filter((line) => line.trim());
 
       return (
-        <div className="space-y-4 text-sm leading-8">
+        <div className="space-y-6">
           {lines.map((line, idx) => {
             const trimmedLine = line.trim();
 
-            // Section headers (bold looking lines)
             if (
               trimmedLine.match(
                 /^(Summary|Strengths|Improvements|Weaknesses|Overall|Recommendation|Match Analysis|Key Points)/i
               )
             ) {
               return (
-                <div key={idx}>
-                  <h3 className="font-semibold text-base text-blue-900 dark:text-blue-200 mb-3 mt-4">
+                <div key={idx} className="relative">
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary to-accent rounded-full"></div>
+                  <h3 className="font-semibold text-lg text-foreground mb-3 mt-4 pl-4">
                     {trimmedLine}
                   </h3>
                 </div>
               );
             }
 
-            // Bullet points
             if (trimmedLine.startsWith("•")) {
+              const text = trimmedLine.substring(1).trim();
               return (
-                <div key={idx} className="flex gap-3 ml-6 leading-8">
-                  <span className="text-blue-600 dark:text-blue-400 font-bold flex-shrink-0">
-                    •
-                  </span>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {trimmedLine.substring(1).trim()}
-                  </p>
+                <div key={idx} className="flex gap-4 pl-4">
+                  <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary"></div>
+                  <p className="text-foreground/80 leading-relaxed">{text}</p>
                 </div>
               );
             }
 
-            // Regular paragraphs
             return (
-              <p
-                key={idx}
-                className="text-gray-700 dark:text-gray-300 leading-8"
-              >
+              <p key={idx} className="text-foreground/80 leading-relaxed pl-4">
                 {trimmedLine}
               </p>
             );
@@ -240,7 +246,7 @@ export default function HRJobsPage() {
     } catch (err) {
       console.error("Error rendering text:", err);
       return (
-        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto">
+        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border overflow-auto">
           {text}
         </pre>
       );
@@ -250,38 +256,39 @@ export default function HRJobsPage() {
   // Helper function to format job description professionally
   const formatDescription = (text: string | null) => {
     if (!text) {
-      return <p className="text-muted-foreground">No description available.</p>;
+      return (
+        <div className="text-center py-8">
+          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <p className="text-muted-foreground">No description available.</p>
+        </div>
+      );
     }
 
     try {
       let cleanedText = cleanMarkdown(text);
-
-      // Split into lines
       const lines = cleanedText.split("\n").filter((line) => line.trim());
 
       return (
-        <div className="space-y-6 text-sm leading-relaxed">
+        <div className="space-y-8">
           {lines.map((line, idx) => {
             const trimmedLine = line.trim();
 
-            // Section headers (lines that look like titles, e.g., "Job Summary", "About the Role")
             if (
               trimmedLine.match(
                 /^(Job Summary|About the Role|Key Responsibilities|Qualifications|What We Offer|Our Commitment|How to Apply)/i
               )
             ) {
               return (
-                <div key={idx}>
-                  <h3 className="font-semibold text-base text-foreground mb-3 mt-6 border-b pb-1">
+                <div key={idx} className="relative">
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"></div>
+                  <h3 className="font-semibold text-xl text-foreground mb-4 pl-4">
                     {trimmedLine}
                   </h3>
                 </div>
               );
             }
 
-            // Bullet points (•, -, *)
             if (trimmedLine.match(/^(•|-|\*)\s/)) {
-              // Group consecutive bullets into a list
               let bulletLines: string[] = [trimmedLine];
               let nextIdx = idx + 1;
               while (
@@ -291,27 +298,27 @@ export default function HRJobsPage() {
                 bulletLines.push(lines[nextIdx].trim());
                 nextIdx++;
               }
-              idx = nextIdx - 1; // Adjust index for the loop
+              idx = nextIdx - 1;
 
               return (
-                <ul
-                  key={idx}
-                  className="ml-6 space-y-2 list-disc text-gray-700 dark:text-gray-300"
-                >
+                <ul key={idx} className="space-y-3 pl-8">
                   {bulletLines.map((bullet, bulletIdx) => {
                     const bulletText = bullet
                       .replace(/^(•|-|\*)\s*/, "")
                       .trim();
                     if (!bulletText) return null;
-                    return <li key={bulletIdx}>{bulletText}</li>;
+                    return (
+                      <li key={bulletIdx} className="flex gap-3">
+                        <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary"></div>
+                        <span className="text-foreground/80">{bulletText}</span>
+                      </li>
+                    );
                   })}
                 </ul>
               );
             }
 
-            // Numbered lists
             if (trimmedLine.match(/^\d+\.\s/)) {
-              // Group consecutive numbered items
               let numLines: string[] = [trimmedLine];
               let nextIdx = idx + 1;
               while (
@@ -321,26 +328,29 @@ export default function HRJobsPage() {
                 numLines.push(lines[nextIdx].trim());
                 nextIdx++;
               }
-              idx = nextIdx - 1; // Adjust index
+              idx = nextIdx - 1;
 
               return (
-                <ol
-                  key={idx}
-                  className="ml-6 space-y-2 list-decimal text-gray-700 dark:text-gray-300"
-                >
+                <ol key={idx} className="space-y-3 pl-8">
                   {numLines.map((numItem, numIdx) => {
                     const numText = numItem.replace(/^\d+\.\s*/, "").trim();
                     if (!numText) return null;
-                    return <li key={numIdx}>{numText}</li>;
+                    return (
+                      <li key={numIdx} className="flex gap-3">
+                        <span className="flex-shrink-0 font-semibold text-primary">
+                          {numIdx + 1}.
+                        </span>
+                        <span className="text-foreground/80">{numText}</span>
+                      </li>
+                    );
                   })}
                 </ol>
               );
             }
 
-            // Regular paragraphs (non-empty lines not matching above)
             if (trimmedLine) {
               return (
-                <p key={idx} className="text-gray-700 dark:text-gray-300">
+                <p key={idx} className="text-foreground/80 leading-relaxed">
                   {trimmedLine}
                 </p>
               );
@@ -353,18 +363,44 @@ export default function HRJobsPage() {
     } catch (err) {
       console.error("Error formatting description:", err);
       return (
-        <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded-md overflow-auto">
+        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border overflow-auto">
           {text}
         </pre>
       );
     }
   };
 
+  // Get status badge style
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "OPEN":
+        return "badge-green";
+      case "CLOSED":
+        return "badge-amber";
+      case "DRAFT":
+        return "badge-purple";
+      default:
+        return "badge-blue";
+    }
+  };
+
+  // Get match score badge style
+  const getMatchScoreBadge = (score: string) => {
+    const scoreNum = parseInt(score);
+    if (scoreNum >= 80) return "badge-green";
+    if (scoreNum >= 60) return "badge-blue";
+    if (scoreNum >= 40) return "badge-amber";
+    return "badge-purple";
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <HRLayout>
-        <div className="p-6">
-          <Loader />
+        <div className="p-8 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader />
+            <p className="mt-4 text-muted-foreground">Loading jobs...</p>
+          </div>
         </div>
       </HRLayout>
     );
@@ -373,8 +409,16 @@ export default function HRJobsPage() {
   if (status === "unauthenticated" || error) {
     return (
       <HRLayout>
-        <div className="p-6 text-center text-red-500">
-          {error || "Please sign in to view your jobs and applications."}
+        <div className="p-8 text-center">
+          <div className="card-primary max-w-md mx-auto">
+            <div className="icon-wrapper-amber mx-auto w-16 h-16 mb-4 flex items-center justify-center">
+              <Briefcase className="w-8 h-8 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Access Required</h3>
+            <p className="text-muted-foreground mb-4">
+              {error || "Please sign in to view your jobs and applications."}
+            </p>
+          </div>
         </div>
       </HRLayout>
     );
@@ -382,158 +426,379 @@ export default function HRJobsPage() {
 
   return (
     <HRLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Your Jobs & Applications</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage job postings and review applicant submissions.
-            </p>
-          </div>
-          <Button onClick={fetchJobs} variant="outline">
-            Refresh
-          </Button>
-        </div>
+      <div className="gradient-bg-primary min-h-screen p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
+                  Your Job Postings
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Manage job listings and review applicant submissions
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button onClick={fetchJobs} variant="outline" className="gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  Refresh
+                </Button>
+                <Button className="btn-gradient-primary gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Post New Job
+                </Button>
+              </div>
+            </div>
 
-        {jobs.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No jobs posted yet</h3>
-              <p className="text-muted-foreground">
-                Create your first job posting to start receiving applications.
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-blue">
+                    <Briefcase className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Jobs</p>
+                    <p className="text-2xl font-bold">{jobs.length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-green">
+                    <Users className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Total Applications
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {jobs.reduce(
+                        (acc, job) => acc + job.applications.length,
+                        0
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-purple">
+                    <Sparkles className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Pending Reviews
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {jobs.reduce(
+                        (acc, job) =>
+                          acc +
+                          job.applications.filter(
+                            (app) => !app.aiRecommendation
+                          ).length,
+                        0
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-amber">
+                    <Clock className="w-6 h-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Active Positions
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {jobs.filter((job) => job.status === "OPEN").length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Jobs List */}
+          {jobs.length === 0 ? (
+            <div className="card-primary text-center py-16">
+              <div className="icon-wrapper-blue w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <Briefcase className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">
+                No jobs posted yet
+              </h3>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                Create your first job posting to start receiving applications
+                from qualified candidates.
               </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {jobs.map((job) => {
-              const firstTwoLines = formatShortDescription(job.description);
-              const hasMoreLines = job.description.split("\n").length > 2;
-              return (
-                <Card key={job.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">{job.title}</CardTitle>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-2">
-                          <span>{job.type.replace("_", " ")}</span>
-                          {job.location && <span>• {job.location}</span>}
-                          {job.salary && (
-                            <span>• ${job.salary.toLocaleString()}</span>
-                          )}
-                          <span>
-                            • {new Date(job.createdAt).toLocaleDateString()}
-                          </span>
+              <Button className="btn-gradient-primary gap-2">
+                <Briefcase className="w-4 h-4" />
+                Create Your First Job Posting
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {jobs.map((job) => {
+                const firstTwoLines = formatShortDescription(job.description);
+                const hasMoreLines = job.description.split("\n").length > 2;
+                const statusBadgeClass = getStatusBadge(job.status);
+
+                return (
+                  <div key={job.id} className="card-primary card-hover">
+                    <div className="p-6">
+                      {/* Job Header */}
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h2 className="text-2xl font-bold text-foreground">
+                              {job.title}
+                            </h2>
+                            <Badge className={`${statusBadgeClass} px-3 py-1`}>
+                              {job.status}
+                            </Badge>
+                          </div>
+
+                          {/* Job Details */}
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="w-4 h-4" />
+                              <span>{job.type.replace("_", " ")}</span>
+                            </div>
+                            {job.location && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                <span>{job.location}</span>
+                              </div>
+                            )}
+                            {job.salary && (
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="w-4 h-4" />
+                                <span>${job.salary.toLocaleString()}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <span>
+                                Posted{" "}
+                                {new Date(job.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Job Description Preview */}
+                          <div className="mb-6">
+                            <p className="text-foreground/70 whitespace-pre-line mb-2">
+                              {firstTwoLines}
+                            </p>
+                            {hasMoreLines && (
+                              <Button
+                                size="sm"
+                                variant="link"
+                                onClick={() => openJobDescriptionModal(job)}
+                                className="gap-1 pl-0"
+                              >
+                                Read full description
+                                <ChevronRight className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Users className="w-4 h-4" />
+                            Manage
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="btn-gradient-primary gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            View All Applicants
+                          </Button>
                         </div>
                       </div>
-                      <Badge
-                        variant={
-                          job.status === "OPEN" ? "default" : "secondary"
-                        }
-                      >
-                        {job.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      <p className="text-sm text-muted-foreground whitespace-pre-line">
-                        {firstTwoLines}
-                      </p>
-                      {hasMoreLines && (
-                        <Button
-                          size="sm"
-                          variant="link"
-                          onClick={() => openJobDescriptionModal(job)}
-                          className="p-0 h-auto -mt-1"
-                        >
-                          Read more
-                        </Button>
-                      )}
-                    </div>
-                    <div className="space-y-4">
-                      <h4 className="font-medium flex items-center space-x-2">
-                        <User className="w-4 h-4" />
-                        <span>Applications ({job.applications.length})</span>
-                      </h4>
-                      {job.applications.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                          No applications yet.
-                        </p>
-                      ) : (
-                        <div className="space-y-3">
-                          {job.applications.map((app) => (
-                            <div
-                              key={app.id}
-                              className="flex items-center justify-between p-3 border rounded-lg"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <div className="flex-shrink-0">
-                                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                                    <User className="w-4 h-4 text-background" />
+
+                      {/* Applications Section */}
+                      <div className="border-t pt-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-5 h-5" />
+                            <h3 className="text-lg font-semibold">
+                              Applications ({job.applications.length})
+                            </h3>
+                          </div>
+                          <Badge variant="outline" className="bg-secondary/50">
+                            {job.applications.length} candidate
+                            {job.applications.length !== 1 ? "s" : ""}
+                          </Badge>
+                        </div>
+
+                        {job.applications.length === 0 ? (
+                          <div className="text-center py-8 border rounded-lg bg-secondary/20">
+                            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                            <p className="text-muted-foreground">
+                              No applications yet
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Applications will appear here once candidates
+                              apply
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {job.applications.map((app) => {
+                              const matchScoreBadgeClass = app.scoreMatch
+                                ? getMatchScoreBadge(app.scoreMatch)
+                                : "";
+
+                              return (
+                                <div
+                                  key={app.id}
+                                  className="assessment-item group"
+                                >
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-start gap-4">
+                                      {/* Applicant Avatar */}
+                                      <div className="relative">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                                          <User className="w-6 h-6 text-white" />
+                                        </div>
+                                        {app.scoreMatch && (
+                                          <div
+                                            className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-medium ${matchScoreBadgeClass}`}
+                                          >
+                                            {app.scoreMatch}%
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Applicant Info */}
+                                      <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <h4 className="font-semibold">
+                                            {app.user.firstName}{" "}
+                                            {app.user.lastName}
+                                          </h4>
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs"
+                                          >
+                                            {app.user.position[0] ||
+                                              "Position not specified"}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground mb-2">
+                                          {app.user.email}
+                                        </p>
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                          <span>
+                                            Dept:{" "}
+                                            {app.user.department[0] || "N/A"}
+                                          </span>
+                                          <span>•</span>
+                                          <span>
+                                            Applied:{" "}
+                                            {new Date(
+                                              app.createdAt
+                                            ).toLocaleDateString()}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="gap-2"
+                                        onClick={() =>
+                                          openRecommendationModal(
+                                            app.aiRecommendation,
+                                            app.id,
+                                            app.user.id,
+                                            job.id
+                                          )
+                                        }
+                                      >
+                                        <Sparkles className="w-4 h-4" />
+                                        AI Analysis
+                                      </Button>
+                                      <Button size="sm" className="gap-2">
+                                        <Mail className="w-4 h-4" />
+                                        Contact
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <p className="font-medium">
-                                    {app.user.firstName} {app.user.lastName}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {app.user.email} •{" "}
-                                    {app.user.position[0] || "N/A"}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    Dept: {app.user.department[0] || "N/A"} •
-                                    Applied:{" "}
-                                    {new Date(
-                                      app.createdAt
-                                    ).toLocaleDateString()}
-                                  </p>
-                                  {app.scoreMatch && (
-                                    <Badge variant="outline" className="mt-1">
-                                      Match Score: {app.scoreMatch}%
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    openRecommendationModal(
-                                      app.aiRecommendation,
-                                      app.id,
-                                      app.user.id,
-                                      job.id
-                                    )
-                                  }
-                                >
-                                  AI Recommendation
-                                </Button>
-                                <Button size="sm">Contact</Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Job Description Modal */}
         <Dialog open={!!selectedJob} onOpenChange={closeJobDescriptionModal}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{selectedJob?.title}</DialogTitle>
-              <DialogDescription>Full job description.</DialogDescription>
-            </DialogHeader>
-            <div className="mt-6">
-              {formatDescription(selectedJob?.description)}
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+            <div className="relative">
+              {/* Decorative gradient */}
+              <div className="decorative-gradient-blur-blue -top-20 -right-20 opacity-30"></div>
+              <div className="decorative-gradient-blur-purple -bottom-20 -left-20 opacity-30"></div>
+
+              <DialogHeader className="p-8 pb-0">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <DialogTitle className="text-3xl font-bold mb-2">
+                      {selectedJob?.title}
+                    </DialogTitle>
+                    <div className="flex items-center gap-3">
+                      <Badge className="badge-blue">
+                        {selectedJob?.type.replace("_", " ")}
+                      </Badge>
+                      {selectedJob?.location && (
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1"
+                        >
+                          <MapPin className="w-3 h-3" />
+                          {selectedJob.location}
+                        </Badge>
+                      )}
+                      {selectedJob?.salary && (
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1"
+                        >
+                          <DollarSign className="w-3 h-3" />$
+                          {selectedJob.salary.toLocaleString()}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <DialogDescription className="mt-4 text-lg">
+                  Full job description and requirements
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="p-8">
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  {formatDescription(selectedJob?.description)}
+                </div>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -543,28 +808,47 @@ export default function HRJobsPage() {
           open={!!selectedRecommendation}
           onOpenChange={closeRecommendationModal}
         >
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <div className="flex items-center justify-between w-full pr-6">
-                <div>
-                  <DialogTitle>AI Recommendation</DialogTitle>
-                  <DialogDescription>
-                    Generated analysis of the candidate's fit for the role.
-                  </DialogDescription>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
+            <div className="ai-recommendation-card">
+              {/* Decorative gradient */}
+              <div className="decorative-gradient-blur-blue -top-20 -right-20 opacity-40"></div>
+              <div className="decorative-gradient-blur-purple -bottom-20 -left-20 opacity-40"></div>
+
+              <DialogHeader className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="ai-recommendation-icon-wrapper">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-2xl font-bold">
+                        AI Candidate Analysis
+                      </DialogTitle>
+                      <DialogDescription>
+                        Detailed assessment of candidate suitability
+                      </DialogDescription>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={refreshRecommendation}
+                    disabled={isRefreshing}
+                    className="gap-2"
+                  >
+                    <RefreshCw
+                      className={`w-4 h-4 ${
+                        isRefreshing ? "animate-spin" : ""
+                      }`}
+                    />
+                    {isRefreshing ? "Regenerating..." : "Refresh Analysis"}
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={refreshRecommendation}
-                  disabled={isRefreshing}
-                  className="flex-shrink-0"
-                >
-                  {isRefreshing ? "Refreshing..." : "Refresh"}
-                </Button>
+              </DialogHeader>
+
+              <div className="relative z-10 mt-6">
+                {cleanAndRenderText(selectedRecommendation?.recommendation)}
               </div>
-            </DialogHeader>
-            <div className="mt-6 p-8 rounded-lg border  shadow-sm">
-              {cleanAndRenderText(selectedRecommendation?.recommendation)}
             </div>
           </DialogContent>
         </Dialog>

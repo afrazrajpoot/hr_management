@@ -1,3 +1,4 @@
+// components/hr/HRSidebar.tsx (using custom CSS variables only)
 "use client";
 
 import { useState } from "react";
@@ -11,19 +12,36 @@ import {
   AlertTriangle,
   TrendingUp,
   User,
-  Settings,
   Moon,
   Sun,
-  Menu,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Bell,
+  HelpCircle,
+  LogOut,
+  Upload,
+  Briefcase,
+  Brain,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
   X,
+  Menu,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useSocket } from "@/context/SocketContext";
+import { signOut } from "next-auth/react";
 
 const bottomNavigation = [
-  { name: "Profile", href: "/hr-dashboard/profile", icon: User },
+  {
+    name: "Help Center",
+    href: "/hr-dashboard/help",
+    icon: HelpCircle,
+  },
 ];
 
 interface HRSidebarProps {
@@ -40,7 +58,9 @@ export default function HRSidebar({
   onToggleDarkMode,
 }: HRSidebarProps) {
   const pathname = usePathname();
-  const { dashboardData, totalEmployees } = useSocket();
+  const { dashboardData, totalEmployees, notifications, clearNotifications } =
+    useSocket();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Calculate totals across all departments
   const completedAssessments =
@@ -54,63 +74,79 @@ export default function HRSidebar({
   const departmentCount =
     dashboardData && Array.isArray(dashboardData) ? dashboardData.length : 0;
 
-  // Warn if dashboardData is not in expected format
-  if (!dashboardData || !Array.isArray(dashboardData)) {
-    console.warn(
-      "dashboardData is null, undefined, or not an array:",
-      dashboardData
-    );
-  }
-
   const navigation = [
-    { name: "Dashboard", href: "/hr-dashboard", icon: LayoutDashboard },
+    {
+      name: "Dashboard",
+      href: "/hr-dashboard",
+      icon: LayoutDashboard,
+      description: "Overview & Analytics",
+      color: "from-primary to-accent",
+    },
     {
       name: "Departments",
       href: "/hr-dashboard/departments",
       icon: Building2,
       badge: departmentCount > 0 ? departmentCount : undefined,
+      description: "Department Management",
+      color: "from-blue-500 to-blue-600",
     },
     {
       name: "Employees",
       href: "/hr-dashboard/employees",
       icon: Users,
       badge: totalEmployees > 0 ? totalEmployees : undefined,
+      description: "Employee Management",
+      color: "from-emerald-500 to-emerald-600",
     },
     {
       name: "Assessments",
       href: "/hr-dashboard/assessments",
-      icon: FileText,
+      icon: ClipboardList,
       badge: completedAssessments > 0 ? completedAssessments : undefined,
+      description: "Career Assessments",
+      color: "from-amber-500 to-amber-600",
     },
     {
       name: "Retention Risk",
       href: "/hr-dashboard/retention-risk",
       icon: AlertTriangle,
+      description: "Risk Analysis",
+      color: "from-rose-500 to-rose-600",
     },
     {
       name: "Internal Mobility",
       href: "/hr-dashboard/internal-mobility",
       icon: TrendingUp,
+      description: "Career Tracking",
+      color: "from-purple-500 to-purple-600",
     },
     {
       name: "Upload Employee",
       href: "/hr-dashboard/upload-employee",
-      icon: FileText,
+      icon: Upload,
+      description: "Import Data",
+      color: "from-indigo-500 to-indigo-600",
     },
     {
       name: "Upload Jobs",
       href: "/hr-dashboard/upload-jobs",
-      icon: FileText,
+      icon: Briefcase,
+      description: "Job Postings",
+      color: "from-cyan-500 to-cyan-600",
     },
     {
       name: "Jobs",
       href: "/hr-dashboard/jobs",
       icon: FileText,
+      description: "Job Management",
+      color: "from-teal-500 to-teal-600",
     },
     {
       name: "Profile",
       href: "/hr-dashboard/profile",
       icon: User,
+      description: "Account Settings",
+      color: "from-violet-500 to-violet-600",
     },
   ];
 
@@ -119,103 +155,144 @@ export default function HRSidebar({
     return pathname.startsWith(path);
   };
 
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
+
   return (
     <div
       className={cn(
-        "flex flex-col border-r border-sidebar-border transition-all duration-300",
-        collapsed ? "w-16" : "w-64",
-        darkMode ? "dark" : "light"
+        "sidebar-container flex flex-col h-screen transition-all duration-300 relative bg-gradient-to-b from-background to-card",
+        collapsed ? "w-20" : "w-64"
       )}
     >
-      {/* Logo & Toggle */}
-      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <figure className="w-full rounded-[1vw]">
-              <img
-                src="/logo.png"
-                alt="Genius Factor"
-                className="w-full rounded-2xl h-[3.5vw]"
-              />
-            </figure>
-            <span className="font-semibold text-sidebar-foreground">
-              GeniusFactor
-            </span>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleCollapse}
-          className="text-sidebar-foreground hover:bg-hr-sidebar-hover"
-        >
-          {collapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-        </Button>
+      {/* Decorative gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="decorative-gradient-blur-blue top-0 left-0 opacity-20"></div>
+        <div className="decorative-gradient-blur-purple bottom-0 right-0 opacity-20"></div>
+      </div>
+
+      {/* Header */}
+      <div className="sidebar-header p-6 border-b border-border relative z-10">
+        <div className="flex items-center justify-between gap-4">
+          {!collapsed ? (
+            <div className="flex items-center gap-3 flex-1">
+              <div className="sidebar-logo-wrapper">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <h1 className="text-xl font-bold text-foreground tracking-tight">
+                  GeniusFactor
+                </h1>
+                <p className="text-xs text-muted-foreground truncate">
+                  HR Management Suite
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center w-full">
+              <div className="sidebar-logo-wrapper">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCollapse}
+            className="text-muted-foreground hover:text-foreground hover:bg-secondary p-2 rounded-lg transition-all border border-border"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {navigation.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-              "sidebar-menu-item",
-              isActive(item.href) && "bg-hr-sidebar-active text-white"
-            )}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && (
-              <>
-                <span className="flex-1">{item.name}</span>
-                {item.badge && (
-                  <Badge variant="secondary" className="text-xs">
-                    {item.badge}
-                  </Badge>
+      <nav className="relative z-10 flex-1 p-6 space-y-2 overflow-y-auto">
+        {navigation.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "sidebar-nav-item group flex items-center rounded-lg transition-all duration-300",
+                active && "sidebar-nav-item-active shadow-lg",
+                !active && "hover:bg-secondary/50 hover:border-border",
+                collapsed ? "p-3 justify-center" : "p-3 space-x-3"
+              )}
+              style={
+                active
+                  ? ({
+                      background: `linear-gradient(135deg, ${item.color})`,
+                    } as any)
+                  : {}
+              }
+            >
+              <div
+                className={cn(
+                  "sidebar-nav-icon-wrapper flex-shrink-0",
+                  active
+                    ? "sidebar-nav-icon-wrapper-active bg-white/20"
+                    : "sidebar-nav-icon-wrapper-inactive bg-secondary"
                 )}
-              </>
-            )}
-          </Link>
-        ))}
+              >
+                <item.icon
+                  className={cn(
+                    "w-5 h-5 transition-colors duration-300",
+                    active
+                      ? "text-white"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+              </div>
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={cn(
+                        "font-medium transition-colors duration-300",
+                        active
+                          ? "text-white"
+                          : "text-foreground group-hover:text-foreground/90"
+                      )}
+                    >
+                      {item.name}
+                    </div>
+                    {item.badge && (
+                      <Badge
+                        className={cn(
+                          "text-xs px-2 py-0.5",
+                          active ? "badge-primary text-white" : "badge-blue"
+                        )}
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <p
+                    className={cn(
+                      "text-xs mt-0.5 truncate transition-colors duration-300",
+                      active ? "text-white/80" : "text-muted-foreground"
+                    )}
+                  >
+                    {item.description}
+                  </p>
+                </div>
+              )}
+              {!collapsed && active && (
+                <ChevronRight className="w-4 h-4 text-white/50 flex-shrink-0" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Bottom Section */}
-      <div className="p-4 border-t border-sidebar-border space-y-2">
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleDarkMode}
-          className={cn(
-            "w-full justify-start gap-3 text-sidebar-foreground hover:card",
-            collapsed && "justify-center"
-          )}
-        >
-          {darkMode ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
-          {!collapsed && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
-        </Button>
-
-        {/* Bottom Navigation */}
-        {bottomNavigation.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
-              "sidebar-menu-item",
-              isActive(item.href) && "bg-hr-sidebar-active text-white"
-            )}
-          >
-            <item.icon className="h-5 w-5" />
-            {!collapsed && <span>{item.name}</span>}
-          </Link>
-        ))}
-      </div>
+      {/* Decorative bottom gradient */}
+      <div className="sidebar-decorative-bottom"></div>
     </div>
   );
 }

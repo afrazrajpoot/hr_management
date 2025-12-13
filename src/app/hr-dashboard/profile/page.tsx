@@ -20,6 +20,26 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+// Icons
+import {
+  Building,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  Users,
+  Calendar,
+  Briefcase,
+  User,
+  LogOut,
+  Edit2,
+  Save,
+  X,
+  CheckCircle,
+  Award,
+  Shield,
+} from "lucide-react";
+
 // Types
 interface SessionUser {
   id: string;
@@ -244,8 +264,13 @@ const HRProfilePage = () => {
   if (loading) {
     return (
       <HRLayout>
-        <div className="mx-auto p-6 space-y-8 flex justify-center items-center min-h-screen">
-          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 border-t-primary h-12 w-12 animate-spin"></div>
+        <div className="gradient-bg-primary min-h-screen flex items-center justify-center p-6">
+          <div className="text-center">
+            <div className="ai-recommendation-icon-wrapper w-16 h-16 mx-auto mb-6 flex items-center justify-center">
+              <User className="w-8 h-8 text-white animate-pulse" />
+            </div>
+            <p className="text-muted-foreground">Loading profile...</p>
+          </div>
         </div>
       </HRLayout>
     );
@@ -254,381 +279,791 @@ const HRProfilePage = () => {
   const sessionUser = session?.user as SessionUser;
   const firstNameInitial =
     profileForm.getValues("firstName")?.charAt(0)?.toUpperCase() || "U";
+  const fullName = `${profileForm.getValues(
+    "firstName"
+  )} ${profileForm.getValues("lastName")}`.trim();
 
   return (
     <HRLayout>
-      <div className="mx-auto p-6 space-y-8">
-        {/* Avatar Section */}
-        <div className="flex justify-center items-center">
-          {profileForm.getValues("image") ? (
-            <img
-              src={profileForm.getValues("image")}
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-700"
-            />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-bold border-2 border-gray-700">
-              {firstNameInitial}
+      <div className="gradient-bg-primary min-h-screen p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground mb-3">
+                  Profile Settings
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  Manage your personal and company information
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Logout Button */}
-        <div className="flex justify-center">
-          <Button variant="destructive" onClick={handleLogout} className="w-40">
-            Sign Out
-          </Button>
-        </div>
-
-        {/* Profile Section */}
-        <Card className="card">
-          <CardHeader className="flex flex-row items-center justify-between card">
-            <div>
-              <CardTitle>
-                <p>Personal Information</p>
-              </CardTitle>
-              <CardDescription>
-                <p> Your personal details and contact information</p>
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditingProfile(!isEditingProfile)}
-            >
-              {isEditingProfile ? "Cancel" : "Edit Profile"}
-            </Button>
-          </CardHeader>
-
-          <CardContent className="card">
-            {isEditingProfile ? (
-              <form
-                onSubmit={profileForm.handleSubmit(onUpdateProfile)}
-                className="space-y-4 bg-gray-800 border-gray-700"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      {...profileForm.register("firstName", {
-                        required: "First name is required",
-                      })}
-                    />
-                    {profileForm.formState.errors.firstName && (
-                      <p className="text-sm text-destructive">
-                        {profileForm.formState.errors.firstName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      {...profileForm.register("lastName", {
-                        required: "Last name is required",
-                      })}
-                    />
-                    {profileForm.formState.errors.lastName && (
-                      <p className="text-sm text-destructive">
-                        {profileForm.formState.errors.lastName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...profileForm.register("email", {
-                        required: "Email is required",
-                        pattern: {
-                          value: /^\S+@\S+$/i,
-                          message: "Invalid email address",
-                        },
-                      })}
-                    />
-                    {profileForm.formState.errors.email && (
-                      <p className="text-sm text-destructive">
-                        {profileForm.formState.errors.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="image">Profile Image URL</Label>
-                    <Input
-                      id="image"
-                      type="url"
-                      {...profileForm.register("image")}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={profileForm.formState.isSubmitting}
-                  >
-                    {profileForm.formState.isSubmitting
-                      ? "Saving..."
-                      : "Save Changes"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditingProfile(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-muted-foreground">First Name</Label>
-                    <p className="text-lg font-medium">
-                      {profileForm.getValues("firstName") || "N/A"}
-                    </p>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-blue">
+                    <Award className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Last Name</Label>
-                    <p className="text-lg font-medium">
-                      {profileForm.getValues("lastName") || "N/A"}
-                    </p>
+                    <p className="text-sm text-muted-foreground">HR Role</p>
+                    <p className="text-xl font-semibold">Recruiter</p>
                   </div>
-                  <div className="md:col-span-2">
-                    <Label className="text-muted-foreground">Email</Label>
-                    <p className="text-lg font-medium">
-                      {profileForm.getValues("email") || "N/A"}
+                </div>
+              </div>
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-green">
+                    <Shield className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Account Status
+                    </p>
+                    <p className="text-xl font-semibold">Active</p>
+                  </div>
+                </div>
+              </div>
+              <div className="card-primary card-hover">
+                <div className="flex items-center gap-4">
+                  <div className="icon-wrapper-purple">
+                    <Building className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Company</p>
+                    <p className="text-xl font-semibold">
+                      {company ? "Connected" : "Not Set"}
                     </p>
                   </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Company Section */}
-        <Card className="card">
-          <CardHeader className="flex flex-row items-center justify-between card">
-            <div>
-              <p>Company Information</p>
-              <p>Your company details and business information</p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditingCompany(!isEditingCompany)}
-            >
-              {isEditingCompany
-                ? "Cancel"
-                : company
-                ? "Edit Company"
-                : "Add Company"}
-            </Button>
-          </CardHeader>
+          </div>
 
-          <CardContent className="card">
-            {isEditingCompany ? (
-              <form
-                onSubmit={companyForm.handleSubmit(onUpdateCompany)}
-                className="space-y-4 card"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="companyName">Company Name *</Label>
-                    <Input
-                      id="companyName"
-                      {...companyForm.register("name", {
-                        required: "Company name is required",
-                      })}
-                    />
-                    {companyForm.formState.errors.name && (
-                      <p className="text-sm text-destructive">
-                        {companyForm.formState.errors.name.message}
-                      </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Profile Card */}
+            <div className="lg:col-span-1">
+              <div className="card-primary sticky top-6">
+                {/* Profile Avatar */}
+                <div className="relative mb-6">
+                  <div className="relative mx-auto w-32 h-32">
+                    {profileForm.getValues("image") ? (
+                      <img
+                        src={profileForm.getValues("image")}
+                        alt="Profile"
+                        className="w-full h-full rounded-full object-cover border-4 border-secondary"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-4xl font-bold text-white border-4 border-secondary">
+                        {firstNameInitial}
+                      </div>
                     )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="industry">Industry</Label>
-                    <Input
-                      id="industry"
-                      {...companyForm.register("industry")}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      type="url"
-                      {...companyForm.register("website")}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" {...companyForm.register("phone")} />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="foundedYear">Founded Year</Label>
-                    <Input
-                      id="foundedYear"
-                      type="number"
-                      min="1800"
-                      max={new Date().getFullYear()}
-                      {...companyForm.register("foundedYear", {
-                        valueAsNumber: true,
-                      })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="employeeCount">Employee Count</Label>
-                    <Input
-                      id="employeeCount"
-                      type="number"
-                      min="0"
-                      {...companyForm.register("employeeCount", {
-                        valueAsNumber: true,
-                      })}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Textarea
-                      id="address"
-                      rows={3}
-                      {...companyForm.register("address")}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      rows={4}
-                      {...companyForm.register("description")}
-                    />
+                    <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-success to-green-400 rounded-full border-4 border-card flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={companyForm.formState.isSubmitting}
-                  >
-                    {companyForm.formState.isSubmitting
-                      ? "Saving..."
-                      : "Save Company"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsEditingCompany(false)}
-                  >
-                    Cancel
-                  </Button>
+                {/* Profile Info */}
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    {fullName || "HR Professional"}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    {sessionUser?.role || "Human Resources"}
+                  </p>
+                  <Badge className="badge-blue">Verified Account</Badge>
                 </div>
-              </form>
-            ) : company ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-muted-foreground">
-                      Company Name
-                    </Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.name || "N/A"}
-                    </p>
+
+                {/* Contact Info */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
+                    <div className="icon-wrapper-blue w-10 h-10 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium truncate">
+                        {profileForm.getValues("email") || "N/A"}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-muted-foreground">Industry</Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.industry || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Website</Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.website ? (
+
+                  {company?.companyDetail?.phone && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
+                      <div className="icon-wrapper-green w-10 h-10 flex items-center justify-center">
+                        <Phone className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p className="font-medium">
+                          {company.companyDetail.phone}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {company?.companyDetail?.website && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
+                      <div className="icon-wrapper-purple w-10 h-10 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Website</p>
                         <a
                           href={company.companyDetail.website}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary hover:underline"
+                          className="font-medium text-primary hover:underline truncate block"
                         >
-                          {company.companyDetail.website}
+                          {company.companyDetail.website.replace(
+                            /^https?:\/\//,
+                            ""
+                          )}
                         </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Edit Profile Button */}
+                <div className="mt-8 pt-6 border-t">
+                  <Button
+                    onClick={() => setIsEditingProfile(!isEditingProfile)}
+                    className="w-full gap-2 btn-gradient-primary"
+                  >
+                    {isEditingProfile ? (
+                      <>
+                        <X className="w-4 h-4" />
+                        Cancel Editing
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 className="w-4 h-4" />
+                        Edit Profile
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Forms */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Profile Form Card */}
+              <Card className="card-primary">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-wrapper-blue">
+                        <User className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl font-bold">
+                          Personal Information
+                        </CardTitle>
+                        <CardDescription>
+                          Your personal details and contact information
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Badge
+                      className={
+                        isEditingProfile ? "badge-amber" : "badge-green"
+                      }
+                    >
+                      {isEditingProfile ? "Editing" : "Ready"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <Separator className="mb-6" />
+
+                <CardContent>
+                  {isEditingProfile ? (
+                    <form
+                      onSubmit={profileForm.handleSubmit(onUpdateProfile)}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="firstName"
+                            className="flex items-center gap-2"
+                          >
+                            <User className="w-4 h-4" />
+                            First Name
+                          </Label>
+                          <Input
+                            id="firstName"
+                            className="bg-card border-input"
+                            {...profileForm.register("firstName", {
+                              required: "First name is required",
+                            })}
+                          />
+                          {profileForm.formState.errors.firstName && (
+                            <p className="text-sm text-destructive">
+                              {profileForm.formState.errors.firstName.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="lastName"
+                            className="flex items-center gap-2"
+                          >
+                            <User className="w-4 h-4" />
+                            Last Name
+                          </Label>
+                          <Input
+                            id="lastName"
+                            className="bg-card border-input"
+                            {...profileForm.register("lastName", {
+                              required: "Last name is required",
+                            })}
+                          />
+                          {profileForm.formState.errors.lastName && (
+                            <p className="text-sm text-destructive">
+                              {profileForm.formState.errors.lastName.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="email"
+                            className="flex items-center gap-2"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Email Address
+                          </Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            className="bg-card border-input"
+                            {...profileForm.register("email", {
+                              required: "Email is required",
+                              pattern: {
+                                value: /^\S+@\S+$/i,
+                                message: "Invalid email address",
+                              },
+                            })}
+                          />
+                          {profileForm.formState.errors.email && (
+                            <p className="text-sm text-destructive">
+                              {profileForm.formState.errors.email.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="image"
+                            className="flex items-center gap-2"
+                          >
+                            <Globe className="w-4 h-4" />
+                            Profile Image URL
+                          </Label>
+                          <Input
+                            id="image"
+                            type="url"
+                            className="bg-card border-input"
+                            {...profileForm.register("image")}
+                            placeholder="https://example.com/photo.jpg"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          type="submit"
+                          className="gap-2 btn-gradient-primary"
+                          disabled={profileForm.formState.isSubmitting}
+                        >
+                          <Save className="w-4 h-4" />
+                          {profileForm.formState.isSubmitting
+                            ? "Saving..."
+                            : "Save Changes"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditingProfile(false)}
+                          className="gap-2"
+                        >
+                          <X className="w-4 h-4" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="assessment-item">
+                          <Label className="text-muted-foreground text-sm">
+                            First Name
+                          </Label>
+                          <p className="text-lg font-semibold mt-1">
+                            {profileForm.getValues("firstName") ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div className="assessment-item">
+                          <Label className="text-muted-foreground text-sm">
+                            Last Name
+                          </Label>
+                          <p className="text-lg font-semibold mt-1">
+                            {profileForm.getValues("lastName") ||
+                              "Not provided"}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2 assessment-item">
+                          <Label className="text-muted-foreground text-sm">
+                            Email Address
+                          </Label>
+                          <p className="text-lg font-semibold mt-1">
+                            {profileForm.getValues("email") || "Not provided"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Company Form Card */}
+              <Card className="card-primary">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-wrapper-purple">
+                        <Building className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl font-bold">
+                          Company Information
+                        </CardTitle>
+                        <CardDescription>
+                          Your company details and business information
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingCompany(!isEditingCompany)}
+                      className="gap-2"
+                    >
+                      {isEditingCompany ? (
+                        <>
+                          <X className="w-4 h-4" />
+                          Cancel
+                        </>
+                      ) : company ? (
+                        <>
+                          <Edit2 className="w-4 h-4" />
+                          Edit Company
+                        </>
                       ) : (
-                        "N/A"
+                        <>
+                          <Building className="w-4 h-4" />
+                          Add Company
+                        </>
                       )}
-                    </p>
+                    </Button>
                   </div>
-                  <div>
-                    <Label className="text-muted-foreground">Phone</Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.phone || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">
-                      Founded Year
-                    </Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.foundedYear || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">
-                      Employee Count
-                    </Label>
-                    <p className="text-lg font-medium">
-                      {company.companyDetail?.employeeCount || "N/A"}
-                    </p>
-                  </div>
-                </div>
+                </CardHeader>
 
-                <Separator />
+                <Separator className="mb-6" />
 
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground">Address</Label>
-                  <p className="text-lg">
-                    {company.companyDetail?.address || "N/A"}
-                  </p>
-                </div>
+                <CardContent>
+                  {isEditingCompany ? (
+                    <form
+                      onSubmit={companyForm.handleSubmit(onUpdateCompany)}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="companyName"
+                            className="flex items-center gap-2"
+                          >
+                            <Building className="w-4 h-4" />
+                            Company Name *
+                          </Label>
+                          <Input
+                            id="companyName"
+                            className="bg-card border-input"
+                            {...companyForm.register("name", {
+                              required: "Company name is required",
+                            })}
+                          />
+                          {companyForm.formState.errors.name && (
+                            <p className="text-sm text-destructive">
+                              {companyForm.formState.errors.name.message}
+                            </p>
+                          )}
+                        </div>
 
-                <Separator />
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="industry"
+                            className="flex items-center gap-2"
+                          >
+                            <Briefcase className="w-4 h-4" />
+                            Industry
+                          </Label>
+                          <Input
+                            id="industry"
+                            className="bg-card border-input"
+                            {...companyForm.register("industry")}
+                            placeholder="e.g., Technology, Healthcare"
+                          />
+                        </div>
 
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground">Description</Label>
-                  <p className="text-lg">
-                    {company.companyDetail?.description || "N/A"}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 space-y-4">
-                <div className="text-muted-foreground text-6xl">🏢</div>
-                <h3 className="text-lg font-medium">No Company Information</h3>
-                <p className="text-muted-foreground">
-                  Add your company information to complete your HR profile.
-                </p>
-                <Button onClick={() => setIsEditingCompany(true)}>
-                  Add Company
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="website"
+                            className="flex items-center gap-2"
+                          >
+                            <Globe className="w-4 h-4" />
+                            Website
+                          </Label>
+                          <Input
+                            id="website"
+                            type="url"
+                            className="bg-card border-input"
+                            {...companyForm.register("website")}
+                            placeholder="https://example.com"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="phone"
+                            className="flex items-center gap-2"
+                          >
+                            <Phone className="w-4 h-4" />
+                            Phone
+                          </Label>
+                          <Input
+                            id="phone"
+                            className="bg-card border-input"
+                            {...companyForm.register("phone")}
+                            placeholder="+1 (555) 123-4567"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="foundedYear"
+                            className="flex items-center gap-2"
+                          >
+                            <Calendar className="w-4 h-4" />
+                            Founded Year
+                          </Label>
+                          <Input
+                            id="foundedYear"
+                            type="number"
+                            className="bg-card border-input"
+                            min="1800"
+                            max={new Date().getFullYear()}
+                            {...companyForm.register("foundedYear", {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="employeeCount"
+                            className="flex items-center gap-2"
+                          >
+                            <Users className="w-4 h-4" />
+                            Employee Count
+                          </Label>
+                          <Input
+                            id="employeeCount"
+                            type="number"
+                            className="bg-card border-input"
+                            min="0"
+                            {...companyForm.register("employeeCount", {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="address"
+                            className="flex items-center gap-2"
+                          >
+                            <MapPin className="w-4 h-4" />
+                            Address
+                          </Label>
+                          <Textarea
+                            id="address"
+                            rows={3}
+                            className="bg-card border-input resize-none"
+                            {...companyForm.register("address")}
+                            placeholder="123 Main Street, City, State, ZIP"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="description"
+                            className="flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Description
+                          </Label>
+                          <Textarea
+                            id="description"
+                            rows={4}
+                            className="bg-card border-input resize-none"
+                            {...companyForm.register("description")}
+                            placeholder="Describe your company's mission, values, and culture..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          type="submit"
+                          className="gap-2 btn-gradient-primary"
+                          disabled={companyForm.formState.isSubmitting}
+                        >
+                          <Save className="w-4 h-4" />
+                          {companyForm.formState.isSubmitting
+                            ? "Saving..."
+                            : company
+                            ? "Update Company"
+                            : "Create Company"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsEditingCompany(false)}
+                          className="gap-2"
+                        >
+                          <X className="w-4 h-4" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : company ? (
+                    <div className="space-y-8">
+                      {/* Company Header */}
+                      <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-secondary/30 to-transparent">
+                        <div className="flex items-center gap-4">
+                          <div className="icon-wrapper-purple w-12 h-12 flex items-center justify-center">
+                            <Building className="w-6 h-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold">
+                              {company.companyDetail?.name}
+                            </h3>
+                            <p className="text-muted-foreground">
+                              {company.companyDetail?.industry ||
+                                "Industry not specified"}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className="badge-green">Connected</Badge>
+                      </div>
+
+                      {/* Company Details Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="assessment-item">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="icon-wrapper-blue">
+                              <Globe className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <Label className="text-muted-foreground">
+                              Website
+                            </Label>
+                          </div>
+                          <p className="font-medium">
+                            {company.companyDetail?.website ? (
+                              <a
+                                href={company.companyDetail.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline"
+                              >
+                                {company.companyDetail.website.replace(
+                                  /^https?:\/\//,
+                                  ""
+                                )}
+                              </a>
+                            ) : (
+                              "Not provided"
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="assessment-item">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="icon-wrapper-green">
+                              <Phone className="w-4 h-4 text-green-600" />
+                            </div>
+                            <Label className="text-muted-foreground">
+                              Phone
+                            </Label>
+                          </div>
+                          <p className="font-medium">
+                            {company.companyDetail?.phone || "Not provided"}
+                          </p>
+                        </div>
+
+                        <div className="assessment-item">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="icon-wrapper-amber">
+                              <Calendar className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <Label className="text-muted-foreground">
+                              Founded Year
+                            </Label>
+                          </div>
+                          <p className="font-medium">
+                            {company.companyDetail?.foundedYear ||
+                              "Not provided"}
+                          </p>
+                        </div>
+
+                        <div className="assessment-item">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="icon-wrapper-purple">
+                              <Users className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <Label className="text-muted-foreground">
+                              Employee Count
+                            </Label>
+                          </div>
+                          <p className="font-medium">
+                            {company.companyDetail?.employeeCount
+                              ? `${company.companyDetail.employeeCount.toLocaleString()} employees`
+                              : "Not provided"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Address */}
+                      {company.companyDetail?.address && (
+                        <>
+                          <Separator />
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="icon-wrapper-blue">
+                                <MapPin className="w-4 h-4 text-blue-600" />
+                              </div>
+                              <Label className="text-muted-foreground">
+                                Company Address
+                              </Label>
+                            </div>
+                            <p className="text-foreground/80 p-4 rounded-lg bg-secondary/30">
+                              {company.companyDetail.address}
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Description */}
+                      {company.companyDetail?.description && (
+                        <>
+                          <Separator />
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="icon-wrapper-green">
+                                <FileText className="w-4 h-4 text-green-600" />
+                              </div>
+                              <Label className="text-muted-foreground">
+                                Company Description
+                              </Label>
+                            </div>
+                            <p className="text-foreground/80 leading-relaxed p-4 rounded-lg bg-secondary/30">
+                              {company.companyDetail.description}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="icon-wrapper-purple w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                        <Building className="w-10 h-10 text-purple-600" />
+                      </div>
+                      <h3 className="text-2xl font-semibold mb-3">
+                        No Company Information
+                      </h3>
+                      <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                        Add your company information to complete your HR profile
+                        and start managing job postings.
+                      </p>
+                      <Button
+                        onClick={() => setIsEditingCompany(true)}
+                        className="gap-2 btn-gradient-primary"
+                      >
+                        <Building className="w-4 h-4" />
+                        Add Company Information
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </HRLayout>
   );
 };
+
+// Add missing components
+const Badge = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <span
+    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+      className || ""
+    }`}
+  >
+    {children}
+  </span>
+);
+
+const FileText = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+    />
+  </svg>
+);
 
 export default HRProfilePage;

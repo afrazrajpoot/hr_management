@@ -25,7 +25,6 @@ import {
 import HRLayout from "@/components/hr/HRLayout";
 import { useSocket } from "@/context/SocketContext";
 import EmployeeDirectory from "@/components/hr/EmployeeDirectrory";
-// import EmployeeDirectory from "@/components/hr/EmployeeDirectory";
 
 // Type definitions
 interface MonthlyTrends {
@@ -106,20 +105,32 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
   icon: Icon,
   description,
 }) => (
-  <Card className="card">
+  <Card className="card-primary card-hover border-0 shadow-lg group">
     <CardContent className="p-6">
-      <div className="flex items-center justify-between mb-2">
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="icon-wrapper-blue">
+              <Icon className="h-4 w-4" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              {value}
+            </span>
+            {change && (
+              <Badge className="badge-blue gap-1">
+                <TrendingUp className="h-3 w-3" />
+                {change}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">{description}</p>
         </div>
-        <Badge variant="secondary" className="text-xs">
-          {change}
-        </Badge>
-      </div>
-      <div>
-        <p className="text-2xl font-bold mb-1">{value}</p>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className="text-xs text-muted-foreground mt-1">{description}</p>
+        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <Icon className="h-7 w-7" />
+        </div>
       </div>
     </CardContent>
   </Card>
@@ -128,28 +139,11 @@ const MobilityStatCard: React.FC<MobilityStatCardProps> = ({
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload || !payload.length) return null;
 
-  // Detect dark mode using a CSS class on <body> or <html>
-  const isDark =
-    typeof window !== "undefined" &&
-    document.documentElement.classList.contains("dark");
-
   return (
-    <div
-      style={{
-        background: isDark ? "#1f2937" : "#fff", // gray-800 for dark, white for light
-        color: isDark ? "#fff" : "#000",
-        border: "1px solid",
-        borderColor: isDark ? "#374151" : "#e5e7eb", // gray-700 or gray-200
-        borderRadius: 8,
-        padding: "12px 16px",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-        minWidth: 180,
-        zIndex: 1000,
-      }}
-    >
-      <div className="font-semibold mb-2">{label}</div>
+    <div className="bg-card text-card-foreground border border-border rounded-xl p-4 shadow-xl backdrop-blur-sm min-w-[180px]">
+      {label && <div className="font-bold mb-2 text-foreground">{label}</div>}
       {payload.map((entry: any, idx: number) => (
-        <div key={idx} style={{ color: entry.color, marginBottom: 4 }}>
+        <div key={idx} className="text-sm mb-1" style={{ color: entry.color }}>
           {entry.name}: <span className="font-bold">{entry.value}</span>
         </div>
       ))}
@@ -309,14 +303,14 @@ export default function InternalMobility() {
   // Helper function to assign colors to departments
   const getDepartmentColor = (department: string): string => {
     const colors = [
-      "hsl(var(--hr-chart-1))",
-      "hsl(var(--hr-chart-2))",
-      "hsl(var(--hr-chart-3))",
-      "hsl(var(--hr-chart-4))",
-      "hsl(var(--hr-chart-5))",
+      "hsl(var(--primary))",
+      "hsl(var(--success))",
+      "hsl(var(--warning))",
       "#8B5CF6",
       "#06B6D4",
       "#F59E0B",
+      "#EC4899",
+      "#10B981",
     ];
 
     // Simple hash function for consistent color assignment
@@ -347,21 +341,34 @@ export default function InternalMobility() {
 
   return (
     <HRLayout>
-      <div className="space-y-6 p-6 ">
+      <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Internal Mobility Tracking
-          </h1>
-          <p className="text-muted-foreground">
-            Monitor career movements and progression within the organization
-          </p>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+          <div className="decorative-gradient-blur-blue -top-20 -right-20" />
+          <div className="relative z-10">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+              Internal Mobility Tracking
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Monitor career movements and progression within the organization
+            </p>
+          </div>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="bg-destructive/15 text-destructive p-3 rounded-md">
-            Error loading mobility data: {error}
+          <div className="bg-gradient-to-r from-destructive/10 to-transparent border border-destructive/30 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="icon-wrapper-red">
+                <TrendingUp className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h4 className="font-medium text-foreground">
+                  Data Loading Error
+                </h4>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -400,38 +407,59 @@ export default function InternalMobility() {
         {/* Mobility Trends */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Monthly Mobility Trend - Show Promotions, Transfers, and Total */}
-          <Card className="card">
-            <CardHeader>
-              <CardTitle>Monthly Mobility Trends</CardTitle>
-              <CardDescription>
+          <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
+              <CardTitle className="text-foreground">
+                Monthly Mobility Trends
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Internal movements over the past 6 months
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={processedData.monthlyTrendsData}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                    strokeOpacity={0.3}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
+                    axisLine={false}
+                  />
                   <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Line
                     type="monotone"
                     dataKey="promotions"
-                    stroke="hsl(var(--hr-chart-2))"
+                    stroke="hsl(var(--success))"
                     strokeWidth={2}
                     name="Promotions"
                   />
                   <Line
                     type="monotone"
                     dataKey="transfers"
-                    stroke="hsl(var(--hr-chart-1))"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     name="Transfers"
                   />
                   <Line
                     type="monotone"
                     dataKey="total"
-                    stroke="hsl(var(--hr-chart-4))"
+                    stroke="hsl(var(--warning))"
                     strokeWidth={2}
                     name="Total Movements"
                   />
@@ -441,37 +469,56 @@ export default function InternalMobility() {
           </Card>
 
           {/* Department Flow Chart - Only Incoming & Outgoing */}
-          <Card className="card">
-            <CardHeader>
-              <CardTitle>Department Movement Flow</CardTitle>
-              <CardDescription>
+          <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-success/5 to-transparent border-b border-border">
+              <CardTitle className="text-foreground">
+                Department Movement Flow
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Employee transfers between departments (incoming vs outgoing)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={processedData.departmentFlowData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                    strokeOpacity={0.3}
+                  />
                   <XAxis
                     dataKey="department"
                     angle={-45}
                     textAnchor="end"
                     height={80}
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
+                    axisLine={false}
                   />
-                  <YAxis />
+                  <YAxis
+                    tick={{
+                      fill: "hsl(var(--muted-foreground))",
+                      fontSize: 12,
+                    }}
+                    axisLine={false}
+                  />
                   <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Bar
                     dataKey="incoming"
-                    fill="hsl(var(--hr-chart-2))"
+                    fill="hsl(var(--success))"
                     name="Incoming"
+                    radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="outgoing"
-                    fill="hsl(var(--hr-chart-1))"
+                    fill="hsl(var(--primary))"
                     name="Outgoing"
+                    radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -483,12 +530,12 @@ export default function InternalMobility() {
         {internalMobility?.users && internalMobility.users.length > 0 && (
           <>
             {/* Search Bar */}
-            <Card className="card">
+            <Card className="card-primary card-hover border-0 shadow-xl">
               <CardContent className="p-6">
                 <div className="max-w-md space-y-2">
                   <Label
                     htmlFor="search"
-                    className="text-sm font-medium flex items-center gap-2"
+                    className="text-sm font-medium flex items-center gap-2 text-muted-foreground"
                   >
                     <Search className="h-4 w-4" />
                     Search Employees
@@ -498,6 +545,7 @@ export default function InternalMobility() {
                     placeholder="Search by name, email, position, or department..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="border-border/50 focus:border-primary"
                   />
                 </div>
               </CardContent>
