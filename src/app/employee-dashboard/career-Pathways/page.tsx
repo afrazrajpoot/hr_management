@@ -349,9 +349,7 @@ export default function CareerPathways() {
   if ((isLoading && page === 1) || isLoadingApplications) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
-          <Loader />
-        </div>
+        <Loader />
       </AppLayout>
     );
   }

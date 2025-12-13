@@ -459,3 +459,30 @@ html {
     height: 0.25rem;
     background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.2), transparent);
 }
+
+/* In your btn-gradient-primary class */
+.btn-gradient-primary {
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    color: white;
+    /* Add this */
+    font-weight: 500;
+    /* Add this for medium weight */
+}
+
+.btn-gradient-primary:hover {
+    background: linear-gradient(to right, #1d4ed8, #7e22ce);
+    color: white;
+    /* Ensure text stays white on hover */
+}
+
+/* Also update the dark mode version if you have one */
+.dark .btn-gradient-primary {
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    color: white;
+    font-weight: 500;
+}
+
+.dark .btn-gradient-primary:hover {
+    background: linear-gradient(to right, #1d4ed8, #7e22ce);
+    color: white;
+}

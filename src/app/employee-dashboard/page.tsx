@@ -145,7 +145,12 @@ export default function Dashboard() {
           const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
             { employeeId: session.user.id },
-            { headers: { "Content-Type": "application/json", "Authorization": `Bearer ${session.user.fastApiToken}` } }
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.user.fastApiToken}`,
+              },
+            }
           );
           setApiData(res.data);
         } catch (error) {
@@ -194,19 +199,7 @@ export default function Dashboard() {
   if (isLoading || isFetching) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Lightbulb className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">
-              Loading your dashboard...
-            </p>
-          </div>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -220,14 +213,14 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold gradient-text-primary">
               Welcome back, {apiData?.data?.name || "User"}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+            <p className="text-muted-foreground mt-2 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               {currentDate}
             </p>
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <Button 
-              className="btn-gradient-primary text-white px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+            <Button
+              className="btn-gradient-primary text-primary-foreground px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
               asChild
             >
               <Link href="/employee-dashboard/assessment">
@@ -244,23 +237,26 @@ export default function Dashboard() {
           <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-blue">
-                <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <Target className="w-5 h-5 text-primary" />
               </div>
-              <Badge className="badge-blue">
-                Progress
-              </Badge>
+              <Badge className="badge-blue">Progress</Badge>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {Number(dashboardData.assessmentProgress.percentage) > 100 ? 100 : dashboardData.assessmentProgress.percentage.toFixed(0)}%
+            <h3 className="text-2xl font-bold text-card-foreground mb-2">
+              {Number(dashboardData.assessmentProgress.percentage) > 100
+                ? 100
+                : dashboardData.assessmentProgress.percentage.toFixed(0)}
+              %
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               {dashboardData.assessmentProgress.current} of{" "}
               {dashboardData.assessmentProgress.total} questions
             </p>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
                 className="progress-bar-primary"
-                style={{ width: `${dashboardData.assessmentProgress.percentage}%` }}
+                style={{
+                  width: `${dashboardData.assessmentProgress.percentage}%`,
+                }}
               ></div>
             </div>
           </div>
@@ -269,19 +265,17 @@ export default function Dashboard() {
           <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-green">
-                <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <Trophy className="w-5 h-5 text-accent" />
               </div>
-              <Badge className="badge-green">
-                Achieved
-              </Badge>
+              <Badge className="badge-green">Achieved</Badge>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-card-foreground mb-2">
               {dashboardData.completedAssessments}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-muted-foreground mb-2">
               Completed Assessments
             </p>
-            <div className="flex items-center text-sm text-green-600 dark:text-green-400">
+            <div className="flex items-center text-sm text-success">
               <TrendingUp className="w-4 h-4 mr-1" />
               <span>+3 from last month</span>
             </div>
@@ -291,19 +285,15 @@ export default function Dashboard() {
           <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-amber">
-                <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <Star className="w-5 h-5 text-warning" />
               </div>
-              <Badge className="badge-amber">
-                Performance
-              </Badge>
+              <Badge className="badge-amber">Performance</Badge>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-card-foreground mb-2">
               {dashboardData.averageScore}%
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Average Score
-            </p>
-            <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
+            <p className="text-sm text-muted-foreground mb-2">Average Score</p>
+            <div className="flex items-center text-sm text-warning">
               {dashboardData.averageScore > 70 ? (
                 <>
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -324,19 +314,15 @@ export default function Dashboard() {
           <div className="card-primary card-hover">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-purple">
-                <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <Users className="w-5 h-5 text-accent" />
               </div>
-              <Badge className="badge-purple">
-                Opportunities
-              </Badge>
+              <Badge className="badge-purple">Opportunities</Badge>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-card-foreground mb-2">
               {dashboardData.careerMatches}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Career Matches
-            </p>
-            <div className="flex items-center text-sm text-purple-600 dark:text-purple-400">
+            <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
+            <div className="flex items-center text-sm text-accent">
               <Sparkles className="w-4 h-4 mr-1" />
               <span>New recommendations available</span>
             </div>
@@ -348,52 +334,52 @@ export default function Dashboard() {
           {/* Decorative elements */}
           <div className="decorative-gradient-blur-blue top-0 right-0 -translate-y-32 translate-x-32"></div>
           <div className="decorative-gradient-blur-purple bottom-0 left-0 translate-y-24 -translate-x-24"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="ai-recommendation-icon-wrapper">
-                <BookOpen className="w-6 h-6 text-white" />
+                <BookOpen className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-2xl font-bold text-card-foreground">
                   AI Career Recommendation
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Personalized insights based on your assessment results
                 </p>
               </div>
             </div>
-            
-            <div className="prose prose-lg dark:prose-invert max-w-none bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+
+            <div className="prose prose-lg dark:prose-invert max-w-none bg-card/50 backdrop-blur-sm rounded-xl p-6 border border-input">
               <ReactMarkdown
                 components={{
                   h1: ({ node, ...props }) => (
                     <h1
-                      className="text-2xl font-bold text-gray-900 dark:text-white mb-4"
+                      className="text-2xl font-bold text-card-foreground mb-4"
                       {...props}
                     />
                   ),
                   h2: ({ node, ...props }) => (
                     <h2
-                      className="text-xl font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-3"
+                      className="text-xl font-semibold text-card-foreground mt-6 mb-3"
                       {...props}
                     />
                   ),
                   h3: ({ node, ...props }) => (
                     <h3
-                      className="text-lg font-medium text-gray-700 dark:text-gray-300 mt-4 mb-2"
+                      className="text-lg font-medium text-card-foreground mt-4 mb-2"
                       {...props}
                     />
                   ),
                   p: ({ node, ...props }) => (
                     <p
-                      className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4"
+                      className="text-muted-foreground leading-relaxed mb-4"
                       {...props}
                     />
                   ),
                   ul: ({ node, ...props }) => (
                     <ul
-                      className="list-disc list-outside pl-5 mb-4 text-gray-600 dark:text-gray-400 space-y-2"
+                      className="list-disc list-outside pl-5 mb-4 text-muted-foreground space-y-2"
                       {...props}
                     />
                   ),
@@ -401,7 +387,7 @@ export default function Dashboard() {
                     <li className="text-base" {...props} />
                   ),
                   strong: ({ node, ...props }) => (
-                    <strong className="font-semibold text-blue-600 dark:text-blue-400" {...props} />
+                    <strong className="font-semibold text-primary" {...props} />
                   ),
                 }}
               >
@@ -413,16 +399,13 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Assessments */}
-          <div 
-            id="recent-assessments"
-            className="card-primary card-hover"
-          >
+          <div id="recent-assessments" className="card-primary card-hover">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="icon-wrapper-blue">
-                  <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Calendar className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-bold text-card-foreground">
                   Recent Assessments
                 </h2>
               </div>
@@ -434,29 +417,35 @@ export default function Dashboard() {
             <div className="space-y-3">
               {paginatedAssessments.length > 0 ? (
                 paginatedAssessments.map((assessment) => (
-                  <div
-                    key={assessment.id}
-                    className="assessment-item group"
-                  >
+                  <div key={assessment.id} className="assessment-item group">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`p-1.5 rounded-full ${assessment.status === "Completed" ? 'bg-green-100 dark:bg-green-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
+                        <div
+                          className={`p-1.5 rounded-full ${
+                            assessment.status === "Completed"
+                              ? "bg-success/10"
+                              : "bg-warning/10"
+                          }`}
+                        >
                           {assessment.status === "Completed" ? (
-                            <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <CheckCircle className="w-4 h-4 text-success" />
                           ) : (
-                            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-pulse" />
+                            <Clock className="w-4 h-4 text-warning animate-pulse" />
                           )}
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          <h4 className="font-medium text-card-foreground group-hover:text-primary transition-colors">
                             {assessment.name}
                           </h4>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(assessment.date).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(assessment.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
@@ -466,17 +455,21 @@ export default function Dashboard() {
                             <div className="text-lg font-bold gradient-text-primary">
                               {assessment.score}%
                             </div>
-                            <Badge 
-                              className={`text-xs ${assessment.score > 70 ? 'badge-green' : 'badge-amber'}`}
+                            <Badge
+                              className={`text-xs ${
+                                assessment.score > 70
+                                  ? "badge-green"
+                                  : "badge-amber"
+                              }`}
                             >
                               Score
                             </Badge>
                           </div>
                         )}
                         {assessment.status === "In Progress" && (
-                          <Button 
-                            size="sm" 
-                            className="btn-gradient-primary text-white border-0"
+                          <Button
+                            size="sm"
+                            className="btn-gradient-primary text-primary-foreground border-0"
                             asChild
                           >
                             <Link href="/employee-dashboard/assessment">
@@ -490,11 +483,13 @@ export default function Dashboard() {
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">No assessments completed yet.</p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4 border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
+                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    No assessments completed yet.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-4 border-input text-secondary-foreground hover:bg-secondary"
                     asChild
                   >
                     <Link href="/employee-dashboard/assessment">
@@ -517,7 +512,7 @@ export default function Dashboard() {
                         className={`${
                           currentPage === 1
                             ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                            : "cursor-pointer hover:bg-secondary"
                         }`}
                       />
                     </PaginationItem>
@@ -531,8 +526,8 @@ export default function Dashboard() {
                           isActive={currentPage === page}
                           className={`${
                             currentPage === page
-                              ? "btn-gradient-primary text-white"
-                              : "cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                              ? "btn-gradient-primary text-primary-foreground"
+                              : "cursor-pointer hover:bg-secondary"
                           }`}
                         >
                           {page}
@@ -549,7 +544,7 @@ export default function Dashboard() {
                         className={`${
                           currentPage === totalPages
                             ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                            : "cursor-pointer hover:bg-secondary"
                         }`}
                       />
                     </PaginationItem>
@@ -558,9 +553,9 @@ export default function Dashboard() {
               </div>
             )}
 
-            <Button 
-              variant="outline" 
-              className="w-full mt-6 border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
+            <Button
+              variant="outline"
+              className="w-full mt-6 border-input text-secondary-foreground hover:bg-secondary"
               asChild
             >
               <Link href="/employee-dashboard/results">
@@ -575,9 +570,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="icon-wrapper-purple">
-                  <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <TrendingUp className="w-5 h-5 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-bold text-card-foreground">
                   AI Career Recommendations
                 </h2>
               </div>
@@ -589,31 +584,28 @@ export default function Dashboard() {
             <div className="space-y-4">
               {dashboardData.recentRecommendations.length > 0 ? (
                 dashboardData.recentRecommendations.map((rec, index) => (
-                  <div
-                    key={index}
-                    className="assessment-item group"
-                  >
+                  <div key={index} className="assessment-item group">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40">
+                      <div className="p-2 rounded-full bg-accent/10">
                         {rec.trending ? (
-                          <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <TrendingUp className="w-4 h-4 text-accent" />
                         ) : (
-                          <Briefcase className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                          <Briefcase className="w-4 h-4 text-accent" />
                         )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                          <h4 className="font-medium text-card-foreground group-hover:text-accent transition-colors">
                             {rec.title}
                           </h4>
                           {rec.trending && (
-                            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs">
+                            <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground border-0 text-xs">
                               <TrendingUp className="w-3 h-3 mr-1" />
                               Trending
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {rec.industry}
                         </p>
                       </div>
@@ -621,35 +613,35 @@ export default function Dashboard() {
                         <div className="text-lg font-bold gradient-text-primary">
                           {rec.matchScore}%
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           Match Score
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-input">
+                      <span className="text-sm text-muted-foreground">
                         High compatibility with your skills
                       </span>
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <TrendingUp className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
                     No recommendations available yet.
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2">
                     Complete an assessment to get personalized recommendations
                   </p>
                 </div>
               )}
             </div>
 
-            <Button 
-              variant="outline" 
-              className="w-full mt-6 border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/30"
+            <Button
+              variant="outline"
+              className="w-full mt-6 border-input text-secondary-foreground hover:bg-secondary"
               asChild
             >
               <Link href="/employee-dashboard/career-Pathways">
@@ -660,20 +652,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="quick-actions-card">
-          <div className="decorative-gradient-blur-blue top-0 right-0 -translate-y-32 translate-x-32"></div>
-          
-          <div className="relative z-10">
+        {/* Quick Actions - Card version */}
+        <Card className="card-primary card-hover border-dashed border-2 border-primary/20 dark:border-primary/30 overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="ai-recommendation-icon-wrapper">
-                <Zap className="w-6 h-6 text-white" />
+              <div className="icon-wrapper-blue">
+                <Zap className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-xl font-bold text-card-foreground">
                   Quick Actions
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-sm text-muted-foreground">
                   Get started with these actions
                 </p>
               </div>
@@ -683,16 +673,16 @@ export default function Dashboard() {
               {/* Take Assessment */}
               <Link
                 href="/employee-dashboard/assessment"
-                className="quick-action-item group"
+                className="group p-4 rounded-xl border border-input bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-200">
-                    <ClipboardList className="w-6 h-6 text-white" />
+                  <div className="icon-wrapper-blue group-hover:scale-110 transition-transform duration-300">
+                    <ClipboardList className="w-6 h-6 text-primary" />
                   </div>
-                  <span className="font-medium text-white group-hover:text-blue-200 transition-colors">
+                  <span className="font-medium text-card-foreground group-hover:text-primary transition-colors">
                     Take Assessment
                   </span>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted-foreground">
                     Start new assessment
                   </p>
                 </div>
@@ -701,16 +691,16 @@ export default function Dashboard() {
               {/* View Results */}
               <Link
                 href="/employee-dashboard/results"
-                className="quick-action-item group"
+                className="group p-4 rounded-xl border border-input bg-card hover:border-accent/50 hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-green-500 to-green-600 group-hover:from-green-600 group-hover:to-green-700 transition-all duration-200">
-                    <LineChart className="w-6 h-6 text-white" />
+                  <div className="icon-wrapper-green group-hover:scale-110 transition-transform duration-300">
+                    <LineChart className="w-6 h-6 text-accent" />
                   </div>
-                  <span className="font-medium text-white group-hover:text-green-200 transition-colors">
+                  <span className="font-medium text-card-foreground group-hover:text-accent transition-colors">
                     View Results
                   </span>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted-foreground">
                     See your performance
                   </p>
                 </div>
@@ -719,16 +709,16 @@ export default function Dashboard() {
               {/* Career Paths */}
               <Link
                 href="/employee-dashboard/career-pathways"
-                className="quick-action-item group"
+                className="group p-4 rounded-xl border border-input bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 group-hover:from-purple-600 group-hover:to-purple-700 transition-all duration-200">
-                    <Users className="w-6 h-6 text-white" />
+                  <div className="icon-wrapper-purple group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-accent" />
                   </div>
-                  <span className="font-medium text-white group-hover:text-purple-200 transition-colors">
+                  <span className="font-medium text-card-foreground group-hover:text-primary transition-colors">
                     Career Paths
                   </span>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted-foreground">
                     Explore opportunities
                   </p>
                 </div>
@@ -737,23 +727,23 @@ export default function Dashboard() {
               {/* Development */}
               <Link
                 href="/employee-dashboard/development"
-                className="quick-action-item group"
+                className="group p-4 rounded-xl border border-input bg-card hover:border-warning/50 hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-700 transition-all duration-200">
-                    <Award className="w-6 h-6 text-white" />
+                  <div className="icon-wrapper-amber group-hover:scale-110 transition-transform duration-300">
+                    <Award className="w-6 h-6 text-warning" />
                   </div>
-                  <span className="font-medium text-white group-hover:text-amber-200 transition-colors">
+                  <span className="font-medium text-card-foreground group-hover:text-warning transition-colors">
                     Development
                   </span>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-muted-foreground">
                     Grow your skills
                   </p>
                 </div>
               </Link>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

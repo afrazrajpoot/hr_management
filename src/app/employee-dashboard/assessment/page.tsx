@@ -633,48 +633,7 @@ export default function Assessment() {
   if (isLoading || isFetchingQuestions) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary flex flex-col justify-center items-center p-6">
-          <div className="w-full max-w-4xl mx-auto">
-            <div className="card-primary text-center p-12">
-              <div className="icon-wrapper-purple mx-auto mb-6">
-                <Brain className="w-12 h-12 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold gradient-text-primary mb-4">
-                Loading Your Career Assessment
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                We're preparing your personalized assessment questions...
-              </p>
-              <Loader />
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="icon-wrapper-blue mx-auto mb-2 p-3">
-                    <Target className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Analyzing Profile
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="icon-wrapper-green mx-auto mb-2 p-3">
-                    <BarChart3 className="w-6 h-6 text-success" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Loading Questions
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="icon-wrapper-purple mx-auto mb-2 p-3">
-                    <Sparkles className="w-6 h-6 text-accent" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    AI Personalization
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -826,50 +785,7 @@ export default function Assessment() {
             </div>
           ) : (
             <>
-              {isSubmitting && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center"
-                  style={{
-                    background: "rgba(15, 23, 42, 0.85)",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                  }}
-                >
-                  <div className="card-primary p-8 text-center max-w-md">
-                    <div className="ai-recommendation-icon-wrapper mx-auto mb-6">
-                      <Sparkles className="w-12 h-12 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground mb-3">
-                      Processing Your Results
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      Our AI is analyzing your responses to generate
-                      personalized career insights...
-                    </p>
-                    <Loader />
-                    <div className="mt-8 grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                        <p className="text-xs text-muted-foreground">
-                          Analyzing
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                        <p className="text-xs text-muted-foreground">
-                          Processing
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                        <p className="text-xs text-muted-foreground">
-                          Generating
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {isSubmitting && <Loader />}
               {analysisResults ? (
                 <div className="max-w-3xl mx-auto">
                   <Card className="ai-recommendation-card">

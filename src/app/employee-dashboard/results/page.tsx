@@ -222,36 +222,7 @@ export default function Results() {
   if (isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
-          <div className="text-center space-y-6 max-w-md mx-auto">
-            <div className="ai-recommendation-icon-wrapper mx-auto">
-              <Brain className="w-12 h-12 text-white" />
-            </div>
-            <div className="space-y-3">
-              <h2 className="text-2xl font-bold gradient-text-primary">
-                Loading Your Genius Profile
-              </h2>
-              <p className="text-muted-foreground">
-                Analyzing your assessment results...
-              </p>
-            </div>
-            <Loader />
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Processing</p>
-              </div>
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Analyzing</p>
-              </div>
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Generating</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }

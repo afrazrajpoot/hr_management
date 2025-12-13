@@ -186,36 +186,7 @@ const EmployeeProfilePage: React.FC = () => {
   if (status === "loading" || isFetching || isMutating) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
-          <div className="text-center space-y-6 max-w-md mx-auto">
-            <div className="ai-recommendation-icon-wrapper mx-auto">
-              <User className="w-12 h-12 text-white" />
-            </div>
-            <div className="space-y-3">
-              <h2 className="text-2xl font-bold gradient-text-primary">
-                Loading Your Profile
-              </h2>
-              <p className="text-muted-foreground">
-                Fetching your professional information...
-              </p>
-            </div>
-            <Loader />
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Profile</p>
-              </div>
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Skills</p>
-              </div>
-              <div className="text-center">
-                <div className="progress-bar-primary w-full h-1 mb-2"></div>
-                <p className="text-xs text-muted-foreground">Experience</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Loader />
       </AppLayout>
     );
   }
@@ -371,7 +342,6 @@ const EmployeeProfilePage: React.FC = () => {
           </div>
 
           {/* Main Profile Content */}
-          {/* Main Profile Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -383,43 +353,43 @@ const EmployeeProfilePage: React.FC = () => {
               value={activeTab}
               onValueChange={setActiveTab}
             >
-              <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-4 bg-card border border-input p-1 rounded-xl">
                 <TabsTrigger
                   value="personal"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-2 p-2">
-                    <User className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <User className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
                     <span className="text-sm font-medium">Personal</span>
                   </div>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="employment"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-2 p-2">
-                    <Briefcase className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <Briefcase className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
                     <span className="text-sm font-medium">Employment</span>
                   </div>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="skills"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-2 p-2">
-                    <Award className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <Award className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
                     <span className="text-sm font-medium">Skills</span>
                   </div>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="experience"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-2 p-2">
-                    <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <BookOpen className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
                     <span className="text-sm font-medium">Experience</span>
                   </div>
                 </TabsTrigger>
@@ -439,7 +409,7 @@ const EmployeeProfilePage: React.FC = () => {
                         <User className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold">
+                        <h3 className="text-xl font-bold text-card-foreground">
                           Personal Information
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -459,10 +429,10 @@ const EmployeeProfilePage: React.FC = () => {
                   <div className="card-primary p-6">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="icon-wrapper-green p-3">
-                        <Briefcase className="w-6 h-6 text-success" />
+                        <Briefcase className="w-6 h-6 text-accent" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold">
+                        <h3 className="text-xl font-bold text-card-foreground">
                           Employment Details
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -486,7 +456,7 @@ const EmployeeProfilePage: React.FC = () => {
                         <Award className="w-6 h-6 text-warning" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold">
+                        <h3 className="text-xl font-bold text-card-foreground">
                           Skills & Expertise
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -506,7 +476,9 @@ const EmployeeProfilePage: React.FC = () => {
                           <Briefcase className="w-6 h-6 text-accent" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold">Work Experience</h3>
+                          <h3 className="text-xl font-bold text-card-foreground">
+                            Work Experience
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             Your professional journey and career history
                           </p>
@@ -521,7 +493,9 @@ const EmployeeProfilePage: React.FC = () => {
                           <BookOpen className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold">Education</h3>
+                          <h3 className="text-xl font-bold text-card-foreground">
+                            Education
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             Academic qualifications and certifications
                           </p>
@@ -535,10 +509,12 @@ const EmployeeProfilePage: React.FC = () => {
                       <div className="card-primary p-6">
                         <div className="flex items-center gap-3 mb-6">
                           <div className="icon-wrapper-green p-3">
-                            <FileText className="w-6 h-6 text-success" />
+                            <FileText className="w-6 h-6 text-accent" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold">Resume</h3>
+                            <h3 className="text-xl font-bold text-card-foreground">
+                              Resume
+                            </h3>
                             <p className="text-sm text-muted-foreground">
                               Your professional resume document
                             </p>
