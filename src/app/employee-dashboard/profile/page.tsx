@@ -19,10 +19,24 @@ import EducationTab from "@/components/profileComponants/EducationTab";
 import ResumeTab from "@/components/profileComponants/ResumeTab";
 import { toast, Toaster } from "sonner";
 import Loader from "@/components/Loader";
+import {
+  User,
+  Briefcase,
+  Award,
+  BookOpen,
+  FileText,
+  Shield,
+  Sparkles,
+  TrendingUp,
+  Zap,
+  CheckCircle,
+  Upload,
+} from "lucide-react";
 
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("personal");
 
   const {
     data: employeeData,
@@ -81,12 +95,19 @@ const EmployeeProfilePage: React.FC = () => {
         setFormData(updatedEmployee);
         reset(updatedEmployee);
         setIsEditing(false);
-        toast.success("Profile updated successfully!", { id: toastId });
+        toast.success("Profile updated successfully!", {
+          id: toastId,
+          icon: <CheckCircle className="w-5 h-5 text-success" />,
+        });
       } catch (error) {
         console.error("Error saving employee:", error);
         const errorMessage =
           (error as any)?.data?.error || "Failed to save employee data";
-        toast.error(errorMessage, { id: toastId, duration: 5000 });
+        toast.error(errorMessage, {
+          id: toastId,
+          duration: 5000,
+          icon: <Shield className="w-5 h-5 text-destructive" />,
+        });
       }
     },
     [createOrUpdateEmployee, formData, reset]
@@ -96,6 +117,9 @@ const EmployeeProfilePage: React.FC = () => {
     setFormData({ ...employee });
     reset(employee);
     setIsEditing(false);
+    toast.info("Changes discarded", {
+      icon: <Upload className="w-5 h-5 text-warning" />,
+    });
   }, [employee, reset]);
 
   const handleAvatarUpload = useCallback(
@@ -110,7 +134,10 @@ const EmployeeProfilePage: React.FC = () => {
               avatar: e.target.result as string,
             }));
             setValue("avatar", e.target.result as string);
-            toast.success("Avatar uploaded successfully!", { duration: 3000 });
+            toast.success("Profile picture updated!", {
+              duration: 3000,
+              icon: <Sparkles className="w-5 h-5 text-primary" />,
+            });
           }
         };
         reader.readAsDataURL(file);
@@ -131,7 +158,10 @@ const EmployeeProfilePage: React.FC = () => {
         };
         setFormData((prev) => ({ ...prev, resume: resumeFile }));
         setValue("resume", resumeFile);
-        toast.success("Resume uploaded successfully!", { duration: 3000 });
+        toast.success("Resume uploaded successfully!", {
+          duration: 3000,
+          icon: <FileText className="w-5 h-5 text-success" />,
+        });
       }
     },
     [setValue]
@@ -146,23 +176,96 @@ const EmployeeProfilePage: React.FC = () => {
     if (fetchError) {
       const errorMessage =
         (fetchError as any)?.data?.error || "Failed to load employee data";
-      toast.error(errorMessage, { duration: 5000 });
+      toast.error(errorMessage, {
+        duration: 5000,
+        icon: <Shield className="w-5 h-5 text-destructive" />,
+      });
     }
   }, [employeeData, fetchError, reset]);
 
   if (status === "loading" || isFetching || isMutating) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader />
+        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md mx-auto">
+            <div className="ai-recommendation-icon-wrapper mx-auto">
+              <User className="w-12 h-12 text-white" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold gradient-text-primary">
+                Loading Your Profile
+              </h2>
+              <p className="text-muted-foreground">
+                Fetching your professional information...
+              </p>
+            </div>
+            <Loader />
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Profile</p>
+              </div>
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Skills</p>
+              </div>
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Experience</p>
+              </div>
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
   }
 
   if (status !== "authenticated") {
-    return <div>Please sign in to view your profile.</div>;
+    return (
+      <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
+        <div className="card-primary max-w-md text-center p-8">
+          <div className="icon-wrapper-blue mx-auto mb-6">
+            <Shield className="w-12 h-12 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold gradient-text-primary mb-4">
+            Authentication Required
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Please sign in to access your professional profile
+          </p>
+          <button
+            onClick={() => (window.location.href = "/api/auth/signin")}
+            className="btn-gradient-primary w-full"
+          >
+            <User className="w-4 h-4 mr-2" />
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
   }
+
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    const fields = [
+      employee.firstName,
+      employee.lastName,
+      employee.email,
+      employee.phone,
+      employee.address,
+      employee.dateOfBirth,
+      employee.hireDate,
+      employee.department,
+      employee.position,
+      employee.bio,
+    ];
+    const filledFields = fields.filter(
+      (field) => field && field.trim() !== ""
+    ).length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
+
+  const profileCompletion = calculateProfileCompletion();
 
   return (
     <AppLayout>
@@ -171,65 +274,347 @@ const EmployeeProfilePage: React.FC = () => {
         position="top-right"
         richColors
         toastOptions={{
-          duration: 3000, // Default duration for success toasts
+          duration: 3000,
+          className: "border border-input",
         }}
       />
-      <div className="min-h-screen p-4">
-        <div className="max-w-6xl mx-auto space-y-6 ">
-          <ProfileHeader
-            employee={employee}
-            formData={formData}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            handleSave={handleSubmit(handleSave)}
-            handleCancel={handleCancel}
-            handleAvatarUpload={handleAvatarUpload}
-          />
 
-          <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 shadow-sm border card">
-              <TabsTrigger value="personal">Personal Info</TabsTrigger>
-              <TabsTrigger value="employment">Employment</TabsTrigger>
-              <TabsTrigger value="skills">Skills</TabsTrigger>
-              <TabsTrigger value="experience">Experience</TabsTrigger>
-              {/* <TabsTrigger value="resume">Resume</TabsTrigger> */}
-            </TabsList>
+      <div className="min-h-screen gradient-bg-primary p-4 md:p-6">
+        {/* Decorative Background Elements */}
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-15" />
+          <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-15" />
+        </div>
 
-            <TabsContent value="personal">
-              <PersonalInfoTab
-                employee={employee}
-                isEditing={isEditing}
-                control={control}
-              />
-            </TabsContent>
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Profile Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ProfileHeader
+              employee={employee}
+              formData={formData}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              handleSave={handleSubmit(handleSave)}
+              handleCancel={handleCancel}
+              handleAvatarUpload={handleAvatarUpload}
+            />
+          </motion.div>
 
-            <TabsContent value="employment">
-              <EmploymentTab
-                employee={employee}
-                isEditing={isEditing}
-                control={control}
-                userHrId={session?.user?.hrId}
-              />
-            </TabsContent>
-
-            <TabsContent value="skills">
-              <SkillsTab isEditing={isEditing} control={control} />
-            </TabsContent>
-
-            <TabsContent value="experience">
-              <div className="space-y-6">
-                <ExperienceTab isEditing={isEditing} control={control} />
-                <EducationTab isEditing={isEditing} control={control} />
+          {/* Profile Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="card-primary card-hover">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="icon-wrapper-green p-3">
+                    <TrendingUp className="w-6 h-6 text-success" />
+                  </div>
+                  <span className="badge-green text-sm">Profile Strength</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2">
+                  {profileCompletion}%
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Profile Completion
+                </p>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div
+                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
+                      profileCompletion >= 80
+                        ? "bg-success"
+                        : profileCompletion >= 50
+                        ? "bg-warning"
+                        : "bg-destructive"
+                    }`}
+                    style={{ width: `${profileCompletion}%` }}
+                  />
+                </div>
               </div>
-            </TabsContent>
+            </div>
 
-            {/* <TabsContent value="resume">
-              <ResumeTab
-                formData={formData}
-                handleResumeUpload={handleResumeUpload}
-              />
-            </TabsContent> */}
-          </Tabs>
+            <div className="card-primary card-hover">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="icon-wrapper-blue p-3">
+                    <Award className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="badge-blue text-sm">Skills</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2">
+                  {employee.skills?.length || 0}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Total Skills Listed
+                </p>
+              </div>
+            </div>
+
+            <div className="card-primary card-hover">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="icon-wrapper-purple p-3">
+                    <Briefcase className="w-6 h-6 text-accent" />
+                  </div>
+                  <span className="badge-purple text-sm">Experience</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2">
+                  {employee.experience?.length || 0}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Work Experiences
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Profile Content */}
+          {/* Main Profile Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Tabs
+              defaultValue="personal"
+              className="space-y-6"
+              value={activeTab}
+              onValueChange={setActiveTab}
+            >
+              <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-1 rounded-xl">
+                <TabsTrigger
+                  value="personal"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-2 p-2">
+                    <User className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <span className="text-sm font-medium">Personal</span>
+                  </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="employment"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-2 p-2">
+                    <Briefcase className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <span className="text-sm font-medium">Employment</span>
+                  </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="skills"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-2 p-2">
+                    <Award className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <span className="text-sm font-medium">Skills</span>
+                  </div>
+                </TabsTrigger>
+
+                <TabsTrigger
+                  value="experience"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white rounded-lg transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-2 p-2">
+                    <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400 group-data-[state=active]:text-white transition-colors" />
+                    <span className="text-sm font-medium">Experience</span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
+
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TabsContent value="personal" className="mt-0">
+                  <div className="card-primary p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="icon-wrapper-blue p-3">
+                        <User className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">
+                          Personal Information
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Manage your personal details and contact information
+                        </p>
+                      </div>
+                    </div>
+                    <PersonalInfoTab
+                      employee={employee}
+                      isEditing={isEditing}
+                      control={control}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="employment" className="mt-0">
+                  <div className="card-primary p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="icon-wrapper-green p-3">
+                        <Briefcase className="w-6 h-6 text-success" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">
+                          Employment Details
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Your professional role and organizational information
+                        </p>
+                      </div>
+                    </div>
+                    <EmploymentTab
+                      employee={employee}
+                      isEditing={isEditing}
+                      control={control}
+                      userHrId={session?.user?.hrId}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="skills" className="mt-0">
+                  <div className="card-primary p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="icon-wrapper-amber p-3">
+                        <Award className="w-6 h-6 text-warning" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">
+                          Skills & Expertise
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Showcase your professional skills and competencies
+                        </p>
+                      </div>
+                    </div>
+                    <SkillsTab isEditing={isEditing} control={control} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="experience" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="card-primary p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="icon-wrapper-purple p-3">
+                          <Briefcase className="w-6 h-6 text-accent" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold">Work Experience</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Your professional journey and career history
+                          </p>
+                        </div>
+                      </div>
+                      <ExperienceTab isEditing={isEditing} control={control} />
+                    </div>
+
+                    <div className="card-primary p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="icon-wrapper-blue p-3">
+                          <BookOpen className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold">Education</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Academic qualifications and certifications
+                          </p>
+                        </div>
+                      </div>
+                      <EducationTab isEditing={isEditing} control={control} />
+                    </div>
+
+                    {/* Resume Section (Optional) */}
+                    {employee.resume && (
+                      <div className="card-primary p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="icon-wrapper-green p-3">
+                            <FileText className="w-6 h-6 text-success" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold">Resume</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Your professional resume document
+                            </p>
+                          </div>
+                        </div>
+                        <ResumeTab
+                          formData={formData}
+                          handleResumeUpload={handleResumeUpload}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </motion.div>
+            </Tabs>
+          </motion.div>
+
+          {/* Action Buttons (Mobile) */}
+          {isEditing && (
+            <div className="fixed bottom-6 left-6 right-6 z-10 md:hidden">
+              <div className="card-primary shadow-xl p-4">
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancel}
+                    className="flex-1 px-4 py-3 border border-input rounded-lg font-medium hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmit(handleSave)}
+                    className="flex-1 px-4 py-3 btn-gradient-primary rounded-lg font-medium text-white"
+                  >
+                    <CheckCircle className="w-4 h-4 inline mr-2" />
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Profile Tips */}
+          {!isEditing && profileCompletion < 100 && (
+            <div className="card-primary border-dashed border-2 border-primary/20">
+              <div className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="icon-wrapper-purple p-3 flex-shrink-0">
+                    <Sparkles className="w-6 h-6 text-accent" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-warning" />
+                      Boost Your Profile Visibility
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Complete your profile to improve your career
+                      recommendations and visibility to HR managers.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {!employee.bio && (
+                        <span className="badge-blue">Add Bio</span>
+                      )}
+                      {!employee.skills?.length && (
+                        <span className="badge-amber">Add Skills</span>
+                      )}
+                      {!employee.experience?.length && (
+                        <span className="badge-green">Add Experience</span>
+                      )}
+                      {!employee.education?.length && (
+                        <span className="badge-purple">Add Education</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

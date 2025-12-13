@@ -30,6 +30,13 @@ import {
   Sparkles,
   Globe,
   MapPin,
+  Rocket,
+  Zap,
+  Star,
+  TargetIcon,
+  Shield,
+  BookMarked,
+  FileText,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
@@ -127,15 +134,23 @@ interface Assessment {
 
 const isValid = (value: any): boolean => {
   if (value === null || value === undefined) return false;
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const lower = value.toLowerCase().trim();
-    return lower !== '' && lower !== 'not specified' && lower !== 'none identified' && lower !== 'n/a';
+    return (
+      lower !== "" &&
+      lower !== "not specified" &&
+      lower !== "none identified" &&
+      lower !== "n/a"
+    );
   }
   if (Array.isArray(value)) {
-    return value.length > 0 && value.some(item => isValid(item));
+    return value.length > 0 && value.some((item) => isValid(item));
   }
-  if (typeof value === 'object') {
-    return Object.keys(value).length > 0 && Object.values(value).some(item => isValid(item));
+  if (typeof value === "object") {
+    return (
+      Object.keys(value).length > 0 &&
+      Object.values(value).some((item) => isValid(item))
+    );
   }
   return true;
 };
@@ -166,7 +181,7 @@ export default function Results() {
 
       setAssessments(sortedAssessments);
       setSelectedAssessment(sortedAssessments[0] || null);
-      setCurrentPage(1); // Reset to first page on data load
+      setCurrentPage(1);
     } else if (error) {
       console.error("Error from RTK Query:", error);
       setAssessments([]);
@@ -176,14 +191,20 @@ export default function Results() {
 
   const handleAssessmentClick = (assessment: Assessment) => {
     setSelectedAssessment(assessment);
-    // Scroll to the top of the results section
     const resultsHeader = document.getElementById("results-header");
     if (resultsHeader) {
       resultsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
-  // Pagination logic
+  // Calculate score color
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "success";
+    if (score >= 60) return "primary";
+    if (score >= 40) return "warning";
+    return "destructive";
+  };
+
   const totalPages = Math.ceil(assessments.length / assessmentsPerPage);
   const paginatedAssessments = assessments.slice(
     (currentPage - 1) * assessmentsPerPage,
@@ -192,7 +213,6 @@ export default function Results() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top of assessment history section
     const historySection = document.getElementById("assessment-history");
     if (historySection) {
       historySection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -202,7 +222,36 @@ export default function Results() {
   if (isLoading) {
     return (
       <AppLayout>
-        <Loader />
+        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md mx-auto">
+            <div className="ai-recommendation-icon-wrapper mx-auto">
+              <Brain className="w-12 h-12 text-white" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold gradient-text-primary">
+                Loading Your Genius Profile
+              </h2>
+              <p className="text-muted-foreground">
+                Analyzing your assessment results...
+              </p>
+            </div>
+            <Loader />
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Processing</p>
+              </div>
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Analyzing</p>
+              </div>
+              <div className="text-center">
+                <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                <p className="text-xs text-muted-foreground">Generating</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </AppLayout>
     );
   }
@@ -210,14 +259,33 @@ export default function Results() {
   if (error) {
     return (
       <AppLayout>
-        <div className="p-6">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                Error loading assessments. Please try again later.
-              </p>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen gradient-bg-primary p-6">
+          <div className="max-w-2xl mx-auto">
+            <Card className="card-primary border-destructive/20 bg-destructive/5">
+              <CardContent className="pt-8 pb-6 text-center space-y-6">
+                <div className="icon-wrapper-blue mx-auto">
+                  <AlertCircle className="w-12 h-12 text-destructive" />
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-2xl font-bold gradient-text-primary">
+                    Error Loading Results
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Unable to load your assessment results. Please try again
+                    later.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  className="border-input"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh Page
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </AppLayout>
     );
@@ -225,325 +293,450 @@ export default function Results() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div
-          id="results-header"
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-black dark:text-white">
-              Your Genius Factor Profile
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {selectedAssessment
-                ? `Assessment completed on ${new Date(
-                  selectedAssessment.createdAt
-                ).toLocaleDateString()}`
-                : "No assessments completed yet"}
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            {/* <Button variant="outline" disabled={!selectedAssessment}>
-              <Share2 className="w-4 h-4 mr-2" />
-              Share Results
-            </Button> */}
-
-            <PDFReport assessment={selectedAssessment} employee={session?.user?.firstName + " " + session?.user?.lastName} genius_factor_score={selectedAssessment?.geniusFactorScore} />
-          </div>
+      <div className="min-h-screen gradient-bg-primary p-4 md:p-6">
+        {/* Decorative Background Elements */}
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-15" />
+          <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-15" />
         </div>
 
-        {selectedAssessment ? (
-          <>
-            {/* Overall Score Card */}
-            <Card className="card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold mb-2 text-black dark:text-white">
-                      Overall Genius Score
-                    </h2>
-                    <div className="text-4xl font-bold text-primary mb-2">
-                      {selectedAssessment.geniusFactorScore}
-                      /100
-                    </div>
-                    <p className="text-muted-foreground">
-                      Your strongest area is{" "}
-                      <strong>
-                        {
-                          selectedAssessment.geniusFactorProfileJson
-                            .primary_genius_factor
-                        }
-                      </strong>{" "}
-                      with a score of{" "}
-                      {selectedAssessment.geniusFactorScore}
-                    </p>
-                  </div>
-                  <div className="hidden sm:block">
-                    <Brain className="w-16 h-16 text-primary/20" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div
+            id="results-header"
+            className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+          >
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold gradient-text-primary">
+                Your Genius Factor Profile
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {selectedAssessment
+                  ? `Assessment completed on ${new Date(
+                      selectedAssessment.createdAt
+                    ).toLocaleDateString()}`
+                  : "No assessments completed yet"}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <PDFReport
+                assessment={selectedAssessment}
+                employee={
+                  session?.user?.firstName + " " + session?.user?.lastName
+                }
+                genius_factor_score={selectedAssessment?.geniusFactorScore}
+              />
+              <Button variant="outline" className="border-input">
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Genius Factors Breakdown */}
-              <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <BarChart3 className="w-5 h-5 mr-2" />
-                    Genius Factor Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold text-black dark:text-white">
-                      Primary Genius Factor
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-black dark:text-white leading-6">
-                        {
-                          selectedAssessment.geniusFactorProfileJson
-                            .primary_genius_factor
-                        }
-                      </span>
-                      {/* <span className="text-sm font-semibold text-black dark:text-white">
-                        {selectedAssessment.geniusFactorScore}/100
-                      </span> */}
+          {selectedAssessment ? (
+            <>
+              {/* Genius Score Hero Card */}
+              <Card className="card-primary border-0 gradient-bg-primary">
+                <CardContent className="p-8">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="ai-recommendation-icon-wrapper">
+                          <Brain className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold gradient-text-primary">
+                          Overall Genius Score
+                        </h2>
+                      </div>
+                      <div className="flex items-baseline gap-3">
+                        <div className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-purple-500 bg-clip-text text-transparent">
+                          {selectedAssessment.geniusFactorScore}
+                          <span className="text-2xl lg:text-3xl text-muted-foreground">
+                            /100
+                          </span>
+                        </div>
+                        <Badge
+                          className={`badge-${getScoreColor(
+                            selectedAssessment.geniusFactorScore
+                          )} text-lg`}
+                        >
+                          <Star className="w-4 h-4 mr-1" />
+                          {selectedAssessment.geniusFactorScore >= 80
+                            ? "Exceptional"
+                            : selectedAssessment.geniusFactorScore >= 60
+                            ? "Strong"
+                            : selectedAssessment.geniusFactorScore >= 40
+                            ? "Developing"
+                            : "Emerging"}
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground max-w-2xl">
+                        Your strongest area is{" "}
+                        <strong className="text-primary">
+                          {
+                            selectedAssessment.geniusFactorProfileJson
+                              .primary_genius_factor
+                          }
+                        </strong>{" "}
+                        with a score of {selectedAssessment.geniusFactorScore}
+                      </p>
                     </div>
-                    <Progress
-                      value={
-                        selectedAssessment?.risk_analysis?.scores
-                          ?.geniusFactorScore
-                      }
-                      className="h-2"
-                    />
-                    <p className="text-sm text-black dark:text-white leading-relaxed">
-                      {selectedAssessment.geniusFactorProfileJson?.description}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold text-black dark:text-white">
-                      Secondary Genius Factor
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-black dark:text-white leading-6">
-                        {
-                          selectedAssessment.geniusFactorProfileJson
-                            ?.secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : selectedAssessment.geniusFactorProfileJson?.secondary_genius_factor
-                        }
-                      </span>
-                      {/* <span className="text-sm font-semibold text-black dark:text-white">N/A</span> */}
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-40 h-40">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-4xl font-bold">
+                              {selectedAssessment.geniusFactorScore}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Score
+                            </div>
+                          </div>
+                        </div>
+                        <svg className="w-full h-full" viewBox="0 0 100 100">
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke="hsl(var(--muted))"
+                            strokeWidth="10"
+                          />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke={`hsl(var(--${getScoreColor(
+                              selectedAssessment.geniusFactorScore
+                            )}))`}
+                            strokeWidth="10"
+                            strokeLinecap="round"
+                            strokeDasharray={`${
+                              (selectedAssessment.geniusFactorScore / 100) * 283
+                            } 283`}
+                            transform="rotate(-90 50 50)"
+                          />
+                        </svg>
+                      </div>
                     </div>
-                    <p className="text-sm text-black dark:text-white leading-relaxed">
-                      {
-                        selectedAssessment.geniusFactorProfileJson
-                          ?.secondary_description
-                      }
-                    </p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Strengths & Growth Areas */}
-              <div className="space-y-6">
-                {isValid(selectedAssessment.geniusFactorProfileJson?.key_strengths) && (
-                  <Card className="card">
-                    <CardHeader>
-                      <CardTitle className="flex items-center text-black dark:text-white">
-                        <Award className="w-5 h-5 mr-2" />
-                        Key Strengths
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 gap-2">
-                        {selectedAssessment.geniusFactorProfileJson?.key_strengths?.map(
-                          (strength, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center p-2 rounded-lg bg-green-50/50 dark:bg-green-900/50 border border-green-200 dark:border-green-800"
-                            >
-                              <Target className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
-                              <span className="text-sm">{strength}</span>
-                            </div>
-                          )
-                        )}
+              {/* Genius Factors Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Primary Genius Factor */}
+                <Card className="card-primary card-hover">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="icon-wrapper-blue p-2">
+                        <Target className="w-5 h-5 text-primary" />
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      <div>
+                        <div className="text-lg font-semibold">
+                          Primary Genius Factor
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Your dominant talent
+                        </div>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-primary">
+                        {
+                          selectedAssessment.geniusFactorProfileJson
+                            .primary_genius_factor
+                        }
+                      </span>
+                      <Badge className="badge-blue">
+                        <Zap className="w-3 h-3 mr-1" />
+                        Primary
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {selectedAssessment.geniusFactorProfileJson.description}
+                    </p>
+                    {selectedAssessment.geniusFactorProfileJson
+                      ?.energy_sources &&
+                      isValid(
+                        selectedAssessment.geniusFactorProfileJson
+                          .energy_sources
+                      ) && (
+                        <div className="mt-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Sparkles className="w-4 h-4 text-warning" />
+                            <span className="text-sm font-medium">
+                              Energy Sources
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedAssessment.geniusFactorProfileJson.energy_sources.map(
+                              (source, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="border-warning/20 text-warning whitespace-normal break-words text-left"
+                                >
+                                  {source}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
 
-                {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents) && (
-                  <Card className="card">
-                    <CardHeader>
-                      <CardTitle className="flex items-center text-black dark:text-white">
-                        <TrendingUp className="w-5 h-5 mr-2" />
-                        Growth Opportunities
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 gap-2">
-                        {selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents?.map(
-                          (area, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center p-2 rounded-lg bg-amber-50/50 dark:bg-amber-900/50 border border-amber-200 dark:border-amber-800"
-                            >
-                              <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 mr-2" />
-                              <span className="text-sm">{area}</span>
-                            </div>
-                          )
-                        )}
+                {/* Secondary Genius Factor */}
+                <Card className="card-primary card-hover">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="icon-wrapper-purple p-2">
+                        <TargetIcon className="w-5 h-5 text-accent" />
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      <div>
+                        <div className="text-lg font-semibold">
+                          Secondary Genius Factor
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Supporting talents
+                        </div>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-accent">
+                        {selectedAssessment.geniusFactorProfileJson
+                          .secondary_genius_factor === "None Identified"
+                          ? "Primary Focus"
+                          : selectedAssessment.geniusFactorProfileJson
+                              .secondary_genius_factor}
+                      </span>
+                      <Badge className="badge-purple">
+                        <Star className="w-3 h-3 mr-1" />
+                        Secondary
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {selectedAssessment.geniusFactorProfileJson
+                        .secondary_description ||
+                        "Your primary genius factor is highly dominant, indicating focused expertise in this area."}
+                    </p>
+                    {selectedAssessment.geniusFactorProfileJson
+                      ?.key_strengths &&
+                      isValid(
+                        selectedAssessment.geniusFactorProfileJson.key_strengths
+                      ) && (
+                        <div className="mt-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Award className="w-4 h-4 text-success" />
+                            <span className="text-sm font-medium">
+                              Key Strengths
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2">
+                            {selectedAssessment.geniusFactorProfileJson.key_strengths.map(
+                              (strength, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20"
+                                >
+                                  <CheckCircle className="w-4 h-4 text-success" />
+                                  <span className="text-sm">{strength}</span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
               </div>
-            </div>
 
-            {/* Full Report Details */}
-            <div className="space-y-6">
               {/* Executive Summary */}
-              <Card className="card">
+              <Card className="card-primary card-hover">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Executive Summary
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="icon-wrapper-green p-2">
+                      <BookOpen className="w-5 h-5 text-success" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold">
+                        Executive Summary
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Overview of your genius profile
+                      </div>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className=" font-medium text-black dark:text-white leading-6">
-                    {selectedAssessment.executiveSummary}
-                  </p>
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
+                    <p className="leading-relaxed">
+                      {selectedAssessment.executiveSummary}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Department and HR Info */}
-           {
-            session?.user?.hrId == 'individual_user'|| session?.user?.hrId==null?" ":   <Card className="card">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-black dark:text-white">
-                    <Users className="w-5 h-5 mr-2" />
-                    Department and HR Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    <span>Department: {selectedAssessment.departement || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>HR ID: {selectedAssessment.hrId || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>
-                      Created:{" "}
-                      {new Date(selectedAssessment.createdAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>
-                      Updated:{" "}
-                      {new Date(selectedAssessment.updatedAt).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>User ID: {selectedAssessment.userId}</span>
-                  </div>
-                </CardContent>
-              </Card>
-           }
+              {session?.user?.hrId !== "individual_user" &&
+                session?.user?.hrId != null && (
+                  <Card className="card-primary card-hover">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="icon-wrapper-blue p-2">
+                          <Users className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold">
+                            Department & HR Details
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Organizational information
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="space-y-1 p-3 rounded-lg bg-card border">
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">
+                              Department
+                            </span>
+                          </div>
+                          <div className="text-lg font-semibold">
+                            {selectedAssessment.departement || "N/A"}
+                          </div>
+                        </div>
+                        <div className="space-y-1 p-3 rounded-lg bg-card border">
+                          <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">HR ID</span>
+                          </div>
+                          <div className="text-lg font-semibold">
+                            {selectedAssessment.hrId || "N/A"}
+                          </div>
+                        </div>
+                        <div className="space-y-1 p-3 rounded-lg bg-card border">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-primary" />
+                            <span className="text-sm font-medium">
+                              Assessment Date
+                            </span>
+                          </div>
+                          <div className="text-lg font-semibold">
+                            {new Date(
+                              selectedAssessment.createdAt
+                            ).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Energy Sources */}
-              {isValid(selectedAssessment.geniusFactorProfileJson?.energy_sources) && (
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Energy Sources
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {selectedAssessment.geniusFactorProfileJson?.energy_sources?.map(
-                        (source, index) => (
-                          <li key={index} className="text-sm">
-                            {source}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Current Role Alignment Analysis */}
+              {/* Current Role Alignment */}
               {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson) && (
-                <Card className="card">
+                <Card className="card-primary card-hover">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <AlertCircle className="w-5 h-5 mr-2" />
-                      Current Role Alignment Analysis
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="icon-wrapper-amber p-2">
+                        <BarChart3 className="w-5 h-5 text-warning" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-semibold">
+                          Current Role Alignment
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Fit with your current position
+                        </div>
+                      </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.assessment) && (
-                      <p className="text-sm">
-                        {selectedAssessment.currentRoleAlignmentAnalysisJson?.assessment}
-                      </p>
-                    )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score) && (
-                      <div className="flex items-center">
-                        <BarChart3 className="w-4 h-4 mr-2" />
-                        <span>
-                          Alignment Score:{" "}
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score}
-                        </span>
+                  <CardContent className="space-y-6">
+                    {selectedAssessment.currentRoleAlignmentAnalysisJson
+                      ?.alignment_score && (
+                      <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
+                        <div>
+                          <div className="text-sm font-medium text-warning">
+                            Alignment Score
+                          </div>
+                          <div className="text-2xl font-bold">
+                            {
+                              selectedAssessment
+                                .currentRoleAlignmentAnalysisJson
+                                .alignment_score
+                            }
+                          </div>
+                        </div>
+                        <Badge
+                          className={`badge-${
+                            selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level
+                              ?.toLowerCase()
+                              .includes("low")
+                              ? "green"
+                              : "amber"
+                          }`}
+                        >
+                          <Shield className="w-3 h-3 mr-1" />
+                          {
+                            selectedAssessment.currentRoleAlignmentAnalysisJson
+                              .retention_risk_level
+                          }
+                        </Badge>
                       </div>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.strengths_utilized) && (
+
+                    {selectedAssessment.currentRoleAlignmentAnalysisJson
+                      ?.strengths_utilized && (
                       <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Strengths Utilized:
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-success" />
+                          Strengths Being Utilized
                         </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.strengths_utilized?.map(
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized.map(
                             (strength, index) => (
-                              <li key={index} className="text-sm">
-                                {strength}
-                              </li>
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20"
+                              >
+                                <Target className="w-4 h-4 text-success" />
+                                <span className="text-sm">{strength}</span>
+                              </div>
                             )
                           )}
-                        </ul>
+                        </div>
                       </div>
                     )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level) && (
-                      <div className="flex items-center">
-                        <AlertCircle className="w-4 h-4 mr-2" />
-                        <span>
-                          Retention Risk Level:{" "}
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level}
-                        </span>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents) && (
+
+                    {selectedAssessment.currentRoleAlignmentAnalysisJson
+                      ?.underutilized_talents && (
                       <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Underutilized Talents:
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4 text-warning" />
+                          Growth Opportunities
                         </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson?.underutilized_talents?.map(
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents.map(
                             (talent, index) => (
-                              <li key={index} className="text-sm">
-                                {talent}
-                              </li>
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
+                              >
+                                <TrendingUp className="w-4 h-4 text-warning" />
+                                <span className="text-sm">{talent}</span>
+                              </div>
                             )
                           )}
-                        </ul>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -552,539 +745,623 @@ export default function Results() {
 
               {/* Internal Career Opportunities */}
               {isValid(selectedAssessment.internalCareerOpportunitiesJson) && (
-                <Card className="card">
+                <Card className="card-primary card-hover">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <Globe className="w-5 h-5 mr-2" />
-                      Internal Career Opportunities
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="icon-wrapper-purple p-2">
+                        <Globe className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-semibold">
+                          Career Opportunities
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Internal pathways and suggestions
+                        </div>
+                      </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.career_pathways) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Career Pathways:
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          Primary Industry
                         </h4>
-                        <ul className="list-disc pl-5 space-y-2">
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                          <div className="text-lg font-semibold text-primary">
+                            {
+                              selectedAssessment.internalCareerOpportunitiesJson
+                                .primary_industry
+                            }
+                          </div>
+                        </div>
+
+                        {selectedAssessment.internalCareerOpportunitiesJson
+                          .secondary_industry && (
+                          <>
+                            <h4 className="font-semibold flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-accent" />
+                              Secondary Industry
+                            </h4>
+                            <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
+                              <div className="text-lg font-semibold text-accent">
+                                {
+                                  selectedAssessment
+                                    .internalCareerOpportunitiesJson
+                                    .secondary_industry
+                                }
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-success" />
+                          Transition Timeline
+                        </h4>
+                        <div className="space-y-3">
                           {Object.entries(
                             selectedAssessment.internalCareerOpportunitiesJson
-                              ?.career_pathways || {}
-                          ).map(([track, path], index) => (
-                            <li key={index} className="text-sm">
-                              <strong>{track}:</strong> {path}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.primary_industry) && (
-                      <div className="flex items-center">
-                        <Globe className="w-4 h-4 mr-2" />
-                        <span>
-                          Primary Industry:{" "}
-                          {selectedAssessment.internalCareerOpportunitiesJson?.primary_industry}
-                        </span>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.secondary_industry) && (
-                      <div className="flex items-center">
-                        <Globe className="w-4 h-4 mr-2" />
-                        <span>
-                          Secondary Industry:{" "}
-                          {selectedAssessment.internalCareerOpportunitiesJson?.secondary_industry}
-                        </span>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.transition_timeline) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Transition Timeline:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {Object?.entries(
-                            selectedAssessment?.internalCareerOpportunitiesJson
-                              ?.transition_timeline || {}
+                              .transition_timeline || {}
                           ).map(([key, value], index) => (
-                            <li key={index} className="text-sm">
-                              {key.replace("_", " ")}: {value}
-                            </li>
+                            <div
+                              key={index}
+                              className="flex flex-col gap-1 p-2 rounded-lg bg-success/5 border border-success/20"
+                            >
+                              <span className="text-sm font-medium capitalize">
+                                {key.replace("_", " ")}
+                              </span>
+                              <Badge className="badge-green whitespace-normal break-words">
+                                {value}
+                              </Badge>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       </div>
-                    )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.recommended_departments) && (
+                    </div>
+
+                    {selectedAssessment.internalCareerOpportunitiesJson
+                      .recommended_departments && (
                       <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Recommended Departments:
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Briefcase className="w-4 h-4 text-primary" />
+                          Recommended Departments
                         </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson?.recommended_departments?.map(
+                        <div className="flex flex-wrap gap-2">
+                          {selectedAssessment.internalCareerOpportunitiesJson.recommended_departments.map(
                             (dept, index) => (
-                              <li key={index} className="text-sm">
+                              <Badge key={index} className="badge-blue">
                                 {dept}
-                              </li>
+                              </Badge>
                             )
                           )}
-                        </ul>
+                        </div>
                       </div>
                     )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.specific_role_suggestions) && (
+
+                    {selectedAssessment.internalCareerOpportunitiesJson
+                      .specific_role_suggestions && (
                       <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Specific Role Suggestions:
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Target className="w-4 h-4 text-accent" />
+                          Role Suggestions
                         </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson?.specific_role_suggestions?.map(
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions.map(
                             (role, index) => (
-                              <li key={index} className="text-sm">
-                                {role}
-                              </li>
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 rounded-lg bg-accent/5 border border-accent/20"
+                              >
+                                <Sparkles className="w-4 h-4 text-accent" />
+                                <span className="text-sm">{role}</span>
+                              </div>
                             )
                           )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.internalCareerOpportunitiesJson?.required_skill_development) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Required Skill Development:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson?.required_skill_development?.map(
-                            (skill, index) => (
-                              <li key={index} className="text-sm">
-                                {skill}
-                              </li>
-                            )
-                          )}
-                        </ul>
+                        </div>
                       </div>
                     )}
                   </CardContent>
                 </Card>
               )}
 
-              {/* Retention and Mobility Strategies */}
-              {isValid(selectedAssessment.retentionAndMobilityStrategiesJson) && (
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Retention and Mobility Strategies
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.development_support) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Development Support:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson?.development_support?.map(
-                            (item, index) => (
-                              <li key={index} className="text-sm">
-                                {item}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.retention_strategies) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Retention Strategies:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson?.retention_strategies?.map(
-                            (item, index) => (
-                              <li key={index} className="text-sm">
-                                {item}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.retentionAndMobilityStrategiesJson?.internal_mobility_recommendations) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Internal Mobility Recommendations:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson?.internal_mobility_recommendations?.map(
-                            (item, index) => (
-                              <li key={index} className="text-sm">
-                                {item}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+              {/* Action Plan & Resources Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Development Action Plan */}
+                {isValid(selectedAssessment.developmentActionPlanJson) && (
+                  <Card className="card-primary card-hover">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="icon-wrapper-green p-2">
+                          <Target className="w-5 h-5 text-success" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold">
+                            Development Plan
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Short-term to long-term goals
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {selectedAssessment.developmentActionPlanJson
+                        .thirty_day_goals && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-primary" />
+                            30-Day Goals
+                          </h4>
+                          <ul className="space-y-2">
+                            {selectedAssessment.developmentActionPlanJson.thirty_day_goals.map(
+                              (goal, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2 text-sm"
+                                >
+                                  <div className="icon-wrapper-blue p-1 mt-0.5">
+                                    <CheckCircle className="w-3 h-3 text-primary" />
+                                  </div>
+                                  {goal}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
 
-              {/* Development Action Plan */}
-              {isValid(selectedAssessment.developmentActionPlanJson) && (
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <Calendar className="w-5 h-5 mr-2" />
-                      Development Action Plan
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.developmentActionPlanJson?.thirty_day_goals) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          30-Day Goals:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson?.thirty_day_goals?.map(
-                            (goal, index) => (
-                              <li key={index} className="text-sm">
-                                {goal}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.developmentActionPlanJson?.ninety_day_goals) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          90-Day Goals:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson?.ninety_day_goals?.map(
-                            (goal, index) => (
-                              <li key={index} className="text-sm">
-                                {goal}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.developmentActionPlanJson?.six_month_goals) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          6-Month Goals:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson?.six_month_goals?.map(
-                            (goal, index) => (
-                              <li key={index} className="text-sm">
-                                {goal}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.developmentActionPlanJson?.networking_strategy) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Networking Strategy:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.developmentActionPlanJson?.networking_strategy?.map(
-                            (strategy, index) => (
-                              <li key={index} className="text-sm">
-                                {strategy}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                      {selectedAssessment.developmentActionPlanJson
+                        .ninety_day_goals && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-warning" />
+                            90-Day Goals
+                          </h4>
+                          <ul className="space-y-2">
+                            {selectedAssessment.developmentActionPlanJson.ninety_day_goals.map(
+                              (goal, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2 text-sm"
+                                >
+                                  <div className="icon-wrapper-amber p-1 mt-0.5">
+                                    <Target className="w-3 h-3 text-warning" />
+                                  </div>
+                                  {goal}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Personalized Resources */}
-              {isValid(selectedAssessment.personalizedResourcesJson) && (
-                <Card className="card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <BookOpen className="w-5 h-5 mr-2" />
-                      Personalized Resources
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.personalizedResourcesJson?.affirmations) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Affirmations:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson?.affirmations?.map(
-                            (affirmation, index) => (
-                              <li key={index} className="text-sm">
-                                {affirmation}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.personalizedResourcesJson?.learning_resources) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Learning Resources:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson?.learning_resources?.map(
-                            (resource, index) => (
-                              <li key={index} className="text-sm">
-                                {resource}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.personalizedResourcesJson?.reflection_questions) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Reflection Questions:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson?.reflection_questions?.map(
-                            (question, index) => (
-                              <li key={index} className="text-sm">
-                                {question}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {isValid(selectedAssessment.personalizedResourcesJson?.mindfulness_practices) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Mindfulness Practices:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.personalizedResourcesJson?.mindfulness_practices?.map(
-                            (practice, index) => (
-                              <li key={index} className="text-sm">
-                                {practice}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                {/* Personalized Resources */}
+                {isValid(selectedAssessment.personalizedResourcesJson) && (
+                  <Card className="card-primary card-hover">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="icon-wrapper-purple p-2">
+                          <BookMarked className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold">
+                            Personalized Resources
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Tools for your growth journey
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {selectedAssessment.personalizedResourcesJson
+                        .learning_resources && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-success" />
+                            Learning Resources
+                          </h4>
+                          <ul className="space-y-2">
+                            {selectedAssessment.personalizedResourcesJson.learning_resources.map(
+                              (resource, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2 text-sm"
+                                >
+                                  <div className="icon-wrapper-green p-1 mt-0.5">
+                                    <Sparkles className="w-3 h-3 text-success" />
+                                  </div>
+                                  {resource}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
 
-              {/* Data Sources and Methodology */}
-              {isValid(selectedAssessment.dataSourcesAndMethodologyJson) && (
-                <Card className="card">
+                      {selectedAssessment.personalizedResourcesJson
+                        .affirmations && (
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-primary" />
+                            Affirmations
+                          </h4>
+                          <div className="space-y-2">
+                            {selectedAssessment.personalizedResourcesJson.affirmations.map(
+                              (affirmation, index) => (
+                                <div
+                                  key={index}
+                                  className="p-2 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
+                                >
+                                  "{affirmation}"
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Additional Sections */}
+              {isValid(
+                selectedAssessment.retentionAndMobilityStrategiesJson
+              ) && (
+                <Card className="card-primary card-hover">
                   <CardHeader>
-                    <CardTitle className="flex items-center text-black dark:text-white">
-                      <MapPin className="w-5 h-5 mr-2" />
-                      Data Sources and Methodology
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="icon-wrapper-blue p-2">
+                        <Shield className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-semibold">
+                          Retention Strategies
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Organizational support recommendations
+                        </div>
+                      </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson?.methodology) && (
-                      <p className="text-sm">
-                        {selectedAssessment.dataSourcesAndMethodologyJson?.methodology}
-                      </p>
-                    )}
-                    {isValid(selectedAssessment.dataSourcesAndMethodologyJson?.data_sources) && (
-                      <div>
-                        <h4 className="font-semibold mb-2 text-black dark:text-white">
-                          Data Sources:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-2">
-                          {selectedAssessment.dataSourcesAndMethodologyJson?.data_sources?.map(
-                            (source, index) => (
-                              <li key={index} className="text-sm">
-                                {source}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    )}
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {selectedAssessment.retentionAndMobilityStrategiesJson
+                        .retention_strategies && (
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm">
+                            Retention Focus
+                          </h4>
+                          <ul className="space-y-1">
+                            {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies
+                              .slice(0, 3)
+                              .map((strategy, index) => (
+                                <li
+                                  key={index}
+                                  className="text-sm flex items-center gap-2"
+                                >
+                                  <CheckCircle className="w-3 h-3 text-primary" />
+                                  {strategy}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {selectedAssessment.retentionAndMobilityStrategiesJson
+                        .development_support && (
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm">
+                            Development Support
+                          </h4>
+                          <ul className="space-y-1">
+                            {selectedAssessment.retentionAndMobilityStrategiesJson.development_support
+                              .slice(0, 3)
+                              .map((support, index) => (
+                                <li
+                                  key={index}
+                                  className="text-sm flex items-center gap-2"
+                                >
+                                  <TrendingUp className="w-3 h-3 text-success" />
+                                  {support}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {selectedAssessment.retentionAndMobilityStrategiesJson
+                        .internal_mobility_recommendations && (
+                        <div className="space-y-2">
+                          <h4 className="font-semibold text-sm">
+                            Mobility Recommendations
+                          </h4>
+                          <ul className="space-y-1">
+                            {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations
+                              .slice(0, 3)
+                              .map((rec, index) => (
+                                <li
+                                  key={index}
+                                  className="text-sm flex items-center gap-2"
+                                >
+                                  <Globe className="w-3 h-3 text-accent" />
+                                  {rec}
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </>
-        ) : (
-          <Card className="card">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                No assessments completed yet.
-              </p>
-              <Button variant="outline" className="mt-4" asChild>
-                <Link href="/employee-dashboard/assessment">
-                  Take an Assessment
-                </Link>
-              </Button>
+            </>
+          ) : (
+            <Card className="card-primary">
+              <CardContent className="pt-12 pb-12 text-center">
+                <div className="icon-wrapper-purple mx-auto mb-6 p-4">
+                  <Brain className="h-12 w-12 text-accent" />
+                </div>
+                <h3 className="text-2xl font-bold gradient-text-primary mb-4">
+                  No Assessments Completed
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Complete an assessment to unlock your Genius Factor profile
+                </p>
+                <Button className="btn-gradient-primary" asChild>
+                  <Link href="/employee-dashboard/assessment">
+                    <Target className="w-4 h-4 mr-2" />
+                    Take Assessment
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Assessment History */}
+          <Card className="card-primary" id="assessment-history">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="icon-wrapper-blue p-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-lg font-semibold">
+                    Assessment History
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Your previous assessments
+                  </div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {paginatedAssessments.length > 0 ? (
+                  paginatedAssessments.map((assessment) => (
+                    <div
+                      key={assessment.id}
+                      className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                        selectedAssessment?.id === assessment.id
+                          ? "border-primary bg-primary/5"
+                          : "border-input hover:border-primary/50 hover:bg-primary/3"
+                      }`}
+                      onClick={() => handleAssessmentClick(assessment)}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`p-2 rounded-lg ${
+                                selectedAssessment?.id === assessment.id
+                                  ? "bg-primary/20"
+                                  : "bg-muted"
+                              }`}
+                            >
+                              <Brain className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <div className="font-semibold">
+                                Genius Factor Assessment #{assessment.id}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(
+                                  assessment.createdAt
+                                ).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-muted-foreground line-clamp-2 ml-11">
+                            {assessment.executiveSummary.substring(0, 100)}...
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="text-2xl font-bold">
+                              {assessment.geniusFactorScore}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              /100
+                            </div>
+                          </div>
+                          <Badge
+                            className={`badge-${getScoreColor(
+                              assessment.geniusFactorScore
+                            )}`}
+                          >
+                            {assessment.geniusFactorScore >= 80
+                              ? "Exceptional"
+                              : assessment.geniusFactorScore >= 60
+                              ? "Strong"
+                              : assessment.geniusFactorScore >= 40
+                              ? "Developing"
+                              : "Emerging"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="icon-wrapper-blue mx-auto mb-4 p-3">
+                      <FileText className="w-8 h-8 text-primary" />
+                    </div>
+                    <p className="text-muted-foreground">
+                      No assessment history available
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer hover:bg-muted"
+                        }
+                      />
+                    </PaginationItem>
+                    {Array.from(
+                      { length: totalPages },
+                      (_, index) => index + 1
+                    ).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={currentPage === page}
+                          className={
+                            currentPage === page
+                              ? "bg-primary text-primary-foreground"
+                              : "cursor-pointer hover:bg-muted"
+                          }
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(totalPages, currentPage + 1)
+                          )
+                        }
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer hover:bg-muted"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* Assessment History */}
-        <Card className="card" id="assessment-history">
-          <CardHeader>
-            <CardTitle className="text-black dark:text-white">
-              Assessment History
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {paginatedAssessments.length > 0 ? (
-                paginatedAssessments.map((assessment) => (
-                  <div
-                    key={assessment.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${selectedAssessment?.id === assessment.id
-                      ? "bg-primary/10 border-primary"
-                      : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
-                    onClick={() => handleAssessmentClick(assessment)}
-                  >
-                    <div>
-                      <div className="font-medium">
-                        Assessment Result: {assessment.id}
+          {/* Recommended Actions */}
+          <Card className="ai-recommendation-card">
+            <CardContent className="p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="ai-recommendation-icon-wrapper">
+                  <Rocket className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    Recommended Next Steps
+                  </h3>
+                  <p className="text-white/80">
+                    Personalized actions based on your profile
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Link href="/employee-dashboard/career-Pathways">
+                  <div className="quick-action-item group cursor-pointer">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="icon-wrapper-blue">
+                        <TrendingUp className="w-6 h-6 text-primary" />
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(assessment.createdAt).toLocaleDateString()}
+                      <div>
+                        <h4 className="font-semibold text-white">
+                          Explore Career Paths
+                        </h4>
+                        <p className="text-sm text-white/80">
+                          Based on your profile
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-semibold">
-                        {assessment.geniusFactorScore}/100
-                      </div>
-                      <Badge
-                        variant={
-                          assessment.geniusFactorScore >= 80
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {assessment.executiveSummary.substring(0, 50) + "..."}
-                      </Badge>
+                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                      Discover roles that match your genius factor
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No assessment history available.
-                </p>
-              )}
-            </div>
-            {totalPages > 1 && (
-              <Pagination className="mt-6">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() =>
-                        handlePageChange(Math.max(1, currentPage - 1))
-                      }
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                  {Array.from(
-                    { length: totalPages },
-                    (_, index) => index + 1
-                  ).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        onClick={() => handlePageChange(page)}
-                        isActive={currentPage === page}
-                        className={
-                          currentPage === page
-                            ? "bg-primary text-primary-foreground"
-                            : "cursor-pointer"
-                        }
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        handlePageChange(Math.min(totalPages, currentPage + 1))
-                      }
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </CardContent>
-        </Card>
+                </Link>
 
-        {/* Action Items */}
-        <Card className="card">
-          <CardHeader>
-            <CardTitle className="text-black dark:text-white">
-              Recommended Next Steps
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Button
-                variant="outline"
-                className="h-auto flex-col space-y-2 p-4"
-                asChild
-              >
-                <Link href="/employee-dashboard/career-Pathways">
-                  <TrendingUp className="w-6 h-6" />
-                  <span>Explore Career Paths</span>
-                  <span className="text-xs text-muted-foreground">
-                    Based on your profile
-                  </span>
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto flex-col space-y-2 p-4"
-                asChild
-              >
                 <Link href="/employee-dashboard/development">
-                  <Target className="w-6 h-6" />
-                  <span>Skill Development</span>
-                  <span className="text-xs text-muted-foreground">
-                    Personalized roadmap
-                  </span>
+                  <div className="quick-action-item group cursor-pointer">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="icon-wrapper-green">
+                        <Target className="w-6 h-6 text-success" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white">
+                          Skill Development
+                        </h4>
+                        <p className="text-sm text-white/80">
+                          Personalized roadmap
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                      Build skills aligned with your strengths
+                    </div>
+                  </div>
                 </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto flex-col space-y-2 p-4"
-                asChild
-              >
+
                 <Link href="/employee-dashboard/assessment">
-                  <Brain className="w-6 h-6" />
-                  <span>Retake Assessment</span>
-                  <span className="text-xs text-muted-foreground">
-                    Track your progress
-                  </span>
+                  <div className="quick-action-item group cursor-pointer">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="icon-wrapper-purple">
+                        <Brain className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white">
+                          Track Progress
+                        </h4>
+                        <p className="text-sm text-white/80">
+                          Retake assessment
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                      Monitor your development over time
+                    </div>
+                  </div>
                 </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppLayout>
   );
 }
+
+// Add missing import
+import { RefreshCw } from "lucide-react";

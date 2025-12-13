@@ -8,7 +8,21 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
-import { UserCircle, ContactIcon, MapPin, User, FileText } from "lucide-react";
+import {
+  UserCircle,
+  ContactIcon,
+  MapPin,
+  User,
+  FileText,
+  Mail,
+  Phone,
+  Lock,
+  Calendar,
+  Globe,
+  Heart,
+  Sparkles,
+  Shield,
+} from "lucide-react";
 import InfoField from "./InfoField";
 import { Employee } from "../../../types/profileTypes";
 import { personalInfoFields } from "@/config/profileData";
@@ -32,6 +46,27 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     return employee?.[fieldName] || "";
   };
 
+  // Get icon for field
+  const getFieldIcon = (fieldName: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      firstName: <User className="w-4 h-4 text-primary" />,
+      lastName: <User className="w-4 h-4 text-primary" />,
+      email: <Mail className="w-4 h-4 text-primary" />,
+      password: <Lock className="w-4 h-4 text-primary" />,
+      phone: <Phone className="w-4 h-4 text-primary" />,
+      address: <MapPin className="w-4 h-4 text-accent" />,
+      city: <MapPin className="w-4 h-4 text-accent" />,
+      state: <MapPin className="w-4 h-4 text-accent" />,
+      country: <Globe className="w-4 h-4 text-accent" />,
+      zipCode: <MapPin className="w-4 h-4 text-accent" />,
+      dateOfBirth: <Calendar className="w-4 h-4 text-warning" />,
+      nationality: <Globe className="w-4 h-4 text-warning" />,
+      maritalStatus: <Heart className="w-4 h-4 text-warning" />,
+      bio: <FileText className="w-4 h-4 text-success" />,
+    };
+    return icons[fieldName] || <UserCircle className="w-4 h-4 text-primary" />;
+  };
+
   // Group fields for better organization
   const basicInfoFields = personalInfoFields.filter((f) =>
     ["firstName", "lastName", "email", "password", "phone"].includes(f.field)
@@ -46,6 +81,18 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   );
 
   const bioField = personalInfoFields.find((f) => f.field === "bio");
+
+  // Calculate completeness for each section
+  const calculateSectionCompleteness = (fields: any[]) => {
+    const filledFields = fields.filter((f) =>
+      getFieldValue(f.field)?.trim()
+    ).length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
+
+  const basicInfoComplete = calculateSectionCompleteness(basicInfoFields);
+  const addressComplete = calculateSectionCompleteness(addressFields);
+  const additionalComplete = calculateSectionCompleteness(additionalFields);
 
   return (
     <motion.div
@@ -64,40 +111,73 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card">
+      <Card className="card-primary card-hover">
         <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-              <UserCircle className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="icon-wrapper-blue p-3">
+              <UserCircle className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              <CardTitle className="text-2xl font-bold gradient-text-primary">
                 Personal Information
               </CardTitle>
-              <CardDescription className="text-base mt-1">
+              <CardDescription className="text-muted-foreground mt-2">
                 {isEditing
-                  ? "Edit your personal details and contact information"
-                  : "View your personal details and contact information"}
+                  ? "Update your personal details and contact information"
+                  : "Your personal details and contact information"}
               </CardDescription>
             </div>
+            {!isEditing && (
+              <Badge className="badge-green ml-auto">
+                <Shield className="w-3 h-3 mr-1" />
+                Verified
+              </Badge>
+            )}
           </div>
         </CardHeader>
 
         <CardContent className="space-y-8">
+          {/* Basic Information Section */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-8"
+            className="space-y-6"
           >
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <ContactIcon className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                  Basic Information
-                </h3>
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-blue p-2">
+                    <ContactIcon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-foreground">
+                      Basic Information
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your core personal details
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
+                        basicInfoComplete >= 80
+                          ? "bg-success"
+                          : basicInfoComplete >= 50
+                          ? "bg-warning"
+                          : "bg-destructive"
+                      }`}
+                      style={{ width: `${basicInfoComplete}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium min-w-[40px]">
+                    {basicInfoComplete}%
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {basicInfoFields.map((field, index) => (
                   <motion.div
                     key={field.field}
@@ -110,13 +190,22 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         duration: 0.3,
                       },
                     }}
+                    className="group"
                   >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="icon-wrapper-blue p-2 opacity-80">
+                        {getFieldIcon(field.field)}
+                      </div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        {field.label}
+                      </label>
+                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
                       control={control}
                       defaultValue={getFieldValue(field.field)}
-                      disabled={!isEditing} // Disable inputs when not editing
+                      disabled={!isEditing}
                     />
                   </motion.div>
                 ))}
@@ -126,12 +215,41 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <Separator className="bg-border/50" />
 
             {/* Address Information */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">Address</h3>
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-green p-2">
+                    <MapPin className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-foreground">
+                      Address Information
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your location and contact address
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
+                        addressComplete >= 80
+                          ? "bg-success"
+                          : addressComplete >= 50
+                          ? "bg-warning"
+                          : "bg-destructive"
+                      }`}
+                      style={{ width: `${addressComplete}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium min-w-[40px]">
+                    {addressComplete}%
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {addressFields.map((field, index) => (
                   <motion.div
                     key={field.field}
@@ -144,14 +262,24 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         duration: 0.3,
                       },
                     }}
-                    className={field.field === "address" ? "md:col-span-2" : ""}
+                    className={`group ${
+                      field.field === "address" ? "md:col-span-2" : ""
+                    }`}
                   >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="icon-wrapper-green p-2 opacity-80">
+                        {getFieldIcon(field.field)}
+                      </div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        {field.label}
+                      </label>
+                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
                       control={control}
                       defaultValue={getFieldValue(field.field)}
-                      disabled={!isEditing} // Disable inputs when not editing
+                      disabled={!isEditing}
                     />
                   </motion.div>
                 ))}
@@ -161,14 +289,41 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             <Separator className="bg-border/50" />
 
             {/* Additional Details */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-foreground">
-                  Additional Details
-                </h3>
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-amber p-2">
+                    <User className="h-5 w-5 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-foreground">
+                      Additional Details
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Personal demographic information
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-muted rounded-full h-2">
+                    <div
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
+                        additionalComplete >= 80
+                          ? "bg-success"
+                          : additionalComplete >= 50
+                          ? "bg-warning"
+                          : "bg-destructive"
+                      }`}
+                      style={{ width: `${additionalComplete}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium min-w-[40px]">
+                    {additionalComplete}%
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {additionalFields.map((field, index) => (
                   <motion.div
                     key={field.field}
@@ -181,48 +336,159 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         duration: 0.3,
                       },
                     }}
+                    className="group"
                   >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="icon-wrapper-amber p-2 opacity-80">
+                        {getFieldIcon(field.field)}
+                      </div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        {field.label}
+                      </label>
+                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
                       control={control}
                       defaultValue={getFieldValue(field.field)}
-                      disabled={!isEditing} // Disable inputs when not editing
+                      disabled={!isEditing}
                     />
                   </motion.div>
                 ))}
               </div>
             </div>
 
-            <Separator className="bg-border/50" />
-
             {/* Bio Section */}
             {bioField && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold text-foreground">About</h3>
+              <>
+                <Separator className="bg-border/50" />
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-wrapper-purple p-2">
+                        <FileText className="h-5 w-5 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-foreground">
+                          Professional Bio
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Tell us about yourself professionally
+                        </p>
+                      </div>
+                    </div>
+                    {getFieldValue(bioField.field) && (
+                      <Badge className="badge-purple">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Bio Added
+                      </Badge>
+                    )}
+                  </div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="group"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="icon-wrapper-purple p-2 opacity-80">
+                        {getFieldIcon(bioField.field)}
+                      </div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        {bioField.label}
+                      </label>
+                    </div>
+                    <InfoField
+                      {...bioField}
+                      isEditing={isEditing}
+                      control={control}
+                      defaultValue={getFieldValue(bioField.field)}
+                      disabled={!isEditing}
+                    />
+                    {!getFieldValue(bioField.field) && !isEditing && (
+                      <div className="mt-3 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-dashed border-primary/20">
+                        <div className="flex items-center gap-3">
+                          <Sparkles className="w-5 h-5 text-primary/60" />
+                          <p className="text-sm text-muted-foreground">
+                            Add a professional bio to enhance your profile
+                            visibility
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
                 </div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <InfoField
-                    {...bioField}
-                    isEditing={isEditing}
-                    control={control}
-                    defaultValue={getFieldValue(bioField.field)}
-                    disabled={!isEditing} // Disable inputs when not editing
-                  />
-                </motion.div>
-              </div>
+              </>
             )}
           </motion.div>
         </CardContent>
       </Card>
+
+      {/* Tips Section */}
+      {!isEditing && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="card-primary border-dashed border-2 border-primary/20">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="icon-wrapper-blue p-3 flex-shrink-0">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                    Profile Completion Tips
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          basicInfoComplete >= 100 ? "bg-success" : "bg-warning"
+                        }`}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Complete all basic information fields for better profile
+                        strength
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          addressComplete >= 100 ? "bg-success" : "bg-warning"
+                        }`}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Add your complete address for location-based
+                        opportunities
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          getFieldValue(bioField?.field || "")
+                            ? "bg-success"
+                            : "bg-warning"
+                        }`}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        A professional bio increases your profile completeness
+                        by 15%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
+
+import { Badge } from "@/components/ui/badge";
 
 export default PersonalInfoTab;

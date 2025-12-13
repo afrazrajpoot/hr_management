@@ -55,17 +55,17 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card">
+      <Card className="card-primary card-hover">
         <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
-              <Briefcase className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="icon-wrapper-blue p-3">
+              <Briefcase className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              <CardTitle className="text-2xl font-bold gradient-text-primary">
                 Work Experience
               </CardTitle>
-              <CardDescription className="text-base mt-1">
+              <CardDescription className="text-muted-foreground text-base">
                 Showcase your professional journey and achievements
               </CardDescription>
             </div>
@@ -81,13 +81,13 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 exit={{ opacity: 0 }}
                 className="text-center py-12"
               >
-                <div className="p-4 rounded-full bg-muted/50 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Briefcase className="h-8 w-8 text-muted-foreground" />
+                <div className="icon-wrapper-blue mx-auto mb-4 p-4">
+                  <Briefcase className="h-8 w-8 text-primary" />
                 </div>
-                <p className="text-muted-foreground text-lg">
+                <h3 className="text-xl font-bold gradient-text-primary mb-2">
                   No work experience added yet
-                </p>
-                <p className="text-sm text-muted-foreground/70 mt-1">
+                </h3>
+                <p className="text-muted-foreground">
                   Click edit to add your professional experience
                 </p>
               </motion.div>
@@ -116,7 +116,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 whileHover={!isEditing ? { scale: 1.01 } : {}}
                 className="group relative"
               >
-                <Card className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md dark:hover:shadow-xl transition-all duration-300 hover:border-border overflow-hidden">
+                <Card className="border border-input bg-card hover:bg-muted/10 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/30 overflow-hidden">
                   {!isEditing && (
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   )}
@@ -142,44 +142,43 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <div className="p-1.5 rounded-md bg-primary/10 dark:bg-primary/20 mt-0.5">
-                                <Briefcase className="h-4 w-4 text-primary" />
+                          <div className="space-y-4">
+                            <div className="flex items-start gap-4">
+                              <div className="icon-wrapper-blue p-2 flex-shrink-0 mt-1">
+                                <Briefcase className="h-5 w-5 text-primary" />
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-200">
+                                <h4 className="font-bold text-xl gradient-text-primary group-hover:text-primary transition-colors duration-200">
                                   {(exp as Experience).position}
                                 </h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                                  <p className="font-semibold text-foreground/90">
-                                    {(exp as Experience).company}
-                                  </p>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <div className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-accent" />
+                                    <p className="font-semibold text-foreground/90">
+                                      {(exp as Experience).company}
+                                    </p>
+                                  </div>
+                                  {(exp as Experience).duration && (
+                                    <>
+                                      <div className="w-1 h-1 rounded-full bg-border" />
+                                      <Badge className="badge-green">
+                                        <Calendar className="h-3 w-3 mr-1" />
+                                        {(exp as Experience).duration}
+                                      </Badge>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
-                            {(exp as Experience).duration && (
-                              <div className="flex items-center gap-2 ml-9">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs font-medium"
-                                >
-                                  {(exp as Experience).duration}
-                                </Badge>
-                              </div>
-                            )}
-
                             {(exp as Experience).description && (
-                              <div className="ml-9 mt-3">
-                                <div className="flex items-start gap-2">
-                                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                                  <p className="text-muted-foreground leading-relaxed">
-                                    {(exp as Experience).description}
-                                  </p>
+                              <div className="flex items-start gap-3 ml-12">
+                                <div className="icon-wrapper-purple p-2 mt-1 flex-shrink-0">
+                                  <FileText className="h-4 w-4 text-accent" />
                                 </div>
+                                <p className="text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-lg border border-input">
+                                  {(exp as Experience).description}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -198,7 +197,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                             onClick={() => remove(index)}
                             variant="outline"
                             size="sm"
-                            className="text-destructive hover:text-destructive-foreground hover:bg-destructive border-destructive/20 hover:border-destructive transition-all duration-200"
+                            className="border-destructive/30 hover:border-destructive hover:bg-destructive/10 text-destructive hover:text-destructive transition-all duration-200"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -230,15 +229,11 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   })
                 }
                 variant="outline"
-                className="w-full h-14 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 text-primary font-medium transition-all duration-300 group"
+                className="w-full h-14 border-2 border-dashed border-primary/30 hover:border-primary/50 hover:bg-primary/5 text-primary font-medium transition-all duration-300 group"
               >
-                <motion.div
-                  whileHover={{ rotate: 90 }}
-                  transition={{ duration: 0.2 }}
-                  className="mr-2"
-                >
+                <div className="icon-wrapper-blue mr-3 group-hover:bg-primary/20 transition-colors">
                   <Plus className="h-5 w-5" />
-                </motion.div>
+                </div>
                 <span className="group-hover:font-semibold transition-all duration-200">
                   Add New Experience
                 </span>
@@ -250,15 +245,15 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8"
+              className="text-center py-8 p-6 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-dashed border-primary/20"
             >
-              <div className="p-4 rounded-full bg-primary/10 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <div className="icon-wrapper-blue mx-auto mb-4 p-3">
                 <Plus className="h-8 w-8 text-primary" />
               </div>
-              <p className="text-muted-foreground">
+              <h3 className="font-semibold text-foreground mb-2">
                 Start building your professional profile
-              </p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
+              </h3>
+              <p className="text-muted-foreground">
                 Add your first work experience above
               </p>
             </motion.div>

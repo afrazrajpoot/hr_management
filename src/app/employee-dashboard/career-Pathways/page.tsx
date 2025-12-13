@@ -38,7 +38,7 @@ const mapApiToCareerData = (apiData: any) => {
   if (!apiData?.recommendations) return [];
 
   return apiData.recommendations.map((job: any) => ({
-    id: job.id || `job-${Math.random()}`, // Fallback ID
+    id: job.id || `job-${Math.random()}`,
     title: job.title || "Untitled Job",
     industry: inferIndustry(job.title || "", job.description || ""),
     matchScore: job.match_score || job.matchScore || 0,
@@ -102,7 +102,7 @@ export default function CareerPathways() {
   });
 
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
-  const [appliedJobs, setAppliedJobs] = useState<string[]>([]); // Track applied jobs locally
+  const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
   const [applyingJobIds, setApplyingJobIds] = useState(new Set<string>());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
@@ -171,7 +171,7 @@ export default function CareerPathways() {
       console.warn(
         "Cannot fetch recommendations: Session not ready or missing data"
       );
-      hasFetchedRef.current = false; // Reset if session becomes invalid
+      hasFetchedRef.current = false;
     }
   }, [getRecommendations, status, session?.user?.hrId, session?.user?.id]);
 
@@ -294,7 +294,10 @@ export default function CareerPathways() {
         `${process.env.NEXT_PUBLIC_PYTHON_URL}/api/applications`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" ,"Authorization": `Bearer ${session?.user?.fastApiToken || ''}`},
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.fastApiToken || ""}`,
+          },
           body: JSON.stringify({
             job_id: jobId,
             hr_id: session?.user?.hrId,
@@ -346,7 +349,9 @@ export default function CareerPathways() {
   if ((isLoading && page === 1) || isLoadingApplications) {
     return (
       <AppLayout>
-        <Loader />
+        <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
+          <Loader />
+        </div>
       </AppLayout>
     );
   }
@@ -354,8 +359,10 @@ export default function CareerPathways() {
   if (isError) {
     return (
       <AppLayout>
-        <div className="p-6 text-center text-red-500">
-          Error loading recommendations: {JSON.stringify(error)}
+        <div className="min-h-screen gradient-bg-primary p-6">
+          <div className="text-center text-destructive">
+            Error loading recommendations: {JSON.stringify(error)}
+          </div>
         </div>
       </AppLayout>
     );
@@ -363,254 +370,286 @@ export default function CareerPathways() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Career Pathways Assistant</h1>
-            <p className="text-muted-foreground mt-1">
-              AI-powered career recommendations based on your Genius Factor
-              profile
-            </p>
+      <div className="min-h-screen gradient-bg-primary p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold gradient-text-primary">
+                Career Pathways Assistant
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                AI-powered career recommendations based on your Genius Factor
+                profile
+              </p>
+            </div>
           </div>
-        </div>
 
-        <Card className="card">
-          <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder="Search career titles, industries, or locations..."
-                    value={filters.search}
-                    onChange={(e) =>
-                      handleFilterChange("search", e.target.value)
-                    }
-                    className="pl-10"
-                  />
+          <Card className="card-primary">
+            <CardContent className="p-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search career titles, industries, or locations..."
+                      value={filters.search}
+                      onChange={(e) =>
+                        handleFilterChange("search", e.target.value)
+                      }
+                      className="pl-10 border-input"
+                    />
+                  </div>
                 </div>
+                <Select
+                  value={filters.industry}
+                  onValueChange={(value) =>
+                    handleFilterChange("industry", value)
+                  }
+                >
+                  <SelectTrigger className="w-full lg:w-48 border-input">
+                    <SelectValue placeholder="Industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={filters.type}
+                  onValueChange={(value) => handleFilterChange("type", value)}
+                >
+                  <SelectTrigger className="w-full lg:w-48 border-input">
+                    <SelectValue placeholder="Job Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type.replace("_", " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground">
+              Showing {filteredAndSortedRecommendations.length} career matches
+              {data?.total && ` of ${data.total}`}
+            </p>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
               <Select
-                value={filters.industry}
-                onValueChange={(value) => handleFilterChange("industry", value)}
+                value={`${filters.sortBy}-${filters.sortOrder}`}
+                onValueChange={handleSortChange}
               >
-                <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="Industry" />
+                <SelectTrigger className="w-32 border-input">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={filters.type}
-                onValueChange={(value) => handleFilterChange("type", value)}
-              >
-                <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="Job Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {jobTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type.replace("_", " ")}
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground">
-            Showing {filteredAndSortedRecommendations.length} career matches
-            {data?.total && ` of ${data.total}`}
-          </p>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">Sort by:</span>
-            <Select
-              value={`${filters.sortBy}-${filters.sortOrder}`}
-              onValueChange={handleSortChange}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredAndSortedRecommendations.map((career: any) => (
-            <Card key={career.id} className="card group">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <CardTitle className="text-xl">{career.title}</CardTitle>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredAndSortedRecommendations.map((career: any) => (
+              <Card key={career.id} className="card-primary card-hover group">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <CardTitle className="text-xl">
+                          {career.title}
+                        </CardTitle>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span>{career.industry}</span>
+                        <span>•</span>
+                        <span>{career.type.replace("_", " ")}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <span>{career.industry}</span>
-                      <span>•</span>
-                      <span>{career.type.replace("_", " ")}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          {career.matchScore}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Match
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleSaved(career.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Bookmark
+                          className={`w-4 h-4 ${
+                            savedJobs.includes(career.id)
+                              ? "fill-current text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">
-                        {career.matchScore}%
-                      </div>
-                      <div className="text-xs text-muted-foreground">Match</div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {truncateDescription(career.description)}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center">
+                      <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span>{career.salaryRange}</span>
                     </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span>{career.location}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Recruiter:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {career.companies
+                        .slice(0, 3)
+                        .map((company: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs border-primary/20"
+                          >
+                            {company}
+                          </Badge>
+                        ))}
+                      {career.companies.length > 3 && (
+                        <Badge
+                          variant="outline"
+                          className="text-xs border-muted text-muted-foreground"
+                        >
+                          +{career.companies.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t space-x-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => toggleSaved(career.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openJobDetails(career)}
+                      className="border-input"
                     >
-                      <Bookmark
-                        className={`w-4 h-4 ${
-                          savedJobs.includes(career.id)
-                            ? "fill-current text-primary"
-                            : ""
-                        }`}
-                      />
+                      View Details
+                      <ExternalLink className="w-3 h-3 ml-2" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        handleApply(career.id, career.title, career.matchScore)
+                      }
+                      disabled={
+                        appliedJobs.includes(career.id) ||
+                        applyingJobIds.has(career.id)
+                      }
+                      className="btn-gradient-primary"
+                    >
+                      {applyingJobIds.has(career.id) ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                          <span>Applying...</span>
+                        </div>
+                      ) : appliedJobs.includes(career.id) ? (
+                        "Applied"
+                      ) : (
+                        "Apply Now"
+                      )}
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <JobDetailsModal
+            job={selectedJob}
+            onClose={closeJobDetails}
+            onApply={handleApply}
+            appliedJobs={appliedJobs}
+            applyingJobIds={applyingJobIds}
+          />
+
+          {/* Success Modal */}
+          <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+            <DialogContent className="card-primary">
+              <DialogHeader>
+                <DialogTitle className="flex items-center justify-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-success" />
+                  <span>Application Submitted!</span>
+                </DialogTitle>
+                <DialogDescription className="text-center">
+                  Your application for the position has been successfully
+                  submitted. You'll hear back from the recruiter soon.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center">
+                <Button onClick={() => setShowSuccessModal(false)}>
+                  Close
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {isLoading && (
+            <div className="text-center py-4">
+              <Loader />
+            </div>
+          )}
+
+          {!data?.hasMore && filteredAndSortedRecommendations.length > 0 && (
+            <div className="text-center py-4 text-muted-foreground">
+              No more recommendations to load
+            </div>
+          )}
+
+          {filteredAndSortedRecommendations.length === 0 && !isLoading && (
+            <Card className="card-primary">
+              <CardContent className="pt-12 pb-12 text-center">
+                <div className="icon-wrapper-blue mx-auto mb-4 p-3">
+                  <Search className="w-8 h-8 text-primary" />
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {truncateDescription(career.description)}
+                <h3 className="text-xl font-bold gradient-text-primary mb-2">
+                  No recommendations found
+                </h3>
+                <p className="text-muted-foreground">
+                  Try adjusting your search or filters
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span>{career.salaryRange}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                    <span>{career.location}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">Recruiter:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {career.companies
-                      .slice(0, 3)
-                      .map((company: string, index: number) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {company}
-                        </Badge>
-                      ))}
-                    {career.companies.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{career.companies.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openJobDetails(career)}
-                  >
-                    View Details
-                    <ExternalLink className="w-3 h-3 ml-2" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      handleApply(career.id, career.title, career.matchScore)
-                    }
-                    disabled={
-                      appliedJobs.includes(career.id) ||
-                      applyingJobIds.has(career.id)
-                    }
-                  >
-                    {applyingJobIds.has(career.id) ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                        <span>Applying...</span>
-                      </div>
-                    ) : appliedJobs.includes(career.id) ? (
-                      "Applied"
-                    ) : (
-                      "Apply Now"
-                    )}
-                  </Button>
-                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          )}
 
-        <JobDetailsModal
-          job={selectedJob}
-          onClose={closeJobDetails}
-          onApply={handleApply}
-          appliedJobs={appliedJobs}
-          applyingJobIds={applyingJobIds}
-        />
-
-        {/* Success Modal */}
-        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center justify-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-                <span>Application Submitted!</span>
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                Your application for the position has been successfully
-                submitted. You'll hear back from the recruiter soon.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center">
-              <Button onClick={() => setShowSuccessModal(false)}>Close</Button>
+          {data?.hasMore && !isLoading && (
+            <div className="text-center">
+              <Button
+                onClick={loadMore}
+                variant="outline"
+                size="lg"
+                className="border-input"
+              >
+                Load More Recommendations
+              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
-
-        {isLoading && (
-          <div className="text-center py-4">
-            <Loader />
-          </div>
-        )}
-
-        {!data?.hasMore && filteredAndSortedRecommendations.length > 0 && (
-          <div className="text-center py-4 text-muted-foreground">
-            No more recommendations to load
-          </div>
-        )}
-
-        {filteredAndSortedRecommendations.length === 0 && !isLoading && (
-          <div className="text-center py-12 text-muted-foreground">
-            No recommendations found matching your filters
-          </div>
-        )}
-
-        {data?.hasMore && !isLoading && (
-          <div className="text-center">
-            <Button onClick={loadMore} variant="outline" size="lg">
-              Load More Recommendations
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </AppLayout>
   );

@@ -19,6 +19,15 @@ import {
   MapPin,
   UserCheck,
   RefreshCw,
+  Brain,
+  Target,
+  BarChart3,
+  Sparkles,
+  Shield,
+  Rocket,
+  Award,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import {
@@ -581,7 +590,7 @@ export default function Assessment() {
         return (
           <Button
             onClick={() => navigate.push("/api/auth/signin")}
-            className="mt-4 btn-gradient"
+            className="mt-4 btn-gradient-primary"
           >
             Sign In
           </Button>
@@ -592,7 +601,7 @@ export default function Assessment() {
         return (
           <Button
             onClick={() => navigate.push("/employee-dashboard/profile")}
-            className="mt-4 btn-gradient"
+            className="mt-4 btn-gradient-primary"
           >
             Complete Profile
           </Button>
@@ -624,11 +633,47 @@ export default function Assessment() {
   if (isLoading || isFetchingQuestions) {
     return (
       <AppLayout>
-        <div className="p-6 max-w-4xl mx-auto flex flex-col justify-center items-center h-64 space-y-4">
-          <Loader />
-          <p className="text-muted-foreground">
-            Loading assessment questions...
-          </p>
+        <div className="min-h-screen gradient-bg-primary flex flex-col justify-center items-center p-6">
+          <div className="w-full max-w-4xl mx-auto">
+            <div className="card-primary text-center p-12">
+              <div className="icon-wrapper-purple mx-auto mb-6">
+                <Brain className="w-12 h-12 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold gradient-text-primary mb-4">
+                Loading Your Career Assessment
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                We're preparing your personalized assessment questions...
+              </p>
+              <Loader />
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="icon-wrapper-blue mx-auto mb-2 p-3">
+                    <Target className="w-6 h-6 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Analyzing Profile
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="icon-wrapper-green mx-auto mb-2 p-3">
+                    <BarChart3 className="w-6 h-6 text-success" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Loading Questions
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="icon-wrapper-purple mx-auto mb-2 p-3">
+                    <Sparkles className="w-6 h-6 text-accent" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    AI Personalization
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
@@ -636,438 +681,713 @@ export default function Assessment() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-4xl mx-auto">
-        {error && !analysisResults && !guidelineType ? (
-          <Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/10">
-            <CardContent className="pt-6 text-center space-y-6">
-              <div className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-                <AlertCircle className="w-10 h-10 text-destructive" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-foreground">
-                  Submission Failed
-                </h2>
-                <p className="text-muted-foreground text-lg">{error}</p>
-                {error.includes("API") ||
-                error.includes("connection") ||
-                error.includes("server") ? (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Please check your internet connection and try again. If the
-                    problem persists, contact support.
-                  </p>
-                ) : null}
-              </div>
-              <div className="flex gap-4 justify-center">
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant="outline"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh Page
-                </Button>
-                <Button
-                  onClick={retrySubmission}
-                  className="btn-gradient"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader size="sm" className="mr-2" />
-                      Retrying...
-                    </>
-                  ) : (
-                    "Try Again"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : guidelineType ? (
-          // Guideline message UI - styled as a helpful box, not an error
-          <Card className="border-0 shadow-none max-w-2xl mx-auto">
-            <CardContent className="pt-8 pb-6 text-center space-y-6">
-              <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mx-auto">
-                {getGuidelineIcon(guidelineType)}
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-foreground">
-                  {guidelineType === "subscription"
-                    ? "Upgrade Required"
-                    : guidelineType === "profileIncomplete" ||
-                      guidelineType === "noProfile"
-                    ? "Profile Setup Needed"
-                    : guidelineType === "unauthorized"
-                    ? "Sign In Required"
-                    : "Account Issue"}
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  {guidelineMessage}
-                </p>
-              </div>
+      <div className="min-h-screen gradient-bg-primary p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Decorative Background Elements */}
+          <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+            <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-20" />
+            <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-20" />
+          </div>
 
-              {/* Show missing fields if applicable */}
-              {guidelineType === "profileIncomplete" &&
-                missingFields.length > 0 && (
-                  <Card className="w-full border-border/50">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium flex items-center gap-2 text-foreground/80">
-                        <UserCheck className="w-4 h-4" />
-                        Missing Profile Information
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        {missingFields.map((field) => (
-                          <li key={field} className="flex items-center gap-2">
-                            {field === "firstName" && (
-                              <User className="w-4 h-4 flex-shrink-0" />
-                            )}
-                            {field === "lastName" && (
-                              <User className="w-4 h-4 flex-shrink-0" />
-                            )}
-                            {field === "dateOfBirth" && (
-                              <Calendar className="w-4 h-4 flex-shrink-0" />
-                            )}
-                            {field === "hireDate" && (
-                              <Calendar className="w-4 h-4 flex-shrink-0" />
-                            )}
-                            {field === "address" && (
-                              <MapPin className="w-4 h-4 flex-shrink-0" />
-                            )}
-                            <span>
-                              {field
-                                .replace(/([A-Z])/g, " $1")
-                                .trim()
-                                .toLowerCase()
-                                .replace(/\b\w/g, (l) => l.toUpperCase())}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-
-              {/* Additional info for subscription */}
-              {guidelineType === "subscription" && hasExistingReport && (
-                <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-                  <p className="text-sm text-warning-foreground">
-                    You've already completed this assessment once. Subscribe to
-                    unlock unlimited attempts and advanced insights.
-                  </p>
-                </div>
-              )}
-
-              {getGuidelineAction()}
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            {isSubmitting && (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center"
-                style={{
-                  background: "rgba(15, 23, 42, 0.45)",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                }}
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <Loader />
-                  <p className="text-white text-lg font-medium">
-                    Submitting your assessment...
-                  </p>
-                  <p className="text-gray-300 text-sm">
-                    Please don't close this window
-                  </p>
-                </div>
-              </div>
-            )}
-            {analysisResults ? (
-              <Card className="card border-success/20 bg-success/5 dark:bg-success/10">
-                <CardContent className="pt-6 text-center space-y-6">
-                  <div className="flex justify-center">
-                    <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center">
-                      <CheckCircle className="w-10 h-10 text-success" />
-                    </div>
+          {error && !analysisResults && !guidelineType ? (
+            <div className="max-w-2xl mx-auto">
+              <Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/10 card-primary">
+                <CardContent className="pt-8 pb-6 text-center space-y-6">
+                  <div className="icon-wrapper-blue mx-auto">
+                    <AlertCircle className="w-12 h-12 text-destructive" />
                   </div>
-
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <h2 className="text-2xl font-bold text-foreground">
-                      Assessment Submitted Successfully!
+                      Submission Failed
                     </h2>
-                    <p className="text-muted-foreground max-w-lg mx-auto">
-                      Your answers have been securely recorded and analyzed by
-                      our AI system.
-                    </p>
+                    <p className="text-muted-foreground text-lg">{error}</p>
+                    {error.includes("API") ||
+                    error.includes("connection") ||
+                    error.includes("server") ? (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Please check your internet connection and try again. If
+                        the problem persists, contact support.
+                      </p>
+                    ) : null}
                   </div>
-
-                  <div className="bg-background/50 p-6 rounded-lg border max-w-xl mx-auto text-left space-y-4">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary" />
-                      What happens next?
-                    </h3>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      <li className="flex gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        You will be automatically redirected to your results
-                        dashboard in a few seconds.
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        Our system is generating your personalized career path
-                        recommendations based on your unique profile.
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                        You can view your detailed analysis, including your
-                        Genius Factor and key strengths, on the results page.
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="pt-4">
+                  <div className="flex gap-4 justify-center">
                     <Button
-                      onClick={() =>
-                        navigate.push("/employee-dashboard/results")
-                      }
-                      className="btn-gradient min-w-[200px]"
+                      onClick={() => window.location.reload()}
+                      variant="outline"
+                      className="border-input"
                     >
-                      View My Results
-                      <ChevronRight className="w-4 h-4 ml-2" />
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh Page
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Redirecting in 2 seconds...
-                    </p>
+                    <Button
+                      onClick={retrySubmission}
+                      className="btn-gradient-primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader size="sm" className="mr-2" />
+                          Retrying...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-4 h-4 mr-2" />
+                          Try Again
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ) : (
-              <>
-                {/* Header */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h1 className="text-3xl font-bold">Career Assessment</h1>
-                      <p className="text-muted-foreground">
-                        {currentPart?.part} - Question{" "}
-                        {currentQuestionIndex + 1} of {totalQuestionsInPart}
+            </div>
+          ) : guidelineType ? (
+            // Guideline message UI - styled as a helpful box, not an error
+            <div className="max-w-2xl mx-auto">
+              <Card className="card-primary">
+                <CardContent className="pt-8 pb-6 text-center space-y-6">
+                  <div className="icon-wrapper-blue mx-auto">
+                    {getGuidelineIcon(guidelineType)}
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="text-2xl font-bold gradient-text-primary">
+                      {guidelineType === "subscription"
+                        ? "Upgrade Required"
+                        : guidelineType === "profileIncomplete" ||
+                          guidelineType === "noProfile"
+                        ? "Profile Setup Needed"
+                        : guidelineType === "unauthorized"
+                        ? "Sign In Required"
+                        : "Account Issue"}
+                    </h2>
+                    <p className="text-muted-foreground text-lg">
+                      {guidelineMessage}
+                    </p>
+                  </div>
+
+                  {/* Show missing fields if applicable */}
+                  {guidelineType === "profileIncomplete" &&
+                    missingFields.length > 0 && (
+                      <Card className="w-full border-input">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                            <UserCheck className="w-4 h-4" />
+                            Missing Profile Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            {missingFields.map((field) => (
+                              <li
+                                key={field}
+                                className="flex items-center gap-2"
+                              >
+                                {field === "firstName" && (
+                                  <User className="w-4 h-4 flex-shrink-0" />
+                                )}
+                                {field === "lastName" && (
+                                  <User className="w-4 h-4 flex-shrink-0" />
+                                )}
+                                {field === "dateOfBirth" && (
+                                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                                )}
+                                {field === "hireDate" && (
+                                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                                )}
+                                {field === "address" && (
+                                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                                )}
+                                <span>
+                                  {field
+                                    .replace(/([A-Z])/g, " $1")
+                                    .trim()
+                                    .toLowerCase()
+                                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                  {/* Additional info for subscription */}
+                  {guidelineType === "subscription" && hasExistingReport && (
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+                      <p className="text-sm text-warning-foreground">
+                        You've already completed this assessment once. Subscribe
+                        to unlock unlimited attempts and advanced insights.
                       </p>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {Math.floor(timeSpent / 60)}:
-                        {(timeSpent % 60).toString().padStart(2, "0")}
-                      </div>
-                      {hasSavedProgress && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={resetProgress}
-                          className="text-xs px-2 py-1"
-                        >
-                          Reset Progress
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={reloadQuestions}
-                        disabled={isFetchingQuestions}
-                        className="text-xs px-2 py-1"
-                      >
-                        <RefreshCw
-                          className={`w-3 h-3 mr-1 ${
-                            isFetchingQuestions ? "animate-spin" : ""
-                          }`}
-                        />
-                        Reload Questions
-                      </Button>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Part Progress</span>
-                      <span>{Math.round(progress)}%</span>
+                  {getGuidelineAction()}
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <>
+              {isSubmitting && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center"
+                  style={{
+                    background: "rgba(15, 23, 42, 0.85)",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                  }}
+                >
+                  <div className="card-primary p-8 text-center max-w-md">
+                    <div className="ai-recommendation-icon-wrapper mx-auto mb-6">
+                      <Sparkles className="w-12 h-12 text-white" />
                     </div>
-                    <Progress value={progress} className="h-2" />
+                    <h3 className="text-xl font-bold text-foreground mb-3">
+                      Processing Your Results
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Our AI is analyzing your responses to generate
+                      personalized career insights...
+                    </p>
+                    <Loader />
+                    <div className="mt-8 grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                        <p className="text-xs text-muted-foreground">
+                          Analyzing
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                        <p className="text-xs text-muted-foreground">
+                          Processing
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <div className="progress-bar-primary w-full h-1 mb-2"></div>
+                        <p className="text-xs text-muted-foreground">
+                          Generating
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
+              {analysisResults ? (
+                <div className="max-w-3xl mx-auto">
+                  <Card className="ai-recommendation-card">
+                    <CardContent className="pt-8 pb-6 text-center space-y-8">
+                      <div className="flex justify-center">
+                        <div className="ai-recommendation-icon-wrapper">
+                          <CheckCircle className="w-14 h-14 text-white" />
+                        </div>
+                      </div>
 
-                {/* Current Part Card */}
-                {currentQ && visibleQuestions.length > 0 ? (
-                  <Card className="card-elevated mb-6 card">
-                    <CardHeader>
-                      <CardTitle className="text-xl">
-                        {currentPart?.part}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-lg font-semibold">
-                            {currentQ.category}
-                          </div>
-                          <span className="text-sm text-muted-foreground bg-gray-50/50 dark:bg-gray-800/50 px-2 py-1 rounded">
-                            Multiple Choice
+                        <h2 className="text-3xl font-bold gradient-text-primary">
+                          Assessment Complete! 🎉
+                        </h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                          Your answers have been analyzed by our AI system to
+                          uncover your unique career potential.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                        <div className="quick-action-item text-center p-4">
+                          <Brain className="w-8 h-8 text-primary mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1">
+                            AI Analysis Complete
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Your unique Genius Factor calculated
+                          </p>
+                        </div>
+                        <div className="quick-action-item text-center p-4">
+                          <TrendingUp className="w-8 h-8 text-success mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1">
+                            Career Paths Generated
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Personalized recommendations ready
+                          </p>
+                        </div>
+                        <div className="quick-action-item text-center p-4">
+                          <Award className="w-8 h-8 text-warning mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1">
+                            Strengths Identified
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Key abilities and talents mapped
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4">
+                        <Button
+                          onClick={() =>
+                            navigate.push("/employee-dashboard/results")
+                          }
+                          className="btn-gradient-primary min-w-[240px] h-12 text-lg"
+                        >
+                          <Rocket className="w-5 h-5 mr-2" />
+                          View Detailed Results
+                          <ChevronRight className="w-5 h-5 ml-2" />
+                        </Button>
+                        <p className="text-sm text-muted-foreground mt-3">
+                          You will be redirected in 2 seconds...
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <>
+                  {/* Hero Header */}
+                  <div className="mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                      <div>
+                        <h1 className="text-4xl font-bold gradient-text-primary mb-2">
+                          Career Assessment
+                        </h1>
+                        <p className="text-lg text-muted-foreground">
+                          Discover your ideal career path through AI-powered
+                          analysis
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                        <div className="flex items-center text-sm bg-card px-4 py-2 rounded-lg border">
+                          <Clock className="w-4 h-4 mr-2 text-primary" />
+                          <span className="font-semibold">
+                            {Math.floor(timeSpent / 60)}:
+                            {(timeSpent % 60).toString().padStart(2, "0")}
                           </span>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {currentQ.section}
-                        </div>
-                        <div className="text-lg leading-relaxed">
-                          {currentQ.question}
-                        </div>
-                        <RadioGroup
-                          value={answers[currentQ.id] || ""}
-                          onValueChange={handleAnswerChange}
-                          className="space-y-3"
-                        >
-                          {currentQ.options?.map((apiOption, index) => {
-                            // Generate static letters: A, B, C, D...
-                            const staticLetter = String.fromCharCode(
-                              65 + index
-                            );
-
-                            return (
-                              <div
-                                key={index}
-                                className="flex items-center space-x-2 p-3 rounded-lg border hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
-                              >
-                                <RadioGroupItem
-                                  value={apiOption}
-                                  id={`option-${currentQ.id}-${index}`}
-                                />
-                                <Label
-                                  htmlFor={`option-${currentQ.id}-${index}`}
-                                  className="flex-1 cursor-pointer flex items-start"
-                                >
-                                  {/* Show static letter (A, B, C, D...) */}
-                                  <span className="font-bold mr-3 text-primary flex-shrink-0">
-                                    {staticLetter}.
-                                  </span>
-                                  {/* Show option text without the letter prefix */}
-                                  <span className="leading-relaxed">
-                                    {apiOption.replace(/^[A-Z]\)\s*/, "")}
-                                  </span>
-                                </Label>
-                              </div>
-                            );
-                          })}
-                        </RadioGroup>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card className="card-elevated mb-6 card">
-                    <CardContent className="p-8 text-center">
-                      <AlertCircle className="w-12 h-12 text-warning mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">
-                        No Questions Available
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        Unable to load assessment questions. This might be due
-                        to a network issue or server problem.
-                      </p>
-                      <Button onClick={reloadQuestions} variant="outline">
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Try Loading Questions Again
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Navigation */}
-                <div className="flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={
-                      currentPartIndex === 0 && currentQuestionIndex === 0
-                    }
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Previous
-                  </Button>
-
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" asChild>
-                      <Link href="/employee-dashboard">Exit</Link>
-                    </Button>
-
-                    {isLastQuestionInPart && isLastPart ? (
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={
-                          !isAllComplete ||
-                          isSubmitting ||
-                          visibleQuestions.length === 0
-                        }
-                        className="btn-gradient"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader size="sm" className="mr-2" />
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            Submit Assessment
-                            <ChevronRight className="w-4 h-4 ml-2" />
-                          </>
+                        {hasSavedProgress && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={resetProgress}
+                            className="border-input"
+                          >
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Restart
+                          </Button>
                         )}
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleNext}
-                        disabled={
-                          !isAnswered ||
-                          (isLastQuestionInPart && !isPartComplete) ||
-                          visibleQuestions.length === 0
-                        }
-                        className="btn-gradient"
-                      >
-                        {isLastQuestionInPart ? "Next Part" : "Next"}
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Progress Indicators for Current Part */}
-                {visibleQuestions.length > 0 && (
-                  <div className="mt-8">
-                    <div className="text-sm text-muted-foreground mb-2 text-center">
-                      Answered{" "}
-                      {currentPartQuestions.filter((q) => answers[q.id]).length}{" "}
-                      of {totalQuestionsInPart} questions in this part
-                    </div>
-                    <div className="flex justify-center">
-                      <div className="flex space-x-2">
-                        {currentPartQuestions.map((_, index) => (
-                          <div
-                            key={index}
-                            className={`w-3 h-3 rounded-full transition-colors ${
-                              index === currentQuestionIndex
-                                ? "bg-primary dark:bg-primary"
-                                : index < currentQuestionIndex
-                                ? "bg-success dark:bg-success"
-                                : answers[currentPartQuestions[index].id]
-                                ? "bg-warning dark:bg-warning"
-                                : "bg-muted dark:bg-muted"
-                            }`}
-                          />
-                        ))}
                       </div>
                     </div>
+
+                    {/* Progress Section */}
+                    <Card className="card-primary mb-6">
+                      <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-xl font-semibold mb-1">
+                              {currentPart?.part}
+                            </h3>
+                            <p className="text-muted-foreground">
+                              Question {currentQuestionIndex + 1} of{" "}
+                              {totalQuestionsInPart}
+                            </p>
+                          </div>
+                          <div className="mt-2 md:mt-0">
+                            <span className="badge-blue">
+                              Part {currentPartIndex + 1} of{" "}
+                              {visibleQuestions.length}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Progress
+                            </span>
+                            <span className="font-semibold">
+                              {Math.round(progress)}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-3">
+                            <div
+                              className="progress-bar-primary rounded-full h-3 transition-all duration-300"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+
+                  {/* Main Content Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Question Card - Takes 2/3 width on large screens */}
+                    <div className="lg:col-span-2">
+                      {currentQ && visibleQuestions.length > 0 ? (
+                        <Card className="card-primary card-hover h-full">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-2xl flex items-center gap-2">
+                                <div className="icon-wrapper-blue p-2">
+                                  <Target className="w-5 h-5 text-primary" />
+                                </div>
+                                <span>Your Question</span>
+                              </CardTitle>
+                              <span className="badge-purple text-xs">
+                                Multiple Choice
+                              </span>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-8">
+                            {/* Category and Section */}
+                            <div className="space-y-4">
+                              <div>
+                                <div className="text-lg font-semibold text-primary mb-1">
+                                  {currentQ.category}
+                                </div>
+                                <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                                  {currentQ.section}
+                                </div>
+                              </div>
+
+                              {/* Question Text */}
+                              <div className="text-xl leading-relaxed font-medium bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">
+                                {currentQ.question}
+                              </div>
+                            </div>
+
+                            {/* Options */}
+                            <RadioGroup
+                              value={answers[currentQ.id] || ""}
+                              onValueChange={handleAnswerChange}
+                              className="space-y-3"
+                            >
+                              {currentQ.options?.map((apiOption, index) => {
+                                const staticLetter = String.fromCharCode(
+                                  65 + index
+                                );
+                                const isSelected =
+                                  answers[currentQ.id] === apiOption;
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                                      isSelected
+                                        ? "border-primary bg-primary/5"
+                                        : "border-input hover:border-primary/50 hover:bg-primary/3"
+                                    }`}
+                                  >
+                                    <RadioGroupItem
+                                      value={apiOption}
+                                      id={`option-${currentQ.id}-${index}`}
+                                      className="mt-0.5"
+                                    />
+                                    <Label
+                                      htmlFor={`option-${currentQ.id}-${index}`}
+                                      className="flex-1 cursor-pointer flex items-start"
+                                    >
+                                      <span
+                                        className={`font-bold mr-3 text-lg flex-shrink-0 ${
+                                          isSelected
+                                            ? "text-primary"
+                                            : "text-muted-foreground"
+                                        }`}
+                                      >
+                                        {staticLetter}.
+                                      </span>
+                                      <span className="leading-relaxed">
+                                        {apiOption.replace(/^[A-Z]\)\s*/, "")}
+                                      </span>
+                                    </Label>
+                                  </div>
+                                );
+                              })}
+                            </RadioGroup>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <Card className="card-primary">
+                          <CardContent className="p-12 text-center">
+                            <div className="icon-wrapper-amber mx-auto mb-6">
+                              <AlertCircle className="w-12 h-12 text-warning" />
+                            </div>
+                            <h3 className="text-2xl font-semibold mb-3">
+                              No Questions Available
+                            </h3>
+                            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                              We're having trouble loading your assessment
+                              questions. This might be due to a network issue or
+                              server problem.
+                            </p>
+                            <Button
+                              onClick={reloadQuestions}
+                              className="btn-gradient-primary"
+                              disabled={isFetchingQuestions}
+                            >
+                              <RefreshCw
+                                className={`w-4 h-4 mr-2 ${
+                                  isFetchingQuestions ? "animate-spin" : ""
+                                }`}
+                              />
+                              Try Loading Questions Again
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+
+                    {/* Sidebar - Takes 1/3 width on large screens */}
+                    <div className="space-y-6">
+                      {/* Quick Stats Card */}
+                      <Card className="card-primary">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-primary" />
+                            Assessment Stats
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Current Part
+                            </span>
+                            <span className="font-semibold">
+                              {currentPartIndex + 1}/{visibleQuestions.length}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Questions Answered
+                            </span>
+                            <span className="font-semibold">
+                              {
+                                currentPartQuestions.filter(
+                                  (q) => answers[q.id]
+                                ).length
+                              }
+                              /{totalQuestionsInPart}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Total Progress
+                            </span>
+                            <span className="font-semibold">
+                              {Math.round(
+                                (visibleQuestions
+                                  .flatMap((p) => p.questions)
+                                  .filter((q) => answers[q.id]).length /
+                                  visibleQuestions.flatMap((p) => p.questions)
+                                    .length) *
+                                  100
+                              )}
+                              %
+                            </span>
+                          </div>
+                          <div className="pt-4 border-t">
+                            <div className="text-sm text-muted-foreground mb-2">
+                              This Part Progress
+                            </div>
+                            <div className="flex space-x-1">
+                              {currentPartQuestions.map((_, index) => (
+                                <div
+                                  key={index}
+                                  className={`flex-1 h-2 rounded-full transition-all ${
+                                    index === currentQuestionIndex
+                                      ? "bg-primary"
+                                      : index < currentQuestionIndex
+                                      ? "bg-success"
+                                      : answers[currentPartQuestions[index].id]
+                                      ? "bg-warning"
+                                      : "bg-muted"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Tips Card */}
+                      <Card className="card-primary">
+                        <CardHeader>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-warning" />
+                            Quick Tips
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="icon-wrapper-green p-2 mt-0.5">
+                              <CheckCircle className="w-4 h-4 text-success" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Be Honest</p>
+                              <p className="text-xs text-muted-foreground">
+                                Answer truthfully for accurate results
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="icon-wrapper-blue p-2 mt-0.5">
+                              <Clock className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">
+                                Take Your Time
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                No time limit - think carefully
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="icon-wrapper-purple p-2 mt-0.5">
+                              <Shield className="w-4 h-4 text-accent" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">
+                                All Data Secure
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Your responses are encrypted
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Navigation Card */}
+                      <Card className="card-primary">
+                        <CardContent className="p-4 space-y-4">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={handlePrevious}
+                              disabled={
+                                currentPartIndex === 0 &&
+                                currentQuestionIndex === 0
+                              }
+                              className="flex-1 border-input"
+                            >
+                              <ChevronLeft className="w-4 h-4 mr-2" />
+                              Previous
+                            </Button>
+                            <Button
+                              variant="outline"
+                              asChild
+                              className="flex-1 border-input"
+                            >
+                              <Link href="/employee-dashboard">Exit</Link>
+                            </Button>
+                          </div>
+
+                          {isLastQuestionInPart && isLastPart ? (
+                            <Button
+                              onClick={handleSubmit}
+                              disabled={
+                                !isAllComplete ||
+                                isSubmitting ||
+                                visibleQuestions.length === 0
+                              }
+                              className="w-full btn-gradient-primary"
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <Loader size="sm" className="mr-2" />
+                                  Submitting...
+                                </>
+                              ) : (
+                                <>
+                                  <Rocket className="w-4 h-4 mr-2" />
+                                  Submit Assessment
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={handleNext}
+                              disabled={
+                                !isAnswered ||
+                                (isLastQuestionInPart && !isPartComplete) ||
+                                visibleQuestions.length === 0
+                              }
+                              className="w-full btn-gradient-primary"
+                            >
+                              {isLastQuestionInPart
+                                ? "Next Part"
+                                : "Next Question"}
+                              <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          )}
+
+                          {!isAnswered && (
+                            <p className="text-xs text-center text-muted-foreground">
+                              Select an option to continue
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Bottom Navigation - Mobile Only */}
+                  <div className="lg:hidden mt-6">
+                    <Card className="card-primary">
+                      <CardContent className="p-4">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={handlePrevious}
+                            disabled={
+                              currentPartIndex === 0 &&
+                              currentQuestionIndex === 0
+                            }
+                            className="flex-1 border-input"
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-2" />
+                            Previous
+                          </Button>
+
+                          {isLastQuestionInPart && isLastPart ? (
+                            <Button
+                              onClick={handleSubmit}
+                              disabled={
+                                !isAllComplete ||
+                                isSubmitting ||
+                                visibleQuestions.length === 0
+                              }
+                              className="flex-1 btn-gradient-primary"
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <Loader size="sm" className="mr-2" />
+                                  Submitting...
+                                </>
+                              ) : (
+                                "Submit"
+                              )}
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={handleNext}
+                              disabled={
+                                !isAnswered ||
+                                (isLastQuestionInPart && !isPartComplete) ||
+                                visibleQuestions.length === 0
+                              }
+                              className="flex-1 btn-gradient-primary"
+                            >
+                              Next
+                              <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </AppLayout>
   );
