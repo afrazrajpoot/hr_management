@@ -17,7 +17,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Calendar, FileText, Eye } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  FileText,
+  Eye,
+  Users,
+  Filter,
+  Download,
+  Plus,
+  TrendingUp,
+  BarChart3,
+  MoreHorizontal,
+  ChevronRight,
+  Activity,
+  Target,
+  Shield,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import {
   Pagination,
@@ -33,6 +49,8 @@ import EmployeeDetailModal from "@/components/adminCOmponents/AdminEmployeeDetai
 import Loader from "@/components/Loader";
 import { HRLayout } from "@/components/admin/layout/admin-layout";
 import { useGetHrEmployeeQuery } from "@/redux/admin-api";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,11 +59,11 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
   const getStatusColor = (status: any) => {
     switch (status) {
       case "Completed":
-        return "bg-success text-success-foreground";
+        return "badge-green";
       case "Not Started":
-        return "bg-muted text-muted-foreground";
+        return "badge-blue";
       default:
-        return "bg-muted text-muted-foreground";
+        return "badge-blue";
     }
   };
 
@@ -56,7 +74,7 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
   const completionRate = employee.reports.length > 0 ? 100 : 0;
 
   const totalReportPages = Math.ceil(employee.reports.length / reportsPerPage);
-  const sortedReports = employee.reports.slice().reverse(); // Sort newest first
+  const sortedReports = employee.reports.slice().reverse();
   const paginatedReports = sortedReports.slice(
     (currentPage - 1) * reportsPerPage,
     currentPage * reportsPerPage
@@ -85,11 +103,10 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
             <PaginationLink
               onClick={() => handleReportPageChange(page)}
               isActive={currentPage === page}
-              className={
-                currentPage === page
-                  ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
-              }
+              className={cn(
+                "cursor-pointer",
+                currentPage === page && "bg-primary text-primary-foreground"
+              )}
             >
               {page}
             </PaginationLink>
@@ -105,11 +122,10 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
           <PaginationLink
             onClick={() => handleReportPageChange(1)}
             isActive={currentPage === 1}
-            className={
-              currentPage === 1
-                ? "bg-primary text-primary-foreground"
-                : "cursor-pointer"
-            }
+            className={cn(
+              "cursor-pointer",
+              currentPage === 1 && "bg-primary text-primary-foreground"
+            )}
           >
             1
           </PaginationLink>
@@ -132,11 +148,10 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
             <PaginationLink
               onClick={() => handleReportPageChange(page)}
               isActive={currentPage === page}
-              className={
-                currentPage === page
-                  ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
-              }
+              className={cn(
+                "cursor-pointer",
+                currentPage === page && "bg-primary text-primary-foreground"
+              )}
             >
               {page}
             </PaginationLink>
@@ -158,11 +173,11 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
             <PaginationLink
               onClick={() => handleReportPageChange(totalReportPages)}
               isActive={currentPage === totalReportPages}
-              className={
-                currentPage === totalReportPages
-                  ? "bg-primary text-primary-foreground"
-                  : "cursor-pointer"
-              }
+              className={cn(
+                "cursor-pointer",
+                currentPage === totalReportPages &&
+                  "bg-primary text-primary-foreground"
+              )}
             >
               {totalReportPages}
             </PaginationLink>
@@ -174,79 +189,107 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
     return items;
   };
 
+  const lastDepartment = Array.isArray(employee.department)
+    ? employee.department[employee.department.length - 1]
+    : employee.department;
+  const lastPosition = Array.isArray(employee.position)
+    ? employee.position[employee.position.length - 1]
+    : employee.position;
+
   return (
     <Card
-      className="card hover:shadow-lg transition-all duration-200 cursor-pointer"
+      className="card-primary card-hover group"
       onClick={() => onViewEmployee(employee)}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">
+            <div className="sidebar-user-avatar h-12 w-12 flex items-center justify-center">
+              <span className="text-sm font-bold text-white">
                 {employee.avatar}
               </span>
             </div>
             <div>
-              <CardTitle className="text-lg">{employee.name}</CardTitle>
-              <CardDescription>
-                {typeof employee.position === "string" ? employee.position : employee?.position[employee.position.length - 1]}
-                <span> {" - "} </span>
-                {typeof employee.department === "string" ? employee.department : Array.isArray(employee.department)
-                  ? employee.department[employee.department.length - 1] : "N/A"
-                }
+              <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors">
+                {employee.name}
+              </CardTitle>
+              <CardDescription className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs badge-blue">
+                  <Target className="h-3 w-3 mr-1" />
+                  {lastPosition || "N/A"}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  <Shield className="h-3 w-3 mr-1" />
+                  {lastDepartment || "N/A"}
+                </Badge>
               </CardDescription>
             </div>
           </div>
+          <Badge className={cn(getStatusColor(status), "text-xs")}>
+            {status}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
+            <div className="icon-wrapper-purple p-2">
+              <FileText className="h-4 w-4 text-purple-600" />
+            </div>
+            <span className="text-sm font-medium text-foreground">
               {employee.reports.length > 0
                 ? "Genius Factor Career Assessment"
                 : "No Assessments"}
             </span>
           </div>
-          <Badge className={getStatusColor(status)}>{status}</Badge>
+          <div className="text-xs text-muted-foreground">
+            {employee.reports.length} report
+            {employee.reports.length !== 1 ? "s" : ""}
+          </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">
-              Completion Rate
+              Assessment Progress
             </span>
-            <span className="text-sm font-medium">{completionRate}%</span>
+            <span className="text-sm font-medium text-foreground">
+              {completionRate}%
+            </span>
           </div>
-          <Progress value={completionRate} className="h-2" />
+          <Progress
+            value={completionRate}
+            className="progress-bar-primary h-2"
+          />
         </div>
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
+          <div className="icon-wrapper-amber p-2">
+            <Calendar className="h-4 w-4 text-amber-600" />
+          </div>
           <span>
             {status === "Completed"
-              ? `Completed: ${firstReport.createdAt
-                ? new Date(firstReport.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-                : "Unknown"
-              }`
+              ? `Last: ${
+                  firstReport.createdAt
+                    ? new Date(firstReport.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : "Unknown"
+                }`
               : "Not Started"}
           </span>
         </div>
 
         {employee.reports.length > 0 && (
           <div className="space-y-4">
+            <Separator />
             <div className="space-y-2">
-              {/* sort , show in reverse */}
               {paginatedReports.map((report: any, index: number) => (
                 <Button
                   key={report.id}
-                  variant="default"
+                  variant="outline"
                   size="sm"
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
+                  className="w-full hover:bg-primary hover:text-primary-foreground group/btn transition-all duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleViewReport({
@@ -255,7 +298,7 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
                       title: "Genius Factor Career Assessment",
                       employee: employee.name,
                       department: report.departement,
-                      position: employee.position,
+                      position: lastPosition,
                       dateCompleted: report.createdAt
                         ? new Date(report.createdAt).toISOString().split("T")[0]
                         : "Unknown",
@@ -283,8 +326,9 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
                     });
                   }}
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Report #{(currentPage - 1) * reportsPerPage + index + 1}
+                  <Eye className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                  View Report #{index + 1}
+                  <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                 </Button>
               ))}
             </div>
@@ -297,11 +341,10 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
                         e.stopPropagation();
                         handleReportPageChange(Math.max(1, currentPage - 1));
                       }}
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
+                      className={cn(
+                        "cursor-pointer",
+                        currentPage === 1 && "pointer-events-none opacity-50"
+                      )}
                     />
                   </PaginationItem>
                   {getPaginationItems()}
@@ -313,11 +356,11 @@ const AssessmentCard = ({ employee, onViewDetails, onViewEmployee }: any) => {
                           Math.min(totalReportPages, currentPage + 1)
                         );
                       }}
-                      className={
-                        currentPage === totalReportPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
+                      className={cn(
+                        "cursor-pointer",
+                        currentPage === totalReportPages &&
+                          "pointer-events-none opacity-50"
+                      )}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -340,30 +383,36 @@ export default function Assessments() {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
 
-  // Fetch employees with server-side pagination
   const { isLoading, isError, data } = useGetHrEmployeeQuery<any>({
     page: currentPage,
     limit,
   });
 
-  // Map employee data
   const employeeData = useMemo(
     () =>
       data?.employees?.map((employee: any) => ({
         id: employee.id,
-        name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
-          }`.trim(),
+        name: `${employee.firstName} ${
+          employee.lastName !== "Not provide" ? employee.lastName : ""
+        }`.trim(),
         email: employee.email,
         phoneNumber: employee.phoneNumber,
         department: Array.isArray(employee.department)
-          ? employee.department.join(", ")
-          : employee.department || "Unknown",
+          ? employee.department
+          : employee.department
+          ? [employee.department]
+          : ["Unknown"],
         position: Array.isArray(employee.position)
-          ? employee.position.join(", ")
-          : employee.position || "Unknown",
+          ? employee.position
+          : employee.position
+          ? [employee.position]
+          : ["Unknown"],
         reports: employee.reports || [],
-        avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-          }`,
+        avatar: `${employee.firstName[0]}${
+          employee.lastName !== "Not provide"
+            ? employee.lastName[0]
+            : employee.firstName[1] || employee.firstName[0]
+        }`,
         ...employee.employee,
         salary: employee.salary,
         role: employee.role,
@@ -373,7 +422,6 @@ export default function Assessments() {
     [data]
   );
 
-  // Optimized client-side filtering
   const filteredEmployees = useMemo(() => {
     if (!employeeData.length) return [];
 
@@ -381,26 +429,27 @@ export default function Assessments() {
     const isDepartmentAll = departmentFilter === "all";
     const hasSearchTerm = searchTerm.length > 0;
 
-    // If no filters are applied, return all employees
     if (isDepartmentAll && !hasSearchTerm) {
       return employeeData;
     }
 
     return employeeData.filter((employee: any) => {
-      // Department filter
-      if (!isDepartmentAll && employee.department !== departmentFilter) {
-        return false;
+      if (!isDepartmentAll) {
+        const hasDepartment = employee.department?.some(
+          (dept: string) =>
+            dept.toLowerCase() === departmentFilter.toLowerCase()
+        );
+        if (!hasDepartment) return false;
       }
 
-      // Search filter (only if there's a search term)
       if (hasSearchTerm) {
         const nameMatch = employee.name.toLowerCase().includes(searchLower);
-        const positionMatch =
-          employee.position &&
-          employee.position.toLowerCase().includes(searchLower);
-        const departmentMatch =
-          employee.department &&
-          employee.department.toLowerCase().includes(searchLower);
+        const positionMatch = employee.position?.some((pos: string) =>
+          pos.toLowerCase().includes(searchLower)
+        );
+        const departmentMatch = employee.department?.some((dept: string) =>
+          dept.toLowerCase().includes(searchLower)
+        );
 
         if (!nameMatch && !positionMatch && !departmentMatch) {
           return false;
@@ -411,25 +460,24 @@ export default function Assessments() {
     });
   }, [employeeData, departmentFilter, searchTerm]);
 
-  // Get unique departments from current page
   const departments = useMemo(
     () => [
       "all",
-      ...new Set(
-        employeeData
-          .map((emp: any) => emp.department)
-          .filter((dept: string) => dept && dept !== "Unknown")
+      ...Array.from(
+        new Set(
+          employeeData.flatMap((emp: any) =>
+            emp.department?.filter((dept: string) => dept && dept !== "Unknown")
+          )
+        )
       ),
     ],
     [employeeData]
   );
 
-  // Handle page change
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
-  // Get pagination info from API response
   const paginationInfo = data?.pagination || {
     currentPage: 1,
     totalPages: 1,
@@ -447,13 +495,32 @@ export default function Assessments() {
     setShowEmployeeModal(true);
   };
 
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalEmployees = paginationInfo.totalEmployees || 0;
+    const employeesWithReports = employeeData.filter(
+      (emp: any) => emp.reports.length > 0
+    ).length;
+    const completionRate =
+      totalEmployees > 0
+        ? Math.round((employeesWithReports / totalEmployees) * 100)
+        : 0;
+
+    return {
+      total: totalEmployees,
+      assessed: employeesWithReports,
+      completionRate,
+      pending: totalEmployees - employeesWithReports,
+    };
+  }, [paginationInfo, employeeData]);
+
   if (isLoading) {
     return (
       <HRLayout
         title="Employee Management"
-        subtitle="Track and analyze all employee Employee across companies"
+        subtitle="Track and analyze all employee assessments across companies"
       >
-        <div className="p-6 text-center">
+        <div className="flex items-center justify-center h-64">
           <Loader />
         </div>
       </HRLayout>
@@ -464,12 +531,16 @@ export default function Assessments() {
     return (
       <HRLayout
         title="Employee Management"
-        subtitle="Track and analyze all employee Employee across companies"
+        subtitle="Track and analyze all employee assessments across companies"
       >
-        <div className="p-6 text-center">
-          <Card className="card">
-            <CardContent className="pt-6">
-              <p className="text-destructive">Error loading assessments</p>
+        <div className="flex items-center justify-center h-64">
+          <Card className="card-primary">
+            <CardContent className="p-8 text-center">
+              <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Error loading employees
+              </h3>
+              <p className="text-muted-foreground">Please try again later</p>
             </CardContent>
           </Card>
         </div>
@@ -480,44 +551,148 @@ export default function Assessments() {
   return (
     <HRLayout
       title="Employee Management"
-      subtitle="Track and analyze all employee Employee across companies"
+      subtitle="Track and analyze all employee assessments across companies"
     >
-      <div className="space-y-6 p-6">
-        <div id="assessments-header">
-          <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
-          <p className="text-muted-foreground">
-            Manage and review all career assessments (
-            {paginationInfo.totalEmployees} employees)
-          </p>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Employees</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage and review all career assessments ({stats.total} employees)
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="hover:bg-muted">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Employee
+            </Button>
+          </div>
         </div>
 
-        <Card className="card">
-          <CardContent className="p-6">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Employees
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{stats.total}</h3>
+                <Badge className="badge-blue mt-2">
+                  <Users className="h-3 w-3 mr-1" />
+                  All Companies
+                </Badge>
+              </div>
+              <div className="icon-wrapper-blue">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Assessed
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{stats.assessed}</h3>
+                <Badge className="badge-green mt-2">
+                  <FileText className="h-3 w-3 mr-1" />
+                  Reports Generated
+                </Badge>
+              </div>
+              <div className="icon-wrapper-green">
+                <FileText className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Completion Rate
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {stats.completionRate}%
+                </h3>
+                <Badge className="badge-purple mt-2">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Overall Progress
+                </Badge>
+              </div>
+              <div className="icon-wrapper-purple">
+                <Target className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Pending
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{stats.pending}</h3>
+                <Badge className="badge-amber mt-2">
+                  <Activity className="h-3 w-3 mr-1" />
+                  Need Assessment
+                </Badge>
+              </div>
+              <div className="icon-wrapper-amber">
+                <Calendar className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Card */}
+        <Card className="card-primary">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter & Search
+            </CardTitle>
+            <Button variant="ghost" size="sm" className="text-xs">
+              <MoreHorizontal className="h-4 w-4 mr-2" />
+              Advanced
+            </Button>
+          </CardHeader>
+          <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, position, or department..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, position, or department..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 bg-muted/50 border-border"
+                />
               </div>
               <Select
                 value={departmentFilter}
                 onValueChange={setDepartmentFilter}
               >
                 <SelectTrigger className="w-full sm:w-48">
+                  <Shield className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>
                   {departments.map((dept, index) => {
                     const departmentName = dept as string;
                     return (
-                      <SelectItem key={`${departmentName}-${index}`} value={departmentName}>
-                        {departmentName === "all" ? "All Departments" : departmentName}
+                      <SelectItem
+                        key={`${departmentName}-${index}`}
+                        value={departmentName}
+                      >
+                        {departmentName === "all"
+                          ? "All Departments"
+                          : departmentName}
                       </SelectItem>
                     );
                   })}
@@ -527,25 +702,26 @@ export default function Assessments() {
           </CardContent>
         </Card>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader />
-          </div>
-        ) : (
-          <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredEmployees.map((employee: any) => (
-                <AssessmentCard
-                  key={employee.id}
-                  employee={employee}
-                  onViewDetails={handleViewDetails}
-                  onViewEmployee={handleViewEmployee}
-                />
-              ))}
-            </div>
+        {/* Employees Grid */}
+        <div
+          id="assessments-header"
+          className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+        >
+          {filteredEmployees.map((employee: any) => (
+            <AssessmentCard
+              key={employee.id}
+              employee={employee}
+              onViewDetails={handleViewDetails}
+              onViewEmployee={handleViewEmployee}
+            />
+          ))}
+        </div>
 
-            {paginationInfo.totalPages > 1 && (
-              <div className="flex justify-between items-center mt-4">
+        {/* Pagination */}
+        {paginationInfo.totalPages > 1 && (
+          <Card className="card-primary">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="text-sm text-muted-foreground">
                   Showing{" "}
                   {(paginationInfo.currentPage - 1) * paginationInfo.limit + 1}{" "}
@@ -556,7 +732,7 @@ export default function Assessments() {
                   )}{" "}
                   of {paginationInfo.totalEmployees} employees
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -564,13 +740,50 @@ export default function Assessments() {
                       handlePageChange(paginationInfo.currentPage - 1)
                     }
                     disabled={paginationInfo.currentPage === 1}
+                    className="hover:bg-muted"
                   >
                     Previous
                   </Button>
-                  <span className="flex items-center px-3 text-sm">
-                    Page {paginationInfo.currentPage} of{" "}
-                    {paginationInfo.totalPages}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    {Array.from(
+                      { length: Math.min(5, paginationInfo.totalPages) },
+                      (_, i) => {
+                        let pageNum;
+                        if (paginationInfo.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (paginationInfo.currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (
+                          paginationInfo.currentPage >=
+                          paginationInfo.totalPages - 2
+                        ) {
+                          pageNum = paginationInfo.totalPages - 4 + i;
+                        } else {
+                          pageNum = paginationInfo.currentPage - 2 + i;
+                        }
+
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={
+                              paginationInfo.currentPage === pageNum
+                                ? "default"
+                                : "ghost"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            className={cn(
+                              "min-w-8 h-8",
+                              paginationInfo.currentPage === pageNum &&
+                                "bg-primary text-primary-foreground"
+                            )}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      }
+                    )}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -580,29 +793,44 @@ export default function Assessments() {
                     disabled={
                       paginationInfo.currentPage === paginationInfo.totalPages
                     }
+                    className="hover:bg-muted"
                   >
                     Next
                   </Button>
                 </div>
               </div>
-            )}
-
-            {filteredEmployees.length === 0 && (
-              <Card className="card">
-                <CardContent className="p-12 text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">
-                    No employees found
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting your search criteria.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </>
+            </CardContent>
+          </Card>
         )}
 
+        {/* Empty State */}
+        {filteredEmployees.length === 0 && (
+          <Card className="card-primary">
+            <CardContent className="p-12 text-center">
+              <div className="icon-wrapper-purple p-4 mb-4 inline-block">
+                <FileText className="h-12 w-12 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No employees found
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search or filter criteria
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDepartmentFilter("all");
+                }}
+                className="hover:bg-muted"
+              >
+                Clear Filters
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Modals */}
         <AssessmentDetailsModal
           assessment={selectedAssessment}
           isOpen={showDetailsModal}

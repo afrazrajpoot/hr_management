@@ -1,7 +1,6 @@
 "use client";
 
 import { HRLayout } from "@/components/admin/layout/admin-layout";
-import { StatCard } from "@/components/admin/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,16 @@ import {
   Eye,
   MessageSquare,
   Calendar,
+  TrendingUp,
+  Filter,
+  Download,
+  MoreHorizontal,
+  Target,
+  BarChart3,
+  PieChart as PieChartIcon,
+  Activity,
+  Zap,
+  ChevronRight,
 } from "lucide-react";
 import {
   PieChart,
@@ -46,6 +55,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 export default function RiskAnalysis() {
   const { dashboardData, isAdmin } = useSocket();
@@ -123,6 +135,8 @@ export default function RiskAnalysis() {
   const highRiskEmployeesCount = riskDistribution["High (61-100)"] || 0;
   const mediumRiskEmployeesCount = riskDistribution["Medium (31-60)"] || 0;
   const lowRiskEmployeesCount = riskDistribution["Low (0-30)"] || 0;
+  const totalEmployees =
+    highRiskEmployeesCount + mediumRiskEmployeesCount + lowRiskEmployeesCount;
 
   // Filter employees by risk level
   const highRiskEmployees = employeeRiskDetails.filter(
@@ -206,13 +220,13 @@ export default function RiskAnalysis() {
   const getRiskBadgeVariant = (level: string) => {
     switch (level.toLowerCase()) {
       case "low":
-        return "default" as const;
+        return "badge-green";
       case "medium":
-        return "secondary" as const;
+        return "badge-amber";
       case "high":
-        return "destructive" as const;
+        return "badge-blue";
       default:
-        return "default" as const;
+        return "badge-blue";
     }
   };
 
@@ -228,81 +242,185 @@ export default function RiskAnalysis() {
     return employeeId ? `${fullName} (ID: ${employeeId})` : fullName;
   };
 
+  const highRiskPercentage =
+    totalEmployees > 0
+      ? Math.round((highRiskEmployeesCount / totalEmployees) * 100)
+      : 0;
+
   return (
     <HRLayout
       title="Retention Risk Analysis"
       subtitle="Identify and manage employee retention risks across all companies"
     >
       <div className="space-y-6">
-        {isAdmin && (
-          <div className="card p-4 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Building2 className="h-5 w-5 text-blue-600 mr-2" />
-                <span className="text-blue-800 font-medium">
-                  Admin View: Risk Analysis
-                </span>
-              </div>
-              <Select
-                value={selectedHR || "all"}
-                onValueChange={(value) =>
-                  setSelectedHR(value === "all" ? null : value)
-                }
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select HR Manager" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All HR Managers</SelectItem>
-                  {hrList.map((hr) => (
-                    <SelectItem key={hr.id} value={hr.id}>
-                      {hr.fullName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Risk Analysis
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Monitor and mitigate retention risks across all organizations
+            </p>
           </div>
-        )}
-
-        <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            title="High Risk Employees"
-            value={highRiskEmployeesCount}
-            description="Require immediate attention"
-            icon={<AlertTriangle className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Medium Risk Employees"
-            value={mediumRiskEmployeesCount}
-            description="Monitor closely"
-            icon={<TrendingDown className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Low Risk Employees"
-            value={lowRiskEmployeesCount}
-            description="Stable retention"
-            icon={<Shield className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Average Risk"
-            value={`${overallMetrics.avg_retention_risk || 0}%`}
-            description={
-              selectedHR ? `For ${selectedHRName}` : "Across all companies"
-            }
-            icon={<Users className="h-4 w-4" />}
-          />
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="hover:bg-muted">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button className="btn-gradient-primary">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Generate Report
+            </Button>
+          </div>
         </div>
 
+        {/* Admin Filter */}
+        {isAdmin && (
+          <Card className="card-primary">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-blue p-2">
+                    <Building2 className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">
+                      Admin View: Risk Analysis
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Viewing data for {selectedHRName}
+                    </p>
+                  </div>
+                </div>
+                <Select
+                  value={selectedHR || "all"}
+                  onValueChange={(value) =>
+                    setSelectedHR(value === "all" ? null : value)
+                  }
+                >
+                  <SelectTrigger className="w-64">
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Select HR Manager" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All HR Managers</SelectItem>
+                    {hrList.map((hr) => (
+                      <SelectItem key={hr.id} value={hr.id}>
+                        {hr.fullName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  High Risk
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {highRiskEmployeesCount}
+                </h3>
+                <div className="mt-2">
+                  <Progress
+                    value={highRiskPercentage}
+                    className="progress-bar-primary h-2"
+                  />
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {highRiskPercentage}% of total
+                  </span>
+                </div>
+              </div>
+              <div className="icon-wrapper-blue">
+                <AlertTriangle className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Medium Risk
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {mediumRiskEmployeesCount}
+                </h3>
+                <Badge className="badge-amber mt-2">
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                  Monitor closely
+                </Badge>
+              </div>
+              <div className="icon-wrapper-amber">
+                <TrendingDown className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Low Risk
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {lowRiskEmployeesCount}
+                </h3>
+                <Badge className="badge-green mt-2">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Stable retention
+                </Badge>
+              </div>
+              <div className="icon-wrapper-green">
+                <Shield className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Average Risk
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {overallMetrics.avg_retention_risk || 0}%
+                </h3>
+                <Badge className="badge-purple mt-2">
+                  <Users className="h-3 w-3 mr-1" />
+                  {selectedHR ? selectedHRName : "All companies"}
+                </Badge>
+              </div>
+              <div className="icon-wrapper-purple">
+                <Target className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Grid */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-gradient-card shadow-card">
-            <CardHeader>
+          {/* Risk Distribution Pie Chart */}
+          <Card className="card-primary card-hover">
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-hr-risk-medium" />
-                {selectedHR
-                  ? "Risk Distribution"
-                  : "Risk Distribution Across All HRs"}
+                <div className="icon-wrapper-purple p-2">
+                  <PieChartIcon className="h-4 w-4" />
+                </div>
+                Risk Distribution
               </CardTitle>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -330,15 +448,18 @@ export default function RiskAnalysis() {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-4">
+              <div className="flex justify-center gap-4 mt-6 flex-wrap">
                 {riskDistributionData.map((item, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <div
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
+                    <span className="text-sm font-medium text-foreground">
+                      {item.name}
+                    </span>
                     <span className="text-sm text-muted-foreground">
-                      {item.name} ({item.value})
+                      ({item.value})
                     </span>
                   </div>
                 ))}
@@ -346,12 +467,18 @@ export default function RiskAnalysis() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-card shadow-card">
-            <CardHeader>
+          {/* Assessment Trends Line Chart */}
+          <Card className="card-primary card-hover">
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-hr-primary" />
-                Assessment Trends Over Time
+                <div className="icon-wrapper-green p-2">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                Assessment Trends
               </CardTitle>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -386,14 +513,19 @@ export default function RiskAnalysis() {
           </Card>
         </div>
 
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
+        {/* Department Risk Chart */}
+        <Card className="card-primary card-hover">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-hr-secondary" />
-              {selectedHR
-                ? "Risk by Department"
-                : "Risk by Department Across All HRs"}
+              <div className="icon-wrapper-blue p-2">
+                <BarChart3 className="h-4 w-4" />
+              </div>
+              Risk by Department
             </CardTitle>
+            <Button variant="ghost" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
           </CardHeader>
           <CardContent>
             {departmentRiskData.length > 0 ? (
@@ -429,89 +561,111 @@ export default function RiskAnalysis() {
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-64">
-                <p className="text-gray-500 dark:text-gray-400">
-                  No department risk data available for {selectedHRName}
+                <p className="text-muted-foreground">
+                  No department risk data available
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-card shadow-card">
+        {/* High Risk Employees Table */}
+        <Card className="card-primary card-hover">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-hr-risk-high" />
-              High Risk Employees
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="icon-wrapper-blue p-2">
+                  <AlertTriangle className="h-4 w-4" />
+                </div>
+                High Risk Employees
+                <Badge className="badge-blue ml-2">
+                  {highRiskEmployees.length}
+                </Badge>
+              </div>
+              <Button variant="outline" size="sm" className="hover:bg-muted">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Contact All
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>{" "}
-                  {/* UNCOMMENTED - Now showing employee name */}
+                  <TableHead>Employee</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>HR Manager</TableHead>
                   <TableHead>Risk Score</TableHead>
-                  <TableHead>Risk Level</TableHead>
-                  <TableHead>Risk Factors</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {highRiskEmployees.slice(0, 10).map((employee: any) => (
-                  <TableRow key={employee.report_id || employee.employee_id}>
+                {highRiskEmployees.slice(0, 5).map((employee: any) => (
+                  <TableRow
+                    key={employee.report_id || employee.employee_id}
+                    className="group hover:bg-muted/50"
+                  >
                     <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {/* UPDATED: Now shows employee full name with ID */}
-                          {getEmployeeDisplayName(employee)}
+                      <div className="flex items-center gap-3">
+                        <div className="sidebar-user-avatar h-8 w-8 flex items-center justify-center">
+                          <span className="text-xs font-bold text-white">
+                            {employee.employee_full_name?.charAt(0) || "E"}
+                          </span>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          Created: {employee.created_at}
+                        <div>
+                          <div className="font-medium text-foreground">
+                            {getEmployeeDisplayName(employee)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3 inline mr-1" />
+                            {employee.created_at}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{employee.department}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {employee.department}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="font-medium">
                       {getHRFullName(
                         employee.hr_id || employee.hr_manager_id || ""
                       )}
                     </TableCell>
-                    <TableCell>{employee.risk_score}%</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-destructive">
+                          {employee.risk_score}%
+                        </span>
+                        <Progress
+                          value={employee.risk_score}
+                          className="w-20 h-2"
+                        />
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge
-                        variant={getRiskBadgeVariant(employee.risk_category)}
+                        className={getRiskBadgeVariant(employee.risk_category)}
                       >
                         {employee.risk_category} risk
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1 max-w-[200px]">
-                        {employee.risk_factors
-                          ?.slice(0, 3)
-                          .map((factor: string, index: number) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {factor}
-                            </Badge>
-                          ))}
-                        {employee.risk_factors?.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{employee.risk_factors.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted"
+                        >
                           <MessageSquare className="h-4 w-4" />
                         </Button>
                       </div>
@@ -520,9 +674,12 @@ export default function RiskAnalysis() {
                 ))}
                 {highRiskEmployees.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      <div className="text-muted-foreground">
-                        No high-risk employees found. All employees are stable.
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <Shield className="h-8 w-8 text-green-600" />
+                        <div className="text-muted-foreground">
+                          No high-risk employees found
+                        </div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -532,112 +689,131 @@ export default function RiskAnalysis() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-hr-accent" />
-              Common Risk Factors
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                {
-                  factor: "Low Assessment Score",
-                  weight: "High",
-                  description: "Employees with scores below 70",
-                },
-                {
-                  factor: "Skill-Role Mismatch",
-                  weight: "High",
-                  description: "Skills not aligned with current role",
-                },
-                {
-                  factor: "Limited Growth Opportunities",
-                  weight: "Medium",
-                  description: "Few advancement paths available",
-                },
-                {
-                  factor: "Below Market Compensation",
-                  weight: "High",
-                  description: "Salary below industry average",
-                },
-                {
-                  factor: "Low Engagement",
-                  weight: "Medium",
-                  description: "Poor participation in company initiatives",
-                },
-              ].map((factor, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 border border-border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium">{factor.factor}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {factor.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge
-                      variant={
-                        factor.weight === "High" ? "destructive" : "secondary"
-                      }
-                    >
-                      {factor.weight} Impact
-                    </Badge>
-                    <Button variant="outline" size="sm">
-                      Analyze
-                    </Button>
-                  </div>
+        {/* Risk Factors & Interventions */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Common Risk Factors */}
+          <Card className="card-primary card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="icon-wrapper-amber p-2">
+                  <Zap className="h-4 w-4" />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                Common Risk Factors
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  {
+                    factor: "Low Assessment Score",
+                    weight: "High",
+                    impact: 92,
+                    color: "blue",
+                  },
+                  {
+                    factor: "Skill-Role Mismatch",
+                    weight: "High",
+                    impact: 88,
+                    color: "blue",
+                  },
+                  {
+                    factor: "Limited Growth Opportunities",
+                    weight: "Medium",
+                    impact: 75,
+                    color: "amber",
+                  },
+                  {
+                    factor: "Below Market Compensation",
+                    weight: "High",
+                    impact: 85,
+                    color: "blue",
+                  },
+                  {
+                    factor: "Low Engagement",
+                    weight: "Medium",
+                    impact: 68,
+                    color: "amber",
+                  },
+                ].map((factor, index) => (
+                  <div
+                    key={index}
+                    className="assessment-item p-3 group hover:bg-muted/50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                        {factor.factor}
+                      </h4>
+                      <Badge
+                        className={cn(
+                          factor.weight === "High"
+                            ? "badge-blue"
+                            : "badge-amber",
+                          "text-xs"
+                        )}
+                      >
+                        {factor.weight} Impact
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Affected: {factor.impact}%
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-hr-primary" />
-              Recommended Interventions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div className="p-4 bg-hr-risk-high/10 border border-hr-risk-high/20 rounded-lg">
-                <h4 className="font-medium text-hr-risk-high mb-2">
-                  Immediate Actions
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Schedule 1-on-1 meetings with high-risk employees</li>
-                  <li>• Review compensation packages</li>
-                  <li>• Assess role fit and satisfaction</li>
-                </ul>
+          {/* Recommended Interventions */}
+          <Card className="card-primary card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="icon-wrapper-green p-2">
+                  <Target className="h-4 w-4" />
+                </div>
+                Recommended Interventions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-gradient-to-r from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-lg">
+                  <h4 className="font-medium text-blue-600 mb-2">
+                    Immediate Actions
+                  </h4>
+                  <ul className="text-sm space-y-1 text-foreground">
+                    <li>• Schedule 1-on-1 meetings with high-risk employees</li>
+                    <li>• Review compensation packages</li>
+                    <li>• Assess role fit and satisfaction</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-lg">
+                  <h4 className="font-medium text-amber-600 mb-2">
+                    Short-term (1-3 months)
+                  </h4>
+                  <ul className="text-sm space-y-1 text-foreground">
+                    <li>• Implement skill development programs</li>
+                    <li>• Create advancement pathways</li>
+                    <li>• Increase recognition programs</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-green-500/10 to-green-600/5 border border-green-500/20 rounded-lg">
+                  <h4 className="font-medium text-green-600 mb-2">
+                    Long-term (3+ months)
+                  </h4>
+                  <ul className="text-sm space-y-1 text-foreground">
+                    <li>• Establish mentorship programs</li>
+                    <li>• Regular career planning sessions</li>
+                    <li>• Enhanced benefits packages</li>
+                  </ul>
+                </div>
               </div>
-              <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-                <h4 className="font-medium text-warning mb-2">
-                  Short-term (1-3 months)
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Implement skill development programs</li>
-                  <li>• Create advancement pathways</li>
-                  <li>• Increase recognition programs</li>
-                </ul>
-              </div>
-              <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
-                <h4 className="font-medium text-success mb-2">
-                  Long-term (3+ months)
-                </h4>
-                <ul className="text-sm space-y-1">
-                  <li>• Establish mentorship programs</li>
-                  <li>• Regular career planning sessions</li>
-                  <li>• Enhanced benefits packages</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </HRLayout>
   );

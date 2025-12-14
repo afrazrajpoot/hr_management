@@ -1,9 +1,9 @@
 "use client";
 
 import { HRLayout } from "@/components/admin/layout/admin-layout";
-import { StatCard } from "@/components/admin/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -22,6 +22,15 @@ import {
   ArrowDown,
   Calendar,
   Filter,
+  Download,
+  Plus,
+  BarChart3,
+  Activity,
+  Target,
+  MoreHorizontal,
+  ChevronRight,
+  TrendingDown,
+  Zap,
 } from "lucide-react";
 import {
   LineChart,
@@ -46,6 +55,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 export default function Mobility() {
   const { mobilityAnalysis } = useSocket();
@@ -158,7 +170,7 @@ export default function Mobility() {
       )
   );
 
-  // UPDATED: Prepare mobility type data for pie chart - Ingoing vs Outgoing
+  // Prepare mobility type data for pie chart - Ingoing vs Outgoing
   const mobilityTypeData = [
     {
       name: "Ingoing",
@@ -211,9 +223,9 @@ export default function Mobility() {
   const getMobilityIcon = (type: string) => {
     switch (type) {
       case "promotion":
-        return <ArrowUp className="h-4 w-4 text-success" />;
+        return <ArrowUp className="h-4 w-4 text-green-600" />;
       case "transfer":
-        return <ArrowRight className="h-4 w-4 text-hr-secondary" />;
+        return <ArrowRight className="h-4 w-4 text-blue-600" />;
       default:
         return <ArrowUpDown className="h-4 w-4" />;
     }
@@ -222,11 +234,11 @@ export default function Mobility() {
   const getMobilityBadgeVariant = (type: string) => {
     switch (type) {
       case "promotion":
-        return "default" as const;
+        return "badge-green";
       case "transfer":
-        return "secondary" as const;
+        return "badge-blue";
       default:
-        return "outline" as const;
+        return "badge-blue";
     }
   };
 
@@ -236,94 +248,155 @@ export default function Mobility() {
       subtitle="Monitor career movements and progression across all departments"
     >
       <div className="space-y-6">
-        {/* HR Filter Dropdown */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-hr-primary" />
-                Filter by HR Manager
-              </div>
-              <Select value={selectedHrId} onValueChange={setSelectedHrId}>
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Select HR Manager" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All HR Managers</SelectItem>
-                  {hrIds.map((hrId) => (
-                    <SelectItem key={hrId} value={hrId}>
-                      {hrNameMap[hrId]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Mobility Tracking
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Monitor career movements and progression across organizations
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="hover:bg-muted">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Track Movement
+            </Button>
+          </div>
+        </div>
+
+        {/* Filter Card */}
+        <Card className="card-primary">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter Analysis
             </CardTitle>
+            <Select value={selectedHrId} onValueChange={setSelectedHrId}>
+              <SelectTrigger className="w-[300px]">
+                <div className="flex items-center">
+                  <Users className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select HR Manager" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All HR Managers</SelectItem>
+                {hrIds.map((hrId) => (
+                  <SelectItem key={hrId} value={hrId}>
+                    {hrNameMap[hrId]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardHeader>
         </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            title="Total Movements"
-            value={totalMovements.toString()}
-            description={`Last 6 months • ${selectedHrName}`}
-            icon={<ArrowUpDown className="h-4 w-4" />}
-            trend={{
-              value: 0,
-              label: selectedHrName,
-              isPositive: true,
-            }}
-          />
-          <StatCard
-            title="Ingoing Movements"
-            value={finalTotalIngoing.toString()}
-            description={`${ingoingPercentage}% of movements`}
-            icon={<ArrowDown className="h-4 w-4 text-green-600" />}
-            trend={{
-              value: ingoingPercentage,
-              label: "vs last period",
-              isPositive: true,
-            }}
-          />
-          <StatCard
-            title="Outgoing Movements"
-            value={finalTotalOutgoing.toString()}
-            description={`${outgoingPercentage}% of movements`}
-            icon={<ArrowUp className="h-4 w-4 text-red-600" />}
-            trend={{
-              value: outgoingPercentage,
-              label: "vs last period",
-              isPositive: false,
-            }}
-          />
-          <StatCard
-            title={selectedHrId === "all" ? "HR Managers" : "Departments"}
-            value={
-              selectedHrId === "all"
-                ? hrIds.length.toString()
-                : Object.keys(
-                    filteredHrStats[selectedHrId]?.departments || {}
-                  ).length.toString()
-            }
-            description={
-              selectedHrName === "all"
-                ? "Active managers"
-                : "Managed departments"
-            }
-            icon={<Building2 className="h-4 w-4" />}
-            trend={{ value: 0, label: selectedHrName, isPositive: true }}
-          />
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Movements
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{totalMovements}</h3>
+                <Badge className="badge-blue mt-2">
+                  <ArrowUpDown className="h-3 w-3 mr-1" />
+                  Last 6 months
+                </Badge>
+              </div>
+              <div className="icon-wrapper-blue">
+                <ArrowUpDown className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Ingoing Movements
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{finalTotalIngoing}</h3>
+                <div className="mt-2">
+                  <Progress
+                    value={ingoingPercentage}
+                    className="progress-bar-primary h-2"
+                  />
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {ingoingPercentage}% of total
+                  </span>
+                </div>
+              </div>
+              <div className="icon-wrapper-green">
+                <ArrowDown className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Outgoing Movements
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {finalTotalOutgoing}
+                </h3>
+                <div className="mt-2">
+                  <Progress
+                    value={outgoingPercentage}
+                    className="progress-bar-primary h-2"
+                  />
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {outgoingPercentage}% of total
+                  </span>
+                </div>
+              </div>
+              <div className="icon-wrapper-blue">
+                <ArrowUp className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Active Managers
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{hrIds.length}</h3>
+                <Badge className="badge-purple mt-2">
+                  <Building2 className="h-3 w-3 mr-1" />
+                  Managing departments
+                </Badge>
+              </div>
+              <div className="icon-wrapper-purple">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Charts */}
+        {/* Charts Grid */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Mobility Trends Chart */}
-          <Card className="bg-gradient-card shadow-card">
-            <CardHeader>
+          <Card className="card-primary card-hover">
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-hr-primary" />
-                {selectedHrName} Mobility Trends
+                <div className="icon-wrapper-green p-2">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                Mobility Trends
               </CardTitle>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -361,7 +434,7 @@ export default function Mobility() {
                   <Line
                     type="monotone"
                     dataKey="total"
-                    stroke="hsl(var(--hr-primary))"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={3}
                     name="Total"
                   />
@@ -370,13 +443,18 @@ export default function Mobility() {
             </CardContent>
           </Card>
 
-          {/* UPDATED: Movement Types Pie Chart - Ingoing vs Outgoing */}
-          <Card className="bg-gradient-card shadow-card">
-            <CardHeader>
+          {/* Movement Types Pie Chart */}
+          <Card className="card-primary card-hover">
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <ArrowUpDown className="h-5 w-5 text-hr-accent" />
+                <div className="icon-wrapper-purple p-2">
+                  <BarChart3 className="h-4 w-4" />
+                </div>
                 Movement Flow
               </CardTitle>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -407,44 +485,47 @@ export default function Mobility() {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="grid grid-cols-2 gap-2 mt-4">
+              <div className="flex justify-center gap-4 mt-6 flex-wrap">
                 {mobilityTypeData.map((item, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <div
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
-                    <div>
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {item.name}
-                      </span>
-                      <div className="text-xs text-muted-foreground">
-                        {item.value} ({item.percentage}%)
-                      </div>
-                    </div>
+                    <span className="text-sm font-medium text-foreground">
+                      {item.name}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      ({item.value})
+                    </span>
+                    <Badge
+                      className={cn(
+                        item.name === "Ingoing" ? "badge-green" : "badge-blue",
+                        "text-xs"
+                      )}
+                    >
+                      {item.percentage}%
+                    </Badge>
                   </div>
                 ))}
-                {mobilityTypeData.length < 2 && (
-                  <div className="col-span-2 text-xs text-muted-foreground">
-                    {finalTotalIngoing === 0 && finalTotalOutgoing === 0
-                      ? "No movement data available"
-                      : `Total: ${
-                          finalTotalIngoing + finalTotalOutgoing
-                        } movements`}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Department Mobility Chart */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
+        <Card className="card-primary card-hover">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-hr-secondary" />
+              <div className="icon-wrapper-blue p-2">
+                <Building2 className="h-4 w-4" />
+              </div>
               Departments Mobility
             </CardTitle>
+            <Button variant="ghost" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -472,9 +553,9 @@ export default function Mobility() {
                 />
                 <Bar
                   dataKey="internal"
-                  fill="hsl(var(--success))"
+                  fill="#3b82f6"
                   name="Internal Moves"
-                  radius={[2, 2, 0, 0]}
+                  radius={[4, 4, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -482,11 +563,22 @@ export default function Mobility() {
         </Card>
 
         {/* Recent Movements Table */}
-        <Card className="bg-gradient-card shadow-card">
+        <Card className="card-primary card-hover">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-hr-primary" />
-              Recent Activity Summary ({selectedHrName})
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="icon-wrapper-amber p-2">
+                  <Activity className="h-4 w-4" />
+                </div>
+                Recent Activity Summary
+                <Badge className="badge-amber ml-2">
+                  {recentMobility.length}
+                </Badge>
+              </div>
+              <Button variant="outline" size="sm" className="hover:bg-muted">
+                <Zap className="h-4 w-4 mr-2" />
+                View All
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -497,45 +589,82 @@ export default function Mobility() {
                   <TableHead>Movement Type</TableHead>
                   <TableHead>Count</TableHead>
                   <TableHead>HR Manager</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentMobility.length > 0 ? (
                   recentMobility.map((movement) => (
-                    <TableRow key={movement.id}>
+                    <TableRow
+                      key={movement.id}
+                      className="group hover:bg-muted/50"
+                    >
                       <TableCell className="font-medium">
-                        {movement.department}
+                        <div className="flex items-center gap-3">
+                          <div className="sidebar-user-avatar h-8 w-8 flex items-center justify-center">
+                            <Building2 className="h-4 w-4 text-white" />
+                          </div>
+                          <span className="text-foreground group-hover:text-primary transition-colors">
+                            {movement.department}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {getMobilityIcon(movement.type)}
+                          <div
+                            className={cn(
+                              "icon-wrapper p-2",
+                              movement.type === "promotion"
+                                ? "icon-wrapper-green"
+                                : "icon-wrapper-blue"
+                            )}
+                          >
+                            {getMobilityIcon(movement.type)}
+                          </div>
                           <Badge
-                            variant={getMobilityBadgeVariant(movement.type)}
+                            className={getMobilityBadgeVariant(movement.type)}
                           >
                             {movement.type}
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell>{movement.count}</TableCell>
+                      <TableCell>
+                        <div className="text-lg font-bold text-foreground">
+                          {movement.count}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium text-sm">
                             {movement.hrName}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {movement.hrId.slice(0, 8)}...
+                            ID: {movement.hrId.slice(0, 8)}...
                           </span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-muted"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="text-center text-muted-foreground"
-                    >
-                      No recent mobility data available
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="icon-wrapper-blue p-3">
+                          <TrendingDown className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div className="text-muted-foreground">
+                          No recent mobility data available
+                        </div>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -544,8 +673,108 @@ export default function Mobility() {
           </CardContent>
         </Card>
 
-        {/* Analysis Period Info */}
+        {/* Additional Insights */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="card-primary card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="icon-wrapper-green p-2">
+                  <Target className="h-4 w-4" />
+                </div>
+                Promotion Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-green-600">
+                  {promotionPercentage}%
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {totalPromotions} promotions out of {totalMovements} total
+                  movements
+                </p>
+                <Progress
+                  value={promotionPercentage}
+                  className="progress-bar-primary mt-4"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-primary card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="icon-wrapper-blue p-2">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+                Transfer Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-blue-600">
+                  {transferPercentage}%
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {totalTransfers} transfers across departments
+                </p>
+                <Progress
+                  value={transferPercentage}
+                  className="progress-bar-primary mt-4"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="card-primary card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="icon-wrapper-purple p-2">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                Analysis Period
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center">
+                <div className="text-lg font-bold text-foreground">
+                  Last 6 Months
+                </div>
+                {analysisPeriod && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {analysisPeriod.start} to {analysisPeriod.end}
+                  </p>
+                )}
+                <div className="mt-4">
+                  <Badge className="badge-purple">
+                    <Activity className="h-3 w-3 mr-1" />
+                    Real-time Data
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </HRLayout>
   );
 }
+
+// Add missing icon component
+const Eye = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);

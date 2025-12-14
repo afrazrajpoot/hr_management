@@ -17,9 +17,28 @@ import {
   Eye,
   Filter,
   Loader2,
+  Plus,
+  ChevronDown,
+  Download,
+  MoreHorizontal,
+  Activity,
 } from "lucide-react";
 import { CompanyModal } from "@/components/adminCOmponents/CompanyModal";
 import Loader from "@/components/Loader";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface HRUser {
   id: string;
@@ -132,8 +151,8 @@ interface Company {
 
 export default function Companies() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState(""); // Immediate UI feedback
-  const [filteredSearchTerm, setFilteredSearchTerm] = useState(""); // Debounced for API
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredSearchTerm, setFilteredSearchTerm] = useState("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,12 +163,10 @@ export default function Companies() {
   const [selectedCompanyName, setSelectedCompanyName] = useState("all");
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch companies when page or filtered search term changes
   useEffect(() => {
     fetchCompanies();
   }, [page, filteredSearchTerm]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (searchTimeout.current) {
@@ -181,16 +198,13 @@ export default function Companies() {
 
       const data: ApiResponse = await response.json();
 
-      // Check if data exists and is an array
       if (!data.data || !Array.isArray(data.data)) {
         throw new Error("Invalid data format: Expected an array in 'data'");
       }
 
-      // Transform API data to match Company interface
       const transformedCompanies: Company[] = data.data
         .map((item, index) => {
           if (!item.hrUser) {
-            console.warn("Incomplete item data (no hrUser):", item);
             return {
               id: `placeholder-${index}`,
               companyDetail: {
@@ -213,11 +227,9 @@ export default function Companies() {
           const employees = item.employees || [];
           const company = item.company;
 
-          // Calculate statistics
           const numEmployees = employees.length;
           const numReports = employees.filter((e) => e.report).length;
 
-          // Use company data if available, otherwise fallback to HR user data
           const companyDetail = company?.companyDetail || {
             name: `${hrUser.firstName} ${hrUser.lastName} (HR User)`,
             email: hrUser.email,
@@ -271,33 +283,27 @@ export default function Companies() {
     }
   };
 
-  // Optimized search handler with immediate feedback and debounced API calls
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Clear existing timeout
     if (searchTimeout.current) {
       clearTimeout(searchTimeout.current);
     }
 
-    // Update UI immediately for better typing experience
     setSearchTerm(value);
 
-    // Handle immediate search for short terms (1-2 characters)
     if (value.length <= 2) {
       setFilteredSearchTerm(value);
       setPage(1);
       return;
     }
 
-    // Debounced search for longer terms (150ms for responsive feel)
     searchTimeout.current = setTimeout(() => {
       setFilteredSearchTerm(value);
       setPage(1);
     }, 150);
   }, []);
 
-  // Extract unique company names
   const companyNames = useMemo(
     () => [
       "all",
@@ -308,7 +314,6 @@ export default function Companies() {
     [companies]
   );
 
-  // Memoize filtered companies to prevent unnecessary re-renders
   const filteredCompanies = useMemo(() => {
     return companies.filter((company) => {
       const matchesSearch =
@@ -341,7 +346,6 @@ export default function Companies() {
     });
   }, [companies, filteredSearchTerm, selectedCompanyName]);
 
-  // Memoize calculations to prevent recalculation on every render
   const totalEmployees = useMemo(
     () => companies.reduce((sum, company) => sum + company.totalEmployees, 0),
     [companies]
@@ -458,14 +462,6 @@ export default function Companies() {
     setSelectedCompany(null);
   }, []);
 
-  const handleCompanyFilterChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedCompanyName(e.target.value);
-      setPage(1); // Reset to first page when filter changes
-    },
-    []
-  );
-
   if (loading && companies.length === 0) {
     return (
       <HRLayout
@@ -501,42 +497,133 @@ export default function Companies() {
       subtitle="Overview and management of all connected organizations"
     >
       <div className="space-y-6">
-        {/* Stats Section */}
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Organizations
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage and monitor all connected HR organizations
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button className="btn-gradient-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Organization
+            </Button>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Refresh Data</DropdownMenuItem>
+                <DropdownMenuItem>Manage Categories</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>View Analytics</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard
-            title="Total Organizations"
-            value={companies.length}
-            description="Connected HR organizations"
-            icon={<Building2 className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Total Employees"
-            value={totalEmployees.toLocaleString()}
-            description="Across all organizations"
-            icon={<Users className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Assessments Completed"
-            value={totalAssessments}
-            description="Total employee reports"
-            icon={<ClipboardList className="h-4 w-4" />}
-          />
-          <StatCard
-            title="Average Risk"
-            value={averageRisk !== null ? `${averageRisk}%` : "N/A"}
-            description="Retention risk"
-            icon={<TrendingDown className="h-4 w-4" />}
-            variant={averageRisk !== null ? "default" : "secondary"}
-          />
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Organizations
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{companies.length}</h3>
+                <Badge className="badge-blue mt-2">
+                  <Activity className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </div>
+              <div className="icon-wrapper-blue">
+                <Building2 className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Employees
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {totalEmployees.toLocaleString()}
+                </h3>
+                <Badge className="badge-green mt-2">
+                  <Users className="h-3 w-3 mr-1" />
+                  Across all organizations
+                </Badge>
+              </div>
+              <div className="icon-wrapper-green">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Assessments
+                </p>
+                <h3 className="text-2xl font-bold mt-1">{totalAssessments}</h3>
+                <Badge className="badge-purple mt-2">
+                  <ClipboardList className="h-3 w-3 mr-1" />
+                  Total reports
+                </Badge>
+              </div>
+              <div className="icon-wrapper-purple">
+                <ClipboardList className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="card-primary card-hover">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Avg Retention Risk
+                </p>
+                <h3 className="text-2xl font-bold mt-1">
+                  {averageRisk !== null ? `${averageRisk}%` : "N/A"}
+                </h3>
+                <Badge className="badge-amber mt-2">
+                  <TrendingDown className="h-3 w-3 mr-1" />
+                  Retention risk
+                </Badge>
+              </div>
+              <div className="icon-wrapper-amber">
+                <TrendingDown className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filter Section */}
-        <Card className="bg-gradient-card shadow-card">
-          <CardHeader>
+        <Card className="card-primary card-hover">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Filter Organizations
+              Filter & Search
             </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm">
+                <Activity className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -544,22 +631,28 @@ export default function Companies() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search organizations, HR users, or jobs..."
-                  value={searchTerm} // Immediate visual feedback
+                  value={searchTerm}
                   onChange={handleSearch}
-                  className="pl-9"
+                  className="pl-9 bg-muted/50 border-border"
                 />
               </div>
-              <select
+              <Select
                 value={selectedCompanyName}
-                onChange={handleCompanyFilterChange}
-                className="px-3 py-2 border border-border rounded-md bg-background text-foreground min-w-[150px]"
+                onValueChange={setSelectedCompanyName}
               >
-                {companyNames.map((name) => (
-                  <option key={name} value={name}>
-                    {name === "all" ? "All Companies" : name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-[200px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {companyNames.slice(1).map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -577,35 +670,21 @@ export default function Companies() {
                 : 0;
 
             return (
-              <Card
-                key={company.id}
-                className="bg-gradient-card shadow-card hover:shadow-elevated transition-all duration-200 cursor-pointer group"
-                // onClick={() =>
-                //   router.push(`/hr-dashboard/organizations/${company.id}`)
-                // }
-              >
+              <Card key={company.id} className="card-primary card-hover group">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-lg bg-gradient-primary flex items-center justify-center">
+                      <div className="sidebar-user-avatar h-12 w-12 flex items-center justify-center">
                         <Building2 className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <CardTitle className="text-lg group-hover:text-hr-primary transition-colors">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
                           {company.companyDetail.name}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
                           <span>{company.companyDetail.role}</span>
                           <span className="text-xs">•</span>
                           <span>{company.companyDetail.industry}</span>
-                          {company.companyDetail.phoneNumber && (
-                            <>
-                              <span className="text-xs">•</span>
-                              <span className="text-xs">
-                                {company.companyDetail.phoneNumber}
-                              </span>
-                            </>
-                          )}
                         </p>
                         {company.companyDetail.email && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -614,14 +693,24 @@ export default function Companies() {
                         )}
                       </div>
                     </div>
-                    <Badge variant={getRiskBadgeVariant(retentionRisk)}>
+                    <Badge
+                      className={cn(
+                        retentionRisk === null
+                          ? "badge-blue"
+                          : retentionRisk < 10
+                          ? "badge-green"
+                          : retentionRisk < 20
+                          ? "badge-amber"
+                          : "badge-blue"
+                      )}
+                    >
                       {getRiskLevel(retentionRisk)}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="assessment-item text-center p-3">
                       <div className="text-2xl font-bold text-foreground">
                         {company.totalEmployees}
                       </div>
@@ -629,7 +718,7 @@ export default function Companies() {
                         Employees
                       </div>
                     </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <div className="assessment-item text-center p-3">
                       <div className="text-2xl font-bold text-foreground">
                         {company.totalIndividualReports}
                       </div>
@@ -639,7 +728,7 @@ export default function Companies() {
                     </div>
                   </div>
 
-                  {/* Assessment Completion - Only show if employees exist */}
+                  {/* Assessment Completion */}
                   {company.totalEmployees > 0 && (
                     <div>
                       <div className="flex justify-between text-sm mb-1">
@@ -650,7 +739,7 @@ export default function Companies() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div
-                          className="bg-gradient-primary h-2 rounded-full transition-all duration-500"
+                          className="progress-bar-primary h-2 rounded-full transition-all duration-500"
                           style={{
                             width: `${Math.min(completionRate, 100)}%`,
                           }}
@@ -659,7 +748,7 @@ export default function Companies() {
                     </div>
                   )}
 
-                  {/* Retention Risk - Only show if we have actual data */}
+                  {/* Retention Risk */}
                   {retentionRisk !== null ? (
                     <div>
                       <div className="flex justify-between text-sm mb-1">
@@ -670,19 +759,21 @@ export default function Companies() {
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full transition-all duration-500 ${
-                            retentionRisk < 10
-                              ? "bg-success"
-                              : retentionRisk < 20
-                              ? "bg-warning"
-                              : "bg-destructive"
-                          }`}
-                          style={{ width: `${retentionRisk}%` }}
+                          className="h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${retentionRisk}%`,
+                            background:
+                              retentionRisk < 10
+                                ? "var(--success)"
+                                : retentionRisk < 20
+                                ? "var(--warning)"
+                                : "var(--destructive)",
+                          }}
                         />
                       </div>
                     </div>
                   ) : company.totalEmployees > 0 ? (
-                    <div className="p-3 bg-muted/50 rounded-lg text-center">
+                    <div className="assessment-item text-center p-3">
                       <p className="text-xs text-muted-foreground">
                         No assessment data available
                       </p>
@@ -691,7 +782,7 @@ export default function Companies() {
 
                   <Button
                     variant="outline"
-                    className="w-full mt-4 group-hover:bg-hr-primary group-hover:text-white transition-all"
+                    className="w-full mt-4 hover:bg-primary hover:text-primary-foreground transition-all"
                     onClick={(e) => handleViewDetails(company, e)}
                   >
                     <Eye className="h-4 w-4 mr-2" />
@@ -703,13 +794,19 @@ export default function Companies() {
           })}
         </div>
 
-        {/* Load More Button */}
+        {/* Load More */}
         {hasMore && (
           <div className="text-center">
-            <Button onClick={loadMore} disabled={loading} variant="outline">
+            <Button
+              onClick={loadMore}
+              disabled={loading}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
               {loading ? (
                 <>
-                  <Loader />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
                 </>
               ) : (
                 "Load More Organizations"
@@ -720,16 +817,25 @@ export default function Companies() {
 
         {/* Empty State */}
         {filteredCompanies.length === 0 && !loading && (
-          <Card className="bg-gradient-card shadow-card">
-            <CardContent className="text-center py-12">
-              <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <Card className="card-primary">
+            <CardContent className="text-center py-16">
+              <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">
                 No organizations found
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-6">
                 Try adjusting your search terms or filters to find organizations
-                or HR users.
               </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilteredSearchTerm("");
+                  setSelectedCompanyName("all");
+                }}
+              >
+                Clear Filters
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -744,3 +850,6 @@ export default function Companies() {
     </HRLayout>
   );
 }
+
+// Add missing cn import
+import { cn } from "@/lib/utils";
