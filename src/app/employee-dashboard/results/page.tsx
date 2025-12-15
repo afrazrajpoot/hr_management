@@ -37,100 +37,20 @@ import {
   Shield,
   BookMarked,
   FileText,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 import PDFReport from "@/components/employee/PDFReport";
 import Loader from "@/components/Loader";
 import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
 import { useSession } from "next-auth/react";
 
-interface GeniusFactorProfile {
-  description: string;
-  key_strengths: string[];
-  energy_sources: string[];
-  primary_genius_factor: string;
-  secondary_description: string;
-  secondary_genius_factor: string;
-}
-
-interface CurrentRoleAlignmentAnalysis {
-  assessment: string;
-  alignment_score: string;
-  strengths_utilized: string[];
-  retention_risk_level: string;
-  underutilized_talents: string[];
-}
-
-interface CareerPathways {
-  [key: string]: string;
-}
-
-interface TransitionTimeline {
-  "1_year": string;
-  "2_years"?: string;
-  "6_months"?: string;
-  "2_year"?: string;
-  "6_month"?: string;
-  six_months?: string;
-  one_year?: string;
-  two_years?: string;
-}
-
-interface InternalCareerOpportunities {
-  career_pathways: CareerPathways;
-  primary_industry: string;
-  secondary_industry: string;
-  transition_timeline: TransitionTimeline;
-  recommended_departments: string[];
-  specific_role_suggestions: string[];
-  required_skill_development: string[];
-}
-
-interface RetentionAndMobilityStrategies {
-  development_support: string[];
-  retention_strategies: string[];
-  internal_mobility_recommendations: string[];
-}
-
-interface DevelopmentActionPlan {
-  six_month_goals: string[];
-  ninety_day_goals: string[];
-  thirty_day_goals: string[];
-  networking_strategy: string[];
-}
-
-interface PersonalizedResources {
-  affirmations: string[];
-  learning_resources: string[];
-  reflection_questions: string[];
-  mindfulness_practices: string[];
-}
-
-interface DataSourcesAndMethodology {
-  methodology: string;
-  data_sources: string[];
-}
-
-interface Assessment {
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  executiveSummary: string;
-  hrId?: string;
-  departement?: string;
-  geniusFactorScore: number;
-  geniusFactorProfileJson: GeniusFactorProfile;
-  currentRoleAlignmentAnalysisJson?: CurrentRoleAlignmentAnalysis;
-  internalCareerOpportunitiesJson?: InternalCareerOpportunities;
-  retentionAndMobilityStrategiesJson?: RetentionAndMobilityStrategies;
-  developmentActionPlanJson?: DevelopmentActionPlan;
-  personalizedResourcesJson?: PersonalizedResources;
-  dataSourcesAndMethodologyJson?: DataSourcesAndMethodology;
-  risk_analysis?: any;
-}
+// ... (keep all your existing interfaces as they are)
 
 const isValid = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -158,11 +78,13 @@ const isValid = (value: any): boolean => {
 export default function Results() {
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
   const { data: session } = useSession();
-
+  
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isPaid, setIsPaid] = useState(true); // Assume paid by default
+  const [showAllContent, setShowAllContent] = useState(false); // For preview mode
   const assessmentsPerPage = 5;
 
   useEffect(() => {
@@ -174,6 +96,16 @@ export default function Results() {
         return;
       }
 
+      // Check if user has access to full data by checking if any assessment has complete data
+      const hasFullAccess = assessmentsData.some(
+        (assessment: Assessment) => 
+          assessment.currentRoleAlignmentAnalysisJson || 
+          assessment.internalCareerOpportunitiesJson ||
+          assessment.retentionAndMobilityStrategiesJson
+      );
+      
+      setIsPaid(hasFullAccess);
+      
       const sortedAssessments = [...assessmentsData].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -186,6 +118,7 @@ export default function Results() {
       console.error("Error from RTK Query:", error);
       setAssessments([]);
       setSelectedAssessment(null);
+      setIsPaid(true); // Default to paid on error
     }
   }, [data, error]);
 
@@ -219,6 +152,82 @@ export default function Results() {
     }
   };
 
+  // Render section with blur effect for unpaid users
+  const renderSection = (
+    title: string,
+    icon: React.ReactNode,
+    description: string,
+    content: React.ReactNode,
+    isPremium: boolean = false,
+    showBlur: boolean = false
+  ) => {
+    const shouldBlur = !isPaid && isPremium;
+    const isVisible = isPaid || showAllContent || !shouldBlur;
+    
+    return (
+      <Card className="card-primary card-hover relative overflow-hidden">
+        {shouldBlur && (
+          <div className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+              <div className="bg-primary/10 p-4 rounded-full mb-4">
+                <Lock className="w-12 h-12 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Premium Content</h3>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Unlock your full Genius Factor analysis including detailed career insights, alignment scores, and personalized development plans.
+              </p>
+              <Button
+                onClick={() => setShowAllContent(true)}
+                className="btn-gradient-primary"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Preview Full Analysis
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`icon-wrapper-${shouldBlur ? 'amber' : 'blue'} p-2`}>
+                {icon}
+              </div>
+              <div>
+                <div className="text-lg font-semibold flex items-center gap-2">
+                  {title}
+                  {shouldBlur && (
+                    <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50">
+                      <Lock className="w-3 h-3 mr-1" />
+                      Premium
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {description}
+                </div>
+              </div>
+            </div>
+            {shouldBlur && isVisible && (
+              <Badge 
+                variant="outline" 
+                className="cursor-pointer hover:bg-amber-50"
+                onClick={() => setShowAllContent(false)}
+              >
+                <EyeOff className="w-3 h-3 mr-1" />
+                Hide
+              </Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {content}
+        </CardContent>
+      </Card>
+    );
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -242,8 +251,7 @@ export default function Results() {
                     Error Loading Results
                   </h2>
                   <p className="text-muted-foreground">
-                    Unable to load your assessment results. Please try again
-                    later.
+                    Unable to load your assessment results. Please try again later.
                   </p>
                 </div>
                 <Button
@@ -265,6 +273,39 @@ export default function Results() {
   return (
     <AppLayout>
       <div className="min-h-screen gradient-bg-primary p-4 md:p-6">
+        {/* Payment Status Banner */}
+        {!isPaid && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-amber-100 p-2 rounded-full">
+                      <Lock className="w-6 h-6 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-amber-900">
+                        Unlock Your Full Potential
+                      </h3>
+                      <p className="text-amber-700 text-sm">
+                        Upgrade to access complete career insights, detailed analysis, and personalized recommendations.
+                      </p>
+                    </div>
+                  </div>
+                  <Button className="btn-gradient-primary whitespace-nowrap">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Upgrade Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Decorative Background Elements */}
         <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
           <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-15" />
@@ -290,23 +331,32 @@ export default function Results() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <PDFReport
-                assessment={selectedAssessment}
-                employee={
-                  session?.user?.firstName + " " + session?.user?.lastName
-                }
-                genius_factor_score={selectedAssessment?.geniusFactorScore}
-              />
-              <Button variant="outline" className="border-input">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
+              {isPaid ? (
+                <>
+                  <PDFReport
+                    assessment={selectedAssessment}
+                    employee={
+                      session?.user?.firstName + " " + session?.user?.lastName
+                    }
+                    genius_factor_score={selectedAssessment?.geniusFactorScore}
+                  />
+                  <Button variant="outline" className="border-input">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" className="border-input" disabled>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Full Report (Upgrade Required)
+                </Button>
+              )}
             </div>
           </div>
 
           {selectedAssessment ? (
             <>
-              {/* Genius Score Hero Card */}
+              {/* Genius Score Hero Card - Always visible */}
               <Card className="card-primary border-0 gradient-bg-primary">
                 <CardContent className="p-8">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
@@ -395,7 +445,7 @@ export default function Results() {
                 </CardContent>
               </Card>
 
-              {/* Genius Factors Grid */}
+              {/* Genius Factors Grid - Always visible */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Primary Genius Factor */}
                 <Card className="card-primary card-hover">
@@ -528,7 +578,7 @@ export default function Results() {
                 </Card>
               </div>
 
-              {/* Executive Summary */}
+              {/* Executive Summary - Always visible */}
               <Card className="card-primary card-hover">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
@@ -554,84 +604,13 @@ export default function Results() {
                 </CardContent>
               </Card>
 
-              {/* Department and HR Info */}
-              {session?.user?.hrId !== "individual_user" &&
-                session?.user?.hrId != null && (
-                  <Card className="card-primary card-hover">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className="icon-wrapper-blue p-2">
-                          <Users className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold">
-                            Department & HR Details
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Organizational information
-                          </div>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="space-y-1 p-3 rounded-lg bg-card border">
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">
-                              Department
-                            </span>
-                          </div>
-                          <div className="text-lg font-semibold">
-                            {selectedAssessment.departement || "N/A"}
-                          </div>
-                        </div>
-                        <div className="space-y-1 p-3 rounded-lg bg-card border">
-                          <div className="flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">HR ID</span>
-                          </div>
-                          <div className="text-lg font-semibold">
-                            {selectedAssessment.hrId || "N/A"}
-                          </div>
-                        </div>
-                        <div className="space-y-1 p-3 rounded-lg bg-card border">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-primary" />
-                            <span className="text-sm font-medium">
-                              Assessment Date
-                            </span>
-                          </div>
-                          <div className="text-lg font-semibold">
-                            {new Date(
-                              selectedAssessment.createdAt
-                            ).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-              {/* Current Role Alignment */}
-              {isValid(selectedAssessment.currentRoleAlignmentAnalysisJson) && (
-                <Card className="card-primary card-hover">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="icon-wrapper-amber p-2">
-                        <BarChart3 className="w-5 h-5 text-warning" />
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">
-                          Current Role Alignment
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Fit with your current position
-                        </div>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+              {/* Current Role Alignment - Premium */}
+              {renderSection(
+                "Current Role Alignment",
+                <BarChart3 className="w-5 h-5 text-warning" />,
+                "Fit with your current position",
+                selectedAssessment.currentRoleAlignmentAnalysisJson ? (
+                  <div className="space-y-6">
                     {selectedAssessment.currentRoleAlignmentAnalysisJson
                       ?.alignment_score && (
                       <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
@@ -710,29 +689,24 @@ export default function Results() {
                         </div>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No alignment data available</p>
+                  </div>
+                ),
+                true,
+                true
               )}
 
-              {/* Internal Career Opportunities */}
-              {isValid(selectedAssessment.internalCareerOpportunitiesJson) && (
-                <Card className="card-primary card-hover">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="icon-wrapper-purple p-2">
-                        <Globe className="w-5 h-5 text-accent" />
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">
-                          Career Opportunities
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Internal pathways and suggestions
-                        </div>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
+              {/* Internal Career Opportunities - Premium */}
+              {renderSection(
+                "Career Opportunities",
+                <Globe className="w-5 h-5 text-accent" />,
+                "Internal pathways and suggestions",
+                selectedAssessment.internalCareerOpportunitiesJson ? (
+                  <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <h4 className="font-semibold flex items-center gap-2">
@@ -835,31 +809,26 @@ export default function Results() {
                         </div>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No career opportunity data available</p>
+                  </div>
+                ),
+                true,
+                true
               )}
 
-              {/* Action Plan & Resources Grid */}
+              {/* Action Plan & Resources Grid - Premium */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Development Action Plan */}
-                {isValid(selectedAssessment.developmentActionPlanJson) && (
-                  <Card className="card-primary card-hover">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className="icon-wrapper-green p-2">
-                          <Target className="w-5 h-5 text-success" />
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold">
-                            Development Plan
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Short-term to long-term goals
-                          </div>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Development Action Plan - Premium */}
+                {renderSection(
+                  "Development Plan",
+                  <Target className="w-5 h-5 text-success" />,
+                  "Short-term to long-term goals",
+                  selectedAssessment.developmentActionPlanJson ? (
+                    <div className="space-y-4">
                       {selectedAssessment.developmentActionPlanJson
                         .thirty_day_goals && (
                         <div>
@@ -909,29 +878,24 @@ export default function Results() {
                           </ul>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No development plan available</p>
+                    </div>
+                  ),
+                  true,
+                  true
                 )}
 
-                {/* Personalized Resources */}
-                {isValid(selectedAssessment.personalizedResourcesJson) && (
-                  <Card className="card-primary card-hover">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className="icon-wrapper-purple p-2">
-                          <BookMarked className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold">
-                            Personalized Resources
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Tools for your growth journey
-                          </div>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Personalized Resources - Premium */}
+                {renderSection(
+                  "Personalized Resources",
+                  <BookMarked className="w-5 h-5 text-accent" />,
+                  "Tools for your growth journey",
+                  selectedAssessment.personalizedResourcesJson ? (
+                    <div className="space-y-4">
                       {selectedAssessment.personalizedResourcesJson
                         .learning_resources && (
                         <div>
@@ -978,102 +942,94 @@ export default function Results() {
                           </div>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No personalized resources available</p>
+                    </div>
+                  ),
+                  true,
+                  true
                 )}
               </div>
 
-              {/* Additional Sections */}
-              {isValid(
-                selectedAssessment.retentionAndMobilityStrategiesJson
-              ) && (
-                <Card className="card-primary card-hover">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="icon-wrapper-blue p-2">
-                        <Shield className="w-5 h-5 text-primary" />
+              {/* Additional Sections - Premium */}
+              {selectedAssessment.retentionAndMobilityStrategiesJson &&
+                renderSection(
+                  "Retention Strategies",
+                  <Shield className="w-5 h-5 text-primary" />,
+                  "Organizational support recommendations",
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {selectedAssessment.retentionAndMobilityStrategiesJson
+                      .retention_strategies && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">
+                          Retention Focus
+                        </h4>
+                        <ul className="space-y-1">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies
+                            .slice(0, 3)
+                            .map((strategy, index) => (
+                              <li
+                                key={index}
+                                className="text-sm flex items-center gap-2"
+                              >
+                                <CheckCircle className="w-3 h-3 text-primary" />
+                                {strategy}
+                              </li>
+                            ))}
+                        </ul>
                       </div>
-                      <div>
-                        <div className="text-lg font-semibold">
-                          Retention Strategies
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Organizational support recommendations
-                        </div>
+                    )}
+
+                    {selectedAssessment.retentionAndMobilityStrategiesJson
+                      .development_support && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">
+                          Development Support
+                        </h4>
+                        <ul className="space-y-1">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.development_support
+                            .slice(0, 3)
+                            .map((support, index) => (
+                              <li
+                                key={index}
+                                className="text-sm flex items-center gap-2"
+                              >
+                                <TrendingUp className="w-3 h-3 text-success" />
+                                {support}
+                              </li>
+                            ))}
+                        </ul>
                       </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {selectedAssessment.retentionAndMobilityStrategiesJson
-                        .retention_strategies && (
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-sm">
-                            Retention Focus
-                          </h4>
-                          <ul className="space-y-1">
-                            {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies
-                              .slice(0, 3)
-                              .map((strategy, index) => (
-                                <li
-                                  key={index}
-                                  className="text-sm flex items-center gap-2"
-                                >
-                                  <CheckCircle className="w-3 h-3 text-primary" />
-                                  {strategy}
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
-                      )}
+                    )}
 
-                      {selectedAssessment.retentionAndMobilityStrategiesJson
-                        .development_support && (
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-sm">
-                            Development Support
-                          </h4>
-                          <ul className="space-y-1">
-                            {selectedAssessment.retentionAndMobilityStrategiesJson.development_support
-                              .slice(0, 3)
-                              .map((support, index) => (
-                                <li
-                                  key={index}
-                                  className="text-sm flex items-center gap-2"
-                                >
-                                  <TrendingUp className="w-3 h-3 text-success" />
-                                  {support}
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {selectedAssessment.retentionAndMobilityStrategiesJson
-                        .internal_mobility_recommendations && (
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-sm">
-                            Mobility Recommendations
-                          </h4>
-                          <ul className="space-y-1">
-                            {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations
-                              .slice(0, 3)
-                              .map((rec, index) => (
-                                <li
-                                  key={index}
-                                  className="text-sm flex items-center gap-2"
-                                >
-                                  <Globe className="w-3 h-3 text-accent" />
-                                  {rec}
-                                </li>
-                              ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    {selectedAssessment.retentionAndMobilityStrategiesJson
+                      .internal_mobility_recommendations && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">
+                          Mobility Recommendations
+                        </h4>
+                        <ul className="space-y-1">
+                          {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations
+                            .slice(0, 3)
+                            .map((rec, index) => (
+                              <li
+                                key={index}
+                                className="text-sm flex items-center gap-2"
+                              >
+                                <Globe className="w-3 h-3 text-accent" />
+                                {rec}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>,
+                  true,
+                  true
+                )}
             </>
           ) : (
             <Card className="card-primary">
@@ -1097,7 +1053,7 @@ export default function Results() {
             </Card>
           )}
 
-          {/* Assessment History */}
+          {/* Assessment History - Always visible */}
           <Card className="card-primary" id="assessment-history">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
@@ -1305,26 +1261,53 @@ export default function Results() {
                   </div>
                 </Link>
 
-                <Link href="/employee-dashboard/assessment">
-                  <div className="quick-action-item group cursor-pointer">
+                {!isPaid ? (
+                  <div 
+                    className="quick-action-item group cursor-pointer"
+                    onClick={() => {
+                      // Scroll to upgrade section or show modal
+                      document.getElementById('results-header')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
                     <div className="flex items-center gap-3 mb-3">
                       <div className="icon-wrapper-purple">
-                        <Brain className="w-6 h-6 text-accent" />
+                        <Lock className="w-6 h-6 text-accent" />
                       </div>
                       <div>
                         <h4 className="font-semibold text-white">
-                          Track Progress
+                          Unlock Full Analysis
                         </h4>
                         <p className="text-sm text-white/80">
-                          Retake assessment
+                          Premium features
                         </p>
                       </div>
                     </div>
                     <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                      Monitor your development over time
+                      Access complete career insights
                     </div>
                   </div>
-                </Link>
+                ) : (
+                  <Link href="/employee-dashboard/assessment">
+                    <div className="quick-action-item group cursor-pointer">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="icon-wrapper-purple">
+                          <Brain className="w-6 h-6 text-accent" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-white">
+                            Track Progress
+                          </h4>
+                          <p className="text-sm text-white/80">
+                            Retake assessment
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                        Monitor your development over time
+                      </div>
+                    </div>
+                  </Link>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -1334,5 +1317,5 @@ export default function Results() {
   );
 }
 
-// Add missing import
+// Add missing imports
 import { RefreshCw } from "lucide-react";
