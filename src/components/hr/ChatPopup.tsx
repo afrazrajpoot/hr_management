@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, X, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 interface ChatMessage {
   role: string;
@@ -41,7 +42,7 @@ export default function ChatPopup({
   const [isFetchingConversation, setIsFetchingConversation] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  const { data: session } = useSession();
   useEffect(() => {
     // Only fetch if dialog is open and we have required data
     if (isOpen && hrId && department?.department) {
@@ -245,6 +246,10 @@ export default function ChatPopup({
         }/api/chat/${hrId}/${encodeURIComponent(department.department)}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.fastApiToken}`,
+          },
         }
       );
 
