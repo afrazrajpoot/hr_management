@@ -158,17 +158,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
               </div>
             </div>
 
-            {!canEditEmployment && (
-              <div className="flex items-center gap-2">
-                <div className="icon-wrapper-blue p-2">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <Badge className="badge-blue">
-                  <Lock className="w-3 h-3 mr-1" />
-                  HR Managed
-                </Badge>
-              </div>
-            )}
+
             
             {canEditEmployment && (
               <div className="ml-auto flex items-center gap-2">

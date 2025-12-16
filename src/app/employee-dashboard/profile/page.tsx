@@ -350,45 +350,33 @@ const EmployeeProfilePage: React.FC = () => {
               value={activeTab}
               onValueChange={setActiveTab}
             >
-              <TabsList className="grid w-full grid-cols-4 bg-card border border-input p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-4 bg-transparent border-none rounded-xl h-14">
                 <TabsTrigger
                   value="personal"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
-                  <div className="flex items-center gap-2 p-2">
-                    <User className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
-                    <span className="text-sm font-medium">Personal</span>
-                  </div>
+                  <span className="text-sm font-medium">Personal</span>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="employment"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
-                  <div className="flex items-center gap-2 p-2">
-                    <Briefcase className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
-                    <span className="text-sm font-medium">Employment</span>
-                  </div>
+                  <span className="text-sm font-medium">Employment</span>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="skills"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
-                  <div className="flex items-center gap-2 p-2">
-                    <Award className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
-                    <span className="text-sm font-medium">Skills</span>
-                  </div>
+                  <span className="text-sm font-medium">Skills</span>
                 </TabsTrigger>
 
                 <TabsTrigger
                   value="experience"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 group"
+                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
-                  <div className="flex items-center gap-2 p-2">
-                    <BookOpen className="w-5 h-5 text-muted-foreground group-data-[state=active]:text-primary-foreground transition-colors" />
-                    <span className="text-sm font-medium">Experience</span>
-                  </div>
+                  <span className="text-sm font-medium">Experience</span>
                 </TabsTrigger>
               </TabsList>
 
