@@ -19,15 +19,21 @@ import {
   Calendar,
   Award,
   BookOpen,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import { Education } from "../../../types/profileTypes";
 
 interface EducationTabProps {
   isEditing: boolean;
   control: any;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
-const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control }) => {
+const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit, onSave, onCancel }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "education",
@@ -64,6 +70,38 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control }) => {
                 Your academic achievements and qualifications
               </CardDescription>
             </div>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  onClick={onSave}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save
+                </Button>
+                <Button
+                  onClick={onCancel}
+                  variant="outline"
+                  className="border-input"
+                  size="sm"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={onEdit}
+                className="btn-gradient-primary"
+                size="sm"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
         </CardHeader>
 

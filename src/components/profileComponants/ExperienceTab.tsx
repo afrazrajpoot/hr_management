@@ -19,6 +19,9 @@ import {
   Calendar,
   Building2,
   FileText,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import InfoField from "./InfoField";
 import { Experience } from "../../../types/profileTypes";
@@ -27,11 +30,17 @@ import { experienceFields } from "@/config/profileData";
 interface ExperienceTabProps {
   isEditing: boolean;
   control: any;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 const ExperienceTab: React.FC<ExperienceTabProps> = ({
   isEditing,
   control,
+  onEdit,
+  onSave,
+  onCancel,
 }) => {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -68,6 +77,38 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               <CardDescription className="text-muted-foreground text-base">
                 Showcase your professional journey and achievements
               </CardDescription>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={onSave}
+                    className="btn-gradient-primary"
+                    size="sm"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                  <Button
+                    onClick={onCancel}
+                    variant="outline"
+                    className="border-input"
+                    size="sm"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={onEdit}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>

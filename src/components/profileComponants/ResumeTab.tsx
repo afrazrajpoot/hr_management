@@ -7,7 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Download } from "lucide-react";
+import { Upload, Download, Edit, Save, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Employee } from "../../../types/profileTypes";
 // import { Employee } from "./types";
@@ -15,11 +15,19 @@ import { Employee } from "../../../types/profileTypes";
 interface ResumeTabProps {
   formData: Employee;
   handleResumeUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 const ResumeTab: React.FC<ResumeTabProps> = ({
   formData,
   handleResumeUpload,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
 }) => (
   <motion.div
     variants={{
@@ -31,8 +39,44 @@ const ResumeTab: React.FC<ResumeTabProps> = ({
   >
     <Card>
       <CardHeader>
-        <CardTitle>Resume Management</CardTitle>
-        <CardDescription>Upload and manage your resume</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Resume Management</CardTitle>
+            <CardDescription>Upload and manage your resume</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  onClick={onSave}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save
+                </Button>
+                <Button
+                  onClick={onCancel}
+                  variant="outline"
+                  className="border-input"
+                  size="sm"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={onEdit}
+                className="btn-gradient-primary"
+                size="sm"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <motion.div

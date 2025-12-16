@@ -267,11 +267,8 @@ const EmployeeProfilePage: React.FC = () => {
             <ProfileHeader
               employee={employee}
               formData={formData}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              handleSave={handleSubmit(handleSave)}
-              handleCancel={handleCancel}
               handleAvatarUpload={handleAvatarUpload}
+              isEditing={isEditing}
             />
           </motion.div>
 
@@ -421,6 +418,9 @@ const EmployeeProfilePage: React.FC = () => {
                       employee={employee}
                       isEditing={isEditing}
                       control={control}
+                      onEdit={() => setIsEditing(true)}
+                      onSave={handleSubmit(handleSave)}
+                      onCancel={handleCancel}
                     />
                   </div>
                 </TabsContent>
@@ -445,6 +445,9 @@ const EmployeeProfilePage: React.FC = () => {
                       isEditing={isEditing}
                       control={control}
                       userHrId={session?.user?.hrId}
+                      onEdit={() => setIsEditing(true)}
+                      onSave={handleSubmit(handleSave)}
+                      onCancel={handleCancel}
                     />
                   </div>
                 </TabsContent>
@@ -464,7 +467,13 @@ const EmployeeProfilePage: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <SkillsTab isEditing={isEditing} control={control} />
+                    <SkillsTab 
+                      isEditing={isEditing} 
+                      control={control}
+                      onEdit={() => setIsEditing(true)}
+                      onSave={handleSubmit(handleSave)}
+                      onCancel={handleCancel}
+                    />
                   </div>
                 </TabsContent>
 
@@ -484,7 +493,13 @@ const EmployeeProfilePage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <ExperienceTab isEditing={isEditing} control={control} />
+                      <ExperienceTab 
+                        isEditing={isEditing} 
+                        control={control}
+                        onEdit={() => setIsEditing(true)}
+                        onSave={handleSubmit(handleSave)}
+                        onCancel={handleCancel}
+                      />
                     </div>
 
                     <div className="card-primary p-6">
@@ -501,7 +516,13 @@ const EmployeeProfilePage: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <EducationTab isEditing={isEditing} control={control} />
+                      <EducationTab 
+                        isEditing={isEditing} 
+                        control={control}
+                        onEdit={() => setIsEditing(true)}
+                        onSave={handleSubmit(handleSave)}
+                        onCancel={handleCancel}
+                      />
                     </div>
 
                     {/* Resume Section (Optional) */}
@@ -523,6 +544,10 @@ const EmployeeProfilePage: React.FC = () => {
                         <ResumeTab
                           formData={formData}
                           handleResumeUpload={handleResumeUpload}
+                          onEdit={() => setIsEditing(true)}
+                          onSave={handleSubmit(handleSave)}
+                          onCancel={handleCancel}
+                          isEditing={isEditing}
                         />
                       </div>
                     )}
@@ -532,28 +557,7 @@ const EmployeeProfilePage: React.FC = () => {
             </Tabs>
           </motion.div>
 
-          {/* Action Buttons (Mobile) */}
-          {isEditing && (
-            <div className="fixed bottom-6 left-6 right-6 z-10 md:hidden">
-              <div className="card-primary shadow-xl p-4">
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleCancel}
-                    className="flex-1 px-4 py-3 border border-input rounded-lg font-medium hover:bg-muted transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubmit(handleSave)}
-                    className="flex-1 px-4 py-3 btn-gradient-primary rounded-lg font-medium text-white"
-                  >
-                    <CheckCircle className="w-4 h-4 inline mr-2" />
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Action Buttons (Mobile) - Removed as requested */}
 
           {/* Profile Tips */}
           {!isEditing && profileCompletion < 100 && (

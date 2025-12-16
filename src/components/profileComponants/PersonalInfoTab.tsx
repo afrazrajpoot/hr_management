@@ -22,7 +22,11 @@ import {
   Heart,
   Sparkles,
   Shield,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import InfoField from "./InfoField";
 import { Employee } from "../../../types/profileTypes";
 import { personalInfoFields } from "@/config/profileData";
@@ -31,12 +35,18 @@ interface PersonalInfoTabProps {
   employee: Employee;
   isEditing: boolean;
   control: any;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   employee,
   isEditing,
   control,
+  onEdit,
+  onSave,
+  onCancel,
 }: any) => {
   // Get field display value
   const getFieldValue = (fieldName: string) => {
@@ -127,12 +137,39 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   : "Your personal details and contact information"}
               </CardDescription>
             </div>
-            {!isEditing && (
-              <Badge className="badge-green ml-auto">
-                <Shield className="w-3 h-3 mr-1" />
-                Verified
-              </Badge>
-            )}
+
+            <div className="ml-auto flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={onSave}
+                    className="btn-gradient-primary"
+                    size="sm"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                  <Button
+                    onClick={onCancel}
+                    variant="outline"
+                    className="border-input"
+                    size="sm"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={onEdit}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
 

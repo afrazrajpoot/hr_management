@@ -5,9 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Upload,
-  Save,
-  X,
-  Edit,
   Mail,
   Phone,
   MapPin,
@@ -22,21 +19,15 @@ import { Employee } from "../../../types/profileTypes";
 interface ProfileHeaderProps {
   employee: Employee;
   formData: Employee;
-  isEditing: boolean;
-  setIsEditing: (value: boolean) => void;
-  handleSave: () => Promise<void>;
-  handleCancel: () => void;
   handleAvatarUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  isEditing: boolean;
 }
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   employee,
   formData,
-  isEditing,
-  setIsEditing,
-  handleSave,
-  handleCancel,
   handleAvatarUpload,
+  isEditing,
 }) => {
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -215,54 +206,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-3">
-                  {isEditing ? (
-                    <>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleSave}
-                          className="btn-gradient-primary w-full"
-                          size="lg"
-                        >
-                          <Save size={18} className="mr-2" />
-                          Save Changes
-                        </Button>
-                      </motion.div>
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          onClick={handleCancel}
-                          variant="outline"
-                          className="w-full border-input"
-                          size="lg"
-                        >
-                          <X size={18} className="mr-2" />
-                          Cancel
-                        </Button>
-                      </motion.div>
-                    </>
-                  ) : (
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        onClick={() => setIsEditing(true)}
-                        className="btn-gradient-primary w-full"
-                        size="lg"
-                      >
-                        <Edit size={18} className="mr-2" />
-                        Edit Profile
-                      </Button>
-                    </motion.div>
-                  )}
-                </div>
+                {/* Action Buttons - Removed as requested */}
+                {/* Buttons moved to individual tabs */}
               </div>
 
               {/* Profile Progress Bar */}

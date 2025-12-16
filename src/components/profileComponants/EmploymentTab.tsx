@@ -19,7 +19,11 @@ import {
   Sparkles,
   TrendingUp,
   Award,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import InfoField from "./InfoField";
 import { Employee } from "../../../types/profileTypes";
 import { employmentFields } from "@/config/profileData";
@@ -31,6 +35,9 @@ interface EmploymentTabProps {
   isEditing: boolean;
   control: any;
   userHrId?: string | null;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 const EmploymentTab: React.FC<EmploymentTabProps> = ({
@@ -38,6 +45,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   isEditing,
   control,
   userHrId,
+  onEdit,
+  onSave,
+  onCancel,
 }) => {
   // Get field display value
   const getFieldValue = (fieldName: string): any => {
@@ -45,7 +55,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   };
 
   // Allow editing only if userHrId is null or undefined
-  const canEditEmployment = !userHrId;
+  const canEditEmployment = !!userHrId;
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -157,6 +167,41 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   <Lock className="w-3 h-3 mr-1" />
                   HR Managed
                 </Badge>
+              </div>
+            )}
+            
+            {canEditEmployment && (
+              <div className="ml-auto flex items-center gap-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      onClick={onSave}
+                      className="btn-gradient-primary"
+                      size="sm"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </Button>
+                    <Button
+                      onClick={onCancel}
+                      variant="outline"
+                      className="border-input"
+                      size="sm"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={onEdit}
+                    className="btn-gradient-primary"
+                    size="sm"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
               </div>
             )}
           </div>

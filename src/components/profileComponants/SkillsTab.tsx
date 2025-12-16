@@ -14,7 +14,6 @@ import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
-  X,
   Zap,
   Code,
   Lightbulb,
@@ -26,6 +25,9 @@ import {
   TrendingUp,
   Award,
   Brain,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import { Employee } from "../../../types/profileTypes";
 
@@ -37,9 +39,12 @@ interface Skill {
 interface SkillsTabProps {
   isEditing: boolean;
   control: Control<Employee>;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
-const SkillsTab: React.FC<SkillsTabProps> = ({ isEditing, control }: any) => {
+const SkillsTab: React.FC<SkillsTabProps> = ({ isEditing, control, onEdit, onSave, onCancel }: any) => {
   const [newSkill, setNewSkill] = useState<string>("");
   const [newProficiency, setNewProficiency] = useState<number>(50);
   const [state, updateState] = useState<boolean>(false);
@@ -177,6 +182,38 @@ const SkillsTab: React.FC<SkillsTabProps> = ({ isEditing, control }: any) => {
                 Showcase your technical and professional competencies with
                 proficiency levels
               </CardDescription>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={onSave}
+                    className="btn-gradient-primary"
+                    size="sm"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                  <Button
+                    onClick={onCancel}
+                    variant="outline"
+                    className="border-input"
+                    size="sm"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={onEdit}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
