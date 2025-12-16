@@ -339,22 +339,22 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                 </Button>
 
                 {/* Settings */}
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
                 >
                   <Settings className="h-5 w-5" />
-                </Button>
+                </Button> */}
 
                 {/* Help */}
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
                 >
                   <HelpCircle className="h-5 w-5" />
-                </Button>
+                </Button> */}
 
                 {/* Notifications Dropdown */}
                 <DropdownMenu
