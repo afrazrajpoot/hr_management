@@ -50,6 +50,7 @@ const mapApiToCareerData = (apiData: any) => {
     status: job.status || "Unknown",
     saved: false,
     description: job.description || "No description available",
+    sourceUrl: job.source_url || job.sourceUrl || null,
     companies: [
       job.recruiter
         ? `${job.recruiter.firstName} ${job.recruiter.lastName}`
@@ -154,18 +155,19 @@ export default function CareerPathways() {
   useEffect(() => {
     if (
       status === "authenticated" &&
-      session?.user?.hrId &&
       session?.user?.id &&
       !hasFetchedRef.current
     ) {
       hasFetchedRef.current = true;
+      // Use existing HR ID or generate a random one
+      const hrId = session.user.hrId || `hr-${Math.random().toString(36).substring(7)}`;
+      
       getRecommendations({
-        recruiter_id: session.user.hrId,
+        recruiter_id: hrId,
         employee_id: session.user.id,
       });
     } else if (
       status !== "authenticated" ||
-      !session?.user?.hrId ||
       !session?.user?.id
     ) {
       console.warn(
@@ -280,8 +282,14 @@ export default function CareerPathways() {
   const handleApply = async (
     jobId: string,
     jobTitle: string,
-    matchScore: number
+    matchScore: number,
+    sourceUrl?: string
   ) => {
+    if (sourceUrl) {
+      window.open(sourceUrl, "_blank");
+      return;
+    }
+
     if (appliedJobs.includes(jobId)) {
       alert("You have already applied for this job.");
       return;
@@ -300,7 +308,7 @@ export default function CareerPathways() {
           },
           body: JSON.stringify({
             job_id: jobId,
-            hr_id: session?.user?.hrId,
+            hr_id: session?.user?.hrId || `hr-${Math.random().toString(36).substring(7)}`,
             user_id: session?.user?.id,
             score: matchScore,
           }),
@@ -553,7 +561,12 @@ export default function CareerPathways() {
                     <Button
                       size="sm"
                       onClick={() =>
-                        handleApply(career.id, career.title, career.matchScore)
+                        handleApply(
+                          career.id,
+                          career.title,
+                          career.matchScore,
+                          career.sourceUrl
+                        )
                       }
                       disabled={
                         appliedJobs.includes(career.id) ||

@@ -20,7 +20,12 @@ import {
 interface JobDetailsModalProps {
   job: any | null;
   onClose: () => void;
-  onApply?: (jobId: string, jobTitle: string, matchScore: number) => void;
+  onApply?: (
+    jobId: string,
+    jobTitle: string,
+    matchScore: number,
+    sourceUrl?: string
+  ) => void;
   appliedJobs: string[];
   applyingJobIds: Set<string>;
 }
@@ -106,7 +111,12 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
       alert("You have already applied for this job.");
       return;
     }
-    onApply(job.id || "", job.title || "", job.matchScore || 0);
+    onApply(
+      job.id || "",
+      job.title || "",
+      job.matchScore || 0,
+      job.sourceUrl
+    );
   };
 
   return (
