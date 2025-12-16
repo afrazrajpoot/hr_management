@@ -591,26 +591,25 @@ export default function Assessments() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - FIXED ICON POSITIONING */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-blue">
-                      <FileText className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-purple-600/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Total Assessments
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Assessments
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                        {metrics.totalAssessments}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                    {metrics.totalAssessments}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center">
-                  <FileText className="h-7 w-7 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -618,22 +617,21 @@ export default function Assessments() {
 
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-green">
-                      <Sparkles className="h-4 w-4 text-success" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success/20 to-green-600/10 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="h-5 w-5 text-success" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Completed
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Completed
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                        {metrics.completedCount}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
-                    {metrics.completedCount}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-success/10 to-green-600/10 flex items-center justify-center">
-                  <Sparkles className="h-7 w-7 text-success" />
                 </div>
               </div>
             </CardContent>
@@ -641,22 +639,21 @@ export default function Assessments() {
 
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-amber">
-                      <Target className="h-4 w-4 text-warning" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-warning/20 to-amber-600/10 flex items-center justify-center flex-shrink-0">
+                      <Target className="h-5 w-5 text-warning" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Not Started
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Not Started
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                        {metrics.notStartedCount}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
-                    {metrics.notStartedCount}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-warning/10 to-amber-600/10 flex items-center justify-center">
-                  <Target className="h-7 w-7 text-warning" />
                 </div>
               </div>
             </CardContent>
@@ -664,154 +661,110 @@ export default function Assessments() {
 
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-purple">
-                      <Award className="h-4 w-4 text-purple-600" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 flex items-center justify-center flex-shrink-0">
+                      <Award className="h-5 w-5 text-purple-600" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Avg Genius Score
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Avg Genius Score
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        {metrics.avgScore}/100
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {metrics.avgScore}/100
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
-                  <Award className="h-7 w-7 text-purple-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Search & Filters Section */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Search className="h-5 w-5 text-primary" />
-                Find Assessments
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Search and filter employee assessments
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by employee name, department, or position..."
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    className="pl-10 h-12 border-border/50 focus:border-primary"
-                  />
-                </div>
-                <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Search
-                </button>
-              </div>
+        {/* Search & Filters Section - FIXED LAYOUT */}
+   <div className="grid gap-6 lg:grid-cols-2">
+  <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
+    <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
+      <CardTitle className="flex items-center gap-2 text-foreground">
+        <Search className="h-5 w-5 text-primary" />
+        Find Assessments
+      </CardTitle>
+      <CardDescription className="text-muted-foreground">
+        Search and filter employee assessments
+      </CardDescription>
+    </CardHeader>
+    <CardContent className="p-6">
+      <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+        {/* Search Input */}
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by employee name, department, or position..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            className="pl-10 h-12 border-border/50 focus:border-primary w-full bg-card"
+          />
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Filter className="h-3 w-3" />
-                    Status Filter
-                  </label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="border-border/50">
-                      <SelectValue placeholder="All Statuses" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="Completed">Completed</SelectItem>
-                      <SelectItem value="Not Started">Not Started</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+        {/* Status Filter */}
+        <div className="w-full lg:w-auto">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-12 border-border/50 w-full lg:w-[180px] bg-card hover:bg-card/90">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent className="bg-card border border-border shadow-lg">
+              <SelectItem value="all" className="hover:bg-muted focus:bg-muted">
+                All Statuses
+              </SelectItem>
+              <SelectItem value="Completed" className="hover:bg-muted focus:bg-muted">
+                Completed
+              </SelectItem>
+              <SelectItem value="Not Started" className="hover:bg-muted focus:bg-muted">
+                Not Started
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <Users className="h-3 w-3" />
-                    Department Filter
-                  </label>
-                  <Select
-                    value={departmentFilter}
-                    onValueChange={setDepartmentFilter}
+        {/* Department Filter */}
+        <div className="w-full lg:w-auto">
+          <Select
+            value={departmentFilter}
+            onValueChange={setDepartmentFilter}
+          >
+            <SelectTrigger className="h-12 border-border/50 w-full lg:w-[200px] bg-card hover:bg-card/90">
+              <SelectValue placeholder="All Departments" />
+            </SelectTrigger>
+            <SelectContent className="bg-card border border-border shadow-lg max-h-[300px] overflow-y-auto">
+              <SelectItem value="all" className="hover:bg-muted focus:bg-muted">
+                All Departments
+              </SelectItem>
+              {Array.from(new Set(dashboardOptions.Departments.map(dept => dept.option))).map((deptName, index) => {
+                const dept = dashboardOptions.Departments.find(d => d.option === deptName);
+                return dept ? (
+                  <SelectItem 
+                    key={dept.value || deptName} 
+                    value={dept.value || deptName}
+                    className="bg-card border border-border shadow-lg"
                   >
-                    <SelectTrigger className="border-border/50">
-                      <SelectValue placeholder="All Departments" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Departments</SelectItem>
-                      {dashboardOptions.Departments.map(
-                        (dept: { option: string; value: string }) => (
-                          <SelectItem key={dept.value} value={dept.value}>
-                            {dept.option}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          {/* <Card className="quick-actions-card border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-white">Assessment Tools</CardTitle>
-              <CardDescription className="text-white/70">
-                Quick actions and insights
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[
-                {
-                  icon: Download,
-                  label: "Export All Reports",
-                  color: "from-primary to-purple-600",
-                },
-                {
-                  icon: BarChart3,
-                  label: "Analytics Dashboard",
-                  color: "from-success to-green-500",
-                },
-                {
-                  icon: TrendingUp,
-                  label: "Track Progress",
-                  color: "from-warning to-amber-500",
-                },
-                {
-                  icon: Target,
-                  label: "Schedule Batch",
-                  color: "from-blue-500 to-cyan-500",
-                },
-              ].map((action, index) => (
-                <button
-                  key={index}
-                  className="quick-action-item w-full text-left flex items-center justify-between p-3 hover:scale-[1.02] transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`h-10 w-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
-                    >
-                      <action.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="text-white font-medium">
-                      {action.label}
-                    </span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </button>
-              ))}
-            </CardContent>
-          </Card> */}
+                    {dept.option}
+                  </SelectItem>
+                ) : null;
+              })}
+            </SelectContent>
+          </Select>
         </div>
+
+        {/* Search Button */}
+        <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center justify-center gap-2 whitespace-nowrap w-full lg:w-auto">
+          <Search className="h-4 w-4" />
+          Search
+        </button>
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
         {/* Employee Assessment Grid */}
         <div className="space-y-4">

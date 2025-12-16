@@ -482,109 +482,109 @@ const DepartmentDashboard = () => {
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary Cards - Fixed Icon Positioning */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Card 1: Total Departments */}
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-blue">
-                      <Building2 className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Building2 className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Total Departments
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Departments
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                        {deptData.length}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                    {deptData.length}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center">
-                  <Building2 className="h-7 w-7 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Card 2: Total Employees */}
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-green">
-                      <Users className="h-4 w-4 text-success" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-5 w-5 text-success" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Total Employees
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Employees
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                        {totalEmployees}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
-                    {totalEmployees}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-success/10 to-green-600/10 flex items-center justify-center">
-                  <Users className="h-7 w-7 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Card 3: Net Movement */}
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-purple">
-                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-purple-600/10 flex items-center justify-center flex-shrink-0">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Net Movement
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Net Movement
+                      </p>
+                      <div className="flex items-end gap-2">
+                        <span
+                          className={`text-3xl font-bold ${
+                            netMovement >= 0 ? "text-success" : "text-destructive"
+                          }`}
+                        >
+                          {netMovement >= 0 ? "+" : ""}
+                          {netMovement}
+                        </span>
+                        <Badge
+                          className={`${
+                            netMovement >= 0 ? "badge-green" : "badge-amber"
+                          }`}
+                        >
+                          {netMovement >= 0 ? "Growth" : "Decline"}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-end gap-2">
-                    <span
-                      className={`text-3xl font-bold ${
-                        netMovement >= 0 ? "text-success" : "text-destructive"
-                      }`}
-                    >
-                      {netMovement >= 0 ? "+" : ""}
-                      {netMovement}
-                    </span>
-                    <Badge
-                      className={`${
-                        netMovement >= 0 ? "badge-green" : "badge-amber"
-                      }`}
-                    >
-                      {netMovement >= 0 ? "Growth" : "Decline"}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
-                  <Activity className="h-7 w-7 text-purple-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Card 4: Active Departments */}
           <Card className="card-primary card-hover border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="icon-wrapper-amber">
-                      <Target className="h-4 w-4 text-warning" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-warning/20 to-amber-600/10 flex items-center justify-center flex-shrink-0">
+                      <Target className="h-5 w-5 text-warning" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Active Departments
-                    </p>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Active Departments
+                      </p>
+                      <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                        {filteredDepartments.length}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
-                    {filteredDepartments.length}
-                  </div>
-                </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-warning/10 to-amber-600/10 flex items-center justify-center">
-                  <Target className="h-7 w-7 text-warning" />
                 </div>
               </div>
             </CardContent>
@@ -618,18 +618,13 @@ const DepartmentDashboard = () => {
                   <PieChart>
                     <Pie
                       data={departmentDistributionData}
-                      cx="50%"
+                      cx="30%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
+                      innerRadius={50}
+                      outerRadius={85}
                       paddingAngle={2}
                       dataKey="value"
-                      label={({ name, percent }) =>
-                        percent > 0.05
-                          ? `${name}: ${(percent * 100).toFixed(0)}%`
-                          : ""
-                      }
-                      labelLine={false}
+                      label={false}
                     >
                       {departmentDistributionData.map((entry, index) => (
                         <Cell
@@ -646,8 +641,18 @@ const DepartmentDashboard = () => {
                       verticalAlign="middle"
                       align="right"
                       wrapperStyle={{
-                        paddingLeft: "20px",
+                        paddingLeft: "40px",
                         fontSize: "12px",
+                        maxWidth: "50%",
+                      }}
+                      formatter={(value, entry) => {
+                        const item = departmentDistributionData.find((d) => d.name === value);
+                        const percent = item ? ((item.value / item.total) * 100).toFixed(0) : 0;
+                        return (
+                          <span className="text-foreground">
+                            {value}: {percent}%
+                          </span>
+                        );
                       }}
                     />
                   </PieChart>

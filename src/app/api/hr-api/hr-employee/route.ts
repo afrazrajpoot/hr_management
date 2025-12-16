@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 interface CustomSession {
   user?: { id: string };
 }
-
 export async function GET(request: Request) {
   try {
     const session: CustomSession | null = await getServerSession(authOptions);
@@ -20,28 +19,26 @@ export async function GET(request: Request) {
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "10", 10);
     const skip = (page - 1) * limit;
-    const searchTerm = url.searchParams.get("search") || "";
-    const department = url.searchParams.get("department") || "";
-    const risk = url.searchParams.get("risk") || "";
-    const status = url.searchParams.get("status") || "";
 
-    // Build where clause for users (same as original)
+    // DECODE all parameters to handle URL encoding
+    const searchTerm = decodeURIComponent(url.searchParams.get("search") || "");
+    const department = decodeURIComponent(url.searchParams.get("department") || "");
+    const risk = decodeURIComponent(url.searchParams.get("risk") || "");
+    const status = decodeURIComponent(url.searchParams.get("status") || "");
+
+    // Debug log
+    console.log('Search parameters received:', {
+      rawSearch: url.searchParams.get("search"),
+      decodedSearch: searchTerm,
+      department,
+      risk,
+      status
+    });
+
+    // Build where clause for users
     const whereClause: any = { hrId: session.user.id };
-    
-    if (searchTerm) {
-      whereClause.OR = [
-        { firstName: { contains: searchTerm, mode: "insensitive" } },
-        { lastName: { contains: searchTerm, mode: "insensitive" } },
-        { email: { contains: searchTerm, mode: "insensitive" } },
-        { position: { hasSome: [searchTerm] } },
-      ];
-    }
-    
-    if (department && department !== "All Departments") {
-      whereClause.department = { hasSome: [department] };
-    }
 
-    // 1. Fetch all users with basic filters (we'll filter further for status/risk)
+    // 1. Fetch all users for this HR first
     const allUsers = await prisma.user.findMany({
       where: whereClause,
       select: {
@@ -68,13 +65,13 @@ export async function GET(request: Request) {
     });
 
     // 2. Get all user IDs from allUsers
-    const allUserIds = allUsers.map(user => user.id);
+    const allUserIds = allUsers.map((user: any) => user.id);
 
     // 3. Fetch all reports under this HR
     let reports = await prisma.individualEmployeeReport.findMany({
-      where: { 
+      where: {
         hrId: session.user.id,
-        userId: { in: allUserIds } // Only get reports for users we're considering
+        userId: { in: allUserIds }
       },
       select: {
         id: true,
@@ -110,12 +107,12 @@ export async function GET(request: Request) {
     // Get user IDs that have reports
     const usersWithReportsIds = [...new Set(reports.map((report: any) => report.userId))];
 
-    // 5. Group reports by userId (same as original)
+    // 5. Group reports by userId
     const grouped: Record<string, any> = {};
     for (const emp of allUsers) {
       grouped[emp.id] = { ...emp, reports: [] };
     }
-    
+
     for (const report of reports) {
       if (grouped[report.userId]) {
         grouped[report.userId].reports.push(report);
@@ -132,7 +129,6 @@ export async function GET(request: Request) {
     } else if (status === "Not Started") {
       filteredEmployeesForMetrics = filteredEmployeesForMetrics.filter((employee: any) => employee.reports.length === 0);
     }
-    // If no status or "all", keep ALL employees for metrics
 
     // Calculate metrics using full filtered dataset (not paginated)
     const totalAssessments = filteredEmployeesForMetrics.reduce(
@@ -145,16 +141,15 @@ export async function GET(request: Request) {
     const totalNotStartedEmployees = filteredEmployeesForMetrics.filter(
       (emp: any) => emp.reports.length === 0
     ).length;
-    
-    // FIXED: Calculate avgScore using genius_factor_score from risk_analysis.scores
+
+    // Calculate avgScore
     let totalGeniusScore = 0;
     let totalReportsWithScore = 0;
-    
+
     filteredEmployeesForMetrics.forEach((emp: any) => {
       emp.reports.forEach((report: any) => {
-        // Use genius_factor_score from risk_analysis.scores
         const geniusFactorScore = report?.geniusFactorScore || 0;
-        if (geniusFactorScore > 0) { // Only count valid scores
+        if (geniusFactorScore > 0) {
           totalGeniusScore += geniusFactorScore;
           totalReportsWithScore += 1;
         }
@@ -163,17 +158,75 @@ export async function GET(request: Request) {
 
     const avgScore = totalReportsWithScore > 0 ? Math.round(totalGeniusScore / totalReportsWithScore) : 0;
 
-    // 7. Apply status filter for employee list (same as original)
+    // 7. Apply FILTERS to the employee list (Search, Department, Status)
     let filteredEmployees = Object.values(grouped);
 
+    // A. Apply Search Filter (In-Memory) - FIXED VERSION
+    if (searchTerm && searchTerm.trim() !== "") {
+      const lowerSearch = searchTerm.toLowerCase().trim();
+      console.log('Applying search filter for term:', lowerSearch);
+
+      filteredEmployees = filteredEmployees.filter((emp: any) => {
+        // Search in name (first name + last name)
+        const firstName = (emp.firstName || "").toLowerCase();
+        const lastName = (emp.lastName || "").toLowerCase();
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const nameMatch = firstName.includes(lowerSearch) ||
+          lastName.includes(lowerSearch) ||
+          fullName.includes(lowerSearch);
+
+        // Search in email - ensure case insensitive
+        const email = (emp.email || "").toLowerCase();
+        const emailMatch = email.includes(lowerSearch);
+
+        // Search in position - handle various data types
+        let positionMatch = false;
+
+        if (emp.position) {
+          if (Array.isArray(emp.position)) {
+            // Handle array of positions
+            positionMatch = emp.position.some((pos: any) => {
+              if (typeof pos === 'string') {
+                return pos.toLowerCase().includes(lowerSearch);
+              } else if (pos && typeof pos === 'object') {
+                const posString = JSON.stringify(pos).toLowerCase();
+                return posString.includes(lowerSearch);
+              }
+              return false;
+            });
+          } else if (typeof emp.position === 'string') {
+            // Handle string position
+            positionMatch = emp.position.toLowerCase().includes(lowerSearch);
+          } else if (typeof emp.position === 'object') {
+            // Handle object position
+            const posString = JSON.stringify(emp.position).toLowerCase();
+            positionMatch = posString.includes(lowerSearch);
+          }
+        }
+
+        // Return true if any search field matches
+        return nameMatch || emailMatch || positionMatch;
+      });
+
+      console.log('Number of employees after search filtering:', filteredEmployees.length);
+    }
+
+    // B. Apply Department Filter (In-Memory)
+    if (department && department !== "All Departments") {
+      filteredEmployees = filteredEmployees.filter((emp: any) => {
+        if (Array.isArray(emp.department)) {
+          return emp.department.includes(department);
+        }
+        return emp.department === department;
+      });
+    }
+
+    // C. Apply Status Filter
     if (status === "Completed") {
-      // Only employees with reports
       filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length > 0);
     } else if (status === "Not Started") {
-      // Only employees without reports
       filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length === 0);
     }
-    // If no status or "all", keep ALL employees (including those with and without reports)
 
     // 8. Sort by ID for consistent ordering
     filteredEmployees = filteredEmployees.sort((a: any, b: any) => a.id.localeCompare(b.id));
@@ -187,28 +240,8 @@ export async function GET(request: Request) {
     // 11. Calculate total pages
     const totalPages = Math.ceil(filteredTotalEmployees / limit);
 
-    // 12. Log for debugging
-    allUsers.forEach((emp: any) => {
-      if (!emp.employee) {
-        console.warn(
-          `User ${emp.id} (${emp.email}) has no employee record. employeeId: ${emp.employeeId}`
-        );
-      }
-    });
-
-    console.log('Status filter applied:', status, 'Total employees:', filteredTotalEmployees, 'With reports:', usersWithReportsIds.length);
-    console.log('Metrics calculated:', { 
-      totalAssessments, 
-      totalCompletedEmployees, 
-      totalNotStartedEmployees, 
-      avgScore,
-      totalReportsWithScore,
-      totalGeniusScore 
-    });
-
     return NextResponse.json(
       {
-        // Paginated employees list
         employees: paginatedEmployees,
         pagination: {
           currentPage: page,
@@ -216,12 +249,11 @@ export async function GET(request: Request) {
           totalEmployees: filteredTotalEmployees,
           limit,
         },
-        // Full metrics data (not paginated)
         metrics: {
           totalAssessments,
           completedCount: totalCompletedEmployees,
           notStartedCount: totalNotStartedEmployees,
-          inProgressCount: 0, // No in-progress reports in data
+          inProgressCount: 0,
           avgScore,
         }
       },

@@ -323,7 +323,7 @@ export default function Employees() {
           </Card>
         </div>
 
-        {/* Search & Filters Section */}
+        {/* Search & Filters Section - FIXED HEIGHTS */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Quick Stats & Search */}
           <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
@@ -333,24 +333,18 @@ export default function Employees() {
                 Find employees by name, department, or risk level
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <CardContent>
+              <div className="flex flex-col lg:flex-row gap-3 items-stretch">
+                <div className="relative flex-1 min-w-0">
+                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, email, or position..."
                     value={searchInput}
                     onChange={handleSearchChange}
-                    className="pl-10 h-12 border-border/50 focus:border-primary"
+                    className="pl-10 h-12 border-border/50 focus:border-primary w-full"
                   />
                 </div>
-                <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Search
-                </button>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <Select
                   value={selectedDepartment}
                   onValueChange={(value) => {
@@ -358,10 +352,10 @@ export default function Employees() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-12 border-border/50">
+                  <SelectTrigger className="h-12 border-border/50 min-w-[160px]">
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border border-border shadow-lg">
                     {uniqueDepartments.map((dept) => (
                       <SelectItem key={dept.value} value={dept.value}>
                         {dept.option}
@@ -377,10 +371,10 @@ export default function Employees() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-12 border-border/50">
+                  <SelectTrigger className="h-12 border-border/50 min-w-[150px]">
                     <SelectValue placeholder="All Risk Levels" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border border-border shadow-lg">
                     {uniqueRiskLevels.map((risk: any) => (
                       <SelectItem key={risk.option} value={risk.value}>
                         {risk.option}
@@ -396,10 +390,10 @@ export default function Employees() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-12 border-border/50">
+                  <SelectTrigger className="h-12 border-border/50 min-w-[140px]">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card border border-border shadow-lg">
                     {assessmentStatuses.map((status) => (
                       <SelectItem key={status} value={status}>
                         {status}
@@ -407,6 +401,11 @@ export default function Employees() {
                     ))}
                   </SelectContent>
                 </Select>
+
+                <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center justify-center gap-2 whitespace-nowrap">
+                  <Search className="h-4 w-4" />
+                  Search
+                </button>
               </div>
             </CardContent>
           </Card>
