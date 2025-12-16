@@ -47,6 +47,7 @@ import { useGetHrEmployeeQuery } from "@/redux/hr-api";
 import AssessmentDetailsModal from "@/components/hr/AssessmentDetailsModal";
 import Loader from "@/components/Loader";
 import { dashboardOptions } from "@/app/data";
+import SearchFilterBar from "@/components/hr/SearchFilterBar";
 
 const AssessmentCard = ({ employee, onViewDetails }: any) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -683,88 +684,53 @@ export default function Assessments() {
         </div>
 
         {/* Search & Filters Section - FIXED LAYOUT */}
-   <div className="grid gap-6 lg:grid-cols-2">
-  <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
-    <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
-      <CardTitle className="flex items-center gap-2 text-foreground">
-        <Search className="h-5 w-5 text-primary" />
-        Find Assessments
-      </CardTitle>
-      <CardDescription className="text-muted-foreground">
-        Search and filter employee assessments
-      </CardDescription>
-    </CardHeader>
-    <CardContent className="p-6">
-      <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-        {/* Search Input */}
-        <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-          <Input
+        {/* Search & Filters Section - FIXED LAYOUT */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SearchFilterBar
+            title="Find Assessments"
+            description="Search and filter employee assessments"
+            searchValue={searchValue}
+            onSearchChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search by employee name, department, or position..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="pl-10 h-12 border-border/50 focus:border-primary w-full bg-card"
+            filters={[
+              {
+                type: "select",
+                value: statusFilter,
+                onChange: setStatusFilter,
+                options: [
+                  { label: "All Statuses", value: "all" },
+                  { label: "Completed", value: "Completed" },
+                  { label: "Not Started", value: "Not Started" },
+                ],
+                placeholder: "All Statuses",
+                className: "w-full lg:w-[180px]",
+              },
+              {
+                type: "select",
+                value: departmentFilter,
+                onChange: setDepartmentFilter,
+                options: [
+             
+                  ...Array.from(
+                    new Set(
+                      dashboardOptions.Departments.map((dept) => dept.option)
+                    )
+                  ).map((deptName) => {
+                    const dept = dashboardOptions.Departments.find(
+                      (d) => d.option === deptName
+                    );
+                    return {
+                      label: dept?.option || deptName,
+                      value: dept?.value || deptName,
+                    };
+                  }),
+                ],
+                placeholder: "All Departments",
+                className: "w-full lg:w-[200px]",
+              },
+            ]}
           />
         </div>
-
-        {/* Status Filter */}
-        <div className="w-full lg:w-auto">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-12 border-border/50 w-full lg:w-[180px] bg-card hover:bg-card/90">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent className="bg-card border border-border shadow-lg">
-              <SelectItem value="all" className="hover:bg-muted focus:bg-muted">
-                All Statuses
-              </SelectItem>
-              <SelectItem value="Completed" className="hover:bg-muted focus:bg-muted">
-                Completed
-              </SelectItem>
-              <SelectItem value="Not Started" className="hover:bg-muted focus:bg-muted">
-                Not Started
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Department Filter */}
-        <div className="w-full lg:w-auto">
-          <Select
-            value={departmentFilter}
-            onValueChange={setDepartmentFilter}
-          >
-            <SelectTrigger className="h-12 border-border/50 w-full lg:w-[200px] bg-card hover:bg-card/90">
-              <SelectValue placeholder="All Departments" />
-            </SelectTrigger>
-            <SelectContent className="bg-card border border-border shadow-lg max-h-[300px] overflow-y-auto">
-              <SelectItem value="all" className="hover:bg-muted focus:bg-muted">
-                All Departments
-              </SelectItem>
-              {Array.from(new Set(dashboardOptions.Departments.map(dept => dept.option))).map((deptName, index) => {
-                const dept = dashboardOptions.Departments.find(d => d.option === deptName);
-                return dept ? (
-                  <SelectItem 
-                    key={dept.value || deptName} 
-                    value={dept.value || deptName}
-                    className="bg-card border border-border shadow-lg"
-                  >
-                    {dept.option}
-                  </SelectItem>
-                ) : null;
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Search Button */}
-        <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center justify-center gap-2 whitespace-nowrap w-full lg:w-auto">
-          <Search className="h-4 w-4" />
-          Search
-        </button>
-      </div>
-    </CardContent>
-  </Card>
-</div>
 
         {/* Employee Assessment Grid */}
         <div className="space-y-4">

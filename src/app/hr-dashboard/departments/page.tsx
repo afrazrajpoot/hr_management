@@ -618,7 +618,7 @@ const DepartmentDashboard = () => {
                   <PieChart>
                     <Pie
                       data={departmentDistributionData}
-                      cx="30%"
+                      cx="50%"
                       cy="50%"
                       innerRadius={50}
                       outerRadius={85}
@@ -940,9 +940,9 @@ const DepartmentDashboard = () => {
             <span>•</span>
             <span>{totalEmployees} total employees</span>
           </div>
-          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             Generate Report <ArrowRight className="h-3 w-3" />
-          </button>
+          </button> */}
         </div>
 
         {/* Employee Detail Modal */}

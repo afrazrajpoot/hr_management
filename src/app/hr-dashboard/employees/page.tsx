@@ -40,6 +40,7 @@ import { useSession } from "next-auth/react";
 import { dashboardOptions } from "@/app/data";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import SearchFilterBar, { FilterConfig } from "@/components/hr/SearchFilterBar";
 
 const assessmentStatuses = ["All Statuses", "Completed", "Not Started"];
 
@@ -230,21 +231,19 @@ export default function Employees() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <div className="icon-wrapper-blue">
-                      <Users className="h-4 w-4 text-primary" />
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Total Employees
                     </p>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  <div className="text-3xl ml-[3vw] font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                     {totalEmployees}
                   </div>
                 </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center">
-                  <Users className="h-7 w-7 text-primary" />
-                </div>
+              
               </div>
             </CardContent>
           </Card>
@@ -253,21 +252,21 @@ export default function Employees() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <div className="icon-wrapper-green">
-                      <Target className="h-4 w-4 text-success" />
+                      <Target className="h-6 w-6 text-success" />
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Assessment Rate
                     </p>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold ml-[3vw] bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
                     {completionRate}%
                   </div>
                 </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-success/10 to-green-600/10 flex items-center justify-center">
+                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-success/10 to-green-600/10 flex items-center justify-center">
                   <Target className="h-7 w-7 text-success" />
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -276,21 +275,21 @@ export default function Employees() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <div className="icon-wrapper-amber">
-                      <Shield className="h-4 w-4 text-warning" />
+                      <Shield className="h-6 w-6 text-warning" />
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">
                       High Risk
                     </p>
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                  <div className="text-3xl ml-[3vw] font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
                     {highRiskEmployees}
                   </div>
                 </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-warning/10 to-amber-600/10 flex items-center justify-center">
+                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-warning/10 to-amber-600/10 flex items-center justify-center">
                   <Shield className="h-7 w-7 text-warning" />
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -299,15 +298,15 @@ export default function Employees() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 ">
                     <div className="icon-wrapper-purple">
-                      <Zap className="h-4 w-4 text-purple-600" />
+                      <Zap className="h-6 w-6 text-purple-600" />
                     </div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Active Filters
                     </p>
                   </div>
-                  <div className="text-2xl font-bold text-foreground">
+                  <div className="text-2xl ml-[3vw] font-bold text-foreground">
                     {
                       [selectedDepartment, selectedRisk, selectedStatus].filter(
                         (item) => !item.includes("All")
@@ -315,9 +314,9 @@ export default function Employees() {
                     }
                   </div>
                 </div>
-                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
+                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
                   <Filter className="h-7 w-7 text-purple-600" />
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -326,89 +325,58 @@ export default function Employees() {
         {/* Search & Filters Section - FIXED HEIGHTS */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Quick Stats & Search */}
-          <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-foreground">Employee Search</CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Find employees by name, department, or risk level
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col lg:flex-row gap-3 items-stretch">
-                <div className="relative flex-1 min-w-0">
-                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, email, or position..."
-                    value={searchInput}
-                    onChange={handleSearchChange}
-                    className="pl-10 h-12 border-border/50 focus:border-primary w-full"
-                  />
-                </div>
-
-                <Select
-                  value={selectedDepartment}
-                  onValueChange={(value) => {
-                    setSelectedDepartment(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="h-12 border-border/50 min-w-[160px]">
-                    <SelectValue placeholder="All Departments" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border border-border shadow-lg">
-                    {uniqueDepartments.map((dept) => (
-                      <SelectItem key={dept.value} value={dept.value}>
-                        {dept.option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedRisk}
-                  onValueChange={(value) => {
-                    setSelectedRisk(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="h-12 border-border/50 min-w-[150px]">
-                    <SelectValue placeholder="All Risk Levels" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border border-border shadow-lg">
-                    {uniqueRiskLevels.map((risk: any) => (
-                      <SelectItem key={risk.option} value={risk.value}>
-                        {risk.option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedStatus}
-                  onValueChange={(value) => {
-                    setSelectedStatus(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="h-12 border-border/50 min-w-[140px]">
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border border-border shadow-lg">
-                    {assessmentStatuses.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <button className="btn-gradient-primary px-6 h-12 rounded-lg text-white font-medium flex items-center justify-center gap-2 whitespace-nowrap">
-                  <Search className="h-4 w-4" />
-                  Search
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Quick Stats & Search */}
+          <SearchFilterBar
+            title="Employee Search"
+            description="Find employees by name, department, or risk level"
+            searchValue={searchInput}
+            onSearchChange={handleSearchChange}
+            placeholder="Search by name, email, or position..."
+            filters={[
+              {
+                type: "select",
+                value: selectedDepartment,
+                onChange: (value) => {
+                  setSelectedDepartment(value);
+                  setCurrentPage(1);
+                },
+                options: uniqueDepartments.map((dept) => ({
+                  label: dept.option,
+                  value: dept.value,
+                })),
+                placeholder: "All Departments",
+                className: "min-w-[160px]",
+              },
+              {
+                type: "select",
+                value: selectedRisk,
+                onChange: (value) => {
+                  setSelectedRisk(value);
+                  setCurrentPage(1);
+                },
+                options: uniqueRiskLevels.map((risk: any) => ({
+                  label: risk.option,
+                  value: risk.value,
+                })),
+                placeholder: "All Risk Levels",
+                className: "min-w-[150px]",
+              },
+              {
+                type: "select",
+                value: selectedStatus,
+                onChange: (value) => {
+                  setSelectedStatus(value);
+                  setCurrentPage(1);
+                },
+                options: assessmentStatuses.map((status) => ({
+                  label: status,
+                  value: status,
+                })),
+                placeholder: "All Statuses",
+                className: "min-w-[140px]",
+              },
+            ]}
+          />
         </div>
 
         {/* Employee Table */}
@@ -688,9 +656,9 @@ export default function Employees() {
             <span>•</span>
             <span>Last updated: Just now</span>
           </div>
-          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             Need Help? <ChevronRight className="h-3 w-3" />
-          </button>
+          </button> */}
         </div>
       </div>
     </HRLayout>

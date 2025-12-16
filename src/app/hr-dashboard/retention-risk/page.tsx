@@ -90,18 +90,18 @@ const RiskStatCard = ({
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 ">
             <div
               className={`icon-wrapper-${
                 trend === "up" ? "amber" : trend === "down" ? "green" : "blue"
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-6 w-6" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="text-3xl ml-[2vw] font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
               {value}
             </span>
             {change && (
@@ -127,9 +127,9 @@ const RiskStatCard = ({
             <p className="text-xs text-muted-foreground mt-3">{description}</p>
           )}
         </div>
-        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+        {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
           <Icon className="h-7 w-7" />
-        </div>
+        </div> */}
       </div>
     </CardContent>
   </Card>

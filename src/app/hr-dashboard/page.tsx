@@ -109,14 +109,14 @@ const StatCard = ({
     <CardContent className="p-6 relative z-10">
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 ">
             <div className="icon-wrapper-blue">
-              <Icon className="h-4 w-4 text-primary" />
+              <Icon className="h-6 w-6 text-primary" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
           </div>
           <div className="flex items-end gap-3">
-            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="text-3xl ml-[2vw] font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
               {value}
             </span>
             {change && (
@@ -135,9 +135,9 @@ const StatCard = ({
             <p className="text-xs text-muted-foreground mt-3">{description}</p>
           )}
         </div>
-        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
           <Icon className="h-7 w-7 text-primary" />
-        </div>
+        </div> */}
       </div>
     </CardContent>
   </Card>
@@ -1099,9 +1099,9 @@ export default function Dashboard() {
             <span>•</span>
             <span>{totalEmployees} employees in system</span>
           </div>
-          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             Export Report <ArrowUpRight className="h-3 w-3" />
-          </button>
+          </button> */}
         </div>
       </div>
     </HRLayout>
