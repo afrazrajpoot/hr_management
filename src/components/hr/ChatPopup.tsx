@@ -59,6 +59,7 @@ export default function ChatPopup({
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${session?.user?.fastApiToken}`,
               },
             }
           );
@@ -193,6 +194,7 @@ export default function ChatPopup({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.user?.fastApiToken}`,
           },
           body: JSON.stringify(payload),
         }
