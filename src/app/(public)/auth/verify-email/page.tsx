@@ -6,32 +6,33 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Mail, CheckCircle, AlertCircle, Loader2, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function VerifyEmailContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [otp, setOtp] = useState('');
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const email = searchParams.get('email');
+  const email = searchParams.get('email') || session?.user?.email;
 
-  useEffect(() => {
-    if (token) {
-      verifyEmail(token);
+  const handleVerify = async () => {
+    if (!otp || otp.length < 6) {
+      setMessage('Please enter a valid 6-digit code');
+      setIsSuccess(false);
+      return;
     }
-  }, [token]);
 
-  const verifyEmail = async (verificationToken: string) => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: verificationToken }),
+        body: JSON.stringify({ token: otp }),
       });
 
       const data = await response.json();
@@ -76,9 +77,8 @@ function VerifyEmailContent() {
   const resendVerification = async () => {
     try {
       setIsLoading(true);
-      const emailToUse = email || session?.user?.email;
       
-      if (!emailToUse) {
+      if (!email) {
         setMessage('No email address found. Please sign in again.');
         return;
       }
@@ -86,14 +86,14 @@ function VerifyEmailContent() {
       const response = await fetch('/api/auth/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailToUse }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
-      setMessage(data.message || 'Verification email sent!');
+      setMessage(data.message || 'Verification code sent!');
       setIsSuccess(true);
     } catch (error) {
-      setMessage('Failed to send verification email');
+      setMessage('Failed to send verification code');
       setIsSuccess(false);
     } finally {
       setIsLoading(false);
@@ -124,7 +124,7 @@ function VerifyEmailContent() {
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             >
-              <Mail className="h-10 w-10 text-white" />
+              <Lock className="h-10 w-10 text-white" />
             </motion.div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
               Verify Your Email
@@ -132,11 +132,11 @@ function VerifyEmailContent() {
             <CardDescription className="text-gray-600 dark:text-gray-300 text-base">
               {email ? (
                 <>
-                  We've sent a verification link to<br />
+                  We've sent a 6-digit code to<br />
                   <span className="font-semibold text-blue-600 dark:text-blue-400">{email}</span>
                 </>
               ) : (
-                "We've sent a verification link to your email address"
+                "Enter the 6-digit code sent to your email"
               )}
             </CardDescription>
           </CardHeader>
@@ -160,54 +160,61 @@ function VerifyEmailContent() {
               </motion.div>
             )}
             
-            {!token && (
-              <div className="text-center text-sm text-gray-600 dark:text-gray-300 space-y-3 bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-800/30">
-                <p className="leading-relaxed font-medium">
-                  Please check your inbox and click the verification link to continue.
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Don't forget to check your spam folder if you don't see it.
-                </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="otp" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Verification Code
+                </label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Enter 6-digit code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  className="text-center text-2xl tracking-widest h-14 font-mono"
+                  maxLength={6}
+                />
               </div>
-            )}
 
-            {!token && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-3"
+              <Button
+                onClick={handleVerify}
+                disabled={isLoading || otp.length < 6}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg"
               >
-                <Button
-                  onClick={resendVerification}
-                  disabled={isLoading}
-                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    'Resend Verification Email'
-                  )}
-                </Button>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify Email'
+                )}
+              </Button>
+            </div>
 
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/auth/sign-in')}
-                  className="w-full h-12 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300 rounded-lg font-medium"
-                >
-                  Back to Sign In
-                </Button>
-              </motion.div>
-            )}
-
-            {isLoading && token && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              </div>
-            )}
+            <div className="pt-4 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Didn't receive the code?
+              </p>
+              <Button
+                variant="outline"
+                onClick={resendVerification}
+                disabled={isLoading}
+                className="w-full h-10 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
+                Resend Code
+              </Button>
+            </div>
+            
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => router.push('/auth/sign-in')}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Back to Sign In
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>

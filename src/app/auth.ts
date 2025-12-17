@@ -46,7 +46,7 @@ export const authOptions: AuthOptions = {
         // User doesn't exist - CREATE NEW USER (initial signup)
         if (!user) {
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
-          const verificationToken = crypto.randomBytes(32).toString('hex');
+          const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
           user = await prisma.user.create({
             data: {

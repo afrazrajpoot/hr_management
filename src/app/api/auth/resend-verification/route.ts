@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate new verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        // Generate new verification OTP
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Update user with new token
         await prisma.user.update({

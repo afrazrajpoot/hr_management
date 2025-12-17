@@ -711,29 +711,26 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
 
     // Skip if no transporter (development mode or transporter creation failed)
     if (!transporter) {
-      console.log('📧 Email service unavailable - verification link logged below:');
+      console.log('📧 Email service unavailable - verification OTP logged below:');
       console.log('📧 Email would be sent to:', email);
-      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
-      console.log('🔗 Verification link:', verificationUrl);
+      console.log('🔐 Verification OTP:', token);
       return { messageId: 'no-transporter', success: false };
     }
-
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
 
     const mailOptions = {
       from: `"Genius Factor" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Verify Your Email Address',
-      html: getVerificationEmailHtml(verificationUrl),
+      html: getVerificationEmailHtml(token),
       text: `
         Verify Your Email Address
         
         Thank you for signing up for Genius Factor!
         
-        Please verify your email address by clicking the link below:
-        ${verificationUrl}
+        Please use the following code to verify your email address:
+        ${token}
         
-        This verification link will expire in 24 hours.
+        This code will expire in 24 hours.
         
         If you didn't create an account, you can safely ignore this email.
         
@@ -768,9 +765,8 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
   } catch (error: any) {
     console.error('❌ Error sending verification email:', error);
 
-    // Log the verification link for development purposes
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
-    console.log('📧 User can use this verification link:', verificationUrl);
+    // Log the verification OTP for development purposes
+    console.log('🔐 User can use this verification OTP:', token);
 
     // Return error info instead of throwing to allow user flow to continue
     return { messageId: 'error', success: false, error };
