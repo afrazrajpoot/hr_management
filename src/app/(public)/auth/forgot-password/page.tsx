@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ type FormData = {
 const ForgotPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -55,9 +57,14 @@ const ForgotPasswordPage = () => {
       }
 
       setIsSubmitted(true);
-      toast.success("Reset link sent to your email!");
+      toast.success("Reset code sent to your email!");
+      
+      // Redirect to reset password page with email
+      setTimeout(() => {
+        router.push(`/auth/reset-password?email=${encodeURIComponent(data.email)}`);
+      }, 1500);
     } catch (error: any) {
-      toast.error(error.message || "Failed to send reset link");
+      toast.error(error.message || "Failed to send reset code");
     } finally {
       setIsLoading(false);
     }

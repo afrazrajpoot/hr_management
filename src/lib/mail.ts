@@ -305,10 +305,10 @@
 
 //         We received a request to reset your password for your Genius Factor account.
 
-//         Click the link below to create a new password:
-//         ${resetUrl}
+//         Use the following code to reset your password:
+//         ${token}
 
-//         This reset link will expire in 1 hour.
+//         This code will expire in 1 hour.
 
 //         If you didn't request a password reset, you can safely ignore this email.
 
@@ -791,22 +791,20 @@ export const sendPasswordResetEmail = async (email: string, token: string): Prom
       return { messageId: 'no-transporter', success: false };
     }
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
-
     const mailOptions = {
       from: `"Genius Factor" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Reset Your Password',
-      html: getPasswordResetEmailHtml(resetUrl),
+      html: getPasswordResetEmailHtml(token),
       text: `
         Reset Your Password
         
         We received a request to reset your password for your Genius Factor account.
         
-        Click the link below to create a new password:
-        ${resetUrl}
+        Use the following code to reset your password:
+        ${token}
         
-        This reset link will expire in 1 hour.
+        This code will expire in 1 hour.
         
         If you didn't request a password reset, you can safely ignore this email.
         

@@ -20,7 +20,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "If an account exists with this email, a password reset link has been sent." });
         }
 
-        const resetToken = crypto.randomBytes(32).toString("hex");
+        // Generate 6-digit OTP
+        const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
         const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour expiry
 
         await prisma.user.update({

@@ -32,26 +32,23 @@ const ResetPasswordForm = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const emailParam = searchParams.get("email");
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormData & { otp: string }>({
     defaultValues: {
       password: "",
       confirmPassword: "",
+      otp: "",
     },
   });
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (!token) {
-      toast.error("Invalid or missing reset token");
-      return;
-    }
-
+  const onSubmit: SubmitHandler<FormData & { otp: string }> = async (data) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/reset-password", {
@@ -60,7 +57,7 @@ const ResetPasswordForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token,
+          token: data.otp,
           password: data.password,
         }),
       });
@@ -119,28 +116,6 @@ const ResetPasswordForm = () => {
     },
   };
 
-  if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-4">
-        <Card className="bg-slate-800 border-slate-700 max-w-md w-full">
-          <CardHeader>
-            <CardTitle className="text-red-500">Invalid Link</CardTitle>
-            <CardDescription className="text-slate-400">
-              The password reset link is invalid or missing. Please request a new one.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Link href="/auth/forgot-password">
-              <Button variant="outline" className="w-full text-slate-200 border-slate-600 hover:bg-slate-700">
-                Request New Link
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-900">
       <motion.div
@@ -186,7 +161,7 @@ const ResetPasswordForm = () => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <CardDescription className="text-slate-400 text-base">
-                Enter your new password below
+                Enter the code sent to {emailParam || "your email"} and your new password
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -198,6 +173,45 @@ const ResetPasswordForm = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-5"
               >
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="otp"
+                    className="text-sm font-medium text-slate-300"
+                  >
+                    Verification Code
+                  </Label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-3 top-3.5 h-4 w-4 text-slate-500" />
+                    <Input
+                      id="otp"
+                      type="text"
+                      placeholder="Enter 6-digit code"
+                      {...register("otp", {
+                        required: "Verification code is required",
+                        minLength: {
+                          value: 6,
+                          message: "Code must be 6 digits",
+                        },
+                        maxLength: {
+                          value: 6,
+                          message: "Code must be 6 digits",
+                        },
+                      })}
+                      disabled={isLoading}
+                      className="pl-10 h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300 tracking-widest"
+                    />
+                  </div>
+                  {errors.otp && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-sm text-red-500"
+                    >
+                      {errors.otp.message}
+                    </motion.p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <Label
                     htmlFor="password"
