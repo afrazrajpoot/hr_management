@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useSocket } from "@/context/SocketContext";
 
 const navigation = [
@@ -76,6 +76,12 @@ const navigation = [
     icon: Bot,
     color: "from-purple-500 to-purple-600",
   },
+  {
+    name: "Community",
+    href: "/employee-dashboard/community",
+    icon: Users,
+    color: "from-cyan-500 to-cyan-600",
+  },
 ];
 
 export function AppSidebar() {
@@ -84,6 +90,7 @@ export function AppSidebar() {
   const location = usePathname();
   const { theme, setTheme } = useTheme();
   const { isConnected, notifications, clearNotifications } = useSocket();
+  const { data: session } = useSession();
 
   const toggleTheme = (): void => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -139,6 +146,11 @@ export function AppSidebar() {
       {/* Navigation */}
       <nav className="relative z-10 flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
+          // Hide Community link if user is paid
+          if (item.name === "Community" && session?.user?.paid) {
+            return null;
+          }
+          
           const isActive = location === item.href;
           return (
             <Link
