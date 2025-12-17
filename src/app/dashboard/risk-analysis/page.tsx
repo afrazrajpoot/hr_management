@@ -263,7 +263,7 @@ export default function RiskAnalysis() {
               Monitor and mitigate retention risks across all organizations
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Button variant="outline" className="hover:bg-muted">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -272,7 +272,7 @@ export default function RiskAnalysis() {
               <AlertTriangle className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Admin Filter */}

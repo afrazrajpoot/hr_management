@@ -476,7 +476,7 @@ export default function HROverview() {
               Comprehensive analytics across all HR managers
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Select value={dateRange} onValueChange={setDateRange}>
               <SelectTrigger className="w-40">
                 <Clock className="h-4 w-4 mr-2" />
@@ -499,7 +499,7 @@ export default function HROverview() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Admin Banner */}

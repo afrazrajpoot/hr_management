@@ -258,7 +258,7 @@ export default function Mobility() {
               Monitor career movements and progression across organizations
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Button variant="outline" className="hover:bg-muted">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -267,7 +267,7 @@ export default function Mobility() {
               <Plus className="h-4 w-4 mr-2" />
               Track Movement
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Filter Card */}

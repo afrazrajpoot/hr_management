@@ -562,7 +562,7 @@ export default function Assessments() {
               Manage and review all career assessments ({stats.total} employees)
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Button variant="outline" className="hover:bg-muted">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -571,7 +571,7 @@ export default function Assessments() {
               <Plus className="h-4 w-4 mr-2" />
               Add Employee
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Cards */}

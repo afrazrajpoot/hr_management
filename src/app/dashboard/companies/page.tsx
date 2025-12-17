@@ -507,7 +507,7 @@ export default function Companies() {
               Manage and monitor all connected HR organizations
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Button className="btn-gradient-primary">
               <Plus className="h-4 w-4 mr-2" />
               Add Organization
@@ -529,7 +529,7 @@ export default function Companies() {
                 <DropdownMenuItem>View Analytics</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Cards */}
