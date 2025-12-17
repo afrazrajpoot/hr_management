@@ -88,7 +88,7 @@ export function HRSidebar() {
       "sidebar-nav-item px-3 py-2.5 rounded-lg transition-all duration-200",
       isActive(path)
         ? "sidebar-nav-item-active bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary text-primary shadow-sm"
-        : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+        : "hover:bg-white/10 text-white/70 hover:text-white"
     );
   };
 
@@ -97,7 +97,7 @@ export function HRSidebar() {
       "transition-colors duration-200",
       isActive(path)
         ? "text-primary"
-        : "text-muted-foreground group-hover:text-foreground"
+        : "text-white/70 group-hover:text-white"
     );
   };
 
@@ -117,7 +117,7 @@ export function HRSidebar() {
               <span className="text-lg font-bold text-white gradient-text-primary">
                 Genius Factor
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-white/70">
                 HR Analytics Suite
               </span>
             </div>
@@ -126,7 +126,7 @@ export function HRSidebar() {
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-6 py-2">
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white/60 px-6 py-2">
             Dashboard
           </SidebarGroupLabel>
           <SidebarGroupContent className="px-3 space-y-1">

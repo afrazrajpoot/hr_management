@@ -403,13 +403,13 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               <span className="text-sm text-muted-foreground">
                 No assessments completed yet
               </span>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 className="mt-3 border-primary text-primary hover:bg-primary/10"
               >
                 Schedule Assessment
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>
@@ -880,9 +880,9 @@ export default function Assessments() {
             <span>•</span>
             <span>Avg score: {metrics.avgScore}/100</span>
           </div>
-          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             Assessment Guide <ChevronRight className="h-3 w-3" />
-          </button>
+          </button> */}
         </div>
 
         {/* Assessment Details Modal */}

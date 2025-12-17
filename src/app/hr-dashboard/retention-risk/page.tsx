@@ -952,9 +952,9 @@ export default function RetentionRisk() {
             <span>•</span>
             <span>Last updated: Just now</span>
           </div>
-          <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
             Need Help? <ChevronRight className="h-3 w-3" />
-          </button>
+          </button> */}
         </div>
 
         {/* Chat Popup */}

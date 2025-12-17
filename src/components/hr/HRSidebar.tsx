@@ -179,10 +179,10 @@ export default function HRSidebar({
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 overflow-hidden">
-                <h1 className="text-xl font-bold text-foreground tracking-tight">
+                <h1 className="text-xl font-bold text-white tracking-tight">
                   GeniusFactor
                 </h1>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-white/70 truncate">
                   HR Management Suite
                 </p>
               </div>
@@ -199,7 +199,7 @@ export default function HRSidebar({
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
-            className="text-muted-foreground hover:text-foreground hover:bg-secondary p-2 rounded-lg transition-all border border-border"
+            className="text-white/70 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all border border-white/20"
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -245,7 +245,7 @@ export default function HRSidebar({
                     "w-5 h-5 transition-colors duration-300",
                     active
                       ? "text-white"
-                      : "text-muted-foreground group-hover:text-foreground"
+                      : "text-white/70 group-hover:text-white"
                   )}
                 />
               </div>
@@ -257,7 +257,7 @@ export default function HRSidebar({
                         "font-medium transition-colors duration-300",
                         active
                           ? "text-white"
-                          : "text-foreground group-hover:text-foreground/90"
+                          : "text-white group-hover:text-white/90"
                       )}
                     >
                       {item.name}
@@ -276,7 +276,7 @@ export default function HRSidebar({
                   <p
                     className={cn(
                       "text-xs mt-0.5 truncate transition-colors duration-300",
-                      active ? "text-white/80" : "text-muted-foreground"
+                      active ? "text-white/80" : "text-white/60"
                     )}
                   >
                     {item.description}
