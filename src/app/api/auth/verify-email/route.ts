@@ -1,6 +1,7 @@
 // app/api/auth/verify-email/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendWelcomeEmail } from '@/lib/mail';
 
 export async function POST(request: NextRequest) {
     try {
@@ -32,6 +33,16 @@ export async function POST(request: NextRequest) {
                 verificationToken: null,
             },
         });
+
+        // Send welcome email
+        if (updatedUser.email) {
+            try {
+                await sendWelcomeEmail(updatedUser.email, updatedUser.firstName || 'User');
+            } catch (emailError) {
+                console.error('Failed to send welcome email:', emailError);
+                // Continue execution - don't fail the verification if email fails
+            }
+        }
 
         return NextResponse.json({
             message: 'Email verified successfully',

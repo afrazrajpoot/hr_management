@@ -230,3 +230,4 @@ export const getPasswordResetEmailHtml = (resetUrl: string, recipientName?: stri
   </style>
 </body>
 </html>
+`
