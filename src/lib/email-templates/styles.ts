@@ -1,14 +1,20 @@
 export const emailStyles = {
-    mainBackground: '#f4f7f6',
-    containerBackground: '#ffffff',
-    primaryColor: '#667eea',
-    secondaryColor: '#764ba2',
-    textColor: '#333333',
-    textMuted: '#718096',
-    fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-    borderRadius: '12px',
-    buttonGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    headerGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  mainBackground: '#f4f7f6',
+  containerBackground: '#ffffff',
+  primaryColor: '#667eea',
+  secondaryColor: '#764ba2',
+  accentColor: '#f59e0b', // Added for accent
+  successColor: '#10b981', // Added for success
+  warningColor: '#f59e0b', // Added for warning
+  destructiveColor: '#ef4444', // Added for destructive
+  mutedColor: '#f1f5f9', // Added for muted background
+  borderColor: '#e2e8f0', // Added for border
+  textColor: '#333333',
+  textMuted: '#718096',
+  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+  borderRadius: '12px',
+  buttonGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  headerGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
 };
 
 export const commonHead = `
