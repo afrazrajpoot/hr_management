@@ -50,7 +50,38 @@ import Loader from "@/components/Loader";
 import { useGetAssessmentResultsQuery } from "@/redux/employe-api";
 import { useSession } from "next-auth/react";
 
-// ... (keep all your existing interfaces as they are)
+interface Assessment {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  geniusFactorScore: number;
+  alignmentScore?: number | string;
+  geniusFactorProfileJson: {
+    primary_genius_factor: string;
+    secondary_genius_factor: string;
+    key_strengths: string[];
+    weakness: string[];
+    description: string;
+    secondary_description: string;
+    energy_sources?: string[];
+  };
+  executiveSummary: string;
+  currentRoleAlignmentAnalysisJson?: {
+    alignment_score: number | string;
+    retention_risk_level: string;
+    strengths_utilized: string[];
+    underutilized_talents: string[];
+  };
+  internalCareerOpportunitiesJson?: {
+    primary_industry: string;
+    secondary_industry?: string;
+    transition_timeline?: Record<string, string>;
+    recommended_departments?: string[];
+    specific_role_suggestions?: string[];
+  };
+  retentionAndMobilityStrategiesJson?: any;
+}
 
 const isValid = (value: any): boolean => {
   if (value === null || value === undefined) return false;
@@ -104,7 +135,12 @@ export default function Results() {
           assessment.retentionAndMobilityStrategiesJson
       );
       
-      setIsPaid(hasFullAccess);
+      // If the API explicitly returns paid status, use it. Otherwise fallback to data check.
+      if (data.paid !== undefined) {
+        setIsPaid(data.paid);
+      } else {
+        setIsPaid(hasFullAccess);
+      }
       
       const sortedAssessments = [...assessmentsData].sort(
         (a, b) =>
@@ -159,14 +195,15 @@ export default function Results() {
     description: string,
     content: React.ReactNode,
     isPremium: boolean = false,
-    showBlur: boolean = false
+    showBlur: boolean = false,
+    unblurredContent: React.ReactNode = null
   ) => {
     const shouldBlur = !isPaid && isPremium;
     const isVisible = isPaid || showAllContent || !shouldBlur;
     
     return (
       <Card className="card-primary card-hover relative overflow-hidden">
-        {shouldBlur && (
+        {shouldBlur && !unblurredContent && (
           <div className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
@@ -222,7 +259,35 @@ export default function Results() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {content}
+          {unblurredContent && (
+            <div className="mb-6">
+                {unblurredContent}
+            </div>
+          )}
+          <div className="relative">
+             {shouldBlur && unblurredContent && (
+              <div className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="bg-primary/10 p-4 rounded-full mb-4">
+                    <Lock className="w-12 h-12 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">Premium Content</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md">
+                    Unlock your full Genius Factor analysis including detailed career insights, alignment scores, and personalized development plans.
+                  </p>
+                  <Button
+                    onClick={() => setShowAllContent(true)}
+                    className="btn-gradient-primary"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview Full Analysis
+                  </Button>
+                </div>
+              </div>
+            )}
+            {content}
+          </div>
         </CardContent>
       </Card>
     );
@@ -612,39 +677,6 @@ export default function Results() {
                 selectedAssessment.currentRoleAlignmentAnalysisJson ? (
                   <div className="space-y-6">
                     {selectedAssessment.currentRoleAlignmentAnalysisJson
-                      ?.alignment_score && (
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
-                        <div>
-                          <div className="text-sm font-medium text-warning">
-                            Alignment Score
-                          </div>
-                          <div className="text-2xl font-bold">
-                            {
-                              selectedAssessment
-                                .currentRoleAlignmentAnalysisJson
-                                .alignment_score
-                            }
-                          </div>
-                        </div>
-                        <Badge
-                          className={`badge-${
-                            selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level
-                              ?.toLowerCase()
-                              .includes("low")
-                              ? "green"
-                              : "amber"
-                          }`}
-                        >
-                          <Shield className="w-3 h-3 mr-1" />
-                          {
-                            selectedAssessment.currentRoleAlignmentAnalysisJson
-                              .retention_risk_level
-                          }
-                        </Badge>
-                      </div>
-                    )}
-
-                    {selectedAssessment.currentRoleAlignmentAnalysisJson
                       ?.strengths_utilized && (
                       <div>
                         <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -691,13 +723,45 @@ export default function Results() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No alignment data available</p>
-                  </div>
+                  (!selectedAssessment.alignmentScore && !isPaid) && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No alignment data available</p>
+                    </div>
+                  )
                 ),
                 true,
-                true
+                true,
+                // Unblurred Content (Alignment Score)
+                (selectedAssessment.alignmentScore || selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score) ? (
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
+                    <div>
+                      <div className="text-sm font-medium text-warning">
+                        Alignment Score
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {selectedAssessment.alignmentScore || selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score}
+                      </div>
+                    </div>
+                    {selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level && (
+                      <Badge
+                        className={`badge-${
+                          selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level
+                            ?.toLowerCase()
+                            .includes("low")
+                            ? "green"
+                            : "amber"
+                        }`}
+                      >
+                        <Shield className="w-3 h-3 mr-1" />
+                        {
+                          selectedAssessment.currentRoleAlignmentAnalysisJson
+                            .retention_risk_level
+                        }
+                      </Badge>
+                    )}
+                  </div>
+                ) : null
               )}
 
               {/* Internal Career Opportunities - Premium */}

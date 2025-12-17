@@ -27,32 +27,48 @@ export async function GET() {
       },
     });
 
-    // If user is not paid, return minimal data
+    // If user is not paid, return limited data including weakness and alignment score
     if (!user?.paid) {
-      const minimalData = assessmentResults.map((result) => ({
-        id: result.id,
-        createdAt: result.createdAt,
-        updatedAt: result.updatedAt,
-        userId: result.userId,
-        geniusFactorScore: result.geniusFactorScore,
-        geniusFactorProfileJson: {
-          primary_genius_factor: (result.geniusFactorProfileJson as any)?.primary_genius_factor || "",
-          secondary_genius_factor: (result.geniusFactorProfileJson as any)?.secondary_genius_factor || "",
-          key_strengths: (result.geniusFactorProfileJson as any)?.key_strengths || [],
-          description: (result.geniusFactorProfileJson as any)?.description || "",
-          secondary_description: (result.geniusFactorProfileJson as any)?.secondary_description || "",
-        },
-        executiveSummary: result.executiveSummary,
-      }));
+      const minimalData = assessmentResults.map((result) => {
+        const profileJson = result.geniusFactorProfileJson as any;
+        const roleAnalysis = result.currentRoleAlignmentAnalysisJson as any;
+
+        // Extract alignment score - assuming it's stored in currentRoleAlignmentAnalysisJson
+        // You might need to adjust this based on your actual data structure
+        const alignmentScore = roleAnalysis?.alignment_score ||
+          roleAnalysis?.score ||
+          roleAnalysis?.overall_score ||
+          null;
+
+        return {
+          id: result.id,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+          userId: result.userId,
+          geniusFactorScore: result.geniusFactorScore,
+          alignmentScore: alignmentScore, // Add alignment score here
+          geniusFactorProfileJson: {
+            primary_genius_factor: profileJson?.primary_genius_factor || "",
+            secondary_genius_factor: profileJson?.secondary_genius_factor || "",
+            key_strengths: profileJson?.key_strengths || [],
+            weakness: profileJson?.weakness || profileJson?.weaknesses || [],
+            description: profileJson?.description || "",
+            secondary_description: profileJson?.secondary_description || "",
+          },
+          executiveSummary: result.executiveSummary,
+        };
+      });
 
       return NextResponse.json({
         data: minimalData,
+        paid: false,
       });
     }
 
     // Return full data for paid users
     return NextResponse.json({
       data: assessmentResults,
+      paid: true,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
