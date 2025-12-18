@@ -14,11 +14,7 @@ import {
   DollarSign,
   Users,
   Target,
-  Shield,
-  Lock,
-  Sparkles,
   TrendingUp,
-  Award,
   Edit,
   Save,
   X,
@@ -34,7 +30,6 @@ interface EmploymentTabProps {
   employee: Employee;
   isEditing: boolean;
   control: any;
-  userHrId?: string | null;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -44,7 +39,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   employee,
   isEditing,
   control,
-  userHrId,
   onEdit,
   onSave,
   onCancel,
@@ -53,9 +47,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
   const getFieldValue = (fieldName: string): any => {
     return employee?.[fieldName as keyof Employee] || "";
   };
-
-  // Allow editing only if userHrId is null or undefined
-  const canEditEmployment = !!userHrId;
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -151,49 +142,43 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   Employment Details
                 </CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  {canEditEmployment
-                    ? "Your employment information and organizational details"
-                    : "Your employment information (HR Managed)"}
+                  Your employment information and organizational details
                 </CardDescription>
               </div>
             </div>
 
-
-            
-            {canEditEmployment && (
-              <div className="ml-auto flex items-center gap-2">
-                {isEditing ? (
-                  <>
-                    <Button
-                      onClick={onSave}
-                      className="btn-gradient-primary"
-                      size="sm"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </Button>
-                    <Button
-                      onClick={onCancel}
-                      variant="outline"
-                      className="border-input"
-                      size="sm"
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
+            <div className="ml-auto flex items-center gap-2">
+              {isEditing ? (
+                <>
                   <Button
-                    onClick={onEdit}
+                    onClick={onSave}
                     className="btn-gradient-primary"
                     size="sm"
                   >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
                   </Button>
-                )}
-              </div>
-            )}
+                  <Button
+                    onClick={onCancel}
+                    variant="outline"
+                    className="border-input"
+                    size="sm"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={onEdit}
+                  className="btn-gradient-primary"
+                  size="sm"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
 
@@ -253,14 +238,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   </p>
                 </div>
               </div>
-              {!canEditEmployment && (
-                <Badge
-                  variant="outline"
-                  className="border-destructive/20 text-destructive"
-                >
-                  Read Only
-                </Badge>
-              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,13 +256,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   className="group"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        !canEditEmployment
-                          ? "bg-muted/50"
-                          : "icon-wrapper-blue opacity-80"
-                      }`}
-                    >
+                    <div className="icon-wrapper-blue p-2 opacity-80">
                       {getFieldIcon(field.field)}
                     </div>
                     <label className="text-sm font-medium text-muted-foreground">
@@ -304,10 +275,10 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   </div>
                   <InfoField
                     {...field}
-                    isEditing={isEditing && canEditEmployment}
+                    isEditing={isEditing}
                     control={control}
                     defaultValue={getFieldValue(field.field)}
-                    disabled={!canEditEmployment}
+                    disabled={!isEditing}
                   />
                 </motion.div>
               ))}
@@ -350,13 +321,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   className="group"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        !canEditEmployment
-                          ? "bg-muted/50"
-                          : "icon-wrapper-purple opacity-80"
-                      }`}
-                    >
+                    <div className="icon-wrapper-purple p-2 opacity-80">
                       {getFieldIcon(field.field)}
                     </div>
                     <label className="text-sm font-medium text-muted-foreground">
@@ -368,56 +333,15 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   </div>
                   <InfoField
                     {...field}
-                    isEditing={isEditing && canEditEmployment}
+                    isEditing={isEditing}
                     control={control}
                     defaultValue={getFieldValue(field.field)}
-                    disabled={!canEditEmployment}
+                    disabled={!isEditing}
                   />
                 </motion.div>
               ))}
             </div>
           </div>
-
-          {/* Note for HR Managed Fields */}
-          {!canEditEmployment && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="p-4 rounded-lg bg-gradient-to-r from-primary/5 to-destructive/5 border border-destructive/20"
-            >
-              <div className="flex items-start gap-3">
-                <div className="icon-wrapper-blue p-2 mt-1">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-destructive" />
-                    HR Managed Fields
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Your employment details are managed by the HR department.
-                    Please contact your HR representative for any updates or
-                    corrections to this information.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <Badge variant="outline" className="border-primary/20">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Automated Updates
-                    </Badge>
-                    <Badge variant="outline" className="border-warning/20">
-                      <Award className="w-3 h-3 mr-1" />
-                      Secure Data
-                    </Badge>
-                    <Badge variant="outline" className="border-success/20">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      Real-time Sync
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </CardContent>
       </Card>
 

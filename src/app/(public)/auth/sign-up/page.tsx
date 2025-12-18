@@ -81,8 +81,6 @@ const SignUpForm = () => {
     }
   }, [searchParams]);
 
-
-
   const checkPasswordStrength = (password: string) => {
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -134,9 +132,13 @@ const SignUpForm = () => {
         setError(result.error);
         toast.error(result.error);
       } else {
-        toast.success("Account created successfully! Please verify your email.");
+        toast.success(
+          "Account created successfully! Please verify your email."
+        );
         // Redirect to email verification page
-        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
+        router.push(
+          `/auth/verify-email?email=${encodeURIComponent(data.email)}`
+        );
       }
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";
@@ -308,7 +310,7 @@ const SignUpForm = () => {
               </motion.div>
             )}
 
-            <motion.div variants={itemVariants} className="space-y-4">
+            {/* <motion.div variants={itemVariants} className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <Button
                   variant="outline"
@@ -320,12 +322,12 @@ const SignUpForm = () => {
                   Google
                 </Button>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             <motion.div variants={itemVariants} className="relative">
-              <div className="absolute inset-0 flex items-center">
+              {/* <div className="absolute inset-0 flex items-center">
                 <Separator className="bg-gray-200 dark:bg-gray-700" />
-              </div>
+              </div> */}
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">
                   Or continue with email
@@ -365,8 +367,9 @@ const SignUpForm = () => {
                           );
                         }
                       }}
-                      className={`pl-10 ${field.id === "password" ? "pr-10" : ""
-                        } h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-colors`}
+                      className={`pl-10 ${
+                        field.id === "password" ? "pr-10" : ""
+                      } h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-colors`}
                     />
                     {field.id === "password" && (
                       <button
@@ -406,12 +409,13 @@ const SignUpForm = () => {
                       Password strength:
                     </span>
                     <span
-                      className={`font-medium ${passwordStrength <= 2
-                        ? "text-red-600"
-                        : passwordStrength === 3
+                      className={`font-medium ${
+                        passwordStrength <= 2
+                          ? "text-red-600"
+                          : passwordStrength === 3
                           ? "text-yellow-600"
                           : "text-blue-500"
-                        }`}
+                      }`}
                     >
                       {getPasswordStrengthText()}
                     </span>
@@ -531,9 +535,7 @@ const SignUpForm = () => {
 
 const SignUpPage = () => {
   return (
-    <Suspense fallback={
-      <Loader />
-    }>
+    <Suspense fallback={<Loader />}>
       <SignUpForm />
     </Suspense>
   );

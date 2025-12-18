@@ -432,7 +432,6 @@ const EmployeeProfilePage: React.FC = () => {
                       employee={employee}
                       isEditing={isEditing}
                       control={control}
-                      userHrId={session?.user?.hrId}
                       onEdit={() => setIsEditing(true)}
                       onSave={handleSubmit(handleSave)}
                       onCancel={handleCancel}

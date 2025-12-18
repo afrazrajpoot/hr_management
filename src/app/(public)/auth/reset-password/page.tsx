@@ -198,7 +198,7 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300 tracking-widest"
+                      className="pl-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300 tracking-widest"
                     />
                   </div>
                   {errors.otp && (
@@ -233,7 +233,7 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 pr-10 h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300"
+                      className="pl-10 pr-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300"
                     />
                     <button
                       type="button"
@@ -281,7 +281,7 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 pr-10 h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300"
+                      className="pl-10 pr-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300"
                     />
                     <button
                       type="button"

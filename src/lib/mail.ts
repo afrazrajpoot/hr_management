@@ -860,18 +860,21 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
       return { messageId: 'no-transporter', success: false };
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const dashboardUrl = appUrl ? `${appUrl}/employee-dashboard` : '#';
+
     const mailOptions = {
       from: `"Genius Factor" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Welcome to Genius Factor!',
-      html: getWelcomeEmailHtml(firstName, `${process.env.NEXT_PUBLIC_APP_URL}/auth/sign-in`),
+      html: getWelcomeEmailHtml(firstName, dashboardUrl),
       text: `
         Welcome to Genius Factor, ${firstName}!
         
         Your account is now fully activated and ready to use.
         
-        Get started by logging in and completing your profile:
-        ${process.env.NEXT_PUBLIC_APP_URL}/auth/sign-in
+        Get started by entering your dashboard and completing your profile:
+        ${dashboardUrl}
         
         We're excited to help you discover and develop your unique talents!
         

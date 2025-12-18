@@ -313,7 +313,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   placeholder="Search employees, assessments..."
-                  className="w-64 pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 backdrop-blur-sm"
+                  className="w-64 pl-10 bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 border-slate-700 dark:border-slate-700 border-slate-300 text-foreground placeholder:text-muted-foreground backdrop-blur-sm"
                 />
               </div>
 

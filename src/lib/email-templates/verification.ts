@@ -190,20 +190,6 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                   ${char}
                 </span>
               </div>
-              
-              <!-- Number Indicator -->
-              <div style="
-                position: absolute;
-                bottom: 8px;
-                left: 0;
-                right: 0;
-                text-align: center;
-                font-size: 11px;
-                color: #94a3b8;
-                font-weight: 600;
-              ">
-                ${index + 1}
-              </div>
             </div>
           `).join('')}
         </div>

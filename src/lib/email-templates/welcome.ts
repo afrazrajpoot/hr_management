@@ -1,6 +1,14 @@
 import { emailStyles, commonHead, getHeader, getFooter } from './styles';
 
-export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
+export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const fallbackUrl = appUrl ? `${appUrl}/employee-dashboard` : '#';
+  const safeLoginUrl =
+    loginUrl && loginUrl !== 'undefined' && loginUrl !== 'null'
+      ? loginUrl
+      : fallbackUrl;
+
+  return `
 <!DOCTYPE html>
 <html>
   ${commonHead}
@@ -23,7 +31,14 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
         <div style="width: 60px; height: 60px; background: linear-gradient(135deg, ${emailStyles.primaryColor}, ${emailStyles.secondaryColor}); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 700; margin: 0 auto 20px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);">
           ${firstName.charAt(0).toUpperCase()}
         </div>
-        
+
+        <!-- Brand Logo -->
+        <div style="margin-bottom: 12px; font-size: 16px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: ${emailStyles.primaryColor};">
+          Genius
+          <span style="color: ${emailStyles.accentColor}; margin: 0 6px;">⚡</span>
+          Factor AI
+        </div>
+
         <div style="background: linear-gradient(135deg, ${emailStyles.successColor}, ${emailStyles.secondaryColor}); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 15px;">
           ACCOUNT VERIFIED • PREMIUM ACCESS
         </div>
@@ -33,7 +48,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
         </h1>
         
         <p style="color: ${emailStyles.textMuted}; font-size: 20px; margin: 0 0 30px; line-height: 1.6;">
-          Your journey to discovering genius begins now 🚀
+          Your Genius Factor journey starts now. 🚀
         </p>
       </div>
       
@@ -49,6 +64,56 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
               Your account is now fully activated with access to all premium features. 
               We're thrilled to have you join our community of innovators and thinkers.
             </p>
+          </div>
+
+          <!-- Quick Start Tips -->
+          <div style="margin-top: 30px; padding: 25px; background-color: ${emailStyles.mutedColor}; border-radius: ${emailStyles.borderRadius};">
+            <h3 style="margin: 0 0 20px; font-size: 18px; font-weight: 700; color: ${emailStyles.textColor};">
+              ⚡ Quick Start Guide
+            </h3>
+            <div style="display: grid; gap: 15px;">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">1</span>
+                </div>
+                <div>
+                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
+                    Complete Your Profile
+                  </p>
+                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
+                    Help us personalize your experience
+                  </p>
+                </div>
+              </div>
+              
+              <div style="display: flex; align-items: flex-start; gap: 12px; margin-top: 15px;">
+                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">2</span>
+                </div>
+                <div>
+                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
+                    Take Initial Assessment
+                  </p>
+                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
+                    15-minute evaluation of your strengths
+                  </p>
+                </div>
+              </div>
+              
+              <div style="display: flex; align-items: flex-start; gap: 12px; margin-top: 15px;">
+                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">3</span>
+                </div>
+                <div>
+                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
+                    Explore Recommendations
+                  </p>
+                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
+                    Discover personalized growth paths
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
           
           <!-- Feature Highlights -->
@@ -124,73 +189,22 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
           
           <!-- CTA Button -->
           <div style="text-align: center; margin: 50px 0;">
-            <a href="${loginUrl}" style="background: linear-gradient(135deg, ${emailStyles.primaryColor}, ${emailStyles.secondaryColor}); border-radius: ${emailStyles.borderRadius}; padding: 18px 45px; color: white; text-decoration: none; font-weight: 700; display: inline-block; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);">
+            <a href="${safeLoginUrl}" style="background: linear-gradient(135deg, ${emailStyles.primaryColor}, ${emailStyles.secondaryColor}); border-radius: ${emailStyles.borderRadius}; padding: 18px 45px; color: white; text-decoration: none; font-weight: 700; display: inline-block; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);">
               Enter Your Dashboard
             </a>
             <p style="color: ${emailStyles.textMuted}; margin: 15px 0 0; font-size: 14px;">
-              Start your first assessment in minutes
+              First, complete your profile — then start your first assessment in minutes.
             </p>
           </div>
           
           <!-- Welcome Quote -->
           <div style="background-color: #f8fafc; border-radius: ${emailStyles.borderRadius}; padding: 25px; margin: 30px 0; border: 1px solid ${emailStyles.borderColor};">
             <p style="margin: 0; font-size: 16px; font-style: italic; color: ${emailStyles.textColor}; line-height: 1.6;">
-              "Every genius was once a beginner. Your journey of discovery starts today. 
-              We're here to guide you every step of the way."
+              "Genius grows when curiosity meets consistent action. Start small today and let insight guide your next big leap."
             </p>
             <p style="margin: 15px 0 0; font-size: 14px; font-weight: 600; color: ${emailStyles.primaryColor};">
               — The Genius Factor Team
             </p>
-          </div>
-          
-          <!-- Quick Start Tips -->
-          <div style="margin-top: 40px; padding: 25px; background-color: ${emailStyles.mutedColor}; border-radius: ${emailStyles.borderRadius};">
-            <h3 style="margin: 0 0 20px; font-size: 18px; font-weight: 700; color: ${emailStyles.textColor};">
-              ⚡ Quick Start Guide
-            </h3>
-            <div style="display: grid; gap: 15px;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">1</span>
-                </div>
-                <div>
-                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
-                    Complete Your Profile
-                  </p>
-                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
-                    Help us personalize your experience
-                  </p>
-                </div>
-              </div>
-              
-              <div style="display: flex; align-items: flex-start; gap: 12px; margin-top: 15px;">
-                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">2</span>
-                </div>
-                <div>
-                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
-                    Take Initial Assessment
-                  </p>
-                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
-                    15-minute evaluation of your strengths
-                  </p>
-                </div>
-              </div>
-              
-              <div style="display: flex; align-items: flex-start; gap: 12px; margin-top: 15px;">
-                <div style="background-color: #e0e7ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <span style="font-size: 12px; font-weight: 700; color: ${emailStyles.primaryColor};">3</span>
-                </div>
-                <div>
-                  <p style="margin: 0; font-size: 14px; color: ${emailStyles.textColor}; font-weight: 500;">
-                    Explore Recommendations
-                  </p>
-                  <p style="margin: 5px 0 0; font-size: 13px; color: ${emailStyles.textMuted};">
-                    Discover personalized growth paths
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -222,3 +236,4 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => `
   </body>
 </html>
 `;
+};

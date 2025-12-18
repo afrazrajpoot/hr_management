@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams, } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner"; // Import sonner
@@ -66,7 +66,11 @@ const SignInForm = () => {
 
   // Handle redirection based on session.redirectTo - only if user just signed in
   useEffect(() => {
-    if (status === "authenticated" && justSignedIn && (session as any).redirectTo) {
+    if (
+      status === "authenticated" &&
+      justSignedIn &&
+      (session as any).redirectTo
+    ) {
       toast.success("Sign-in successful! Redirecting..."); // Show success toast
       router.push((session as any).redirectTo);
       setJustSignedIn(false); // Reset flag
@@ -260,7 +264,7 @@ const SignInForm = () => {
               </motion.div>
             )}
 
-            <motion.div variants={itemVariants} className="space-y-4">
+            {/* <motion.div variants={itemVariants} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
@@ -283,12 +287,12 @@ const SignInForm = () => {
                   Google
                 </Button>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             <motion.div variants={itemVariants} className="relative">
-              <div className="absolute inset-0 flex items-center">
+              {/* <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full bg-slate-600" />
-              </div>
+              </div> */}
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-slate-800 px-3 text-slate-400 font-medium">
                   Or continue with email
@@ -320,8 +324,9 @@ const SignInForm = () => {
                         field.registerOptions
                       )}
                       disabled={isLoading}
-                      className={`pl-10 ${field.id === "password" ? "pr-10" : ""
-                        } h-12 bg-slate-700/50 border-slate-600 focus:border-slate-500 text-white placeholder:text-slate-400 rounded-lg transition-all duration-300`}
+                      className={`pl-10 ${
+                        field.id === "password" ? "pr-10" : ""
+                      } h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300`}
                     />
                     {field.id === "password" && (
                       <button
@@ -424,9 +429,7 @@ const SignInForm = () => {
 
 const SignInPage = () => {
   return (
-    <Suspense fallback={
-      <Loader />
-    }>
+    <Suspense fallback={<Loader />}>
       <SignInForm />
     </Suspense>
   );
