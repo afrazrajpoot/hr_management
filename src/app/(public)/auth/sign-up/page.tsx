@@ -273,22 +273,22 @@ const SignUpForm = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 w-full max-w-lg"
       >
-        <Card className="bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700">
+        <Card className="!bg-slate-800/90 shadow-xl border !border-slate-700/50">
           <CardHeader className="space-y-2 text-center">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+              <CardTitle className="text-2xl font-semibold text-white">
                 Create Your Account
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-gray-500 dark:text-gray-400">
+              <CardDescription className="text-slate-400">
                 Sign up to get started with your account
               </CardDescription>
             </motion.div>
@@ -326,7 +326,7 @@ const SignUpForm = () => {
                 <Separator className="bg-gray-200 dark:bg-gray-700" />
               </div> */}
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">
+                <span className="bg-slate-800 px-2 text-slate-400">
                   Or continue with email
                 </span>
               </div>
@@ -341,7 +341,7 @@ const SignUpForm = () => {
                 <div key={field.id} className="space-y-2">
                   <Label
                     htmlFor={field.id}
-                    className="text-sm font-medium text-gray-700 dark:text-gray-200"
+                    className="text-sm font-medium text-slate-300"
                   >
                     {field.label}
                   </Label>
@@ -364,15 +364,19 @@ const SignUpForm = () => {
                           );
                         }
                       }}
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
                       className={`pl-10 ${
                         field.id === "password" ? "pr-10" : ""
-                      } h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-colors`}
+                      } h-11 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 transition-colors`}
                     />
                     {field.id === "password" && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
                         disabled={isLoading}
                       >
                         {showPassword ? (
@@ -402,9 +406,7 @@ const SignUpForm = () => {
                   className="space-y-1"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Password strength:
-                    </span>
+                    <span className="text-slate-400">Password strength:</span>
                     <span
                       className={`font-medium ${
                         passwordStrength <= 2
@@ -417,7 +419,7 @@ const SignUpForm = () => {
                       {getPasswordStrengthText()}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
                     <motion.div
                       className={`h-full ${getPasswordStrengthColor()}`}
                       initial={{ width: 0 }}
@@ -431,7 +433,7 @@ const SignUpForm = () => {
               <div className="space-y-2">
                 <Label
                   htmlFor="role"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-200"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Role
                 </Label>
@@ -440,13 +442,37 @@ const SignUpForm = () => {
                   defaultValue="Employee"
                   disabled={isLoading}
                 >
-                  <SelectTrigger className="h-11 bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400">
+                  <SelectTrigger
+                    style={{
+                      backgroundColor: "rgb(51 65 85 / 0.8)",
+                      color: "white",
+                    }}
+                    className="h-11 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white"
+                  >
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Employee">Employee</SelectItem>
-                    <SelectItem value="HR">HR</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectContent
+                    className="!bg-slate-800 !border-slate-600 z-50"
+                    style={{ backgroundColor: "#1e293b" }}
+                  >
+                    <SelectItem
+                      value="Employee"
+                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                    >
+                      Employee
+                    </SelectItem>
+                    <SelectItem
+                      value="HR"
+                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                    >
+                      HR
+                    </SelectItem>
+                    <SelectItem
+                      value="Admin"
+                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                    >
+                      Admin
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -461,23 +487,23 @@ const SignUpForm = () => {
                   onCheckedChange={(checked) => {
                     setAcceptTerms(checked as boolean);
                   }}
-                  className="border-gray-300 dark:border-gray-600"
+                  className="border-slate-600"
                 />
                 <Label
                   htmlFor="terms"
-                  className="text-sm text-gray-600 dark:text-gray-400 leading-none"
+                  className="text-sm text-slate-400 leading-none"
                 >
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-blue-400 hover:text-blue-300"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-blue-400 hover:text-blue-300"
                   >
                     Privacy Policy
                   </Link>
@@ -513,11 +539,11 @@ const SignUpForm = () => {
 
           <CardFooter>
             <motion.div variants={itemVariants} className="w-full text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-slate-400">
                 Already have an account?{" "}
                 <Link
                   href="/auth/sign-in"
-                  className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                  className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   Sign in
                 </Link>

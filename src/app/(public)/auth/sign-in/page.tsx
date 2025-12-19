@@ -237,7 +237,7 @@ const SignInForm = () => {
         animate="visible"
         className="relative z-10 w-full max-w-md p-6"
       >
-        <Card className="backdrop-blur-xl bg-slate-800/80 shadow-2xl border border-slate-700/50 rounded-2xl">
+        <Card className="backdrop-blur-xl !bg-slate-800/90 shadow-2xl border !border-slate-700/50 rounded-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
             <motion.div variants={itemVariants}>
               <CardTitle className="text-3xl font-bold text-white mb-2">
@@ -264,35 +264,7 @@ const SignInForm = () => {
               </motion.div>
             )}
 
-            {/* <motion.div variants={itemVariants} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleOAuthSignIn("github")}
-                  disabled={isLoading}
-                  className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 bg-slate-700/50 border-slate-600 hover:bg-slate-600/50 text-slate-200 h-11"
-                >
-                  <motion.div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                  <Github className="w-4 h-4 mr-2" />
-                  GitHub
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleOAuthSignIn("google")}
-                  disabled={isLoading}
-                  className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 bg-slate-700/50 border-slate-600 hover:bg-slate-600/50 text-slate-200 h-11"
-                >
-                  <motion.div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                  <Chrome className="w-4 h-4 mr-2" />
-                  Google
-                </Button>
-              </div>
-            </motion.div> */}
-
             <motion.div variants={itemVariants} className="relative">
-              {/* <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full bg-slate-600" />
-              </div> */}
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-slate-800 px-3 text-slate-400 font-medium">
                   Or continue with email
@@ -324,9 +296,13 @@ const SignInForm = () => {
                         field.registerOptions
                       )}
                       disabled={isLoading}
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
                       className={`pl-10 ${
                         field.id === "password" ? "pr-10" : ""
-                      } h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300`}
+                      } h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300`}
                     />
                     {field.id === "password" && (
                       <button

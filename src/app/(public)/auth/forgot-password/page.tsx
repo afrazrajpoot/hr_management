@@ -58,10 +58,12 @@ const ForgotPasswordPage = () => {
 
       setIsSubmitted(true);
       toast.success("Reset code sent to your email!");
-      
+
       // Redirect to reset password page with email
       setTimeout(() => {
-        router.push(`/auth/reset-password?email=${encodeURIComponent(data.email)}`);
+        router.push(
+          `/auth/reset-password?email=${encodeURIComponent(data.email)}`
+        );
       }, 1500);
     } catch (error: any) {
       toast.error(error.message || "Failed to send reset code");
@@ -140,7 +142,7 @@ const ForgotPasswordPage = () => {
         animate="visible"
         className="relative z-10 w-full max-w-md p-6"
       >
-        <Card className="backdrop-blur-xl bg-slate-800/80 shadow-2xl border border-slate-700/50 rounded-2xl">
+        <Card className="backdrop-blur-xl !bg-slate-800/90 shadow-2xl border !border-slate-700/50 rounded-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
             <motion.div variants={itemVariants}>
               <CardTitle className="text-3xl font-bold text-white mb-2">
@@ -149,7 +151,8 @@ const ForgotPasswordPage = () => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <CardDescription className="text-slate-400 text-base">
-                Enter your email address and we'll send you a link to reset your password
+                Enter your email address and we'll send you a link to reset your
+                password
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -182,7 +185,11 @@ const ForgotPasswordPage = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300"
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
+                      className="pl-10 h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300"
                     />
                   </div>
                   {errors.email && (
@@ -231,7 +238,9 @@ const ForgotPasswordPage = () => {
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Check your email</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Check your email
+                </h3>
                 <p className="text-slate-400 mb-6">
                   We've sent a password reset link to your email address.
                 </p>

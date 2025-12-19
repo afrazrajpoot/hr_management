@@ -70,7 +70,7 @@ const ResetPasswordForm = () => {
 
       setIsSuccess(true);
       toast.success("Password reset successfully!");
-      
+
       // Redirect after a delay
       setTimeout(() => {
         router.push("/auth/sign-in");
@@ -152,7 +152,7 @@ const ResetPasswordForm = () => {
         animate="visible"
         className="relative z-10 w-full max-w-md p-6"
       >
-        <Card className="backdrop-blur-xl bg-slate-800/80 shadow-2xl border border-slate-700/50 rounded-2xl">
+        <Card className="backdrop-blur-xl !bg-slate-800/90 shadow-2xl border !border-slate-700/50 rounded-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
             <motion.div variants={itemVariants}>
               <CardTitle className="text-3xl font-bold text-white mb-2">
@@ -161,7 +161,8 @@ const ResetPasswordForm = () => {
             </motion.div>
             <motion.div variants={itemVariants}>
               <CardDescription className="text-slate-400 text-base">
-                Enter the code sent to {emailParam || "your email"} and your new password
+                Enter the code sent to {emailParam || "your email"} and your new
+                password
               </CardDescription>
             </motion.div>
           </CardHeader>
@@ -198,7 +199,11 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300 tracking-widest"
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
+                      className="pl-10 h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300 tracking-widest"
                     />
                   </div>
                   {errors.otp && (
@@ -233,7 +238,11 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 pr-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300"
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
+                      className="pl-10 pr-10 h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300"
                     />
                     <button
                       type="button"
@@ -281,11 +290,17 @@ const ResetPasswordForm = () => {
                         },
                       })}
                       disabled={isLoading}
-                      className="pl-10 pr-10 h-12 bg-slate-700/50 dark:bg-slate-700/50 bg-slate-100 border-slate-600 dark:border-slate-600 border-slate-300 focus:border-slate-500 dark:focus:border-slate-500 focus:border-primary text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-300"
+                      style={{
+                        backgroundColor: "rgb(51 65 85 / 0.8)",
+                        color: "white",
+                      }}
+                      className="pl-10 pr-10 h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
                       disabled={isLoading}
                     >
@@ -342,14 +357,15 @@ const ResetPasswordForm = () => {
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Password Reset!</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Password Reset!
+                </h3>
                 <p className="text-slate-400 mb-6">
-                  Your password has been successfully reset. Redirecting to sign in...
+                  Your password has been successfully reset. Redirecting to sign
+                  in...
                 </p>
                 <Link href="/auth/sign-in">
-                  <Button
-                    className="w-full bg-slate-700 hover:bg-slate-600 text-white"
-                  >
+                  <Button className="w-full bg-slate-700 hover:bg-slate-600 text-white">
                     Sign In Now
                   </Button>
                 </Link>
