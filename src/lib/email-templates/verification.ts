@@ -1,487 +1,341 @@
 export const getVerificationEmailHtml = (otp: string, recipientName?: string) => `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Verify Your Email | Genius Factor AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification Required - Genius Factor AI</title>
+    <style>
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+            .header {
+                padding: 30px 20px !important;
+            }
+            .content {
+                padding: 40px 20px !important;
+            }
+            .footer {
+                padding: 30px 20px !important;
+            }
+            .otp-code {
+                font-size: 28px !important;
+                letter-spacing: 6px !important;
+                padding: 20px 30px !important;
+            }
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f6f9ff 0%, #f0f4ff 100%);">
-  
-  <!-- Main Container -->
-  <div style="max-width: 480px; margin: 0 auto;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; color: #334155;">
     
-    <!-- Top Header with Logo -->
-    <div style="text-align: center; margin-bottom: 40px;">
-      <!-- Logo Container -->
-      <div style="
-        display: inline-block;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 16px 32px;
-        border-radius: 20px;
-        margin-bottom: 24px;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);
-        position: relative;
-        overflow: hidden;
-      ">
-        <!-- Glow Effect -->
-        <div style="
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-        "></div>
-        
-        <div style="
-          font-size: 28px;
-          font-weight: 800;
-          color: white;
-          letter-spacing: 1px;
-          position: relative;
-          z-index: 1;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        ">
-          <span style="color: #ffffff;">GENIUS</span>
-          <span style="color: #fbbf24; margin: 0 8px;">⚡</span>
-          <span style="color: #ffffff;">FACTOR</span>
-          <span style="color: #60a5fa; margin-left: 12px; font-size: 20px;">AI</span>
-        </div>
-      </div>
-      
-      <h1 style="
-        margin: 0 0 12px;
-        font-size: 32px;
-        font-weight: 800;
-        color: #1a202c;
-        letter-spacing: -0.02em;
-      ">
-        Email Verification
-      </h1>
-      <p style="
-        margin: 0;
-        color: #64748b;
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 1.5;
-      ">
-        ${recipientName ? `Hi ${recipientName}, let's verify your account!` : 'Welcome! Let\'s verify your account.'}
-      </p>
+    <!-- Pre-header Text (Shows in email preview) -->
+    <div style="display: none; max-height: 0; overflow: hidden;">
+        Complete your Genius Factor AI account setup. Your verification code is: ${otp}
     </div>
     
-    <!-- Main Card -->
-    <div style="
-      background: white;
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 
-        0 20px 60px rgba(102, 126, 234, 0.15),
-        0 4px 12px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(226, 232, 240, 0.6);
-      margin-bottom: 32px;
-    ">
-      
-      <!-- Decorative Top Accent -->
-      <div style="
-        height: 6px;
-        background: linear-gradient(90deg, #667eea, #9f7aea, #764ba2);
-        border-radius: 3px;
-        margin: -40px -40px 32px -40px;
-      "></div>
-      
-      <!-- Instruction -->
-      <div style="text-align: center; margin-bottom: 40px;">
-        <p style="
-          color: #475569;
-          font-size: 18px;
-          line-height: 1.6;
-          margin: 0 0 8px;
-          padding: 0 20px;
-        ">
-          Enter this verification code to complete your setup:
-        </p>
-        <div style="
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: #f1f5f9;
-          padding: 8px 16px;
-          border-radius: 12px;
-          margin-top: 12px;
-        ">
-          <div style="
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-          "></div>
-          <span style="
-            color: #4f46e5;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-          ">
-            6-DIGIT CODE REQUIRED
-          </span>
-        </div>
-      </div>
-      
-      <!-- OTP Display -->
-      <div style="margin: 0 0 48px;">
-        <!-- Individual OTP Boxes -->
-        <div style="
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-          margin-bottom: 24px;
-          flex-wrap: wrap;
-        ">
-          ${otp.split('').map((char, index) => `
-            <div style="
-              width: 56px;
-              height: 72px;
-              background: linear-gradient(145deg, #ffffff, #f8fafc);
-              border-radius: 16px;
-              border: 2px solid #e2e8f0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              box-shadow: 
-                0 6px 12px rgba(102, 126, 234, 0.1),
-                0 2px 4px rgba(0, 0, 0, 0.05);
-              position: relative;
-              overflow: hidden;
-              transition: all 0.3s ease;
-            ">
-              <!-- Gradient Corner -->
-              <div style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 24px;
-                height: 24px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                border-radius: 0 0 16px 0;
-                opacity: 0.1;
-              "></div>
-              
-              <!-- Perfectly Centered Number -->
-              <div style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                height: 100%;
-              ">
-                <span style="
-                  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
-                  font-size: 32px;
-                  font-weight: 700;
-                  color: #1e293b;
-                  line-height: 1;
-                  text-align: center;
-                  display: block;
-                  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                  margin-top: 4px;
-                ">
-                  ${char}
-                </span>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-        
-        <!-- Full Code Display -->
-        <div style="text-align: center;">
-          <div style="
-            display: inline-block;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            padding: 16px 32px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-            margin-bottom: 12px;
-          ">
-            <span style="
-              font-family: 'SF Mono', Monaco, 'Courier New', monospace;
-              font-size: 18px;
-              font-weight: 600;
-              color: #4f46e5;
-              letter-spacing: 4px;
-            ">
-              ${otp}
-            </span>
-          </div>
-          <p style="
-            margin: 0;
-            color: #64748b;
-            font-size: 14px;
-            font-weight: 500;
-          ">
-            Copy and paste if needed
-          </p>
-        </div>
-      </div>
-      
-      <!-- Timer Section -->
-      <div style="
-        background: linear-gradient(135deg, #fffbeb, #fef3c7);
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 32px;
-        border: 2px solid #fbbf24;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      ">
-        <div style="display: inline-flex; align-items: center; gap: 16px;">
-          <div style="
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-          ">
-         
-          </div>
-          <div style="text-align: left;">
-            <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 600; letter-spacing: 0.5px;">
-              EXPIRES IN
-            </p>
-            <p style="margin: 4px 0 0; color: #dc2626; font-size: 20px; font-weight: 800;">
-              24 HOURS
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Security Info -->
-      <div style="
-        background: linear-gradient(135deg, #eff6ff, #f0f9ff);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 40px;
-        border-left: 6px solid #3b82f6;
-      ">
-        <div style="display: flex; align-items: flex-start; gap: 16px;">
-          <div style="
-            flex-shrink: 0;
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-          ">
-          
-          </div>
-          <div>
-            <h3 style="margin: 0 0 8px; color: #1e40af; font-size: 18px; font-weight: 700;">
-              Security First
-            </h3>
-            <p style="margin: 0; color: #475569; font-size: 15px; line-height: 1.5;">
-              This code is unique to your account. Never share it. Genius Factor AI will never ask for your verification code.
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Support Section -->
-      <div style="
-        border-top: 2px dashed #e2e8f0;
-        padding-top: 32px;
-        text-align: center;
-      ">
-        <p style="
-          margin: 0 0 20px;
-          color: #64748b;
-          font-size: 16px;
-          font-weight: 500;
-        ">
-          Need help with verification?
-        </p>
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-          <a href="mailto:support@geniusfactor.com" style="
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 28px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            color: #475569;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-          ">
-            <span style="color: #3b82f6; font-size: 18px;">✉️</span>
-            Email Support
-          </a>
-          <a href="#" style="
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 
-              0 8px 24px rgba(102, 126, 234, 0.3),
-              0 4px 12px rgba(102, 126, 234, 0.2);
-          ">
-            <span style="font-size: 18px;">❓</span>
-            Help Center
-          </a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Footer -->
-    <div style="text-align: center;">
-      <!-- Mini Logo -->
-      <div style="
-        display: inline-block;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-        padding: 12px 24px;
-        border-radius: 16px;
-        margin-bottom: 24px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-      ">
-        <span style="
-          color: #667eea;
-          font-weight: 700;
-          font-size: 16px;
-          letter-spacing: 0.5px;
-        ">
-          Genius Factor AI
-        </span>
-        <span style="
-          color: #fbbf24;
-          margin-left: 8px;
-          font-size: 14px;
-        ">⚡</span>
-      </div>
-      
-      <!-- Links -->
-      <div style="
-        display: flex;
-        justify-content: center;
-        gap: 24px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-      ">
-        <a href="#" style="
-          color: #64748b;
-          font-size: 13px;
-          text-decoration: none;
-          font-weight: 500;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: rgba(100, 116, 139, 0.05);
-          transition: all 0.3s ease;
-        ">
-          Privacy
-        </a>
-        <a href="#" style="
-          color: #64748b;
-          font-size: 13px;
-          text-decoration: none;
-          font-weight: 500;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: rgba(100, 116, 139, 0.05);
-          transition: all 0.3s ease;
-        ">
-          Terms
-        </a>
-        <a href="#" style="
-          color: #64748b;
-          font-size: 13px;
-          text-decoration: none;
-          font-weight: 500;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: rgba(100, 116, 139, 0.05);
-          transition: all 0.3s ease;
-        ">
-          Contact
-        </a>
-        <a href="#" style="
-          color: #64748b;
-          font-size: 13px;
-          text-decoration: none;
-          font-weight: 500;
-          padding: 6px 12px;
-          border-radius: 8px;
-          background: rgba(100, 116, 139, 0.05);
-          transition: all 0.3s ease;
-        ">
-          Unsubscribe
-        </a>
-      </div>
-      
-      <!-- Copyright -->
-      <div style="
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-        margin-top: 8px;
-      ">
-        <p style="
-          margin: 0;
-          color: #94a3b8;
-          font-size: 12px;
-          line-height: 1.6;
-        ">
-          © ${new Date().getFullYear()} Genius Factor AI. All rights reserved.
-        </p>
-        <p style="
-          margin: 8px 0 0;
-          color: #cbd5e1;
-          font-size: 11px;
-          font-weight: 500;
-        ">
-          This email was sent to verify your account. If you didn't request this, please ignore it.
-        </p>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Animation Styles -->
-  <style>
-    @keyframes pulse {
-      0% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 0.6; transform: scale(1); }
-    }
-  </style>
+    <!-- Main Container -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#f8fafc">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="container">
+                    <!-- Header -->
+                    <tr>
+                        <td bgcolor="#ffffff" class="header" style="padding: 40px 50px 30px; border-bottom: 1px solid #e2e8f0;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                                            Genius Factor AI
+                                        </div>
+                                        <div style="font-size: 13px; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">
+                                            ENTERPRISE AI SOLUTIONS
+                                        </div>
+                                    </td>
+                                    <td align="right" style="font-size: 12px; color: #94a3b8;">
+                                        ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td bgcolor="#ffffff" class="content" style="padding: 50px;">
+                            <!-- Greeting -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="padding-bottom: 30px;">
+                                        <h1 style="font-size: 24px; font-weight: 600; color: #0f172a; margin: 0 0 15px; line-height: 1.3;">
+                                            Account Verification Required
+                                        </h1>
+                                        <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0;">
+                                            ${recipientName ? `Dear ${recipientName},` : 'Hello,'}<br>
+                                            To complete your account setup and access Genius Factor AI, please verify your email address using the code below.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- OTP Section -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 40px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <div style="text-align: center; margin-bottom: 20px;">
+                                            <div style="font-size: 13px; color: #475569; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 10px; text-transform: uppercase;">
+                                                Verification Code
+                                            </div>
+                                            <div class="otp-code" style="
+                                                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                                                color: #ffffff;
+                                                font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+                                                font-size: 32px;
+                                                font-weight: 600;
+                                                letter-spacing: 8px;
+                                                padding: 25px 40px;
+                                                border-radius: 8px;
+                                                display: inline-block;
+                                                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+                                                margin: 10px 0;
+                                            ">
+                                                ${otp}
+                                            </div>
+                                            <div style="font-size: 14px; color: #64748b; margin-top: 10px;">
+                                                Valid for 24 hours | One-time use only
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Instructions -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 40px 0;">
+                                <tr>
+                                    <td>
+                                        <h2 style="font-size: 18px; font-weight: 600; color: #0f172a; margin: 0 0 20px;">
+                                            How to Verify Your Account
+                                        </h2>
+                                        
+                                        <!-- Step 1 -->
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
+                                            <tr>
+                                                <td valign="top" width="40" style="padding-right: 15px;">
+                                                    <div style="
+                                                        width: 32px;
+                                                        height: 32px;
+                                                        background-color: #f1f5f9;
+                                                        border-radius: 50%;
+                                                        text-align: center;
+                                                        line-height: 32px;
+                                                        color: #6366f1;
+                                                        font-weight: 600;
+                                                        font-size: 14px;
+                                                    ">1</div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div style="color: #0f172a; font-weight: 600; margin-bottom: 5px;">
+                                                        Return to Genius Factor AI
+                                                    </div>
+                                                    <div style="color: #64748b; font-size: 15px; line-height: 1.5;">
+                                                        Navigate back to the verification screen in your browser or application.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Step 2 -->
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
+                                            <tr>
+                                                <td valign="top" width="40" style="padding-right: 15px;">
+                                                    <div style="
+                                                        width: 32px;
+                                                        height: 32px;
+                                                        background-color: #f1f5f9;
+                                                        border-radius: 50%;
+                                                        text-align: center;
+                                                        line-height: 32px;
+                                                        color: #6366f1;
+                                                        font-weight: 600;
+                                                        font-size: 14px;
+                                                    ">2</div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div style="color: #0f172a; font-weight: 600; margin-bottom: 5px;">
+                                                        Enter Verification Code
+                                                    </div>
+                                                    <div style="color: #64748b; font-size: 15px; line-height: 1.5;">
+                                                        Enter the 6-digit code shown above exactly as displayed.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Step 3 -->
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td valign="top" width="40" style="padding-right: 15px;">
+                                                    <div style="
+                                                        width: 32px;
+                                                        height: 32px;
+                                                        background-color: #f1f5f9;
+                                                        border-radius: 50%;
+                                                        text-align: center;
+                                                        line-height: 32px;
+                                                        color: #6366f1;
+                                                        font-weight: 600;
+                                                        font-size: 14px;
+                                                    ">3</div>
+                                                </td>
+                                                <td valign="top">
+                                                    <div style="color: #0f172a; font-weight: 600; margin-bottom: 5px;">
+                                                        Complete Setup
+                                                    </div>
+                                                    <div style="color: #64748b; font-size: 15px; line-height: 1.5;">
+                                                        Follow the remaining prompts to finalize your account configuration.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Security Notice -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 40px 0;">
+                                <tr>
+                                    <td style="
+                                        background-color: #f0f9ff;
+                                        border-left: 4px solid #0ea5e9;
+                                        padding: 20px;
+                                        border-radius: 4px;
+                                    ">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td width="30" valign="top" style="padding-right: 15px;">
+                                                    <div style="color: #0ea5e9; font-size: 18px;">🔒</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size: 15px; font-weight: 600; color: #0369a1; margin-bottom: 5px;">
+                                                        Security Information
+                                                    </div>
+                                                    <div style="font-size: 14px; color: #475569; line-height: 1.5;">
+                                                        This verification code is confidential. Genius Factor AI will never ask you for this code via email, phone, or chat. If you did not initiate this request, please ignore this message and contact our security team immediately.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Support Section -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #e2e8f0;">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 15px; color: #475569; margin-bottom: 15px;">
+                                            <strong>Need assistance?</strong> Our support team is available to help.
+                                        </div>
+                                        <table border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-right: 20px;">
+                                                    <a href="mailto:support@geniusfactorai.com" style="
+                                                        color: #6366f1;
+                                                        text-decoration: none;
+                                                        font-size: 14px;
+                                                        font-weight: 500;
+                                                    ">
+                                                        ✉️ support@geniusfactorai.com
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <a href="https://help.geniusfactorai.com" style="
+                                                        color: #6366f1;
+                                                        text-decoration: none;
+                                                        font-size: 14px;
+                                                        font-weight: 500;
+                                                    ">
+                                                        🌐 Help Center
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td bgcolor="#f1f5f9" class="footer" style="padding: 40px 50px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <!-- Company Info -->
+                                        <div style="font-size: 14px; color: #475569; margin-bottom: 20px; line-height: 1.5;">
+                                            <strong>Genius Factor AI Inc.</strong><br>
+                                            123 Innovation Drive, Suite 500<br>
+                                            San Francisco, CA 94107
+                                        </div>
+                                        
+                                        <!-- Legal Links -->
+                                        <div style="margin-bottom: 25px;">
+                                            <a href="https://geniusfactorai.com/privacy" style="
+                                                color: #64748b;
+                                                text-decoration: none;
+                                                font-size: 12px;
+                                                margin: 0 10px;
+                                            ">Privacy Policy</a>
+                                            <span style="color: #cbd5e1;">•</span>
+                                            <a href="https://geniusfactorai.com/terms" style="
+                                                color: #64748b;
+                                                text-decoration: none;
+                                                font-size: 12px;
+                                                margin: 0 10px;
+                                            ">Terms of Service</a>
+                                            <span style="color: #cbd5e1;">•</span>
+                                            <a href="https://geniusfactorai.com/security" style="
+                                                color: #64748b;
+                                                text-decoration: none;
+                                                font-size: 12px;
+                                                margin: 0 10px;
+                                            ">Security</a>
+                                        </div>
+                                        
+                                        <!-- Copyright -->
+                                        <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                                            <p style="margin: 0 0 10px;">
+                                                This email contains confidential information for the intended recipient only.
+                                                Unauthorized access, disclosure, or distribution is prohibited.
+                                            </p>
+                                            <p style="margin: 0;">
+                                                © ${new Date().getFullYear()} Genius Factor AI. All rights reserved.
+                                                This is an automated service email. Please do not reply to this message.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
 `;
 
 export const emailStyles = {
-  mainBackground: 'linear-gradient(135deg, #f6f9ff 0%, #f0f4ff 100%)',
-  primaryGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  accentColor: '#fbbf24',
-  textColor: '#1a202c',
-  textMuted: '#64748b',
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  borderRadius: '16px',
-  boxShadow: '0 20px 60px rgba(102, 126, 234, 0.15)'
+  companyName: "Genius Factor AI",
+  primaryColor: "#6366f1",
+  secondaryColor: "#8b5cf6",
+  backgroundColor: "#f8fafc",
+  textDark: "#0f172a",
+  textMedium: "#475569",
+  textLight: "#64748b",
+  borderColor: "#e2e8f0",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  brandGradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
 };
