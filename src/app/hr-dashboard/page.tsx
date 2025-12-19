@@ -599,7 +599,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={completionData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
@@ -643,14 +643,6 @@ export default function Dashboard() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-border">
-                <div className="text-sm text-muted-foreground">
-                  Showing {completionData.length} departments
-                </div>
-                <button className="text-sm text-primary font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                  View Details <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
             </CardContent>
           </Card>
 
@@ -674,7 +666,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <AreaChart
                   data={geniusFactorData}
                   margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
@@ -726,24 +718,6 @@ export default function Dashboard() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-3">
-                  <div className="text-2xl font-bold text-primary">
-                    {Math.max(...geniusFactorData.map((d) => d.count))}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Peak in 61-80 range
-                  </div>
-                </div>
-                <div className="bg-gradient-to-r from-purple-600/5 to-transparent rounded-lg p-3">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {geniusFactorData.reduce((a, b) => a + b.count, 0)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total assessments
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
