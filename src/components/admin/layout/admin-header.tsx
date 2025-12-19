@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Bell,
@@ -13,6 +15,7 @@ import {
   HelpCircle,
   AlertTriangle,
   ClipboardList,
+  Loader2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -34,17 +37,89 @@ interface HRHeaderProps {
   subtitle?: string;
 }
 
+interface User {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+}
+
 export function HRHeader({ title, subtitle }: HRHeaderProps) {
   const { theme, setTheme } = useTheme();
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const handleLogout = async () => {
+  const user = session?.user as User | undefined;
+
+  const displayName = useMemo(() => {
+    if (!user) return "";
+    return user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "User";
+  }, [user]);
+
+  const initials = useMemo(() => {
+    if (!displayName) return "U";
+    return displayName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [displayName]);
+
+  const handleLogout = useCallback(async () => {
     try {
       await signOut({ redirect: true, callbackUrl: "/auth/sign-in" });
     } catch (error) {
       console.error("Error signing out:", error);
     }
-  };
+  }, []);
+
+  const fetchSuggestions = useCallback(async () => {
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
+        setShowSuggestions(true);
+      }
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [fetchSuggestions]);
+
+  const handleSuggestionClick = useCallback((suggestion: any) => {
+    setSearchQuery(`${suggestion.firstName} ${suggestion.lastName}`);
+    setShowSuggestions(false);
+    router.push(`/dashboard/companies?search=${encodeURIComponent(suggestion.firstName + " " + suggestion.lastName)}`);
+  }, [router]);
+
+  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      router.push(`/dashboard/companies?search=${encodeURIComponent(searchQuery)}`);
+    }
+  }, [searchQuery, router]);
 
   // Handle loading state
   if (status === "loading") {
@@ -64,22 +139,9 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
     );
   }
 
-  if (!session || !session.user) {
+  if (!session || !user) {
     return null;
   }
-
-  const user: any = session.user;
-  const displayName =
-    user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user.name || "User";
-
-  const initials =
-    user.firstName && user.lastName
-      ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
-      : user.name
-      ? `${user.name.charAt(0)}${user.name.charAt(1) || user.name.charAt(0)}`
-      : "U";
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-6">
@@ -99,14 +161,45 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
       </div>
 
       {/* Search Bar */}
-      <div className="hidden lg:block">
-        <div className="relative">
+      <div className="hidden lg:block relative">
+        <form onSubmit={handleSearchSubmit}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search analytics, reports, employees..."
+            placeholder="Search HR users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
             className="w-72 pl-9 bg-muted/50 border-border focus:border-primary"
           />
-        </div>
+        </form>
+
+        {/* Suggestions Dropdown */}
+        {showSuggestions && (suggestions.length > 0 || isSearching) && (
+          <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-lg shadow-xl z-[60] overflow-hidden">
+            {isSearching ? (
+              <div className="p-4 text-center">
+                <Loader2 className="h-4 w-4 animate-spin mx-auto text-primary" />
+              </div>
+            ) : (
+              <div className="py-2">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion.id}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full px-4 py-2 text-left hover:bg-muted transition-colors flex flex-col"
+                  >
+                    <span className="text-sm font-medium text-foreground">
+                      {suggestion.firstName} {suggestion.lastName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {suggestion.email}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

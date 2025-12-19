@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { HRLayout } from "@/components/admin/layout/admin-layout";
 import { StatCard } from "@/components/admin/ui/stat-card";
@@ -59,6 +59,8 @@ interface HRUser {
     updatedAt: string;
     recruiterId: string;
   }>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface Employee {
@@ -162,6 +164,16 @@ export default function Companies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompanyName, setSelectedCompanyName] = useState("all");
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchParams = useSearchParams();
+
+  // Initialize search from URL
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchTerm(search);
+      setFilteredSearchTerm(search);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchCompanies();

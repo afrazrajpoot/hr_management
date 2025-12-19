@@ -5,15 +5,29 @@ const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
-    // Fetch all HR users (role === 'HR')
+    const { searchParams } = new URL(request.url);
+    const searchTerm = searchParams.get('search') || '';
+
+    // Build where clause for HR users
+    const whereClause: any = {
+      role: 'HR',
+    };
+
+    if (searchTerm) {
+      whereClause.OR = [
+        { firstName: { contains: searchTerm, mode: 'insensitive' } },
+        { lastName: { contains: searchTerm, mode: 'insensitive' } },
+        { email: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    // Fetch HR users (role === 'HR')
     const hrUsers = await prisma.user.findMany({
-      where: {
-        role: 'HR',
-      },
+      where: whereClause,
       include: {
-        accounts: true, // Include accounts if needed
-        sessions: true, // Include sessions if needed
-        jobs: true, // Include jobs posted by HR (RecruiterJobs relation)
+        accounts: true,
+        sessions: true,
+        jobs: true,
       },
     });
 

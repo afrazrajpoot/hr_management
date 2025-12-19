@@ -40,6 +40,7 @@ import { useSession } from "next-auth/react";
 import { dashboardOptions } from "@/app/data";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import SearchFilterBar, { FilterConfig } from "@/components/hr/SearchFilterBar";
 
 const assessmentStatuses = ["All Statuses", "Completed", "Not Started"];
@@ -84,6 +85,16 @@ export default function Employees() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
+  const searchParams = useSearchParams();
+
+  // Initialize search from URL
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      setSearchInput(search);
+      setDebouncedSearch(search);
+    }
+  }, [searchParams]);
 
   // Debounced search effect
   useEffect(() => {

@@ -34,6 +34,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";
 import { useTheme } from "next-themes"; // Add this import
 
@@ -81,6 +82,11 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   const [updatingNotifications, setUpdatingNotifications] = useState<
     Set<string>
   >(new Set());
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const hrId = session?.user?.id || "";
 
@@ -269,6 +275,48 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   };
 
+  // Handle search suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length < 2) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.suggestions || []);
+          setShowSuggestions(true);
+        }
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSuggestionClick = (suggestion: any) => {
+    setSearchQuery(`${suggestion.firstName} ${suggestion.lastName}`);
+    setShowSuggestions(false);
+    router.push(`/hr-dashboard/employees?search=${encodeURIComponent(suggestion.firstName + " " + suggestion.lastName)}`);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      router.push(`/hr-dashboard/employees?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950">
       {/* Unified gradient background */}
@@ -310,11 +358,44 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
             <div className="flex items-center gap-3">
               {/* Search Input */}
               <div className="relative hidden lg:block">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder="Search employees, assessments..."
-                  className="w-64 pl-10 bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 border-slate-700 dark:border-slate-700 border-slate-300 text-foreground placeholder:text-muted-foreground backdrop-blur-sm"
-                />
+                <form onSubmit={handleSearchSubmit}>
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    placeholder="Search employees..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                    className="w-64 pl-10 bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 border-slate-700 dark:border-slate-700 border-slate-300 text-foreground placeholder:text-muted-foreground backdrop-blur-sm"
+                  />
+                </form>
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && (suggestions.length > 0 || isSearching) && (
+                  <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-lg shadow-xl z-[60] overflow-hidden">
+                    {isSearching ? (
+                      <div className="p-4 text-center">
+                        <Loader2 className="h-4 w-4 animate-spin mx-auto text-blue-500" />
+                      </div>
+                    ) : (
+                      <div className="py-2">
+                        {suggestions.map((suggestion) => (
+                          <button
+                            key={suggestion.id}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="w-full px-4 py-2 text-left hover:bg-slate-800 transition-colors flex flex-col"
+                          >
+                            <span className="text-sm font-medium text-white">
+                              {suggestion.firstName} {suggestion.lastName}
+                            </span>
+                            <span className="text-xs text-slate-400">
+                              {suggestion.email}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
