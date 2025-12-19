@@ -435,9 +435,9 @@ const SignUpForm = () => {
                     <SelectItem value="HR" className="select-dropdown-item">
                       HR
                     </SelectItem>
-                    <SelectItem value="Admin" className="select-dropdown-item">
+                    {/* <SelectItem value="Admin" className="select-dropdown-item">
                       Admin
-                    </SelectItem>
+                    </SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>

@@ -1,4 +1,4 @@
-// components/hr/HRSidebar.tsx (using custom CSS variables only)
+// components/hr/HRSidebar.tsx (updated version)
 "use client";
 
 import { useState } from "react";
@@ -29,12 +29,13 @@ import {
   X,
   Menu,
   ClipboardList,
+  Users as CommunityIcon, // Add Community icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useSocket } from "@/context/SocketContext";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react"; // Add useSession
 
 const bottomNavigation = [
   {
@@ -60,6 +61,7 @@ export default function HRSidebar({
   const pathname = usePathname();
   const { dashboardData, totalEmployees, notifications, clearNotifications } =
     useSocket();
+  const { data: session } = useSession(); // Get session data
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Calculate totals across all departments
@@ -74,7 +76,8 @@ export default function HRSidebar({
   const departmentCount =
     dashboardData && Array.isArray(dashboardData) ? dashboardData.length : 0;
 
-  const navigation = [
+  // Base navigation items
+  const baseNavigation = [
     {
       name: "Dashboard",
       href: "/hr-dashboard",
@@ -150,6 +153,22 @@ export default function HRSidebar({
     },
   ];
 
+  // Add Community navigation item if user is not paid
+  const communityNavigationItem = {
+    name: "Community",
+    href: "/hr-dashboard/community",
+    icon: CommunityIcon,
+    description: "Professional Network",
+    color: "from-cyan-500 to-indigo-600",
+  };
+
+  // Build final navigation array
+  const navigation = [
+    ...baseNavigation,
+    // Add Community if user exists and paid is false
+    ...(session?.user && !session.user.paid ? [communityNavigationItem] : []),
+  ];
+
   const isActive = (path: string) => {
     if (path === "/hr-dashboard") return pathname === path;
     return pathname.startsWith(path);
@@ -185,6 +204,17 @@ export default function HRSidebar({
                 <p className="text-xs text-white/70 truncate">
                   HR Management Suite
                 </p>
+                {/* Show subscription status */}
+                {/* {session?.user && (
+                  <div className="mt-1">
+                    <Badge
+                      variant={session.user.paid ? "default" : "outline"}
+                      className="text-xs"
+                    >
+                      {session.user.paid ? "Premium" : "Free"}
+                    </Badge>
+                  </div>
+                )} */}
               </div>
             </div>
           ) : (
@@ -195,6 +225,7 @@ export default function HRSidebar({
             </div>
           )}
 
+          {/* Collapse toggle button (optional) */}
           {/* <Button
             variant="ghost"
             size="sm"
@@ -290,6 +321,35 @@ export default function HRSidebar({
           );
         })}
       </nav>
+
+      {/* Footer with user info */}
+      {!collapsed && session?.user && (
+        <div className="p-4 border-t border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card">
+                <div
+                  className={cn(
+                    "w-full h-full rounded-full",
+                    session.user.paid ? "bg-emerald-500" : "bg-amber-500"
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {session.user.name || "HR User"}
+              </p>
+              <p className="text-xs text-white/60">
+                {session.user.paid ? "Premium Account" : "Free Account"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Decorative bottom gradient */}
       <div className="sidebar-decorative-bottom"></div>
