@@ -45,6 +45,8 @@
     --background: 224 64% 4%;
     --foreground: 220 14% 98%;
 
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 215 25% 30%;
     --card: 220 15% 20%;
     --card-foreground: 220 14% 98%;
 
@@ -485,4 +487,12 @@ html {
 .dark .btn-gradient-primary:hover {
     background: linear-gradient(to right, #1d4ed8, #7e22ce);
     color: white;
+}
+
+
+
+/* For dark mode */
+.dark {
+    --secondary: 220 15% 22%;
+    --secondary-foreground: 220 14% 90%;
 }

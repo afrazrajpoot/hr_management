@@ -194,7 +194,7 @@ const SignUpForm = () => {
       type: "text",
       placeholder: "Enter your first name",
       icon: (
-        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       ),
       registerOptions: {
         required: "First name is required",
@@ -210,7 +210,7 @@ const SignUpForm = () => {
       type: "text",
       placeholder: "Enter your last name",
       icon: (
-        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       ),
       registerOptions: {
         required: "Last name is required",
@@ -226,11 +226,10 @@ const SignUpForm = () => {
       type: "tel",
       placeholder: "Enter your phone number",
       icon: (
-        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       ),
       registerOptions: {
         required: "Phone number is required",
-        // Pattern validation removed
       },
     },
     {
@@ -239,7 +238,7 @@ const SignUpForm = () => {
       type: "email",
       placeholder: "Enter your email",
       icon: (
-        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       ),
       registerOptions: {
         required: "Email is required",
@@ -255,7 +254,7 @@ const SignUpForm = () => {
       type: showPassword ? "text" : "password",
       placeholder: "Create a password",
       icon: (
-        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
       ),
       registerOptions: {
         required: "Password is required",
@@ -273,22 +272,22 @@ const SignUpForm = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center gradient-bg-primary py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 w-full max-w-lg"
       >
-        <Card className="!bg-slate-800/90 shadow-xl border !border-slate-700/50">
+        <Card className="card-primary backdrop-blur-xl overflow-hidden">
           <CardHeader className="space-y-2 text-center">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-semibold text-white">
+              <CardTitle className="text-2xl font-semibold text-foreground">
                 Create Your Account
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-muted-foreground">
                 Sign up to get started with your account
               </CardDescription>
             </motion.div>
@@ -307,27 +306,10 @@ const SignUpForm = () => {
               </motion.div>
             )}
 
-            {/* <motion.div variants={itemVariants} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleOAuthSignIn("google")}
-                  disabled={isLoading}
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <Chrome className="w-5 h-5 mr-2" />
-                  Google
-                </Button>
-              </div>
-            </motion.div> */}
-
             <motion.div variants={itemVariants} className="relative">
-              {/* <div className="absolute inset-0 flex items-center">
-                <Separator className="bg-gray-200 dark:bg-gray-700" />
-              </div> */}
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-800 px-2 text-slate-400">
-                  Or continue with email
+                <span className="bg-card px-2 text-muted-foreground">
+                  Continue with email
                 </span>
               </div>
             </motion.div>
@@ -341,7 +323,7 @@ const SignUpForm = () => {
                 <div key={field.id} className="space-y-2">
                   <Label
                     htmlFor={field.id}
-                    className="text-sm font-medium text-slate-300"
+                    className="text-sm font-medium text-foreground"
                   >
                     {field.label}
                   </Label>
@@ -364,19 +346,15 @@ const SignUpForm = () => {
                           );
                         }
                       }}
-                      style={{
-                        backgroundColor: "rgb(51 65 85 / 0.8)",
-                        color: "white",
-                      }}
                       className={`pl-10 ${
                         field.id === "password" ? "pr-10" : ""
-                      } h-11 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 transition-colors`}
+                      } h-11 bg-card border-input text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors`}
                     />
                     {field.id === "password" && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         disabled={isLoading}
                       >
                         {showPassword ? (
@@ -391,7 +369,7 @@ const SignUpForm = () => {
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-sm text-red-500"
+                      className="text-sm text-destructive"
                     >
                       {errors[field.id as keyof FormData]?.message}
                     </motion.p>
@@ -406,7 +384,9 @@ const SignUpForm = () => {
                   className="space-y-1"
                 >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Password strength:</span>
+                    <span className="text-muted-foreground">
+                      Password strength:
+                    </span>
                     <span
                       className={`font-medium ${
                         passwordStrength <= 2
@@ -419,7 +399,7 @@ const SignUpForm = () => {
                       {getPasswordStrengthText()}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       className={`h-full ${getPasswordStrengthColor()}`}
                       initial={{ width: 0 }}
@@ -433,7 +413,7 @@ const SignUpForm = () => {
               <div className="space-y-2">
                 <Label
                   htmlFor="role"
-                  className="text-sm font-medium text-slate-300"
+                  className="text-sm font-medium text-foreground"
                 >
                   Role
                 </Label>
@@ -442,37 +422,28 @@ const SignUpForm = () => {
                   defaultValue="Employee"
                   disabled={isLoading}
                 >
-                  <SelectTrigger
-                    style={{
-                      backgroundColor: "rgb(51 65 85 / 0.8)",
-                      color: "white",
-                    }}
-                    className="h-11 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white"
-                  >
+                  <SelectTrigger className="h-11 bg-card border-input text-foreground">
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
-                  <SelectContent
-                    className="!bg-slate-800 !border-slate-600 z-50"
-                    style={{ backgroundColor: "#1e293b" }}
-                  >
+                  <SelectContent className="bg-card border-input">
                     <SelectItem
                       value="Employee"
-                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                      className="text-foreground hover:bg-secondary focus:bg-secondary"
                     >
                       Employee
                     </SelectItem>
                     <SelectItem
                       value="HR"
-                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                      className="text-foreground hover:bg-secondary focus:bg-secondary"
                     >
                       HR
                     </SelectItem>
-                    <SelectItem
+                    {/* <SelectItem
                       value="Admin"
-                      className="!text-white hover:!bg-slate-700 focus:!bg-slate-700"
+                      className="text-foreground hover:bg-secondary focus:bg-secondary"
                     >
                       Admin
-                    </SelectItem>
+                    </SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>
@@ -487,23 +458,23 @@ const SignUpForm = () => {
                   onCheckedChange={(checked) => {
                     setAcceptTerms(checked as boolean);
                   }}
-                  className="border-slate-600"
+                  className="border-input"
                 />
                 <Label
                   htmlFor="terms"
-                  className="text-sm text-slate-400 leading-none"
+                  className="text-sm text-muted-foreground leading-none"
                 >
                   I agree to the{" "}
                   <Link
                     href="/terms"
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-primary hover:text-primary/80"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
                     href="/privacy"
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-primary hover:text-primary/80"
                   >
                     Privacy Policy
                   </Link>
@@ -516,7 +487,7 @@ const SignUpForm = () => {
               >
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                  className="w-full h-11 btn-gradient-primary text-primary-foreground font-medium shadow-md hover:shadow-lg transition-all duration-300"
                   disabled={isLoading || !acceptTerms}
                 >
                   {isLoading ? (
@@ -527,7 +498,7 @@ const SignUpForm = () => {
                         repeat: Infinity,
                         ease: "linear",
                       }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
                     />
                   ) : (
                     "Create Account"
@@ -539,11 +510,11 @@ const SignUpForm = () => {
 
           <CardFooter>
             <motion.div variants={itemVariants} className="w-full text-center">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
                   href="/auth/sign-in"
-                  className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
+                  className="font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Sign in
                 </Link>

@@ -6,7 +6,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { toast } from "sonner"; // Import sonner
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ const SignInForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [justSignedIn, setJustSignedIn] = useState(false); // Track if user just signed in
+  const [justSignedIn, setJustSignedIn] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -51,7 +51,6 @@ const SignInForm = () => {
     },
   });
 
-  // Handle query parameter errors
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
@@ -60,24 +59,22 @@ const SignInForm = () => {
           ? "Authentication failed. Please try again."
           : errorParam;
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     }
   }, [searchParams]);
 
-  // Handle redirection based on session.redirectTo - only if user just signed in
   useEffect(() => {
     if (
       status === "authenticated" &&
       justSignedIn &&
       (session as any).redirectTo
     ) {
-      toast.success("Sign-in successful! Redirecting..."); // Show success toast
+      toast.success("Sign-in successful! Redirecting...");
       router.push((session as any).redirectTo);
-      setJustSignedIn(false); // Reset flag
+      setJustSignedIn(false);
     }
   }, [status, session, router, justSignedIn]);
 
-  // Load email from localStorage on component mount
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
@@ -91,7 +88,6 @@ const SignInForm = () => {
     setError("");
 
     try {
-      // Save email to localStorage if "Remember Me" is checked
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", data.email);
       } else {
@@ -106,15 +102,15 @@ const SignInForm = () => {
 
       if (result?.error) {
         setError("Invalid credentials. Please try again.");
-        toast.error("Invalid credentials. Please try again."); // Show error toast
+        toast.error("Invalid credentials. Please try again.");
       } else {
-        setJustSignedIn(true); // Set flag to trigger redirect
-        toast.success("Sign-in successful!"); // Show success toast
+        setJustSignedIn(true);
+        toast.success("Sign-in successful!");
       }
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -126,47 +122,35 @@ const SignInForm = () => {
       const callbackUrl =
         searchParams.get("callbackUrl") || "/employee-dashboard";
       await signIn(provider, { callbackUrl });
-      toast.success(`Signing in with ${provider}...`); // Show OAuth sign-in toast
+      toast.success(`Signing in with ${provider}...`);
     } catch (error) {
       const errorMessage = "Authentication failed. Please try again.";
       setError(errorMessage);
-      toast.error(errorMessage); // Show error toast
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   const containerVariants: any = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.4,
         ease: "easeOut",
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
       },
     },
   };
 
   const itemVariants: any = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
-
-  const backgroundVariants: any = {
-    animate: {
-      backgroundPosition: ["0% 0%", "100% 100%"],
-      transition: {
-        duration: 20,
-        ease: "linear",
-        repeat: Infinity,
-        repeatType: "reverse" as const,
-      },
+      transition: { duration: 0.3, ease: "easeOut" },
     },
   };
 
@@ -176,7 +160,9 @@ const SignInForm = () => {
       label: "Email Address",
       type: "email",
       placeholder: "Enter your email",
-      icon: <Mail className="absolute left-3 top-3.5 h-4 w-4 text-slate-500" />,
+      icon: (
+        <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+      ),
       registerOptions: {
         required: "Email is required",
         pattern: {
@@ -190,7 +176,9 @@ const SignInForm = () => {
       label: "Password",
       type: showPassword ? "text" : "password",
       placeholder: "Enter your password",
-      icon: <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-500" />,
+      icon: (
+        <Lock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+      ),
       registerOptions: {
         required: "Password is required",
         minLength: {
@@ -202,56 +190,28 @@ const SignInForm = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-900">
-      <motion.div
-        variants={backgroundVariants}
-        animate="animate"
-        className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-        style={{
-          backgroundSize: "400% 400%",
-        }}
-      />
-
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            duration: 80,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute -top-1/2 -right-1/2 w-full h-full opacity-5"
-        >
-          <div className="w-96 h-96 border border-slate-700/20 rounded-full" />
-          <div className="w-80 h-80 border border-slate-600/20 rounded-full absolute top-8 left-8" />
-          <div className="w-64 h-64 border border-slate-500/20 rounded-full absolute top-16 left-16" />
-        </motion.div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center gradient-bg-primary py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-md p-6"
+        className="relative z-10 w-full max-w-md"
       >
-        <Card className="backdrop-blur-xl !bg-slate-800/90 shadow-2xl border !border-slate-700/50 rounded-2xl">
-          <CardHeader className="space-y-1 text-center pb-8">
+        <Card className="card-primary backdrop-blur-xl overflow-hidden">
+          <CardHeader className="space-y-1 text-center pb-6">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-3xl font-bold text-white mb-2">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Welcome Back
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-slate-400 text-base">
+              <CardDescription className="text-muted-foreground">
                 Sign in to your account to continue
               </CardDescription>
             </motion.div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-5">
             {error && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -264,24 +224,16 @@ const SignInForm = () => {
               </motion.div>
             )}
 
-            <motion.div variants={itemVariants} className="relative">
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-800 px-3 text-slate-400 font-medium">
-                  Or continue with email
-                </span>
-              </div>
-            </motion.div>
-
             <motion.form
               variants={itemVariants}
               onSubmit={handleSubmit(onSubmit)}
-              className="space-y-5"
+              className="space-y-4"
             >
               {formFields.map((field) => (
                 <div key={field.id} className="space-y-2">
                   <Label
                     htmlFor={field.id}
-                    className="text-sm font-medium text-slate-300"
+                    className="text-sm font-medium text-foreground"
                   >
                     {field.label}
                   </Label>
@@ -296,19 +248,15 @@ const SignInForm = () => {
                         field.registerOptions
                       )}
                       disabled={isLoading}
-                      style={{
-                        backgroundColor: "rgb(51 65 85 / 0.8)",
-                        color: "white",
-                      }}
                       className={`pl-10 ${
                         field.id === "password" ? "pr-10" : ""
-                      } h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300`}
+                      } h-11 border-input text-foreground placeholder:text-muted-foreground focus:border-ring`}
                     />
                     {field.id === "password" && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         disabled={isLoading}
                       >
                         {showPassword ? (
@@ -323,7 +271,7 @@ const SignInForm = () => {
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-sm text-red-500"
+                      className="text-sm text-destructive"
                     >
                       {errors[field.id as keyof FormData]?.message}
                     </motion.p>
@@ -331,7 +279,7 @@ const SignInForm = () => {
                 </div>
               ))}
 
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center justify-between pt-1">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="rememberMe"
@@ -339,18 +287,18 @@ const SignInForm = () => {
                     onCheckedChange={(checked) =>
                       setRememberMe(checked as boolean)
                     }
-                    className="border-slate-600"
+                    className="border-input"
                   />
                   <Label
                     htmlFor="rememberMe"
-                    className="text-sm font-medium text-slate-300"
+                    className="text-sm font-medium text-foreground"
                   >
                     Remember me
                   </Label>
                 </div>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-300"
+                  className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Forgot password?
                 </Link>
@@ -363,7 +311,7 @@ const SignInForm = () => {
               >
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg font-medium"
+                  className="w-full h-11 btn-gradient-primary text-primary-foreground font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -374,7 +322,7 @@ const SignInForm = () => {
                         repeat: Infinity,
                         ease: "linear",
                       }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
                     />
                   ) : (
                     "Sign In"
@@ -384,13 +332,13 @@ const SignInForm = () => {
             </motion.form>
           </CardContent>
 
-          <CardFooter className="pt-6">
+          <CardFooter className="pt-4">
             <motion.div variants={itemVariants} className="w-full text-center">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link
                   href="/auth/sign-up"
-                  className="font-medium text-slate-200 hover:text-white transition-colors duration-300"
+                  className="font-medium text-primary hover:text-primary/80"
                 >
                   Sign up
                 </Link>

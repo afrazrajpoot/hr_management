@@ -59,7 +59,6 @@ const ForgotPasswordPage = () => {
       setIsSubmitted(true);
       toast.success("Reset code sent to your email!");
 
-      // Redirect to reset password page with email
       setTimeout(() => {
         router.push(
           `/auth/reset-password?email=${encodeURIComponent(data.email)}`
@@ -73,106 +72,66 @@ const ForgotPasswordPage = () => {
   };
 
   const containerVariants: any = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.4,
         ease: "easeOut",
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
       },
     },
   };
 
   const itemVariants: any = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
-
-  const backgroundVariants: any = {
-    animate: {
-      backgroundPosition: ["0% 0%", "100% 100%"],
-      transition: {
-        duration: 20,
-        ease: "linear",
-        repeat: Infinity,
-        repeatType: "reverse" as const,
-      },
+      transition: { duration: 0.3, ease: "easeOut" },
     },
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-900">
-      <motion.div
-        variants={backgroundVariants}
-        animate="animate"
-        className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-        style={{
-          backgroundSize: "400% 400%",
-        }}
-      />
-
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            rotate: 360,
-          }}
-          transition={{
-            duration: 80,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute -top-1/2 -right-1/2 w-full h-full opacity-5"
-        >
-          <div className="w-96 h-96 border border-slate-700/20 rounded-full" />
-          <div className="w-80 h-80 border border-slate-600/20 rounded-full absolute top-8 left-8" />
-          <div className="w-64 h-64 border border-slate-500/20 rounded-full absolute top-16 left-16" />
-        </motion.div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center gradient-bg-primary py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 w-full max-w-md p-6"
+        className="relative z-10 w-full max-w-md"
       >
-        <Card className="backdrop-blur-xl !bg-slate-800/90 shadow-2xl border !border-slate-700/50 rounded-2xl">
-          <CardHeader className="space-y-1 text-center pb-8">
+        <Card className="card-primary backdrop-blur-xl overflow-hidden">
+          <CardHeader className="space-y-1 text-center pb-6">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-3xl font-bold text-white mb-2">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Forgot Password
               </CardTitle>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <CardDescription className="text-slate-400 text-base">
+              <CardDescription className="text-muted-foreground">
                 Enter your email address and we'll send you a link to reset your
                 password
               </CardDescription>
             </motion.div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-5">
             {!isSubmitted ? (
               <motion.form
                 variants={itemVariants}
                 onSubmit={handleSubmit(onSubmit)}
-                className="space-y-5"
+                className="space-y-4"
               >
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
-                    className="text-sm font-medium text-slate-300"
+                    className="text-sm font-medium text-foreground"
                   >
                     Email Address
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3.5 h-4 w-4 text-slate-500" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
@@ -185,18 +144,14 @@ const ForgotPasswordPage = () => {
                         },
                       })}
                       disabled={isLoading}
-                      style={{
-                        backgroundColor: "rgb(51 65 85 / 0.8)",
-                        color: "white",
-                      }}
-                      className="pl-10 h-12 !bg-slate-700/80 !border-slate-600 focus:!border-slate-500 !text-white placeholder:!text-slate-400 rounded-lg transition-all duration-300"
+                      className="pl-10 h-11 border-input text-foreground placeholder:text-muted-foreground focus:border-ring"
                     />
                   </div>
                   {errors.email && (
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-sm text-red-500"
+                      className="text-sm text-destructive"
                     >
                       {errors.email.message}
                     </motion.p>
@@ -210,7 +165,7 @@ const ForgotPasswordPage = () => {
                 >
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-lg font-medium"
+                    className="w-full h-11 btn-gradient-primary text-primary-foreground font-medium"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -221,7 +176,7 @@ const ForgotPasswordPage = () => {
                           repeat: Infinity,
                           ease: "linear",
                         }}
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                        className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
                       />
                     ) : (
                       "Send Reset Link"
@@ -238,16 +193,16 @@ const ForgotPasswordPage = () => {
                 <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   Check your email
                 </h3>
-                <p className="text-slate-400 mb-6">
+                <p className="text-muted-foreground mb-6">
                   We've sent a password reset link to your email address.
                 </p>
                 <Button
                   variant="outline"
                   onClick={() => setIsSubmitted(false)}
-                  className="text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-white"
+                  className="text-foreground border-input hover:bg-secondary hover:text-foreground"
                 >
                   Try another email
                 </Button>
@@ -255,11 +210,11 @@ const ForgotPasswordPage = () => {
             )}
           </CardContent>
 
-          <CardFooter className="pt-6">
+          <CardFooter className="pt-4">
             <motion.div variants={itemVariants} className="w-full text-center">
               <Link
                 href="/auth/sign-in"
-                className="inline-flex items-center text-sm font-medium text-slate-400 hover:text-white transition-colors duration-300"
+                className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Sign In
