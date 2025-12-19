@@ -61,7 +61,12 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
 
   const displayName = useMemo(() => {
     if (!user) return "";
-    return user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "User";
+    return (
+      user.name ||
+      `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+      user.email ||
+      "User"
+    );
   }, [user]);
 
   const initials = useMemo(() => {
@@ -92,9 +97,11 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
 
     setShowSearchLoader(true);
     setIsSearching(true);
-    
+
     try {
-      const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(
+        `/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`
+      );
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data.suggestions || []);
@@ -114,19 +121,31 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
     return () => clearTimeout(timer);
   }, [fetchSuggestions]);
 
-  const handleSuggestionClick = useCallback((suggestion: any) => {
-    setSearchQuery(`${suggestion.firstName} ${suggestion.lastName}`);
-    setShowSuggestions(false);
-    router.push(`/dashboard/companies?search=${encodeURIComponent(suggestion.firstName + " " + suggestion.lastName)}`);
-  }, [router]);
-
-  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
+  const handleSuggestionClick = useCallback(
+    (suggestion: any) => {
+      setSearchQuery(`${suggestion.firstName} ${suggestion.lastName}`);
       setShowSuggestions(false);
-      router.push(`/dashboard/companies?search=${encodeURIComponent(searchQuery)}`);
-    }
-  }, [searchQuery, router]);
+      router.push(
+        `/dashboard/companies?search=${encodeURIComponent(
+          suggestion.firstName + " " + suggestion.lastName
+        )}`
+      );
+    },
+    [router]
+  );
+
+  const handleSearchSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        setShowSuggestions(false);
+        router.push(
+          `/dashboard/companies?search=${encodeURIComponent(searchQuery)}`
+        );
+      }
+    },
+    [searchQuery, router]
+  );
 
   // Handle loading state
   if (status === "loading") {
@@ -151,7 +170,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-6">
+    <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border gradient-bg-primary backdrop-blur-sm px-6">
       {/* Sidebar Trigger */}
       <SidebarTrigger className="h-9 w-9 rounded-lg border border-border bg-card hover:bg-muted transition-colors" />
 
@@ -192,7 +211,9 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
             {isSearching ? (
               <div className="p-4 text-center">
                 <Loader2 className="h-5 w-5 animate-spin mx-auto text-primary mb-2" />
-                <p className="text-sm text-muted-foreground">Searching users...</p>
+                <p className="text-sm text-muted-foreground">
+                  Searching users...
+                </p>
               </div>
             ) : suggestions.length === 0 ? (
               <div className="p-4 text-center">
@@ -201,7 +222,8 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
             ) : (
               <div className="py-2 max-h-60 overflow-y-auto">
                 <div className="px-3 py-2 text-xs font-medium text-muted-foreground border-b border-border">
-                  {suggestions.length} user{suggestions.length !== 1 ? 's' : ''} found
+                  {suggestions.length} user{suggestions.length !== 1 ? "s" : ""}{" "}
+                  found
                 </div>
                 {suggestions.map((suggestion) => (
                   <button
@@ -210,8 +232,8 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
                     className="w-full px-4 py-3 text-left hover:bg-secondary transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs font-medium text-primary-foreground">
-                      {suggestion.firstName?.charAt(0) || 'U'}
-                      {suggestion.lastName?.charAt(0) || 'S'}
+                      {suggestion.firstName?.charAt(0) || "U"}
+                      {suggestion.lastName?.charAt(0) || "S"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-foreground block truncate">
@@ -266,7 +288,10 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
               </Badge>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 shadow-xl bg-card border-border">
+          <DropdownMenuContent
+            align="end"
+            className="w-80 shadow-xl bg-card border-border"
+          >
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-bold text-foreground">Notifications</h4>

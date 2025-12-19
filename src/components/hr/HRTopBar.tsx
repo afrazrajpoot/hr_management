@@ -275,7 +275,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
 
       setIsSearching(true);
       try {
-        const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(
+          `/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`
+        );
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data.suggestions || []);
@@ -295,19 +297,25 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   const handleSuggestionClick = (suggestion: any) => {
     setSearchQuery(`${suggestion.firstName} ${suggestion.lastName}`);
     setShowSuggestions(false);
-    router.push(`/hr-dashboard/employees?search=${encodeURIComponent(suggestion.firstName + " " + suggestion.lastName)}`);
+    router.push(
+      `/hr-dashboard/employees?search=${encodeURIComponent(
+        suggestion.firstName + " " + suggestion.lastName
+      )}`
+    );
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       setShowSuggestions(false);
-      router.push(`/hr-dashboard/employees?search=${encodeURIComponent(searchQuery)}`);
+      router.push(
+        `/hr-dashboard/employees?search=${encodeURIComponent(searchQuery)}`
+      );
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-b from-background to-card">
+    <header className="sticky top-0 z-50 gradient-bg-primary">
       {/* Unified gradient background */}
       {/* <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div> */}
 
@@ -327,7 +335,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+                      <h1 className="text-2xl font-bold text-foreground">
+                        {title}
+                      </h1>
                       <Badge className="bg-primary/10 text-primary border border-primary/20">
                         HR Dashboard
                       </Badge>
@@ -353,7 +363,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     placeholder="Search employees..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                    onFocus={() =>
+                      searchQuery.length >= 2 && setShowSuggestions(true)
+                    }
                     className="w-64 pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
                   />
                 </form>
