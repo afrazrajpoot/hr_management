@@ -428,22 +428,16 @@ const SignUpForm = () => {
                   <SelectContent className="bg-card border-input">
                     <SelectItem
                       value="Employee"
-                      className="text-foreground hover:bg-secondary focus:bg-secondary"
+                      className="select-dropdown-item"
                     >
                       Employee
                     </SelectItem>
-                    <SelectItem
-                      value="HR"
-                      className="text-foreground hover:bg-secondary focus:bg-secondary"
-                    >
+                    <SelectItem value="HR" className="select-dropdown-item">
                       HR
                     </SelectItem>
-                    {/* <SelectItem
-                      value="Admin"
-                      className="text-foreground hover:bg-secondary focus:bg-secondary"
-                    >
+                    <SelectItem value="Admin" className="select-dropdown-item">
                       Admin
-                    </SelectItem> */}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>

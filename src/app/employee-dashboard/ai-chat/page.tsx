@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface Message {
   role: "user" | "assistant";
@@ -268,13 +269,15 @@ export default function ChatPage() {
               </p>
             </div>
             {session?.user?.paid == false && (
-              <Button
-                onClick={() => (window.location.href = "/pricing")}
-                className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+              <Link
+                href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                className=""
               >
-                <Sparkles className="h-4 w-4 mr-2" />
-                Upgrade to Pro
-              </Button>
+                <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Upgrade to Pro
+                </Button>
+              </Link>
             )}
           </div>
 

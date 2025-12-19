@@ -109,7 +109,7 @@ const isValid = (value: any): boolean => {
 export default function Results() {
   const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
   const { data: session } = useSession();
-  
+
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
@@ -129,19 +129,19 @@ export default function Results() {
 
       // Check if user has access to full data by checking if any assessment has complete data
       const hasFullAccess = assessmentsData.some(
-        (assessment: Assessment) => 
-          assessment.currentRoleAlignmentAnalysisJson || 
+        (assessment: Assessment) =>
+          assessment.currentRoleAlignmentAnalysisJson ||
           assessment.internalCareerOpportunitiesJson ||
           assessment.retentionAndMobilityStrategiesJson
       );
-      
+
       // If the API explicitly returns paid status, use it. Otherwise fallback to data check.
       if (data.paid !== undefined) {
         setIsPaid(data.paid);
       } else {
         setIsPaid(hasFullAccess);
       }
-      
+
       const sortedAssessments = [...assessmentsData].sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -200,11 +200,15 @@ export default function Results() {
   ) => {
     const shouldBlur = !isPaid && isPremium;
     const isVisible = isPaid || showAllContent || !shouldBlur;
-    
+
     return (
       <Card className="card-primary card-hover relative overflow-hidden">
         {shouldBlur && !unblurredContent && (
-          <div className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <div
+            className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${
+              isVisible ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
               <div className="bg-primary/10 p-4 rounded-full mb-4">
@@ -212,7 +216,9 @@ export default function Results() {
               </div>
               <h3 className="text-xl font-bold mb-2">Premium Content</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Unlock your full Genius Factor analysis including detailed career insights, alignment scores, and personalized development plans.
+                Unlock your full Genius Factor analysis including detailed
+                career insights, alignment scores, and personalized development
+                plans.
               </p>
               <Button
                 onClick={() => setShowAllContent(true)}
@@ -224,18 +230,23 @@ export default function Results() {
             </div>
           </div>
         )}
-        
+
         <CardHeader>
           <CardTitle className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={`icon-wrapper-${shouldBlur ? 'amber' : 'blue'} p-2`}>
+              <div
+                className={`icon-wrapper-${shouldBlur ? "amber" : "blue"} p-2`}
+              >
                 {icon}
               </div>
               <div>
                 <div className="text-lg font-semibold flex items-center gap-2">
                   {title}
                   {shouldBlur && (
-                    <Badge variant="outline" className="border-amber-200 text-amber-700 bg-amber-50">
+                    <Badge
+                      variant="outline"
+                      className="border-amber-200 text-amber-700 bg-amber-50"
+                    >
                       <Lock className="w-3 h-3 mr-1" />
                       Premium
                     </Badge>
@@ -247,8 +258,8 @@ export default function Results() {
               </div>
             </div>
             {shouldBlur && isVisible && (
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="cursor-pointer hover:bg-amber-50"
                 onClick={() => setShowAllContent(false)}
               >
@@ -259,14 +270,14 @@ export default function Results() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {unblurredContent && (
-            <div className="mb-6">
-                {unblurredContent}
-            </div>
-          )}
+          {unblurredContent && <div className="mb-6">{unblurredContent}</div>}
           <div className="relative">
-             {shouldBlur && unblurredContent && (
-              <div className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            {shouldBlur && unblurredContent && (
+              <div
+                className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${
+                  isVisible ? "opacity-0 pointer-events-none" : "opacity-100"
+                }`}
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
                   <div className="bg-primary/10 p-4 rounded-full mb-4">
@@ -274,7 +285,9 @@ export default function Results() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">Premium Content</h3>
                   <p className="text-muted-foreground mb-6 max-w-md">
-                    Unlock your full Genius Factor analysis including detailed career insights, alignment scores, and personalized development plans.
+                    Unlock your full Genius Factor analysis including detailed
+                    career insights, alignment scores, and personalized
+                    development plans.
                   </p>
                   <Button
                     onClick={() => setShowAllContent(true)}
@@ -316,7 +329,8 @@ export default function Results() {
                     Error Loading Results
                   </h2>
                   <p className="text-muted-foreground">
-                    Unable to load your assessment results. Please try again later.
+                    Unable to load your assessment results. Please try again
+                    later.
                   </p>
                 </div>
                 <Button
@@ -357,14 +371,20 @@ export default function Results() {
                         Unlock Your Full Potential
                       </h3>
                       <p className="text-amber-700 text-sm">
-                        Upgrade to access complete career insights, detailed analysis, and personalized recommendations.
+                        Upgrade to access complete career insights, detailed
+                        analysis, and personalized recommendations.
                       </p>
                     </div>
                   </div>
-                  <Button className="btn-gradient-primary whitespace-nowrap">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Upgrade Now
-                  </Button>
+                  <Link
+                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                    className=""
+                  >
+                    <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Upgrade to Pro
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -723,7 +743,7 @@ export default function Results() {
                     )}
                   </div>
                 ) : (
-                  (!selectedAssessment.alignmentScore && !isPaid) && (
+                  !selectedAssessment.alignmentScore && !isPaid && (
                     <div className="text-center py-8 text-muted-foreground">
                       <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                       <p>No alignment data available</p>
@@ -733,17 +753,22 @@ export default function Results() {
                 true,
                 true,
                 // Unblurred Content (Alignment Score)
-                (selectedAssessment.alignmentScore || selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score) ? (
+                selectedAssessment.alignmentScore ||
+                  selectedAssessment.currentRoleAlignmentAnalysisJson
+                    ?.alignment_score ? (
                   <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
                     <div>
                       <div className="text-sm font-medium text-warning">
                         Alignment Score
                       </div>
                       <div className="text-2xl font-bold">
-                        {selectedAssessment.alignmentScore || selectedAssessment.currentRoleAlignmentAnalysisJson?.alignment_score}
+                        {selectedAssessment.alignmentScore ||
+                          selectedAssessment.currentRoleAlignmentAnalysisJson
+                            ?.alignment_score}
                       </div>
                     </div>
-                    {selectedAssessment.currentRoleAlignmentAnalysisJson?.retention_risk_level && (
+                    {selectedAssessment.currentRoleAlignmentAnalysisJson
+                      ?.retention_risk_level && (
                       <Badge
                         className={`badge-${
                           selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level
@@ -1266,19 +1291,15 @@ export default function Results() {
           </Card>
 
           {/* Recommended Actions */}
-          <Card className="ai-recommendation-card">
+          <Card className="card-primary">
             <CardContent className="p-8">
               <div className="flex items-center gap-4 mb-6">
-                <div className="ai-recommendation-icon-wrapper">
-                  <Rocket className="w-8 h-8 text-white" />
+                <div className="ai-recommendation-icon-wrapper text-white">
+                  <Rocket className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">
-                    Recommended Next Steps
-                  </h3>
-                  <p className="text-white/80">
-                    Personalized actions based on your profile
-                  </p>
+                  <h3 className="text-xl font-bold ">Recommended Next Steps</h3>
+                  <p className="">Personalized actions based on your profile</p>
                 </div>
               </div>
 
@@ -1290,15 +1311,11 @@ export default function Results() {
                         <TrendingUp className="w-6 h-6 text-primary" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white">
-                          Explore Career Paths
-                        </h4>
-                        <p className="text-sm text-white/80">
-                          Based on your profile
-                        </p>
+                        <h4 className="font-semibold">Explore Career Paths</h4>
+                        <p className="text-sm">Based on your profile</p>
                       </div>
                     </div>
-                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                    <div className="text-xs  transition-colors">
                       Discover roles that match your genius factor
                     </div>
                   </div>
@@ -1311,26 +1328,24 @@ export default function Results() {
                         <Target className="w-6 h-6 text-success" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white">
-                          Skill Development
-                        </h4>
-                        <p className="text-sm text-white/80">
-                          Personalized roadmap
-                        </p>
+                        <h4 className="font-semibold ">Skill Development</h4>
+                        <p className="text-sm">Personalized roadmap</p>
                       </div>
                     </div>
-                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                    <div className="text-xs  transition-colors">
                       Build skills aligned with your strengths
                     </div>
                   </div>
                 </Link>
 
                 {!isPaid ? (
-                  <div 
+                  <div
                     className="quick-action-item group cursor-pointer"
                     onClick={() => {
                       // Scroll to upgrade section or show modal
-                      document.getElementById('results-header')?.scrollIntoView({ behavior: 'smooth' });
+                      document
+                        .getElementById("results-header")
+                        ?.scrollIntoView({ behavior: "smooth" });
                     }}
                   >
                     <div className="flex items-center gap-3 mb-3">
@@ -1338,15 +1353,11 @@ export default function Results() {
                         <Lock className="w-6 h-6 text-accent" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white">
-                          Unlock Full Analysis
-                        </h4>
-                        <p className="text-sm text-white/80">
-                          Premium features
-                        </p>
+                        <h4 className="font-semibold ">Unlock Full Analysis</h4>
+                        <p className="text-sm ">Premium features</p>
                       </div>
                     </div>
-                    <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                    <div className="text-xs  transition-colors">
                       Access complete career insights
                     </div>
                   </div>
@@ -1358,15 +1369,11 @@ export default function Results() {
                           <Brain className="w-6 h-6 text-accent" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-white">
-                            Track Progress
-                          </h4>
-                          <p className="text-sm text-white/80">
-                            Retake assessment
-                          </p>
+                          <h4 className="font-semibold ">Track Progress</h4>
+                          <p className="text-sm ">Retake assessment</p>
                         </div>
                       </div>
-                      <div className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                      <div className="text-xs  transition-colors">
                         Monitor your development over time
                       </div>
                     </div>

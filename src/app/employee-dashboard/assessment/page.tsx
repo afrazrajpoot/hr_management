@@ -618,13 +618,15 @@ export default function Assessment() {
         );
       default:
         return (
-          <Button
-            onClick={() => window.location.reload()}
-            variant="outline"
-            className="mt-4"
+          <Link
+            href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+            className=""
           >
-            Try Again
-          </Button>
+            <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Upgrade to Pro
+            </Button>
+          </Link>
         );
     }
   };
