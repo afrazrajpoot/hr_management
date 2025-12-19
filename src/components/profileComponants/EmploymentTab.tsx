@@ -101,16 +101,17 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
       position: <Briefcase className="w-4 h-4 text-success" />,
       manager: <Users className="w-4 h-4 text-primary" />,
       salary: <DollarSign className="w-4 h-4 text-warning" />,
+      employer: <Building2 className="w-4 h-4 text-success" />,
     };
     return icons[fieldName] || <Briefcase className="w-4 h-4 text-primary" />;
   };
 
   // Group fields
   const basicEmploymentFields = employmentFields.filter((f) =>
-    ["employeeId", "hireDate", "department", "position"].includes(f.field)
+    ["employer", "hireDate", "department", "position"].includes(f.field)
   );
   const additionalFields = employmentFields.filter((f) =>
-    ["manager", "salary"].includes(f.field)
+    ["manager", "salary", "employeeId"].includes(f.field)
   );
 
   return (

@@ -70,6 +70,7 @@ const EmployeeProfilePage: React.FC = () => {
       education: [],
       experience: [],
       resume: null,
+      employer: "",
     }
   );
 

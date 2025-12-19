@@ -64,29 +64,12 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                             <div style="
                                 background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
                                 border-radius: 12px;
-                                padding: 30px;
+                                padding: 40px 30px;
                                 margin: 20px 0 30px;
                                 border: 1px solid #bae6fd;
+                                text-align: center;
                             ">
-                                <!-- Avatar Circle -->
-                                <div style="
-                                    width: 80px;
-                                    height: 80px;
-                                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                                    border-radius: 50%;
-                                    color: white;
-                                    font-size: 32px;
-                                    font-weight: 700;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    margin: 0 auto 20px;
-                                    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
-                                ">
-                                    ${firstName.charAt(0).toUpperCase()}
-                                </div>
-                                
-                                <h1 style="font-size: 32px; font-weight: 700; color: #0f172a; margin: 0 0 10px; line-height: 1.3;">
+                                <h1 style="font-size: 32px; font-weight: 700; color: #0f172a; margin: 0 0 15px; line-height: 1.3;">
                                     Welcome, ${firstName}!
                                 </h1>
                                 <p style="color: #475569; font-size: 16px; margin: 0; line-height: 1.5;">
@@ -96,18 +79,17 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                             
                             <!-- Success Badge -->
                             <div style="
-                                display: inline-flex;
-                                align-items: center;
-                                gap: 8px;
                                 background: linear-gradient(135deg, #10b981, #059669);
                                 color: white;
-                                padding: 10px 24px;
+                                padding: 12px 28px;
                                 border-radius: 20px;
                                 font-size: 14px;
                                 font-weight: 600;
-                                margin: 0 0 30px;
+                                margin: 0 auto 30px;
+                                text-align: center;
+                                display: inline-block;
+                                letter-spacing: 0.5px;
                             ">
-                                <span>✓</span>
                                 ACCOUNT ACTIVATED • PREMIUM ACCESS
                             </div>
                         </td>
@@ -131,12 +113,12 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                             border-radius: 4px;
                                             margin: 25px 0;
                                         ">
-                                            <p style="color: #0369a1; font-size: 15px; font-weight: 600; margin: 0 0 10px;">
-                                                🎯 Your Journey Begins Today
-                                            </p>
-                                            <p style="color: #475569; font-size: 14px; margin: 0; line-height: 1.5;">
+                                            <div style="color: #0369a1; font-size: 15px; font-weight: 600; margin: 0 0 10px;">
+                                                Your Journey Begins Today
+                                            </div>
+                                            <div style="color: #475569; font-size: 14px; margin: 0; line-height: 1.5;">
                                                 You now have access to our complete suite of AI-powered assessment tools, personalized insights, and growth tracking features.
-                                            </p>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -273,27 +255,15 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                     <div style="
                                                         background-color: #f8fafc;
                                                         border-radius: 8px;
-                                                        padding: 20px;
+                                                        padding: 25px 20px;
                                                         border: 1px solid #e2e8f0;
                                                         height: 100%;
                                                     ">
-                                                        <div style="
-                                                            width: 48px;
-                                                            height: 48px;
-                                                            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                                                            border-radius: 12px;
-                                                            display: flex;
-                                                            align-items: center;
-                                                            justify-content: center;
-                                                            margin-bottom: 15px;
-                                                        ">
-                                                            <span style="color: white; font-size: 20px;">🧠</span>
-                                                        </div>
-                                                        <h3 style="margin: 0 0 10px; font-size: 16px; font-weight: 600; color: #0f172a;">
+                                                        <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 600; color: #0f172a;">
                                                             AI-Powered Assessments
                                                         </h3>
                                                         <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-                                                            Discover your unique cognitive strengths and growth opportunities.
+                                                            Discover your unique cognitive strengths and growth opportunities through our advanced assessment tools.
                                                         </p>
                                                     </div>
                                                 </td>
@@ -301,27 +271,15 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                     <div style="
                                                         background-color: #f8fafc;
                                                         border-radius: 8px;
-                                                        padding: 20px;
+                                                        padding: 25px 20px;
                                                         border: 1px solid #e2e8f0;
                                                         height: 100%;
                                                     ">
-                                                        <div style="
-                                                            width: 48px;
-                                                            height: 48px;
-                                                            background: linear-gradient(135deg, #10b981, #059669);
-                                                            border-radius: 12px;
-                                                            display: flex;
-                                                            align-items: center;
-                                                            justify-content: center;
-                                                            margin-bottom: 15px;
-                                                        ">
-                                                            <span style="color: white; font-size: 20px;">📊</span>
-                                                        </div>
-                                                        <h3 style="margin: 0 0 10px; font-size: 16px; font-weight: 600; color: #0f172a;">
+                                                        <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 600; color: #0f172a;">
                                                             Personalized Insights
                                                         </h3>
                                                         <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-                                                            Receive tailored recommendations and growth strategies.
+                                                            Receive tailored recommendations and growth strategies based on your unique profile.
                                                         </p>
                                                     </div>
                                                 </td>
@@ -331,27 +289,15 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                     <div style="
                                                         background-color: #f8fafc;
                                                         border-radius: 8px;
-                                                        padding: 20px;
+                                                        padding: 25px 20px;
                                                         border: 1px solid #e2e8f0;
                                                         height: 100%;
                                                     ">
-                                                        <div style="
-                                                            width: 48px;
-                                                            height: 48px;
-                                                            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-                                                            border-radius: 12px;
-                                                            display: flex;
-                                                            align-items: center;
-                                                            justify-content: center;
-                                                            margin-bottom: 15px;
-                                                        ">
-                                                            <span style="color: white; font-size: 20px;">👥</span>
-                                                        </div>
-                                                        <h3 style="margin: 0 0 10px; font-size: 16px; font-weight: 600; color: #0f172a;">
+                                                        <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 600; color: #0f172a;">
                                                             Expert Community
                                                         </h3>
                                                         <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-                                                            Connect with professionals on similar growth journeys.
+                                                            Connect with professionals and experts on similar growth journeys for collaboration and learning.
                                                         </p>
                                                     </div>
                                                 </td>
@@ -359,27 +305,15 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                     <div style="
                                                         background-color: #f8fafc;
                                                         border-radius: 8px;
-                                                        padding: 20px;
+                                                        padding: 25px 20px;
                                                         border: 1px solid #e2e8f0;
                                                         height: 100%;
                                                     ">
-                                                        <div style="
-                                                            width: 48px;
-                                                            height: 48px;
-                                                            background: linear-gradient(135deg, #f59e0b, #d97706);
-                                                            border-radius: 12px;
-                                                            display: flex;
-                                                            align-items: center;
-                                                            justify-content: center;
-                                                            margin-bottom: 15px;
-                                                        ">
-                                                            <span style="color: white; font-size: 20px;">📈</span>
-                                                        </div>
-                                                        <h3 style="margin: 0 0 10px; font-size: 16px; font-weight: 600; color: #0f172a;">
+                                                        <h3 style="margin: 0 0 12px; font-size: 16px; font-weight: 600; color: #0f172a;">
                                                             Progress Tracking
                                                         </h3>
                                                         <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-                                                            Monitor your development with detailed analytics.
+                                                            Monitor your development with detailed analytics and milestone tracking features.
                                                         </p>
                                                     </div>
                                                 </td>
@@ -425,7 +359,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                         font-size: 14px;
                                                         font-weight: 500;
                                                     ">
-                                                        📧 Onboarding Support
+                                                        Onboarding Support
                                                     </a>
                                                 </td>
                                                 <td style="padding-bottom: 10px;">
@@ -435,7 +369,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                         font-size: 14px;
                                                         font-weight: 500;
                                                     ">
-                                                        📚 Getting Started Guide
+                                                        Getting Started Guide
                                                     </a>
                                                 </td>
                                             </tr>

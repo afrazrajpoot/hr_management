@@ -11,14 +11,15 @@ export const personalInfoFields: InputFieldConfig[] = [
   { label: "Date of Birth", icon: Calendar, field: "dateOfBirth", type: "date" },
   { label: "Address", icon: MapPin, field: "address" },
   { label: "Bio", icon: User, field: "bio", isTextarea: true },
-  {label:'Password',icon:User,field:'password',type:'password'}
+  { label: 'Password', icon: User, field: 'password', type: 'password' }
 ];
 
 export const employmentFields: InputFieldConfig[] = [
-  { label: "Position", icon: Briefcase, field: "position" },
-  { label: "Department", icon: Briefcase, field: "department" },
-  { label: "Manager", icon: User, field: "manager" },
+  { label: "Employer", icon: Briefcase, field: "employer" },
   { label: "Hire Date", icon: Calendar, field: "hireDate", type: "date" },
+  { label: "Department", icon: Briefcase, field: "department" },
+  { label: "Position", icon: Briefcase, field: "position" },
+  { label: "Manager", icon: User, field: "manager" },
 ];
 
 export const skillFields: InputFieldConfig[] = [

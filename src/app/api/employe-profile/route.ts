@@ -24,6 +24,7 @@ interface EmployeeData {
   education?: any[];
   experience?: any[];
   resume?: string | null;
+  employer?: string;
 }
 
 // GET: Fetch employee data for the authenticated user
@@ -96,6 +97,7 @@ export async function GET(req: NextRequest) {
         education: [],
         experience: [],
         resume: null,
+        employer: "",
       });
     }
 
@@ -119,6 +121,7 @@ export async function GET(req: NextRequest) {
       education: employee.education || [],
       experience: employee.experience || [],
       resume: employee.resume || null,
+      employer: employee.employer || "",
     });
   } catch (error: any) {
     console.error("Error fetching employee:", error);
@@ -250,6 +253,7 @@ export async function POST(req: NextRequest) {
           bio: data.bio || null,
           avatar: data.avatar || null,
           resume: data.resume || null,
+          employer: data.employer || null,
         };
 
         // Handle JSON fields
@@ -328,6 +332,7 @@ export async function POST(req: NextRequest) {
           education: employee.education || [],
           experience: employee.experience || [],
           resume: employee.resume || null,
+          employer: employee.employer || "",
         },
       });
 

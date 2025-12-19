@@ -138,6 +138,7 @@ model Employee {
   education     Json?
   experience    Json?
   resume        String?
+  employer      String?
   user          User?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
