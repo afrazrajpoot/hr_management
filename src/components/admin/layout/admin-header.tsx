@@ -163,13 +163,13 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
       {/* Search Bar */}
       <div className="hidden lg:block relative">
         <form onSubmit={handleSearchSubmit}>
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Search HR users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-            className="w-72 pl-9 bg-muted/50 border-border focus:border-primary"
+            className="w-72 pl-9 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 focus:border-blue-500"
           />
         </form>
 

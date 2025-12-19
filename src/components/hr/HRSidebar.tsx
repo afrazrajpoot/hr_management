@@ -195,7 +195,7 @@ export default function HRSidebar({
             </div>
           )}
 
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={onToggleCollapse}
@@ -206,7 +206,7 @@ export default function HRSidebar({
             ) : (
               <ChevronLeft className="h-4 w-4" />
             )}
-          </Button>
+          </Button> */}
         </div>
       </div>
 

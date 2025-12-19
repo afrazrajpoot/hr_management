@@ -1,4 +1,4 @@
-// components/hr/HRTopBar.tsx (minimal theme toggle addition)
+// components/hr/HRTopBar.tsx (updated with CSS variables)
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -18,7 +18,7 @@ import {
   FileText,
   TrendingUp,
   Moon,
-  Sun, // Add this import
+  Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSocket } from "@/context/SocketContext";
-import { useTheme } from "next-themes"; // Add this import
+import { useTheme } from "next-themes";
 
 interface HRTopBarProps {
   title: string;
@@ -75,7 +75,7 @@ interface SocketNotification {
 export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   const { isConnected, hrNotifications, clearNotifications } = useSocket();
   const { data: session } = useSession();
-  const { theme, setTheme } = useTheme(); // Add this
+  const { theme, setTheme } = useTheme();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
 
   const hrId = session?.user?.id || "";
 
-  // Memoize fetchNotifications to prevent recreation
   const fetchNotifications = useCallback(async () => {
     if (!hrId) return;
     try {
@@ -111,7 +110,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   }, [hrId]);
 
-  // Memoize convertSocketNotification
   const convertSocketNotification = useCallback(
     (socketNotif: SocketNotification): Notification => {
       return {
@@ -130,7 +128,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     []
   );
 
-  // Memoize updateNotificationStatus
   const updateNotificationStatus = useCallback(
     async (notificationId: string, status: string) => {
       try {
@@ -185,7 +182,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     []
   );
 
-  // Memoize markAllAsRead
   const markAllAsRead = useCallback(async () => {
     try {
       setLoading(true);
@@ -200,7 +196,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   }, [notifications, updateNotificationStatus]);
 
-  // Handle incoming socket notifications
   useEffect(() => {
     if (hrNotifications.length > 0) {
       const newSocketNotifications = hrNotifications.map(
@@ -214,7 +209,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   }, [hrNotifications, clearNotifications, convertSocketNotification]);
 
-  // Handle initial fetch and socket subscription
   useEffect(() => {
     if (!hrId || !isConnected) return;
 
@@ -232,10 +226,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   }, [hrId, isConnected, fetchNotifications]);
 
-  // Get unread notifications count
   const unreadCount = notifications.filter((n) => n.status === "unread").length;
 
-  // Generate employee initials
   const getEmployeeInitials = (name?: string) => {
     if (!name) return "EM";
     return name
@@ -245,7 +237,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
       .toUpperCase();
   };
 
-  // Format timestamp
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -261,7 +252,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   };
 
-  // Get notification icon based on type
   const getNotificationIcon = (type?: string) => {
     switch (type) {
       case "assessment_complete":
@@ -275,7 +265,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     }
   };
 
-  // Handle search suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.length < 2) {
@@ -318,9 +307,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950">
+    <header className="sticky top-0 z-50 border-b bg-background">
       {/* Unified gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div>
 
       {/* Content overlay */}
       <div className="relative z-10">
@@ -330,22 +319,22 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
             <div className="flex items-center gap-4">
               <div className="relative">
                 {/* Decorative element */}
-                <div className="absolute -left-2 -top-2 w-12 h-12 bg-gradient-to-br from-blue-600/10 to-purple-600/10 rounded-full blur-xl"></div>
+                <div className="absolute -left-2 -top-2 w-12 h-12 bg-gradient-to-br from-primary/10 to-purple-600/10 rounded-full blur-xl"></div>
 
                 <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
-                    <Sparkles className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+                    <Sparkles className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h1 className="text-2xl font-bold text-white">{title}</h1>
-                      <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+                      <Badge className="bg-primary/10 text-primary border border-primary/20">
                         HR Dashboard
                       </Badge>
                     </div>
                     {subtitle && (
-                      <p className="text-sm text-slate-400 mt-1 flex items-center gap-1">
-                        <span className="w-1 h-1 rounded-full bg-blue-500"></span>
+                      <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-primary"></span>
                         {subtitle}
                       </p>
                     )}
@@ -356,25 +345,25 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
 
             {/* Right: Actions Section */}
             <div className="flex items-center gap-3">
-              {/* Search Input */}
+              {/* Search Input - Updated with CSS variables */}
               <div className="relative hidden lg:block">
                 <form onSubmit={handleSearchSubmit}>
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search employees..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                    className="w-64 pl-10 bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 border-slate-700 dark:border-slate-700 border-slate-300 text-foreground placeholder:text-muted-foreground backdrop-blur-sm"
+                    className="w-64 pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
                   />
                 </form>
 
                 {/* Suggestions Dropdown */}
                 {showSuggestions && (suggestions.length > 0 || isSearching) && (
-                  <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-lg shadow-xl z-[60] overflow-hidden">
+                  <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-lg shadow-xl z-[60] overflow-hidden">
                     {isSearching ? (
                       <div className="p-4 text-center">
-                        <Loader2 className="h-4 w-4 animate-spin mx-auto text-blue-500" />
+                        <Loader2 className="h-4 w-4 animate-spin mx-auto text-primary" />
                       </div>
                     ) : (
                       <div className="py-2">
@@ -382,12 +371,12 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                           <button
                             key={suggestion.id}
                             onClick={() => handleSuggestionClick(suggestion)}
-                            className="w-full px-4 py-2 text-left hover:bg-slate-800 transition-colors flex flex-col"
+                            className="w-full px-4 py-2 text-left hover:bg-secondary transition-colors flex flex-col"
                           >
-                            <span className="text-sm font-medium text-white">
+                            <span className="text-sm font-medium text-foreground">
                               {suggestion.firstName} {suggestion.lastName}
                             </span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-muted-foreground">
                               {suggestion.email}
                             </span>
                           </button>
@@ -400,12 +389,12 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
-                {/* Theme Toggle - Add this button */}
+                {/* Theme Toggle */}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
+                  className="relative text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border border-border"
                   title={
                     theme === "dark"
                       ? "Switch to light mode"
@@ -419,24 +408,6 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   )}
                 </Button>
 
-                {/* Settings */}
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
-                >
-                  <Settings className="h-5 w-5" />
-                </Button> */}
-
-                {/* Help */}
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
-                >
-                  <HelpCircle className="h-5 w-5" />
-                </Button> */}
-
                 {/* Notifications Dropdown */}
                 <DropdownMenu
                   open={isNotificationOpen}
@@ -446,13 +417,13 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="relative text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors border border-slate-700"
+                      className="relative text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border border-border"
                     >
                       <Bell className="h-5 w-5" />
                       {unreadCount > 0 && (
                         <Badge
                           variant="destructive"
-                          className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs border-2 border-slate-900 shadow-lg bg-gradient-to-br from-red-500 to-pink-600"
+                          className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs border-2 border-background shadow-lg"
                         >
                           {unreadCount}
                         </Badge>
@@ -461,20 +432,20 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-96 max-h-[480px] overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 shadow-xl"
+                    className="w-96 max-h-[480px] overflow-hidden bg-card border border-border shadow-xl"
                   >
                     {/* Notification Header */}
-                    <div className="p-4 border-b border-slate-800 bg-gradient-to-r from-slate-800/50 to-transparent">
+                    <div className="p-4 border-b border-border bg-gradient-to-r from-secondary to-transparent">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                            <Bell className="w-5 h-5 text-white" />
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+                            <Bell className="w-5 h-5 text-primary-foreground" />
                           </div>
                           <div>
-                            <DropdownMenuLabel className="text-base font-bold p-0 text-white">
+                            <DropdownMenuLabel className="text-base font-bold p-0 text-foreground">
                               Notifications
                             </DropdownMenuLabel>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-muted-foreground">
                               {notifications.length} total • {unreadCount}{" "}
                               unread
                             </p>
@@ -486,7 +457,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                             size="sm"
                             onClick={markAllAsRead}
                             disabled={loading || unreadCount === 0}
-                            className="text-xs h-8 px-3 hover:bg-slate-800/50 transition-colors text-slate-300 hover:text-white"
+                            className="text-xs h-8 px-3 hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                           >
                             {loading ? (
                               <Loader2 className="h-3 w-3 animate-spin mr-1" />
@@ -501,17 +472,17 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     <div className="p-0">
                       {loading && notifications.length === 0 ? (
                         <div className="p-8 text-center">
-                          <Loader2 className="h-8 w-8 mx-auto animate-spin text-blue-500 mb-3" />
-                          <p className="text-sm text-slate-400">
+                          <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary mb-3" />
+                          <p className="text-sm text-muted-foreground">
                             Loading notifications...
                           </p>
                         </div>
                       ) : notifications.length === 0 ? (
                         <div className="p-8 text-center">
-                          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center">
-                            <Bell className="w-8 h-8 text-blue-500" />
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/30 flex items-center justify-center">
+                            <Bell className="w-8 h-8 text-primary" />
                           </div>
-                          <p className="text-sm text-slate-400">
+                          <p className="text-sm text-muted-foreground">
                             All caught up! No new notifications
                           </p>
                         </div>
@@ -520,13 +491,13 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-4 border-b border-slate-800 last:border-b-0 transition-all hover:bg-slate-800/30 ${
+                              className={`p-4 border-b border-border last:border-b-0 transition-all hover:bg-secondary/50 ${
                                 notification.status === "unread"
-                                  ? "bg-blue-500/5 border-l-4 border-l-blue-500"
+                                  ? "bg-primary/5 border-l-4 border-l-primary"
                                   : "border-l-4 border-l-transparent"
                               } ${
                                 notification.id.startsWith("socket-")
-                                  ? "bg-amber-500/5"
+                                  ? "bg-warning/5"
                                   : ""
                               }`}
                             >
@@ -536,8 +507,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                   <div
                                     className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                                       notification.status === "unread"
-                                        ? "bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30"
-                                        : "bg-slate-800/50 border border-slate-700"
+                                        ? "bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/30"
+                                        : "bg-secondary border border-border"
                                     }`}
                                   >
                                     {getNotificationIcon(notification.type)}
@@ -548,30 +519,30 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-xs font-medium text-white">
+                                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs font-medium text-primary-foreground">
                                         {getEmployeeInitials(
                                           notification.employeeName
                                         )}
                                       </div>
                                       <div>
-                                        <p className="text-sm font-semibold text-white truncate">
+                                        <p className="text-sm font-semibold text-foreground truncate">
                                           {notification.employeeName ||
                                             "Employee"}
                                         </p>
-                                        <p className="text-xs text-slate-400 truncate">
+                                        <p className="text-xs text-muted-foreground truncate">
                                           {notification.employeeEmail ||
                                             "No email provided"}
                                         </p>
                                       </div>
                                     </div>
                                     {notification.status === "unread" && (
-                                      <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs">
+                                      <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs">
                                         New
                                       </Badge>
                                     )}
                                   </div>
 
-                                  <p className="text-sm text-slate-300 mb-3">
+                                  <p className="text-sm text-foreground/90 mb-3">
                                     {notification.message}
                                   </p>
 
@@ -579,16 +550,16 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                     undefined && (
                                     <div className="mb-3">
                                       <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs text-slate-400">
+                                        <span className="text-xs text-muted-foreground">
                                           Progress
                                         </span>
-                                        <span className="text-xs font-medium text-blue-400">
+                                        <span className="text-xs font-medium text-primary">
                                           {notification.data.progress}%
                                         </span>
                                       </div>
-                                      <div className="w-full bg-slate-800 rounded-full h-2">
+                                      <div className="w-full bg-secondary rounded-full h-2">
                                         <div
-                                          className="h-full rounded-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all"
+                                          className="h-full rounded-full bg-gradient-to-r from-primary to-purple-600 transition-all"
                                           style={{
                                             width: `${notification.data.progress}%`,
                                           }}
@@ -598,7 +569,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                   )}
 
                                   <div className="flex items-center justify-between">
-                                    <span className="text-xs text-slate-500">
+                                    <span className="text-xs text-muted-foreground">
                                       {formatTimestamp(notification.createdAt)}
                                       {notification.id.startsWith("socket-") &&
                                         " • Live"}
@@ -617,7 +588,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                       disabled={updatingNotifications.has(
                                         notification.id
                                       )}
-                                      className="h-7 px-2 text-xs hover:bg-slate-800/50 transition-colors text-slate-400 hover:text-white"
+                                      className="h-7 px-2 text-xs hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                                     >
                                       {updatingNotifications.has(
                                         notification.id
@@ -630,7 +601,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                         </>
                                       ) : (
                                         <>
-                                          <Mail className="h-3 w-3 mr-1 text-blue-500" />
+                                          <Mail className="h-3 w-3 mr-1 text-primary" />
                                           Mark read
                                         </>
                                       )}
@@ -651,72 +622,72 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center gap-3 px-3 py-2 hover:bg-slate-800/50 transition-all group border border-slate-700"
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-secondary transition-all group border border-border"
                     >
                       <div className="relative">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center ring-2 ring-blue-500/30 ring-offset-2 ring-offset-slate-900 group-hover:ring-blue-500/50 transition-all">
-                          <User className="w-5 h-5 text-white" />
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center ring-2 ring-primary/30 ring-offset-2 ring-offset-background group-hover:ring-primary/50 transition-all">
+                          <User className="w-5 h-5 text-primary-foreground" />
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900"></div>
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
                       </div>
                       <div className="hidden lg:block text-left max-w-[160px]">
-                        <p className="text-sm font-semibold text-white truncate">
+                        <p className="text-sm font-semibold text-foreground truncate">
                           {session?.user?.name || "HR Manager"}
                         </p>
-                        <p className="text-xs text-slate-400 truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {session?.user?.email || "admin@geniusfactor.com"}
                         </p>
                       </div>
-                      <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-56 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 shadow-xl"
+                    className="w-56 bg-card border border-border shadow-xl"
                   >
                     {/* Profile Header */}
-                    <div className="p-4 bg-gradient-to-r from-slate-800/50 to-transparent">
+                    <div className="p-4 bg-gradient-to-r from-secondary to-transparent">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center ring-2 ring-blue-500/30">
-                          <User className="w-6 h-6 text-white" />
+                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center ring-2 ring-primary/30">
+                          <User className="w-6 h-6 text-primary-foreground" />
                         </div>
                         <div>
-                          <DropdownMenuLabel className="text-base font-bold p-0 text-white">
+                          <DropdownMenuLabel className="text-base font-bold p-0 text-foreground">
                             {session?.user?.name || "HR Manager"}
                           </DropdownMenuLabel>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-muted-foreground">
                             HR Department
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <DropdownMenuSeparator className="my-2 bg-slate-800" />
+                    <DropdownMenuSeparator className="my-2 bg-border" />
 
                     {/* Menu Items */}
                     <div className="p-1">
-                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800/50 cursor-pointer mb-1 text-slate-300 hover:text-white transition-colors">
+                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary cursor-pointer mb-1 text-foreground/80 hover:text-foreground transition-colors">
                         <User className="h-4 w-4" />
                         <Link href="/hr-dashboard/profile" className="flex-1">
                           My Profile
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800/50 cursor-pointer mb-1 text-slate-300 hover:text-white transition-colors">
+                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary cursor-pointer mb-1 text-foreground/80 hover:text-foreground transition-colors">
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800/50 cursor-pointer text-slate-300 hover:text-white transition-colors">
+                      <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-secondary cursor-pointer text-foreground/80 hover:text-foreground transition-colors">
                         <HelpCircle className="h-4 w-4" />
                         <span>Help & Support</span>
                       </DropdownMenuItem>
                     </div>
 
-                    <DropdownMenuSeparator className="my-2 bg-slate-800" />
+                    <DropdownMenuSeparator className="my-2 bg-border" />
 
                     {/* Sign Out */}
                     <div className="p-1">
                       <DropdownMenuItem
-                        className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg hover:bg-red-500/10 hover:text-red-400 cursor-pointer text-red-400 transition-colors"
+                        className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg hover:bg-destructive/10 hover:text-destructive cursor-pointer text-destructive transition-colors"
                         onClick={() =>
                           signOut({ callbackUrl: "/auth/sign-in" })
                         }
