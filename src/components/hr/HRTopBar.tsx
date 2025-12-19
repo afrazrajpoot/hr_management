@@ -307,9 +307,9 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background">
+    <header className="sticky top-0 z-50 bg-gradient-to-b from-background to-card">
       {/* Unified gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div>
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div> */}
 
       {/* Content overlay */}
       <div className="relative z-10">
