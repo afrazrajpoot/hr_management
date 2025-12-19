@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import {
   Card,
   CardContent,
@@ -73,7 +73,7 @@ const getRiskColor = (risk: string | undefined) => {
   }
 };
 
-export default function Employees() {
+function EmployeesContent() {
   // Separate states: immediate input vs debounced API value
   const [searchInput, setSearchInput] = useState(""); // Immediate UI value
   const [debouncedSearch, setDebouncedSearch] = useState(""); // API value
@@ -254,7 +254,6 @@ export default function Employees() {
                     {totalEmployees}
                   </div>
                 </div>
-              
               </div>
             </CardContent>
           </Card>
@@ -668,10 +667,18 @@ export default function Employees() {
             <span>Last updated: Just now</span>
           </div>
           {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-            Need Help? <ChevronRight className="h-3 w-3" />
+          {/* Need Help? <ChevronRight className="h-3 w-3" />
           </button> */}
         </div>
       </div>
     </HRLayout>
+  );
+}
+
+export default function Employees() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <EmployeesContent />
+    </Suspense>
   );
 }

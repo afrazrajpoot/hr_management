@@ -1,7 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  Suspense,
+} from "react";
 import { HRLayout } from "@/components/admin/layout/admin-layout";
 import { StatCard } from "@/components/admin/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,7 +158,7 @@ interface Company {
   updatedAt: string;
 }
 
-export default function Companies() {
+function CompaniesContent() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredSearchTerm, setFilteredSearchTerm] = useState("");
@@ -860,6 +867,14 @@ export default function Companies() {
         onClose={handleCloseModal}
       />
     </HRLayout>
+  );
+}
+
+export default function Companies() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <CompaniesContent />
+    </Suspense>
   );
 }
 
