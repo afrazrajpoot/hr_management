@@ -230,10 +230,7 @@ const SignUpForm = () => {
       ),
       registerOptions: {
         required: "Phone number is required",
-        pattern: {
-          value: /^\+?[\d\s-]{8,}$/,
-          message: "Invalid phone number",
-        },
+        // Pattern validation removed
       },
     },
     {

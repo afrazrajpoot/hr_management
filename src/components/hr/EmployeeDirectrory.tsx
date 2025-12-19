@@ -63,22 +63,23 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
   const currentUsers = users.slice(startIndex, endIndex);
 
   const handlePrevious = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
   const handleNext = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
   return (
-    <Card className="bg-[#081229]">
+    <Card className="card-primary card-hover border-0 shadow-lg group">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           Employee Directory
         </CardTitle>
         <CardDescription>
-          Showing {startIndex + 1}-{Math.min(endIndex, users.length)} of {users.length} employees
+          Showing {startIndex + 1}-{Math.min(endIndex, users.length)} of{" "}
+          {users.length} employees
           {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
         </CardDescription>
       </CardHeader>
@@ -91,7 +92,7 @@ export default function EmployeeDirectory({ users }: EmployeeDirectoryProps) {
             return (
               <Card
                 key={user.id}
-                className="group hover:shadow-lg transition-all duration-300 bg-gray-800 border-gray-700"
+                className="group hover:shadow-lg transition-all duration-300 card-primary card-hover border-0 shadow-lg group"
               >
                 <CardContent className="p-6">
                   {/* Header */}

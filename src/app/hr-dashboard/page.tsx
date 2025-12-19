@@ -832,7 +832,7 @@ export default function Dashboard() {
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
-                    strokeOpacity={0.3}
+                    // strokeOpacity={0.3}
                   />
                   <XAxis
                     dataKey="month"
@@ -998,85 +998,96 @@ export default function Dashboard() {
           </Card>
 
           {/* Quick Actions & Top Departments */}
-          <Card className="quick-actions-card border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-white">Quick Actions</CardTitle>
-              <CardDescription className="text-white/70">
+          <Card className="card-primary card-hover border-0 shadow-xl">
+            <CardHeader className=" text-primary-foreground">
+              <CardTitle className="text-foreground font-medium">
+                Quick Actions
+              </CardTitle>
+              <CardDescription className="text-foreground ">
                 Frequently used HR tools
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 card-primary card-hover border-0">
               {[
                 {
                   icon: Users,
                   label: "Employee",
-                  color: "bg-blue-500/20",
+                  color: "bg-primary/20",
+                  iconColor: "text-primary",
                   link: "/hr-dashboard/employees",
                 },
                 {
                   icon: Award,
                   label: "Assessments",
-                  color: "bg-purple-500/20",
+                  color: "bg-secondary/20",
+                  iconColor: "text-secondary-foreground",
                   link: "/hr-dashboard/assessments",
                 },
                 {
                   icon: AlertTriangle,
                   label: "Retention Risk",
-                  color: "bg-amber-500/20",
+                  color: "bg-warning/20",
+                  iconColor: "text-warning",
                   link: "/hr-dashboard/retention-risk",
                 },
                 {
                   icon: Target,
                   label: "Internal Mobility",
-                  color: "bg-green-500/20",
+                  color: "bg-success/20",
+                  iconColor: "text-success",
                   link: "/hr-dashboard/internal-mobility",
                 },
                 {
                   icon: Zap,
                   label: "Department Insights",
-                  color: "bg-primary/20",
+                  color: "bg-accent/20",
+                  iconColor: "text-accent",
                   link: "/hr-dashboard/departments",
                 },
               ].map((action, index) => (
                 <Link
                   key={index}
                   href={action.link}
-                  className="quick-action-item w-full text-left flex items-center gap-3 p-3 hover:scale-[1.02] transition-transform"
+                  className="w-full text-left flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/5 transition-all hover:scale-[1.02]"
                 >
                   <div
                     className={`${action.color} h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0`}
                   >
-                    <action.icon className="h-5 w-5 text-white" />
+                    <action.icon className={`h-5 w-5 ${action.iconColor}`} />
                   </div>
-                  <span className="text-white font-medium">{action.label}</span>
+                  <span className="text-foreground font-medium">
+                    {action.label}
+                  </span>
                 </Link>
               ))}
 
-              <div className="pt-4 mt-4 border-t border-white/20">
-                <h4 className="text-white font-medium mb-3">
+              <div className="pt-4 mt-4 border-t border-border">
+                <h4 className="text-foreground font-medium mb-3">
                   Top Performing Departments
                 </h4>
                 <div className="space-y-2">
                   {topPerformers.map((dept, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-2 rounded-lg bg-white/5"
+                      className="flex items-center justify-between p-2 rounded-lg bg-secondary/30"
                     >
                       <div className="flex items-center gap-2">
                         <div
                           className={`h-8 w-8 rounded-lg flex items-center justify-center ${
                             index === 0
-                              ? "bg-gradient-to-br from-yellow-500/20 to-amber-500/20"
-                              : "bg-white/10"
+                              ? "bg-gradient-to-br from-primary/20 to-accent/20"
+                              : "bg-secondary"
                           }`}
                         >
-                          <span className="text-white font-bold">
+                          <span className="text-foreground font-bold">
                             {index + 1}
                           </span>
                         </div>
-                        <span className="text-white text-sm">{dept.name}</span>
+                        <span className="text-foreground text-sm">
+                          {dept.name}
+                        </span>
                       </div>
-                      <Badge className="bg-white/20 text-white border-0">
+                      <Badge className="bg-primary/20 text-primary-foreground border-0">
                         {dept.completion}%
                       </Badge>
                     </div>
