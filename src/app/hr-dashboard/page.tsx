@@ -627,7 +627,7 @@ export default function Dashboard() {
                     }}
                     axisLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Bar
                     dataKey="completion"
                     name="Completion Rate"
@@ -715,7 +715,7 @@ export default function Dashboard() {
                     }}
                     axisLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Area
                     type="monotone"
                     dataKey="count"
@@ -792,7 +792,7 @@ export default function Dashboard() {
                     }}
                     axisLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Bar dataKey="count" name="Employees" radius={[6, 6, 0, 0]}>
                     {retentionRiskData.map((entry, index) => (
                       <Cell
@@ -849,7 +849,7 @@ export default function Dashboard() {
                     }}
                     axisLine={false}
                   />
-                  <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={false} />
                   <Legend />
                   {departmentData.slice(0, 3).map((dept: any) => (
                     <Line
