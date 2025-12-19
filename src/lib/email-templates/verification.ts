@@ -310,7 +310,7 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                                                 Unauthorized access, disclosure, or distribution is prohibited.
                                             </p>
                                             <p style="margin: 0;">
-                                                © ${new Date().getFullYear()} Genius Factor AI. All rights reserved.
+                                                Copyright © 2026 Genius Factor Academy, LLC. All rights reserved.
                                                 This is an automated service email. Please do not reply to this message.
                                             </p>
                                         </div>

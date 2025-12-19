@@ -235,7 +235,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                             Access Your Dashboard
                                         </a>
                                         <p style="color: #64748b; font-size: 14px; margin: 15px 0 0; line-height: 1.5;">
-                                            Complete your setup in minutes and start your first assessment.
+                                            Complete your setup in 20 minutes and start your first assessment.
                                         </p>
                                     </td>
                                 </tr>
@@ -427,7 +427,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                                                 You're receiving this because you signed up for Genius Factor AI.
                                             </p>
                                             <p style="margin: 0;">
-                                                © ${new Date().getFullYear()} Genius Factor AI. All rights reserved.
+                                                Copyright © 2026 Genius Factor Academy, LLC. All rights reserved.
                                             </p>
                                         </div>
                                     </td>
