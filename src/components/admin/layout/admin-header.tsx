@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   ClipboardList,
   Loader2,
+  ChevronRight,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSearchLoader, setShowSearchLoader] = useState(false);
 
   const user = session?.user as User | undefined;
 
@@ -84,10 +86,13 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
     if (searchQuery.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
+      setShowSearchLoader(false);
       return;
     }
 
+    setShowSearchLoader(true);
     setIsSearching(true);
+    
     try {
       const response = await fetch(`/api/search-suggestions?q=${encodeURIComponent(searchQuery)}`);
       if (response.ok) {
@@ -97,8 +102,10 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
       }
     } catch (error) {
       console.error("Error fetching suggestions:", error);
+      setSuggestions([]);
     } finally {
       setIsSearching(false);
+      setShowSearchLoader(false);
     }
   }, [searchQuery]);
 
@@ -124,7 +131,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
   // Handle loading state
   if (status === "loading") {
     return (
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-6">
+      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-sm px-6">
         <SidebarTrigger className="h-8 w-8 text-muted-foreground" />
         <div className="flex-1">
           <div className="flex flex-col">
@@ -146,7 +153,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur-sm px-6">
       {/* Sidebar Trigger */}
-      <SidebarTrigger className="h-9 w-9 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors" />
+      <SidebarTrigger className="h-9 w-9 rounded-lg border border-border bg-card hover:bg-muted transition-colors" />
 
       {/* Page Title */}
       <div className="flex-1">
@@ -162,38 +169,64 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
 
       {/* Search Bar */}
       <div className="hidden lg:block relative">
-        <form onSubmit={handleSearchSubmit}>
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <form onSubmit={handleSearchSubmit} className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search HR users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-            className="w-72 pl-9 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-400 focus:border-blue-500"
+            className="w-72 pl-9 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
           />
+          {/* Search loader */}
+          {showSearchLoader && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            </div>
+          )}
         </form>
 
         {/* Suggestions Dropdown */}
-        {showSuggestions && (suggestions.length > 0 || isSearching) && (
+        {showSuggestions && (
           <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-lg shadow-xl z-[60] overflow-hidden">
             {isSearching ? (
               <div className="p-4 text-center">
-                <Loader2 className="h-4 w-4 animate-spin mx-auto text-primary" />
+                <Loader2 className="h-5 w-5 animate-spin mx-auto text-primary mb-2" />
+                <p className="text-sm text-muted-foreground">Searching users...</p>
+              </div>
+            ) : suggestions.length === 0 ? (
+              <div className="p-4 text-center">
+                <p className="text-sm text-muted-foreground">No users found</p>
               </div>
             ) : (
-              <div className="py-2">
+              <div className="py-2 max-h-60 overflow-y-auto">
+                <div className="px-3 py-2 text-xs font-medium text-muted-foreground border-b border-border">
+                  {suggestions.length} user{suggestions.length !== 1 ? 's' : ''} found
+                </div>
                 {suggestions.map((suggestion) => (
                   <button
                     key={suggestion.id}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full px-4 py-2 text-left hover:bg-muted transition-colors flex flex-col"
+                    className="w-full px-4 py-3 text-left hover:bg-secondary transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
                   >
-                    <span className="text-sm font-medium text-foreground">
-                      {suggestion.firstName} {suggestion.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {suggestion.email}
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs font-medium text-primary-foreground">
+                      {suggestion.firstName?.charAt(0) || 'U'}
+                      {suggestion.lastName?.charAt(0) || 'S'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground block truncate">
+                        {suggestion.firstName} {suggestion.lastName}
+                      </span>
+                      <span className="text-xs text-muted-foreground block truncate">
+                        {suggestion.email}
+                      </span>
+                      {suggestion.role && (
+                        <span className="text-xs text-primary mt-1 inline-block px-2 py-0.5 rounded-full bg-primary/10">
+                          {suggestion.role}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   </button>
                 ))}
               </div>
@@ -208,7 +241,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full h-9 w-9 hover:bg-muted"
+          className="rounded-full h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         >
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -222,7 +255,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative rounded-full h-9 w-9 hover:bg-muted"
+              className="relative rounded-full h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground"
             >
               <Bell className="h-4 w-4" />
               <Badge
@@ -233,23 +266,23 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
               </Badge>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 shadow-xl">
+          <DropdownMenuContent align="end" className="w-80 shadow-xl bg-card border-border">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-bold text-foreground">Notifications</h4>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-auto p-0 text-xs"
+                  className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Mark all as read
                 </Button>
               </div>
               <div className="space-y-3">
-                <div className="p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer">
+                <div className="p-3 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className="icon-wrapper-amber p-2">
-                      <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      <AlertTriangle className="h-4 w-4 text-warning" />
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-foreground">
@@ -264,10 +297,10 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
                     </div>
                   </div>
                 </div>
-                <div className="p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors cursor-pointer">
+                <div className="p-3 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className="icon-wrapper-blue p-2">
-                      <ClipboardList className="h-4 w-4 text-blue-600" />
+                      <ClipboardList className="h-4 w-4 text-primary" />
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-foreground">
@@ -291,7 +324,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full h-9 w-9 hover:bg-muted"
+          className="rounded-full h-9 w-9 hover:bg-muted text-muted-foreground hover:text-foreground"
         >
           <HelpCircle className="h-4 w-4" />
         </Button>
@@ -301,7 +334,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-10 pl-2 pr-3 rounded-full border border-transparent hover:border-border hover:bg-muted/50 transition-all"
+              className="relative h-10 pl-2 pr-3 rounded-full border border-transparent hover:border-border hover:bg-muted transition-all"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage
@@ -309,7 +342,7 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
                   alt={displayName}
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-gradient-primary text-white font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-primary-foreground font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -324,13 +357,13 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-56 shadow-xl"
+            className="w-56 shadow-xl bg-card border-border"
             align="end"
             forceMount
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
+                <p className="text-sm font-medium leading-none text-foreground">
                   {displayName}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
@@ -339,18 +372,18 @@ export function HRHeader({ title, subtitle }: HRHeaderProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">
-              <User className="h-4 w-4 mr-2" />
+            <DropdownMenuItem className="cursor-pointer text-foreground focus:text-foreground focus:bg-secondary">
+              <User className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
-              <Settings className="h-4 w-4 mr-2" />
+            <DropdownMenuItem className="cursor-pointer text-foreground focus:text-foreground focus:bg-secondary">
+              <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}
-              className="cursor-pointer text-destructive focus:text-destructive"
+              className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <LogOut className="h-4 w-4 mr-2" />
               <span>Log out</span>
