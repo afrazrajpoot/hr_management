@@ -17,8 +17,6 @@ import {
   Trash2,
   Briefcase,
   Calendar,
-  Building2,
-  FileText,
   Edit,
   Save,
   X,
@@ -184,43 +182,29 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            <div className="flex items-start gap-4">
-                              <div className="icon-wrapper-blue p-2 flex-shrink-0 mt-1">
-                                <Briefcase className="h-5 w-5 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-bold text-xl gradient-text-primary group-hover:text-primary transition-colors duration-200">
-                                  {(exp as Experience).position}
-                                </h4>
-                                <div className="flex items-center gap-3 mt-2">
-                                  <div className="flex items-center gap-2">
-                                    <Building2 className="h-4 w-4 text-accent" />
-                                    <p className="font-semibold text-foreground/90">
-                                      {(exp as Experience).company}
-                                    </p>
-                                  </div>
-                                  {(exp as Experience).duration && (
-                                    <>
-                                      <div className="w-1 h-1 rounded-full bg-border" />
-                                      <Badge className="badge-green">
-                                        <Calendar className="h-3 w-3 mr-1" />
-                                        {(exp as Experience).duration}
-                                      </Badge>
-                                    </>
-                                  )}
-                                </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-xl gradient-text-primary group-hover:text-primary transition-colors duration-200">
+                                {(exp as Experience).position}
+                              </h4>
+                              <div className="flex items-center gap-3 mt-2">
+                                <p className="font-semibold text-foreground/90">
+                                  {(exp as Experience).company}
+                                </p>
+                                {(exp as Experience).duration && (
+                                  <>
+                                    <div className="w-1 h-1 rounded-full bg-border" />
+                                    <Badge className="badge-green">
+                                      {(exp as Experience).duration}
+                                    </Badge>
+                                  </>
+                                )}
                               </div>
                             </div>
 
                             {(exp as Experience).description && (
-                              <div className="flex items-start gap-3 ml-12">
-                                <div className="icon-wrapper-purple p-2 mt-1 flex-shrink-0">
-                                  <FileText className="h-4 w-4 text-accent" />
-                                </div>
-                                <p className="text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-lg border border-input">
-                                  {(exp as Experience).description}
-                                </p>
-                              </div>
+                              <p className="text-muted-foreground leading-relaxed bg-muted/30 p-3 rounded-lg border border-input">
+                                {(exp as Experience).description}
+                              </p>
                             )}
                           </div>
                         )}

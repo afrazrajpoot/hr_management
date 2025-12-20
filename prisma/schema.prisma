@@ -130,6 +130,7 @@ model Employee {
   hireDate      DateTime?
 
  manager        String?
+  annualSalary  String?
 
  
   bio           String?

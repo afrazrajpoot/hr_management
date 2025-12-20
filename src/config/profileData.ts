@@ -1,5 +1,5 @@
 
-import { User, Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Briefcase, DollarSign } from "lucide-react";
 import { InputFieldConfig } from "../../types/profileTypes";
 // import { InputFieldConfig } from "./types";
 
@@ -20,6 +20,7 @@ export const employmentFields: InputFieldConfig[] = [
   { label: "Department", icon: Briefcase, field: "department" },
   { label: "Position", icon: Briefcase, field: "position" },
   { label: "Manager", icon: User, field: "manager" },
+  { label: "Annual Salary", icon: DollarSign, field: "annualSalary", type: "number" },
 ];
 
 export const skillFields: InputFieldConfig[] = [

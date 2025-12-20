@@ -13,7 +13,6 @@ import {
   Calendar,
   DollarSign,
   Users,
-  Target,
   TrendingUp,
   Edit,
   Save,
@@ -92,26 +91,12 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
     return tenure;
   };
 
-  // Get icon for field
-  const getFieldIcon = (fieldName: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      employeeId: <Target className="w-4 h-4 text-primary" />,
-      hireDate: <Calendar className="w-4 h-4 text-warning" />,
-      department: <Building2 className="w-4 h-4 text-accent" />,
-      position: <Briefcase className="w-4 h-4 text-success" />,
-      manager: <Users className="w-4 h-4 text-primary" />,
-      salary: <DollarSign className="w-4 h-4 text-warning" />,
-      employer: <Building2 className="w-4 h-4 text-success" />,
-    };
-    return icons[fieldName] || <Briefcase className="w-4 h-4 text-primary" />;
-  };
-
   // Group fields
   const basicEmploymentFields = employmentFields.filter((f) =>
     ["employer", "hireDate", "department", "position"].includes(f.field)
   );
   const additionalFields = employmentFields.filter((f) =>
-    ["manager", "salary", "employeeId"].includes(f.field)
+    ["manager", "annualSalary", "employeeId"].includes(f.field)
   );
 
   return (
@@ -213,9 +198,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                 <TrendingUp className="w-6 h-6 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Monthly Salary</p>
+                <p className="text-sm text-muted-foreground">Annual Salary</p>
                 <p className="text-xl font-bold">
-                  {formatSalary(employee.salary)}
+                  {formatSalary(employee.annualSalary || employee.salary)}
                 </p>
               </div>
             </div>
@@ -256,24 +241,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   }}
                   className="group"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="icon-wrapper-blue p-2 opacity-80">
-                      {getFieldIcon(field.field)}
-                    </div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {field.label}
-                      {field.field === "hireDate" && employee.hireDate && (
-                        <span className="ml-2 text-xs text-primary">
-                          ({formatDate(employee.hireDate)})
-                        </span>
-                      )}
-                      {field.field === "salary" && employee.salary && (
-                        <span className="ml-2 text-xs text-warning">
-                          ({formatSalary(employee.salary)})
-                        </span>
-                      )}
-                    </label>
-                  </div>
                   <InfoField
                     {...field}
                     isEditing={isEditing}
@@ -281,6 +248,16 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                     defaultValue={getFieldValue(field.field)}
                     disabled={!isEditing}
                   />
+                  {field.field === "hireDate" && employee.hireDate && (
+                    <p className="text-xs text-primary mt-1">
+                      {formatDate(employee.hireDate)}
+                    </p>
+                  )}
+                  {field.field === "annualSalary" && employee.annualSalary && (
+                    <p className="text-xs text-warning mt-1">
+                      {formatSalary(employee.annualSalary)}
+                    </p>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -321,17 +298,6 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   }}
                   className="group"
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="icon-wrapper-purple p-2 opacity-80">
-                      {getFieldIcon(field.field)}
-                    </div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {field.label}
-                      {field.field === "manager" && employee.manager && (
-                        <Badge className="badge-green ml-2">Reporting</Badge>
-                      )}
-                    </label>
-                  </div>
                   <InfoField
                     {...field}
                     isEditing={isEditing}
@@ -339,6 +305,9 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                     defaultValue={getFieldValue(field.field)}
                     disabled={!isEditing}
                   />
+                  {field.field === "manager" && employee.manager && (
+                    <Badge className="badge-green mt-2 inline-block">Reporting</Badge>
+                  )}
                 </motion.div>
               ))}
             </div>

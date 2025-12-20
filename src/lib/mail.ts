@@ -734,7 +734,7 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
         
         If you didn't create an account, you can safely ignore this email.
         
-        © ${new Date().getFullYear()} Genius Factor. All rights reserved.
+        Copyright © 2026 Genius Factor Academy, LLC. All rights reserved.
       `,
       // Set delivery optimization
       priority: 'high' as const,
@@ -880,7 +880,7 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
         
         If you have any questions, feel free to reply to this email.
         
-        © ${new Date().getFullYear()} Genius Factor. All rights reserved.
+        Copyright © 2026 Genius Factor Academy, LLC. All rights reserved.
       `,
     };
 

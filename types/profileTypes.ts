@@ -39,6 +39,7 @@ export interface Employee {
   manager: string;
   employeeId: string;
   salary: string;
+  annualSalary?: string;
   bio: string;
   avatar: string;
   skills: string[]; // Array of strings for skills

@@ -496,3 +496,84 @@ html {
     --secondary: 220 15% 22%;
     --secondary-foreground: 220 14% 90%;
 }
+
+
+
+/* Add these styles to your global.css or component CSS */
+
+/* Smooth slider styling */
+.slider-smooth {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 9999px;
+    outline: none;
+    transition: background 0.2s ease;
+}
+
+.slider-smooth::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #3b82f6;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.slider-smooth::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.slider-smooth::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #3b82f6;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.slider-smooth::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Color-specific slider thumbs */
+.slider-smooth[style*="bg-destructive"]::-webkit-slider-thumb {
+    border-color: #ef4444;
+}
+
+.slider-smooth[style*="bg-warning"]::-webkit-slider-thumb {
+    border-color: #f59e0b;
+}
+
+.slider-smooth[style*="bg-success"]::-webkit-slider-thumb {
+    border-color: #10b981;
+}
+
+.slider-smooth[style*="bg-primary"]::-webkit-slider-thumb {
+    border-color: #3b82f6;
+}
+
+.slider-smooth[style*="bg-destructive"]::-moz-range-thumb {
+    border-color: #ef4444;
+}
+
+.slider-smooth[style*="bg-warning"]::-moz-range-thumb {
+    border-color: #f59e0b;
+}
+
+.slider-smooth[style*="bg-success"]::-moz-range-thumb {
+    border-color: #10b981;
+}
+
+.slider-smooth[style*="bg-primary"]::-moz-range-thumb {
+    border-color: #3b82f6;
+}

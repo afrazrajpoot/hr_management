@@ -342,7 +342,7 @@ export const getPasswordResetEmailHtml = (otp: string, recipientName?: string) =
                                                 If you did not initiate this request, your account may be compromised.
                                             </p>
                                             <p style="margin: 0;">
-                                                © ${new Date().getFullYear()} Genius Factor AI. All rights reserved.
+                                                Copyright © 2026 Genius Factor Academy, LLC. All rights reserved.
                                                 This is an automated security email. Do not reply to this message.
                                             </p>
                                         </div>

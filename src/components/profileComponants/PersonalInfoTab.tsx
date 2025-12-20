@@ -56,27 +56,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     return employee?.[fieldName] || "";
   };
 
-  // Get icon for field
-  const getFieldIcon = (fieldName: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      firstName: <User className="w-4 h-4 text-primary" />,
-      lastName: <User className="w-4 h-4 text-primary" />,
-      email: <Mail className="w-4 h-4 text-primary" />,
-      password: <Lock className="w-4 h-4 text-primary" />,
-      phone: <Phone className="w-4 h-4 text-primary" />,
-      address: <MapPin className="w-4 h-4 text-accent" />,
-      city: <MapPin className="w-4 h-4 text-accent" />,
-      state: <MapPin className="w-4 h-4 text-accent" />,
-      country: <Globe className="w-4 h-4 text-accent" />,
-      zipCode: <MapPin className="w-4 h-4 text-accent" />,
-      dateOfBirth: <Calendar className="w-4 h-4 text-warning" />,
-      nationality: <Globe className="w-4 h-4 text-warning" />,
-      maritalStatus: <Heart className="w-4 h-4 text-warning" />,
-      bio: <FileText className="w-4 h-4 text-success" />,
-    };
-    return icons[fieldName] || <UserCircle className="w-4 h-4 text-primary" />;
-  };
-
   // Group fields for better organization
   const basicInfoFields = personalInfoFields.filter((f) =>
     ["firstName", "lastName", "email", "password", "phone"].includes(f.field)
@@ -229,14 +208,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     }}
                     className="group"
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="icon-wrapper-blue p-2 opacity-80">
-                        {getFieldIcon(field.field)}
-                      </div>
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {field.label}
-                      </label>
-                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
@@ -303,14 +274,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                       field.field === "address" ? "md:col-span-2" : ""
                     }`}
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="icon-wrapper-green p-2 opacity-80">
-                        {getFieldIcon(field.field)}
-                      </div>
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {field.label}
-                      </label>
-                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
@@ -375,14 +338,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     }}
                     className="group"
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="icon-wrapper-amber p-2 opacity-80">
-                        {getFieldIcon(field.field)}
-                      </div>
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {field.label}
-                      </label>
-                    </div>
                     <InfoField
                       {...field}
                       isEditing={isEditing}
@@ -428,14 +383,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     transition={{ delay: 0.2 }}
                     className="group"
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="icon-wrapper-purple p-2 opacity-80">
-                        {getFieldIcon(bioField.field)}
-                      </div>
-                      <label className="text-sm font-medium text-muted-foreground">
-                        {bioField.label}
-                      </label>
-                    </div>
                     <InfoField
                       {...bioField}
                       isEditing={isEditing}

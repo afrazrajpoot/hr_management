@@ -18,6 +18,7 @@ interface EmployeeData {
   manager?: string;
   employeeId: string;
   salary?: string;
+  annualSalary?: string;
   bio?: string;
   avatar?: string;
   skills: any[];
@@ -91,6 +92,7 @@ export async function GET(req: NextRequest) {
         position: user?.position?.at(-1) || "",
         manager: "",
         salary: user?.salary || "",
+        annualSalary: "",
         bio: "",
         avatar: "",
         skills: [],
@@ -115,6 +117,7 @@ export async function GET(req: NextRequest) {
       position: employee.user?.position?.at(-1) || "",
       manager: employee.manager || "",
       salary: employee.user?.salary || "",
+      annualSalary: employee.annualSalary || "",
       bio: employee.bio || "",
       avatar: employee.avatar || "",
       skills: employee.skills || [],
@@ -242,7 +245,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Prepare employee data according to your schema
-        // Employee model has: firstName, lastName, address, dateOfBirth, hireDate, manager, bio, avatar, skills, education, experience, resume
+        // Employee model has: firstName, lastName, address, dateOfBirth, hireDate, manager, annualSalary, bio, avatar, skills, education, experience, resume
         const employeeData: any = {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -250,6 +253,7 @@ export async function POST(req: NextRequest) {
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
           hireDate: data.hireDate ? new Date(data.hireDate) : null,
           manager: data.manager || null,
+          annualSalary: data.annualSalary || null,
           bio: data.bio || null,
           avatar: data.avatar || null,
           resume: data.resume || null,
@@ -326,6 +330,7 @@ export async function POST(req: NextRequest) {
           position: user.position?.at(-1) || "",
           manager: employee.manager || "",
           salary: user.salary || "",
+          annualSalary: employee.annualSalary || "",
           bio: employee.bio || "",
           avatar: employee.avatar || "",
           skills: employee.skills || [],

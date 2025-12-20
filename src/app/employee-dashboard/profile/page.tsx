@@ -416,19 +416,6 @@ const EmployeeProfilePage: React.FC = () => {
 
                 <TabsContent value="employment" className="mt-0">
                   <div className="card-primary p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="icon-wrapper-green p-3">
-                        <Briefcase className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-card-foreground">
-                          Employment Details
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Your professional role and organizational information
-                        </p>
-                      </div>
-                    </div>
                     <EmploymentTab
                       employee={employee}
                       isEditing={isEditing}
@@ -468,19 +455,6 @@ const EmployeeProfilePage: React.FC = () => {
                 <TabsContent value="experience" className="mt-0">
                   <div className="space-y-6">
                     <div className="card-primary p-6">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="icon-wrapper-purple p-3">
-                          <Briefcase className="w-6 h-6 text-accent" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-card-foreground">
-                            Work Experience
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Your professional journey and career history
-                          </p>
-                        </div>
-                      </div>
                       <ExperienceTab 
                         isEditing={isEditing} 
                         control={control}
@@ -491,19 +465,6 @@ const EmployeeProfilePage: React.FC = () => {
                     </div>
 
                     <div className="card-primary p-6">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="icon-wrapper-blue p-3">
-                          <BookOpen className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-card-foreground">
-                            Education
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Academic qualifications and certifications
-                          </p>
-                        </div>
-                      </div>
                       <EducationTab 
                         isEditing={isEditing} 
                         control={control}

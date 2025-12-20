@@ -15,9 +15,7 @@ import {
   Plus,
   Trash2,
   GraduationCap,
-  School,
   Calendar,
-  Award,
   BookOpen,
   Edit,
   Save,
@@ -160,8 +158,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
                         {isEditing ? (
                           <div className="space-y-4">
                             <div className="space-y-2">
-                              <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <GraduationCap className="h-4 w-4" />
+                              <label className="text-sm font-medium text-muted-foreground">
                                 Degree
                               </label>
                               <Input
@@ -174,8 +171,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
                             </div>
 
                             <div className="space-y-2">
-                              <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                <School className="h-4 w-4" />
+                              <label className="text-sm font-medium text-muted-foreground">
                                 Institution
                               </label>
                               <Input
@@ -189,8 +185,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
 
                             <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
+                                <label className="text-sm font-medium text-muted-foreground">
                                   Year
                                 </label>
                                 <Input
@@ -203,8 +198,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
                               </div>
 
                               <div className="space-y-2">
-                                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                  <Award className="h-4 w-4" />
+                                <label className="text-sm font-medium text-muted-foreground">
                                   GPA
                                 </label>
                                 <Input
@@ -219,46 +213,32 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
                           </div>
                         ) : (
                           <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <div className="p-1.5 rounded-md bg-primary/10 dark:bg-primary/20 mt-0.5">
-                                <GraduationCap className="h-4 w-4 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-200">
-                                  {(edu as Education).degree}
-                                </h4>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <School className="h-4 w-4 text-muted-foreground" />
-                                  <p className="font-semibold text-foreground/90">
-                                    {(edu as Education).institution}
-                                  </p>
-                                </div>
-                              </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors duration-200">
+                                {(edu as Education).degree}
+                              </h4>
+                              <p className="font-semibold text-foreground/90 mt-1">
+                                {(edu as Education).institution}
+                              </p>
                             </div>
 
-                            <div className="flex items-center gap-4 ml-9">
+                            <div className="flex items-center gap-4">
                               {(edu as Education).year && (
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs font-medium"
-                                  >
-                                    Graduated {(edu as Education).year}
-                                  </Badge>
-                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs font-medium"
+                                >
+                                  Graduated {(edu as Education).year}
+                                </Badge>
                               )}
 
                               {(edu as Education).gpa && (
-                                <div className="flex items-center gap-2">
-                                  <Award className="h-4 w-4 text-muted-foreground" />
-                                  <Badge
-                                    variant="outline"
-                                    className="text-xs font-medium border-primary/30 text-primary"
-                                  >
-                                    GPA: {(edu as Education).gpa}
-                                  </Badge>
-                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs font-medium border-primary/30 text-primary"
+                                >
+                                  GPA: {(edu as Education).gpa}
+                                </Badge>
                               )}
                             </div>
                           </div>
