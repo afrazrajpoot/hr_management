@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   BarChart3,
   Shield,
+  Upload,
 } from "lucide-react";
 import {
   Sidebar,
@@ -69,6 +70,11 @@ const mainNavItems = [
     title: "User Management",
     url: "/dashboard/user-management",
     icon: Shield,
+  },
+  {
+    title: "Upload Users",
+    url: "/dashboard/upload-users",
+    icon: Upload,
   },
 ];
 
