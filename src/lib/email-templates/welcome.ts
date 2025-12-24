@@ -52,9 +52,18 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string) => {
                         <td bgcolor="#ffffff" class="header" style="padding: 50px; border-bottom: 1px solid #e2e8f0; text-align: center;">
                             <!-- Company Logo -->
                             <div style="margin-bottom: 20px;">
-                                <div style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
-                                    Genius Factor AI
-                                </div>
+                                <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                    <tr>
+                                        <td valign="middle" style="padding-right: 12px;">
+                                            <img src="https://geniusfactor.ai/logo.png" alt="Genius Factor AI Logo" width="70" height="70" style="display: block; border: 0;" />
+                                        </td>
+                                        <td valign="middle">
+                                            <div style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                                                Genius Factor AI
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                                 <div style="font-size: 13px; color: #6366f1; font-weight: 500; letter-spacing: 0.5px;">
                                     UNLOCK YOUR POTENTIAL
                                 </div>

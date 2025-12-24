@@ -45,12 +45,21 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td>
-                                        <div style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
-                                            Genius Factor AI
-                                        </div>
-                                        <div style="font-size: 13px; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">
-                                            ENTERPRISE AI SOLUTIONS
-                                        </div>
+                                        <table border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td valign="middle" style="padding-right: 12px;">
+                                                    <img src="https://geniusfactor.ai/logo.png" alt="Genius Factor AI Logo" width="70" height="70" style="display: block; border: 0;" />
+                                                </td>
+                                                <td valign="middle">
+                                                    <div style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                                                        Genius Factor AI
+                                                    </div>
+                                                    <div style="font-size: 13px; color: #64748b; font-weight: 500; letter-spacing: 0.5px;">
+                                                        ENTERPRISE AI SOLUTIONS
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </td>
                                     <td align="right" style="font-size: 12px; color: #94a3b8;">
                                         ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
