@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/auth";
 import { prisma } from "@/lib/prisma";
+import { fetchWithTimeout } from "@/lib/utils";
+
+// Set max duration for this route (60 seconds)
+export const maxDuration = 60;
 
 export async function POST() {
   try {
@@ -23,9 +27,9 @@ export async function POST() {
       return NextResponse.json({ token: user.fastApiToken });
     }
 
-    // Generate new FastAPI token
+    // Generate new FastAPI token with timeout
     const fastApiUrl = process.env.NEXT_PUBLIC_PYTHON_URL;
-    const fastApiResponse = await fetch(`${fastApiUrl}/api/auth/login`, {
+    const fastApiResponse = await fetchWithTimeout(`${fastApiUrl}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -36,6 +40,7 @@ export async function POST() {
         first_name: user.firstName,
         last_name: user.lastName,
       }),
+      timeout: 10000, // 10 seconds timeout
     });
 
     if (!fastApiResponse.ok) {

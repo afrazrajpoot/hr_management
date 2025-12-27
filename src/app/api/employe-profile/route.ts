@@ -4,6 +4,9 @@ import { authOptions } from "@/app/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
+// Set max duration for this route (60 seconds)
+export const maxDuration = 60;
+
 interface EmployeeData {
   firstName: string;
   lastName: string;

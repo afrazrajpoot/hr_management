@@ -5,6 +5,9 @@ import { getQuestionsByPart } from "@/lib/assessment-questions";
 import type { PartWithQuestions } from "@/types/assessment-types";
 import { authOptions } from "@/app/auth";
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
     const shuffled = [...array];

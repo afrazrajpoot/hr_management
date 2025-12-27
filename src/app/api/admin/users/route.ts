@@ -4,6 +4,9 @@ import { authOptions } from '@/app/auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
+// Set max duration for admin users route (60 seconds)
+export const maxDuration = 60;
+
 // GET - Fetch users with pagination and search
 export async function GET(request: NextRequest) {
   try {

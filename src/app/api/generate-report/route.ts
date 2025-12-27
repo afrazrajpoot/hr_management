@@ -2,6 +2,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Set max duration for report generation (60 seconds)
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

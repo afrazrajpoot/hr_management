@@ -5,6 +5,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 import { fetchWithTimeout } from '@/lib/utils';
 
+// Set max duration for employee parsing (120 seconds for large file uploads)
+export const maxDuration = 120;
+
 export async function POST(req: NextRequest) {
 
   try {

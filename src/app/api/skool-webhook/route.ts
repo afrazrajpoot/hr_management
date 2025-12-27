@@ -1,4 +1,7 @@
 // /app/api/skool-webhook/route.ts
+// Set max duration for webhook (30 seconds)
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
     try {
       // Get the raw text first

@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 import { prisma } from '@/lib/prisma';
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function GET(request: NextRequest) {
     try {
         // Authentication
@@ -336,6 +339,7 @@ export async function GET(request: NextRequest) {
 }
 
 // PATCH endpoint to update user quota, amount, and paid status
+// Note: maxDuration is already set at the top of the file for all routes
 export async function PATCH(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions);

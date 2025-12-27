@@ -5,6 +5,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 import * as XLSX from 'xlsx';
 
+// Set max duration for user upload (120 seconds for file processing)
+export const maxDuration = 120;
+
 export async function POST(req: NextRequest) {
   try {
     const session: any = await getServerSession(authOptions);

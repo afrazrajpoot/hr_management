@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { sendVerificationEmail } from '@/lib/mail';
 import crypto from 'crypto';
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function POST(request: NextRequest) {
     try {
         const { email } = await request.json();

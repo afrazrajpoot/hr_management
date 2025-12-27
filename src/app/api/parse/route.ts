@@ -5,6 +5,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
 import { fetchWithTimeout } from '@/lib/utils';
 
+// Set max duration for file parsing (120 seconds for large file uploads)
+export const maxDuration = 120;
+
 export async function POST(req: NextRequest) {
   try {
     // Get the session to access FastAPI token
@@ -80,56 +83,61 @@ export async function POST(req: NextRequest) {
     }
 
     if (allCompanies.length > 0) {
-      // Get unique company names to check existence
-      const companyNames = [...new Set(allCompanies.map(c => c.name))];
-
-      // Find existing companies in one query
-      const existingCompanies = await prisma.company.findMany({
-        where: {
-          companyDetail: {
-            path: ['name'],
-            string_contains: '', // This is a trick to get all and filter in JS if needed, 
-            // but actually we want exact match for each name.
-            // Prisma doesn't support 'in' with JSON paths easily in one query for multiple values.
-            // So we'll use a raw query or just fetch all and filter if the list is small.
-            // Given the context, let's just fetch those that match ANY of the names if possible.
-          }
-        }
+      // Optimize: Batch check existing companies to reduce database queries
+      const companyNames = [...new Set(allCompanies.map(c => c.name).filter(Boolean))];
+      
+      // Fetch all companies with matching names in a single query
+      // Since Prisma JSON filtering is limited, we'll fetch all and filter in memory
+      // This is still better than N queries
+      const allExistingCompanies = await prisma.company.findMany({
+        select: {
+          id: true,
+          companyDetail: true,
+        },
+        take: 10000, // Limit to prevent memory issues
       });
 
-      // Actually, since Prisma's JSON filtering is limited for 'IN' clauses, 
-      // let's stick to a more robust approach: fetch all company names and filter.
-      // Or better, just do the loop but optimize the findFirst.
+      // Create a Set of existing company names for O(1) lookup
+      const existingCompanyNames = new Set(
+        allExistingCompanies
+          .map(c => c.companyDetail && typeof c.companyDetail === 'object' && 'name' in c.companyDetail 
+            ? (c.companyDetail as any).name 
+            : null)
+          .filter(Boolean)
+      );
 
-      // For now, let's just optimize the loop to be more efficient and remove the disconnect.
-      for (const company of allCompanies) {
-        try {
-          const existingCompany = await prisma.company.findFirst({
-            where: {
-              companyDetail: {
-                path: ['name'],
-                equals: company.name
+      // Batch create companies that don't exist
+      const companiesToCreate = allCompanies.filter(
+        company => company.name && !existingCompanyNames.has(company.name)
+      );
+
+      // Use createMany for better performance (if supported) or batch creates
+      if (companiesToCreate.length > 0) {
+        // Process in batches to avoid overwhelming the database
+        const batchSize = 50;
+        for (let i = 0; i < companiesToCreate.length; i += batchSize) {
+          const batch = companiesToCreate.slice(i, i + batchSize);
+          
+          await Promise.allSettled(
+            batch.map(async (company) => {
+              try {
+                await prisma.company.create({
+                  data: {
+                    companyDetail: company,
+                  } as any,
+                });
+                savedCompanies++;
+              } catch (dbError: any) {
+                errors.push(`Error saving company "${company.name}": ${dbError.message}`);
+                skippedCompanies++;
               }
-            }
-          });
-
-          if (existingCompany) {
-            skippedCompanies++;
-            continue;
-          }
-
-          await prisma.company.create({
-            data: {
-              companyDetail: company,
-            } as any,
-          });
-
-          savedCompanies++;
-        } catch (dbError: any) {
-          errors.push(`Error saving company "${company.name}": ${dbError.message}`);
-          skippedCompanies++;
+            })
+          );
         }
       }
+
+      // Count skipped companies
+      skippedCompanies += allCompanies.length - companiesToCreate.length;
     }
 
     // Create a response summary

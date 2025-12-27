@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
     try {
         const { token, password } = await req.json();

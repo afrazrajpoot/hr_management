@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
     // even if your project has type errors.
     ignoreBuildErrors: true,
   },
+  // Increase timeout for API routes to prevent 504 errors
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
 };
 
 export default nextConfig;

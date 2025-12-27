@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/mail";
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
     try {
         const { email } = await req.json();

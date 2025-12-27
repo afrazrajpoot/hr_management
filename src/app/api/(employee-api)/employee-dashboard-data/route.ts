@@ -4,6 +4,9 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import axios from "axios";
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function GET() {
   try {
     const session: any | null = await getServerSession(authOptions);
@@ -12,14 +15,15 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch additional data from database
-    const careerRecommendation = await prisma.aiCareerRecommendation.findFirst({
-      where: { employeeId: session.user.id },
-    });
-
-    const assessmentReports = await prisma.individualEmployeeReport.findMany({
-      where: { userId: session.user.id },
-    });
+    // Fetch additional data from database in parallel for better performance
+    const [careerRecommendation, assessmentReports] = await Promise.all([
+      prisma.aiCareerRecommendation.findFirst({
+        where: { employeeId: session.user.id },
+      }),
+      prisma.individualEmployeeReport.findMany({
+        where: { userId: session.user.id },
+      }),
+    ]);
 
  
 

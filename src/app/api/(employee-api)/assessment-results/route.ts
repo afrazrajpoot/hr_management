@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 export async function GET() {
   try {
     const session: any | null = await getServerSession(authOptions);

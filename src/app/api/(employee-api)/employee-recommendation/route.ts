@@ -2,6 +2,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/app/auth";
 import { getServerSession } from "next-auth";
+import { fetchWithTimeout } from "@/lib/utils";
+
+// Set max duration for this route (60 seconds)
+export const maxDuration = 60;
 
 async function getRecommendations(employeeId: string, recruiterId: string, fastApiToken: string | null) {
   const fastApiUrl = `${process.env.NEXT_PUBLIC_PYTHON_URL}/employee_dashboard/recommend-companies`;
@@ -15,13 +19,14 @@ async function getRecommendations(employeeId: string, recruiterId: string, fastA
     headers["Authorization"] = `Bearer ${fastApiToken}`;
   }
 
-  const response = await fetch(fastApiUrl, {
+  const response = await fetchWithTimeout(fastApiUrl, {
     method: "POST",
     headers: headers,
     body: JSON.stringify({
       recruiter_id: recruiterId,
       employee_id: employeeId
     }),
+    timeout: 30000, // 30 seconds timeout
   });
 
   if (!response.ok) {

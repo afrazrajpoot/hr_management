@@ -12,6 +12,8 @@ export const prisma =
       ? ['query', 'error', 'warn']
       : ['error'],
     // Connection pool configuration for production
+    // Note: Connection pool settings should be configured in DATABASE_URL
+    // Format: postgresql://user:pass@host:port/db?connection_limit=10&pool_timeout=20
     datasources: {
       db: {
         url: process.env.DATABASE_URL,

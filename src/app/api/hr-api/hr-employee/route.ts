@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+// Set max duration for this route (60 seconds - can be adjusted based on data size)
+export const maxDuration = 60;
+
 interface CustomSession {
   user?: { id: string };
 }
@@ -128,33 +131,31 @@ export async function GET(request: Request) {
       reports: reports.filter(r => r.userId === user.id)
     }));
 
-    // 7. Calculate Metrics (Optimized)
+    // 7. Calculate Metrics (Optimized - prevent duplicate queries)
+    // Fetch report user IDs once to reuse for metrics calculations
+    const allReportUserIds = await prisma.individualEmployeeReport.findMany({
+      where: { hrId: session.user.id },
+      select: { userId: true }
+    });
+    const allReportUserIdsSet = new Set(allReportUserIds.map(r => r.userId));
+
     // For metrics, we need counts across the whole HR scope, possibly filtered by department/search
     const metricsWhere: any = { hrId: session.user.id };
     if (userWhere.department) metricsWhere.department = userWhere.department;
     if (userWhere.OR) metricsWhere.OR = userWhere.OR;
 
+    // Optimize: Use the already fetched report user IDs instead of querying again
     const [totalCompleted, totalNotStarted, geniusScores] = await Promise.all([
       prisma.user.count({
         where: {
           ...metricsWhere,
-          id: {
-            in: (await prisma.individualEmployeeReport.findMany({
-              where: { hrId: session.user.id },
-              select: { userId: true }
-            })).map(r => r.userId)
-          }
+          id: { in: Array.from(allReportUserIdsSet) }
         }
       }),
       prisma.user.count({
         where: {
           ...metricsWhere,
-          id: {
-            notIn: (await prisma.individualEmployeeReport.findMany({
-              where: { hrId: session.user.id },
-              select: { userId: true }
-            })).map(r => r.userId)
-          }
+          id: { notIn: Array.from(allReportUserIdsSet) }
         }
       }),
       prisma.individualEmployeeReport.aggregate({

@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+// Set max duration for admin employee route (60 seconds)
+export const maxDuration = 60;
+
 interface CustomSession {
   user?: { id: string; role?: string };
 }

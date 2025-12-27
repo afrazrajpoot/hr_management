@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma'; // Adjust path to your Prisma client
 import { authOptions } from '@/app/auth';
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
 
 // GET handler to fetch chat conversation
 export async function GET(request: Request) {

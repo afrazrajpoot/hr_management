@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma'; // Adjust the path to your Prisma client instance
 import { authOptions } from '@/app/auth';
 
+// Set max duration for this route (30 seconds)
+export const maxDuration = 30;
+
 // GET method to fetch AnalysisResult records by hrid
 export async function GET(request: Request) {
   try {
