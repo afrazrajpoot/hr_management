@@ -47,14 +47,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
-      jobs 
+    return NextResponse.json({
+      jobs
     }, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching HR jobs and applications:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

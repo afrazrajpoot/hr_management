@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
+import { fetchWithTimeout } from '@/lib/utils';
 
 export async function POST(req: NextRequest) {
 
@@ -19,12 +20,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Call the external parsing API with FastAPI token
-    const res = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
+    const res = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.user.fastApiToken}`
       },
       body: formData,
+      timeout: 60000, // 60 seconds
     });
 
     const data = await res.json();
@@ -42,54 +44,57 @@ export async function POST(req: NextRequest) {
     const employees = parsedData[0]?.parsed_json?.employees || [];
     const signUpResults = [];
 
-    for (const employee of employees) {
-      try {
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-          where: { email: employee.Email },
-        });
+    if (employees.length > 0) {
+      const emails = employees.map((e: any) => e.Email).filter(Boolean);
 
-        if (existingUser) {
+      // Find existing users in one query
+      const existingUsers = await prisma.user.findMany({
+        where: { email: { in: emails } },
+        select: { email: true }
+      });
+
+      const existingEmails = new Set(existingUsers.map(u => u.email));
+      const hashedPassword = await bcrypt.hash('Pa$$w0rd!', 10);
+
+      for (const employee of employees) {
+        try {
+          if (existingEmails.has(employee.Email)) {
+            signUpResults.push({
+              employee: employee.Email,
+              status: 'error',
+              message: 'User already exists',
+            });
+            continue;
+          }
+
+          // Create new user
+          await prisma.user.create({
+            data: {
+              firstName: employee.firstName || employee.Name || 'Not provide',
+              lastName: employee.lastName || 'Not provide',
+              email: employee.Email || 'Not provide',
+              password: hashedPassword,
+              role: 'Employee',
+              salary: employee.Salary ? String(employee.Salary) : '0',
+              phoneNumber: employee.Phone || 'Not provide',
+              department: employee.Department ? [employee.Department] : ['Not provide'],
+              createdAt: new Date(),
+              hrId: session.user.id,
+            },
+          });
+
+          signUpResults.push({
+            employee: employee.Email,
+            status: 'success',
+            message: 'User created successfully',
+          });
+        } catch (signUpError) {
           signUpResults.push({
             employee: employee.Email,
             status: 'error',
-            message: 'User already exists',
+            message: signUpError instanceof Error ? signUpError.message : 'Sign-up failed',
           });
-          continue;
         }
-
-        // Hash the default password
-        const hashedPassword = await bcrypt.hash('Pa$$w0rd!', 10);
-
-        // Create new user
-        const user = await prisma.user.create({
-          data: {
-            firstName: employee.firstName || employee.Name || 'Not provide',
-            lastName: employee.lastName || 'Not provide',
-            email: employee.Email || 'Not provide',
-            password: hashedPassword,
-            role: 'Employee',
-            salary: employee.Salary || 0,
-            phoneNumber: employee.Phone || 'Not provide',
-            department: employee.Department || 'Not provide',
-            createdAt: new Date(),
-            hrId: session.user.id,
-            // Optional fields: emailVerified and image are left as null
-            // accounts and sessions are managed by NextAuth, not set here
-          },
-        });
-
-        signUpResults.push({
-          employee: employee.Email,
-          status: 'success',
-          message: 'User created successfully',
-        });
-      } catch (signUpError) {
-        signUpResults.push({
-          employee: employee.Email,
-          status: 'error',
-          message: signUpError instanceof Error ? signUpError.message : 'Sign-up failed',
-        });
       }
     }
 
@@ -107,7 +112,5 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

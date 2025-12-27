@@ -5,6 +5,7 @@ import type {
     CareerRecommendationRequest,
     PartWithQuestions,
 } from "@/types/assessment-types";
+import { fetchWithTimeout } from "./utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_PYTHON_URL;
 
@@ -62,13 +63,14 @@ export async function submitAssessment(
     data: AssessmentSubmissionRequest,
     authToken: string
 ): Promise<AssessmentAnalysisResult[]> {
-    const response = await fetch(`${API_BASE_URL}/analyze/assessment`, {
+    const response = await fetchWithTimeout(`${API_BASE_URL}/analyze/assessment`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(data),
+        timeout: 60000, // 60 seconds for complex analysis
     });
 
     if (!response.ok) {
@@ -116,7 +118,7 @@ export async function generateCareerRecommendation(
 ): Promise<void> {
     const requestData: CareerRecommendationRequest = { employeeId };
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
         `${API_BASE_URL}/employee_dashboard/generate-employee-career-recommendation`,
         {
             method: "POST",
@@ -125,6 +127,7 @@ export async function generateCareerRecommendation(
                 Authorization: `Bearer ${authToken}`,
             },
             body: JSON.stringify(requestData),
+            timeout: 45000, // 45 seconds
         }
     );
 

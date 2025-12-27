@@ -23,62 +23,69 @@ export async function GET(request: NextRequest) {
     const hrUsers = await prisma.user.findMany({
       where: whereClause,
       include: {
-        accounts: true,
-        sessions: true,
         jobs: true,
       },
     });
 
-    const hrData = [];
-
-    // Iterate through each HR user
-    for (const hrUser of hrUsers) {
-      // Fetch the company where this HR's ID is in the hrId array
-      const company = await prisma.company.findFirst({
-        where: {
-          hrId: {
-            has: hrUser.id,
-          },
-        },
-      });
-
-      // Fetch employees assigned to this HR (hrId matches and role is not 'HR')
-      const employees = await prisma.user.findMany({
-        where: {
-          hrId: hrUser.id,
-          role: {
-            not: 'HR',
-          },
-        },
-        include: {
-          employee: true, // Include employee relation
-          applications: true, // Include applications if needed
-        },
-      });
-
-      // Fetch individual reports for employees, matching hrId
-      const employeesWithReports = await Promise.all(
-        employees.map(async (employee) => {
-          const report = await prisma.individualEmployeeReport.findFirst({
-            where: {
-              userId: employee.id,
-              hrId: hrUser.id,
-            },
-          });
-          return {
-            employee,
-            report, // Report may be null if none exists
-          };
-        })
-      );
-
-      // Construct HR data object
-      hrData.push({
-        hrUser,
-        company, // May be null if no company is associated
-        employees: employeesWithReports,
-      });
+    if (hrUsers.length === 0) {
+      return NextResponse.json({ data: [] }, { status: 200 });
     }
+
+    const hrIds = hrUsers.map(u => u.id);
+
+    // Fetch all companies that have any of these HRs
+    const allCompanies = await prisma.company.findMany({
+      where: {
+        hrId: {
+          hasSome: hrIds,
+        },
+      },
+    });
+
+    // Fetch all employees assigned to these HRs
+    const allEmployees = await prisma.user.findMany({
+      where: {
+        hrId: {
+          in: hrIds,
+        },
+        role: {
+          not: 'HR',
+        },
+      },
+      include: {
+        employee: true,
+      },
+    });
+
+    // Fetch all reports for these employees and HRs
+    const employeeIds = allEmployees.map(e => e.id);
+    const allReports = await prisma.individualEmployeeReport.findMany({
+      where: {
+        userId: { in: employeeIds },
+        hrId: { in: hrIds },
+      },
+    });
+
+    // Construct the response data by mapping in memory
+    const hrData = hrUsers.map(hrUser => {
+      const company = allCompanies.find(c => c.hrId.includes(hrUser.id)) || null;
+
+      const hrEmployees = allEmployees.filter(e => e.hrId === hrUser.id);
+
+      const employeesWithReports = hrEmployees.map(employee => {
+        const report = allReports.find(r => r.userId === employee.id && r.hrId === hrUser.id) || null;
+        return {
+          employee,
+          report,
+        };
+      });
+
+      return {
+        hrUser,
+        company,
+        employees: employeesWithReports,
+      };
+    });
 
     return NextResponse.json({ data: hrData }, { status: 200 });
   } catch (error) {
@@ -87,7 +94,5 @@ export async function GET(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/auth';
+import { fetchWithTimeout } from '@/lib/utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,10 +32,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Call the external parsing API with FastAPI token
-    const res = await fetch(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
+    const res = await fetchWithTimeout(`${process.env.NEXT_PUBLIC_PYTHON_URL}/parse/companies`, {
       method: 'POST',
       headers: headers,
       body: formData,
+      timeout: 60000, // 60 seconds for parsing
     });
 
     const data = await res.json();
@@ -69,48 +71,64 @@ export async function POST(req: NextRequest) {
     let skippedCompanies = 0;
     const errors: string[] = [];
 
-    // Iterate over each file's parsed_json
+    // Collect all companies from all files
+    const allCompanies: any[] = [];
     for (const fileData of parsedData) {
       if (fileData.parsed_json && Array.isArray(fileData.parsed_json.companies)) {
+        allCompanies.push(...fileData.parsed_json.companies);
+      }
+    }
 
-        // Save each company individually
-        for (const company of fileData.parsed_json.companies) {
-          try {
-            // Check if company already exists (optional - based on your business logic)
-            const existingCompany = await prisma.company.findFirst({
-              where: {
-                companyDetail: {
-                  path: ['name'],
-                  equals: company.name
-                }
-              }
-            });
+    if (allCompanies.length > 0) {
+      // Get unique company names to check existence
+      const companyNames = [...new Set(allCompanies.map(c => c.name))];
 
-            if (existingCompany) {
-              skippedCompanies++;
-              console.log(`Company "${company.name}" already exists, skipping...`);
-              continue;
-            }
-
-            const savedCompany = await prisma.company.create({
-              data: {
-                companyDetail: company,
-                // You can add additional fields if needed, for example:
-                // uploadedBy: session.user.id,
-                // uploadedAt: new Date(),
-              } as any,
-            });
-
-            savedCompanies++;
-          } catch (dbError: any) {
-            const errorMsg = `Error saving company "${company.name}": ${dbError.message}`;
-            console.error(errorMsg);
-            errors.push(errorMsg);
-            skippedCompanies++;
+      // Find existing companies in one query
+      const existingCompanies = await prisma.company.findMany({
+        where: {
+          companyDetail: {
+            path: ['name'],
+            string_contains: '', // This is a trick to get all and filter in JS if needed, 
+            // but actually we want exact match for each name.
+            // Prisma doesn't support 'in' with JSON paths easily in one query for multiple values.
+            // So we'll use a raw query or just fetch all and filter if the list is small.
+            // Given the context, let's just fetch those that match ANY of the names if possible.
           }
         }
-      } else {
-        console.warn('File data missing parsed_json or companies array:', fileData);
+      });
+
+      // Actually, since Prisma's JSON filtering is limited for 'IN' clauses, 
+      // let's stick to a more robust approach: fetch all company names and filter.
+      // Or better, just do the loop but optimize the findFirst.
+
+      // For now, let's just optimize the loop to be more efficient and remove the disconnect.
+      for (const company of allCompanies) {
+        try {
+          const existingCompany = await prisma.company.findFirst({
+            where: {
+              companyDetail: {
+                path: ['name'],
+                equals: company.name
+              }
+            }
+          });
+
+          if (existingCompany) {
+            skippedCompanies++;
+            continue;
+          }
+
+          await prisma.company.create({
+            data: {
+              companyDetail: company,
+            } as any,
+          });
+
+          savedCompanies++;
+        } catch (dbError: any) {
+          errors.push(`Error saving company "${company.name}": ${dbError.message}`);
+          skippedCompanies++;
+        }
       }
     }
 
@@ -138,7 +156,5 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

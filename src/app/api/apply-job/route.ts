@@ -27,14 +27,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
-      applications 
+    return NextResponse.json({
+      applications
     }, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching applications:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

@@ -8,8 +8,8 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
+    log: process.env.NODE_ENV === 'development'
+      ? ['query', 'error', 'warn']
       : ['error'],
     // Connection pool configuration for production
     datasources: {
@@ -27,13 +27,17 @@ if (!globalForPrisma.prisma) {
 }
 
 // Only add graceful shutdown handlers once
-if (typeof process !== 'undefined' && !globalForPrisma.prisma) {
-  const shutdown = async () => {
-    console.log(`[${new Date().toISOString()}] [PRISMA] Shutting down...`);
-    await prisma.$disconnect();
-    console.log(`[${new Date().toISOString()}] [PRISMA] Disconnected`);
-  };
+if (typeof process !== 'undefined') {
+  const globalForHandlers = globalThis as any;
+  if (!globalForHandlers.__prismaHandlersRegistered) {
+    const shutdown = async () => {
+      console.log(`[${new Date().toISOString()}] [PRISMA] Shutting down...`);
+      await prisma.$disconnect();
+      console.log(`[${new Date().toISOString()}] [PRISMA] Disconnected`);
+    };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+    globalForHandlers.__prismaHandlersRegistered = true;
+  }
 }
