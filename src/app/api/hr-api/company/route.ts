@@ -17,48 +17,48 @@ export async function POST(req: NextRequest) {
 
     const { userId, companyDetail } = await req.json();
 
-    if (!userId  || !companyDetail) {
+    if (!userId || !companyDetail) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Check if user exists and has HR role
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    // Create new company and update user in a transaction
+    const company = await prisma.$transaction(async (tx) => {
+      // Check if user exists and has HR role
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+      });
 
-    if (!user || user.role !== "HR") {
-      return NextResponse.json(
-        { error: "User not found or not authorized" },
-        { status: 403 }
-      );
-    }
+      if (!user || user.role !== "HR") {
+        throw new Error("User not found or not authorized");
+      }
 
-    // Create new company
-    const company = await prisma.company.create({
-      data: {
-        
-        companyDetail,
-        hrId: [userId], // Add userId to hrId array
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+      const newCompany = await tx.company.create({
+        data: {
+          companyDetail,
+          hrId: [userId],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
 
-    // Update user's hrId field
-    await prisma.user.update({
-      where: { id: userId },
-      data: { hrId: company.id },
+      await tx.user.update({
+        where: { id: userId },
+        data: { hrId: newCompany.id },
+      });
+
+      return newCompany;
     });
 
     return NextResponse.json(company, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating company:", error);
+    const status = error.message === "User not found or not authorized" ? 403 : 500;
     return NextResponse.json(
-      { error: "Failed to create company" },
-      { status: 500 }
+      { error: error.message || "Failed to create company" },
+      { status }
     );
   }
 }
@@ -111,7 +111,7 @@ export async function PUT(req: NextRequest) {
     const updatedCompany = await prisma.company.update({
       where: { id },
       data: {
-        
+
         companyDetail,
         updatedAt: new Date(),
       },

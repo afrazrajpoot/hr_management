@@ -84,26 +84,30 @@ export async function GET(request: NextRequest) {
       prisma.user.count({ where })
     ]);
 
-    // Get job and application counts for HR users
-    const usersWithCounts = await Promise.all(
-      users.map(async (user) => {
-        let jobCount = 0;
-        let applicationCount = 0;
+    // Get job and application counts for HR users in batch
+    const hrUserIds = users.filter(u => u.role === 'HR').map(u => u.id);
 
-        if (user.role === 'HR') {
-          [jobCount, applicationCount] = await Promise.all([
-            prisma.job.count({ where: { recruiterId: user.id } }),
-            prisma.application.count({ where: { hrId: user.id } })
-          ]);
-        }
-
-        return {
-          ...user,
-          jobCount,
-          applicationCount
-        };
+    const [jobCounts, applicationCounts] = await Promise.all([
+      prisma.job.groupBy({
+        by: ['recruiterId'],
+        where: { recruiterId: { in: hrUserIds } },
+        _count: { _all: true }
+      }),
+      prisma.application.groupBy({
+        by: ['hrId'],
+        where: { hrId: { in: hrUserIds } },
+        _count: { _all: true }
       })
-    );
+    ]);
+
+    const jobCountMap = new Map(jobCounts.map(c => [c.recruiterId, c._count._all]));
+    const appCountMap = new Map(applicationCounts.map(c => [c.hrId as string, c._count._all]));
+
+    const usersWithCounts = users.map(user => ({
+      ...user,
+      jobCount: jobCountMap.get(user.id) || 0,
+      applicationCount: appCountMap.get(user.id) || 0
+    }));
 
     const totalPages = Math.ceil(totalCount / limit);
 

@@ -54,7 +54,6 @@ export async function POST(request: Request) {
     const userPositions = [...(existingUser.position || []), validatedPosition];
 
     if (transfer === true) {
-      // Handle transfer: update ingoing and outgoing for relevant departments
       const currentTimestamp = new Date().toISOString();
       const ingoingData = {
         userId,
@@ -62,98 +61,75 @@ export async function POST(request: Request) {
         timestamp: currentTimestamp,
       };
 
-      // Get the last department from the user's department array for outgoing data
-      let outgoingData = null;
       let sourceDepartmentName = null;
       if (existingUser.department && existingUser.department.length > 0) {
         sourceDepartmentName = existingUser.department[existingUser.department.length - 1];
-        outgoingData = {
-          userId,
-          department: sourceDepartmentName,
-          timestamp: currentTimestamp,
-        };
       }
 
-      // Find all departments for the HR
-      let departments = [];
-      try {
-        departments = await prisma.department.findMany({
-          where: {
-            hrId: session.user.id,
-          },
+      // Execute everything in a transaction
+      const result = await prisma.$transaction(async (tx) => {
+        // Find all departments for the HR
+        const departments = await tx.department.findMany({
+          where: { hrId: session.user.id },
         });
-      } catch (error) {
-        console.error("Error fetching departments:", error);
-        return NextResponse.json(
-          { error: "Failed to fetch departments" },
-          { status: 500 }
-        );
-      }
 
-      // Find target and source departments
-      const targetDepartment = departments.find((dept: any) => dept.name === validatedDepartment);
-      if (!targetDepartment) {
-        return NextResponse.json(
-          { error: `Target department '${validatedDepartment}' not found` },
-          { status: 404 }
-        );
-      }
-
-      let updatedDepartments = [];
-
-      // Update target department (append to ingoing)
-      const updatedTargetDept = await prisma.department.update({
-        where: { id: targetDepartment.id },
-        data: {
-          ingoing: {
-            push: ingoingData, // Append to ingoing array
-          },
-          promotion: validatedPromotion || targetDepartment.promotion,
-          transfer: "outgoing", // Set to "outgoing" since transfer is true
-        },
-      });
-      updatedDepartments.push(updatedTargetDept);
-
-      // Update source department (append to outgoing) if it exists
-      if (sourceDepartmentName && outgoingData) {
-        const sourceDepartment = departments.find((dept: any) => dept.name === sourceDepartmentName);
-        if (!sourceDepartment) {
-          return NextResponse.json(
-            { error: `Source department '${sourceDepartmentName}' not found` },
-            { status: 404 }
-          );
+        const targetDepartment = departments.find((dept: any) => dept.name === validatedDepartment);
+        if (!targetDepartment) {
+          throw new Error(`Target department '${validatedDepartment}' not found`);
         }
 
-        const updatedSourceDept = await prisma.department.update({
-          where: { id: sourceDepartment.id },
-          data: {
-            outgoing: {
-              push: outgoingData, // Append to outgoing array
-            },
-            promotion: validatedPromotion || sourceDepartment.promotion,
-            transfer: "outgoing", // Set to "outgoing" since transfer is true
-          },
-        });
-        updatedDepartments.push(updatedSourceDept);
-      }
+        const updates = [];
 
-      // Update user with new department, position, and salary
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          department: userDepartments,
-          position: userPositions,
-          salary: validatedSalary, // Ensure salary is a string
-        },
+        // Update target department
+        updates.push(tx.department.update({
+          where: { id: targetDepartment.id },
+          data: {
+            ingoing: { push: ingoingData },
+            promotion: validatedPromotion || targetDepartment.promotion,
+            transfer: "outgoing",
+          },
+        }));
+
+        // Update source department if it exists
+        if (sourceDepartmentName) {
+          const sourceDepartment = departments.find((dept: any) => dept.name === sourceDepartmentName);
+          if (sourceDepartment) {
+            const outgoingData = {
+              userId,
+              department: sourceDepartmentName,
+              timestamp: currentTimestamp,
+            };
+            updates.push(tx.department.update({
+              where: { id: sourceDepartment.id },
+              data: {
+                outgoing: { push: outgoingData },
+                promotion: validatedPromotion || sourceDepartment.promotion,
+                transfer: "outgoing",
+              },
+            }));
+          }
+        }
+
+        // Update user
+        updates.push(tx.user.update({
+          where: { id: userId },
+          data: {
+            department: userDepartments,
+            position: userPositions,
+            salary: validatedSalary,
+          },
+        }));
+
+        const results = await Promise.all(updates);
+        return results[results.length - 1] as any; // Return the updated user
       });
 
       return NextResponse.json({
         message: "Successfully updated employee data with transfer",
-        departments: updatedDepartments,
         user: {
-          department: updatedUser.department,
-          position: updatedUser.position,
-          salary: updatedUser.salary,
+          department: result.department,
+          position: result.position,
+          salary: result.salary,
         },
       });
     } else {

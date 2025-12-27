@@ -35,226 +35,152 @@ export async function GET(request: Request) {
       status
     });
 
-    // Build where clause for users
-    const whereClause: any = { hrId: session.user.id };
+    // Build base where clause for users
+    const userWhere: any = { hrId: session.user.id };
 
-    // 1. Fetch all users for this HR first
-    const allUsers = await prisma.user.findMany({
-      where: whereClause,
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        salary: true,
-        department: true,
-        position: true,
-        employeeId: true,
-        employee: {
-          select: {
-            id: true,
-            employeeId: true,
-            firstName: true,
-            lastName: true,
-            skills: true,
-            education: true,
-            experience: true,
-          },
-        },
-      },
-    });
+    // 1. Apply Search Filter (DB Level)
+    if (searchTerm && searchTerm.trim() !== "") {
+      const lowerSearch = searchTerm.trim();
+      userWhere.OR = [
+        { firstName: { contains: lowerSearch, mode: 'insensitive' } },
+        { lastName: { contains: lowerSearch, mode: 'insensitive' } },
+        { email: { contains: lowerSearch, mode: 'insensitive' } },
+      ];
+    }
 
-    // 2. Get all user IDs from allUsers
-    const allUserIds = allUsers.map((user: any) => user.id);
+    // 2. Apply Department Filter (DB Level)
+    if (department && department !== "All Departments") {
+      userWhere.department = { has: department };
+    }
 
-    // 3. Fetch all reports under this HR
-    let reports = await prisma.individualEmployeeReport.findMany({
-      where: {
-        hrId: session.user.id,
-        userId: { in: allUserIds }
-      },
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        userId: true,
-        hrId: true,
-        executiveSummary: true,
-        departement: true,
-        geniusFactorProfileJson: true,
-        geniusFactorScore: true,
-        currentRoleAlignmentAnalysisJson: true,
-        internalCareerOpportunitiesJson: true,
-        retentionAndMobilityStrategiesJson: true,
-        developmentActionPlanJson: true,
-        personalizedResourcesJson: true,
-        dataSourcesAndMethodologyJson: true,
-        risk_analysis: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    // 3. Handle Risk and Status filters (Requires subqueries or separate ID fetching)
+    let userIdsWithReports: string[] = [];
+    const needsReportCheck = (risk && risk !== "All Risk Levels") || status !== "";
 
-    // 4. Apply risk filter to reports if specified
-    if (risk && risk !== "All Risk Levels") {
-      reports = reports.filter((report: any) => {
-        const riskLevel = report.currentRoleAlignmentAnalysisJson?.retention_risk_level;
-        return riskLevel === risk;
+    if (needsReportCheck) {
+      const reportWhere: any = { hrId: session.user.id };
+
+      if (risk && risk !== "All Risk Levels") {
+        reportWhere.currentRoleAlignmentAnalysisJson = {
+          path: ['retention_risk_level'],
+          equals: risk
+        };
+      }
+
+      const reports = await prisma.individualEmployeeReport.findMany({
+        where: reportWhere,
+        select: { userId: true }
       });
-    }
 
-    // Get user IDs that have reports
-    const usersWithReportsIds = [...new Set(reports.map((report: any) => report.userId))];
+      userIdsWithReports = [...new Set(reports.map(r => r.userId))];
 
-    // 5. Group reports by userId
-    const grouped: Record<string, any> = {};
-    for (const emp of allUsers) {
-      grouped[emp.id] = { ...emp, reports: [] };
-    }
-
-    for (const report of reports) {
-      if (grouped[report.userId]) {
-        grouped[report.userId].reports.push(report);
+      if (status === "Completed") {
+        userWhere.id = { in: userIdsWithReports };
+      } else if (status === "Not Started") {
+        // To get "Not Started", we need to exclude all users who HAVE reports
+        const allUserIdsWithAnyReport = await prisma.individualEmployeeReport.findMany({
+          where: { hrId: session.user.id },
+          select: { userId: true }
+        });
+        const excludedIds = allUserIdsWithAnyReport.map(r => r.userId);
+        userWhere.id = { notIn: excludedIds };
+      } else if (risk && risk !== "All Risk Levels") {
+        // If only risk is specified, we filter by those who have matching reports
+        userWhere.id = { in: userIdsWithReports };
       }
     }
 
-    let allEmployeesData = Object.values(grouped);
+    // 4. Fetch paginated users and total count
+    const [users, totalEmployees] = await Promise.all([
+      prisma.user.findMany({
+        where: userWhere,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          salary: true,
+          department: true,
+          position: true,
+          employeeId: true,
+          employee: true,
+        },
+        orderBy: { id: 'asc' },
+        skip,
+        take: limit,
+      }),
+      prisma.user.count({ where: userWhere })
+    ]);
 
-    // 6. Apply status filter for metrics calculation (use full dataset)
-    let filteredEmployeesForMetrics = allEmployeesData;
-
-    if (status === "Completed") {
-      filteredEmployeesForMetrics = filteredEmployeesForMetrics.filter((employee: any) => employee.reports.length > 0);
-    } else if (status === "Not Started") {
-      filteredEmployeesForMetrics = filteredEmployeesForMetrics.filter((employee: any) => employee.reports.length === 0);
-    }
-
-    // Calculate metrics using full filtered dataset (not paginated)
-    const totalAssessments = filteredEmployeesForMetrics.reduce(
-      (sum: number, emp: any) => sum + emp.reports.length,
-      0
-    );
-    const totalCompletedEmployees = filteredEmployeesForMetrics.filter(
-      (emp: any) => emp.reports.length > 0
-    ).length;
-    const totalNotStartedEmployees = filteredEmployeesForMetrics.filter(
-      (emp: any) => emp.reports.length === 0
-    ).length;
-
-    // Calculate avgScore
-    let totalGeniusScore = 0;
-    let totalReportsWithScore = 0;
-
-    filteredEmployeesForMetrics.forEach((emp: any) => {
-      emp.reports.forEach((report: any) => {
-        const geniusFactorScore = report?.geniusFactorScore || 0;
-        if (geniusFactorScore > 0) {
-          totalGeniusScore += geniusFactorScore;
-          totalReportsWithScore += 1;
-        }
-      });
+    // 5. Fetch reports for the current page users
+    const userIds = users.map(u => u.id);
+    const reports = await prisma.individualEmployeeReport.findMany({
+      where: {
+        hrId: session.user.id,
+        userId: { in: userIds }
+      },
+      orderBy: { createdAt: 'desc' }
     });
 
-    const avgScore = totalReportsWithScore > 0 ? Math.round(totalGeniusScore / totalReportsWithScore) : 0;
+    // 6. Map reports back to users
+    const employees = users.map(user => ({
+      ...user,
+      reports: reports.filter(r => r.userId === user.id)
+    }));
 
-    // 7. Apply FILTERS to the employee list (Search, Department, Status)
-    let filteredEmployees = Object.values(grouped);
+    // 7. Calculate Metrics (Optimized)
+    // For metrics, we need counts across the whole HR scope, possibly filtered by department/search
+    const metricsWhere: any = { hrId: session.user.id };
+    if (userWhere.department) metricsWhere.department = userWhere.department;
+    if (userWhere.OR) metricsWhere.OR = userWhere.OR;
 
-    // A. Apply Search Filter (In-Memory) - FIXED VERSION
-    if (searchTerm && searchTerm.trim() !== "") {
-      const lowerSearch = searchTerm.toLowerCase().trim();
-      console.log('Applying search filter for term:', lowerSearch);
-
-      filteredEmployees = filteredEmployees.filter((emp: any) => {
-        // Search in name (first name + last name)
-        const firstName = (emp.firstName || "").toLowerCase();
-        const lastName = (emp.lastName || "").toLowerCase();
-        const fullName = `${firstName} ${lastName}`.toLowerCase();
-        const nameMatch = firstName.includes(lowerSearch) ||
-          lastName.includes(lowerSearch) ||
-          fullName.includes(lowerSearch);
-
-        // Search in email - ensure case insensitive
-        const email = (emp.email || "").toLowerCase();
-        const emailMatch = email.includes(lowerSearch);
-
-        // Search in position - handle various data types
-        let positionMatch = false;
-
-        if (emp.position) {
-          if (Array.isArray(emp.position)) {
-            // Handle array of positions
-            positionMatch = emp.position.some((pos: any) => {
-              if (typeof pos === 'string') {
-                return pos.toLowerCase().includes(lowerSearch);
-              } else if (pos && typeof pos === 'object') {
-                const posString = JSON.stringify(pos).toLowerCase();
-                return posString.includes(lowerSearch);
-              }
-              return false;
-            });
-          } else if (typeof emp.position === 'string') {
-            // Handle string position
-            positionMatch = emp.position.toLowerCase().includes(lowerSearch);
-          } else if (typeof emp.position === 'object') {
-            // Handle object position
-            const posString = JSON.stringify(emp.position).toLowerCase();
-            positionMatch = posString.includes(lowerSearch);
+    const [totalCompleted, totalNotStarted, geniusScores] = await Promise.all([
+      prisma.user.count({
+        where: {
+          ...metricsWhere,
+          id: {
+            in: (await prisma.individualEmployeeReport.findMany({
+              where: { hrId: session.user.id },
+              select: { userId: true }
+            })).map(r => r.userId)
           }
         }
-
-        // Return true if any search field matches
-        return nameMatch || emailMatch || positionMatch;
-      });
-
-      console.log('Number of employees after search filtering:', filteredEmployees.length);
-    }
-
-    // B. Apply Department Filter (In-Memory)
-    if (department && department !== "All Departments") {
-      filteredEmployees = filteredEmployees.filter((emp: any) => {
-        if (Array.isArray(emp.department)) {
-          return emp.department.includes(department);
+      }),
+      prisma.user.count({
+        where: {
+          ...metricsWhere,
+          id: {
+            notIn: (await prisma.individualEmployeeReport.findMany({
+              where: { hrId: session.user.id },
+              select: { userId: true }
+            })).map(r => r.userId)
+          }
         }
-        return emp.department === department;
-      });
-    }
+      }),
+      prisma.individualEmployeeReport.aggregate({
+        where: { hrId: session.user.id },
+        _avg: { geniusFactorScore: true },
+        _count: { id: true }
+      })
+    ]);
 
-    // C. Apply Status Filter
-    if (status === "Completed") {
-      filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length > 0);
-    } else if (status === "Not Started") {
-      filteredEmployees = filteredEmployees.filter((employee: any) => employee.reports.length === 0);
-    }
-
-    // 8. Sort by ID for consistent ordering
-    filteredEmployees = filteredEmployees.sort((a: any, b: any) => a.id.localeCompare(b.id));
-
-    // 9. Calculate filtered total for pagination
-    const filteredTotalEmployees = filteredEmployees.length;
-
-    // 10. Apply pagination to filtered results
-    const paginatedEmployees = filteredEmployees.slice(skip, skip + limit);
-
-    // 11. Calculate total pages
-    const totalPages = Math.ceil(filteredTotalEmployees / limit);
+    const totalPages = Math.ceil(totalEmployees / limit);
 
     return NextResponse.json(
       {
-        employees: paginatedEmployees,
+        employees,
         pagination: {
           currentPage: page,
           totalPages,
-          totalEmployees: filteredTotalEmployees,
+          totalEmployees,
           limit,
         },
         metrics: {
-          totalAssessments,
-          completedCount: totalCompletedEmployees,
-          notStartedCount: totalNotStartedEmployees,
+          totalAssessments: geniusScores._count.id,
+          completedCount: totalCompleted,
+          notStartedCount: totalNotStarted,
           inProgressCount: 0,
-          avgScore,
+          avgScore: Math.round(geniusScores._avg.geniusFactorScore || 0),
         }
       },
       { status: 200 }

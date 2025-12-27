@@ -18,30 +18,28 @@ export async function POST(req: Request) {
       data_sources_and_methodology,
       genius_factor_score,
     } = body?.report || {};
-    const user = await prisma.user.findUnique({
-      where: {
-        id: body.userId,
-      },
-    });
+    const report = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: body.userId },
+      });
 
- 
-
-    const report = await prisma.individualEmployeeReport.create({
-      data: {
-        userId: body.userId,
-        hrId: user?.hrId,
-        departement: user?.department?.at(-1) || "General",
-        executiveSummary: executive_summary,
-        geniusFactorProfileJson: genius_factor_profile,
-        currentRoleAlignmentAnalysisJson: current_role_alignment_analysis,
-        internalCareerOpportunitiesJson: internal_career_opportunities,
-        retentionAndMobilityStrategiesJson: retention_and_mobility_strategies,
-        developmentActionPlanJson: development_action_plan,
-        personalizedResourcesJson: personalized_resources,
-        dataSourcesAndMethodologyJson: data_sources_and_methodology,
-        geniusFactorScore: genius_factor_score,
-        risk_analysis: body.risk_analysis || {},
-      },
+      return await tx.individualEmployeeReport.create({
+        data: {
+          userId: body.userId,
+          hrId: user?.hrId,
+          departement: user?.department?.at(-1) || "General",
+          executiveSummary: executive_summary,
+          geniusFactorProfileJson: genius_factor_profile,
+          currentRoleAlignmentAnalysisJson: current_role_alignment_analysis,
+          internalCareerOpportunitiesJson: internal_career_opportunities,
+          retentionAndMobilityStrategiesJson: retention_and_mobility_strategies,
+          developmentActionPlanJson: development_action_plan,
+          personalizedResourcesJson: personalized_resources,
+          dataSourcesAndMethodologyJson: data_sources_and_methodology,
+          geniusFactorScore: genius_factor_score,
+          risk_analysis: body.risk_analysis || {},
+        },
+      });
     });
 
 
