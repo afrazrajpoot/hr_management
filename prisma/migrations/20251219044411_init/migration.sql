@@ -8,7 +8,7 @@ CREATE TYPE "public"."JobStatus" AS ENUM ('OPEN', 'CLOSED', 'DRAFT');
 CREATE TYPE "public"."UserRole" AS ENUM ('CANDIDATE', 'RECRUITER', 'ADMIN');
 
 -- CreateTable
-CREATE TABLE "public"."User" (
+CREATE TABLE "public"."users" (
     "id" TEXT NOT NULL,
     "firstName" TEXT,
     "lastName" TEXT,
@@ -17,11 +17,15 @@ CREATE TABLE "public"."User" (
     "password" TEXT,
     "role" TEXT,
     "paid" BOOLEAN NOT NULL DEFAULT false,
+    "amount" DOUBLE PRECISION DEFAULT 0.0,
+    "quota" DOUBLE PRECISION DEFAULT 0.0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "position" TEXT[],
+    "fastApiToken" TEXT,
+    "fastApiTokenExpiry" TIMESTAMP(3),
     "verificationToken" TEXT,
     "resetToken" TEXT,
     "resetTokenExpiry" TIMESTAMP(3),
@@ -31,7 +35,19 @@ CREATE TABLE "public"."User" (
     "employeeId" TEXT,
     "appliedJobIds" TEXT[],
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."FastAPISession" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "FastAPISession_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -232,10 +248,13 @@ CREATE TABLE "public"."EmployeeChat" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
+CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_employeeId_key" ON "public"."User"("employeeId");
+CREATE UNIQUE INDEX "users_employeeId_key" ON "public"."users"("employeeId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FastAPISession_user_id_key" ON "public"."FastAPISession"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "public"."Account"("provider", "providerAccountId");
@@ -265,19 +284,19 @@ CREATE INDEX "AnalysisResult_department_name_idx" ON "public"."AnalysisResult"("
 CREATE INDEX "AnalysisResult_created_at_idx" ON "public"."AnalysisResult"("created_at");
 
 -- AddForeignKey
-ALTER TABLE "public"."User" ADD CONSTRAINT "User_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "public"."Employee"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."users" ADD CONSTRAINT "users_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "public"."Employee"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Job" ADD CONSTRAINT "Job_recruiterId_fkey" FOREIGN KEY ("recruiterId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Job" ADD CONSTRAINT "Job_recruiterId_fkey" FOREIGN KEY ("recruiterId") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Application" ADD CONSTRAINT "Application_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "public"."Job"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

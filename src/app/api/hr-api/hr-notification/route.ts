@@ -1,11 +1,8 @@
 // app/api/notifications/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/app/auth";
-
-const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
   try {

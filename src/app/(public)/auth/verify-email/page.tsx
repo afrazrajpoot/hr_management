@@ -89,10 +89,12 @@ function VerifyEmailContent() {
         return;
       }
 
+      const emailLower = email.toLowerCase();
+
       const response = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: emailLower }),
       });
 
       const data = await response.json();

@@ -107,7 +107,8 @@ export default function AdminHRUsersPage() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const role = activeTab === "all" ? "" : activeTab === "hr" ? "HR" : "Employee";
+      const role =
+        activeTab === "all" ? "" : activeTab === "hr" ? "HR" : "Employee";
       const queryParams = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
@@ -318,7 +319,9 @@ export default function AdminHRUsersPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">User Management</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              User Management
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Manage and monitor all users across the platform
             </p>
@@ -360,13 +363,16 @@ export default function AdminHRUsersPage() {
                 <h3 className="text-2xl font-bold mt-1">{verifiedUsers}</h3>
                 <div className="mt-2">
                   <Progress
-                    value={totalUsers > 0 ? (verifiedUsers / totalUsers) * 100 : 0}
+                    value={
+                      totalUsers > 0 ? (verifiedUsers / totalUsers) * 100 : 0
+                    }
                     className="progress-bar-primary h-2"
                   />
                   <span className="text-xs text-muted-foreground mt-1">
                     {totalUsers > 0
                       ? Math.round((verifiedUsers / totalUsers) * 100)
-                      : 0}% verified
+                      : 0}
+                    % verified
                   </span>
                 </div>
               </div>
@@ -516,7 +522,7 @@ export default function AdminHRUsersPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent 
+                        <DropdownMenuContent
                           align="end"
                           className="bg-card border-border text-foreground shadow-lg"
                         >
@@ -576,7 +582,10 @@ export default function AdminHRUsersPage() {
                             id={`paid-${user.id}`}
                             checked={editForm.paid}
                             onCheckedChange={(checked) =>
-                              setEditForm((prev) => ({ ...prev, paid: checked }))
+                              setEditForm((prev) => ({
+                                ...prev,
+                                paid: checked,
+                              }))
                             }
                           />
                         </div>
@@ -605,28 +614,30 @@ export default function AdminHRUsersPage() {
                           />
                         </div>
 
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor={`quota-${user.id}`}
-                            className="text-sm font-medium"
-                          >
-                            Quota
-                          </Label>
-                          <Input
-                            id={`quota-${user.id}`}
-                            type="number"
-                            value={editForm.quota}
-                            onChange={(e) =>
-                              setEditForm((prev) => ({
-                                ...prev,
-                                quota: parseInt(e.target.value) || 0,
-                              }))
-                            }
-                            className="bg-muted/50 border-border"
-                            placeholder="Enter quota"
-                            min="0"
-                          />
-                        </div>
+                        {user?.role?.toLowerCase() === "hr" && (
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor={`quota-${user.id}`}
+                              className="text-sm font-medium"
+                            >
+                              Quota
+                            </Label>
+                            <Input
+                              id={`quota-${user.id}`}
+                              type="number"
+                              value={editForm.quota}
+                              onChange={(e) =>
+                                setEditForm((prev) => ({
+                                  ...prev,
+                                  quota: parseInt(e.target.value) || 0,
+                                }))
+                              }
+                              className="bg-muted/50 border-border"
+                              placeholder="Enter quota"
+                              min="0"
+                            />
+                          </div>
+                        )}
 
                         <div className="flex gap-2 pt-2">
                           <Button
@@ -785,9 +796,12 @@ export default function AdminHRUsersPage() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                      Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
-                      {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-                      {pagination.total} users
+                      Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                      {Math.min(
+                        pagination.page * pagination.limit,
+                        pagination.total
+                      )}{" "}
+                      of {pagination.total} users
                     </div>
                     <div className="flex items-center gap-2">
                       <Button

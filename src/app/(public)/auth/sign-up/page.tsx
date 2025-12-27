@@ -116,12 +116,14 @@ const SignUpForm = () => {
       return;
     }
 
+    const email = data.email.toLowerCase();
+
     try {
       const result = await signIn("credentials", {
         firstName: data.firstName,
         lastName: data.lastName,
         phoneNumber: data.phoneNumber,
-        email: data.email,
+        email: email,
         password: data.password,
         role: data.role,
         action: "signup",
@@ -136,9 +138,7 @@ const SignUpForm = () => {
           "Account created successfully! Please verify your email."
         );
         // Redirect to email verification page
-        router.push(
-          `/auth/verify-email?email=${encodeURIComponent(data.email)}`
-        );
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";

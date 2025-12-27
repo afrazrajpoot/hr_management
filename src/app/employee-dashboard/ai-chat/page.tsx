@@ -152,14 +152,17 @@ export default function ChatPage() {
         Authorization: `Bearer ${session.user.fastApiToken}`,
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/chat`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          user_id: session?.user.id,
-          message: input,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_PYTHON_URL}/chat`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            user_id: session?.user.id,
+            message: input,
+          }),
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 401) {

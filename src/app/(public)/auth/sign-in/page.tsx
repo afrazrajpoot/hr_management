@@ -87,15 +87,17 @@ const SignInForm = () => {
     setIsLoading(true);
     setError("");
 
+    const email = data.email.toLowerCase();
+
     try {
       if (rememberMe) {
-        localStorage.setItem("rememberedEmail", data.email);
+        localStorage.setItem("rememberedEmail", email);
       } else {
         localStorage.removeItem("rememberedEmail");
       }
 
       const result = await signIn("credentials", {
-        email: data.email,
+        email: email,
         password: data.password,
         redirect: false,
       });

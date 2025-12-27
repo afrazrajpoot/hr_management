@@ -41,13 +41,15 @@ const ForgotPasswordPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
+    const email = data.email.toLowerCase();
+
     try {
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ email }),
       });
 
       const result = await response.json();
@@ -60,9 +62,7 @@ const ForgotPasswordPage = () => {
       toast.success("Reset code sent to your email!");
 
       setTimeout(() => {
-        router.push(
-          `/auth/reset-password?email=${encodeURIComponent(data.email)}`
-        );
+        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
       }, 1500);
     } catch (error: any) {
       toast.error(error.message || "Failed to send reset code");

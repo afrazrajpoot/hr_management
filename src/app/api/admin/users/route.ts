@@ -338,10 +338,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete user (cascade will handle related records)
-    await prisma.user.delete({
-      where: { id: userId }
-    });
+    // Delete related records first, then the user
+    await prisma.$transaction([
+      prisma.account.deleteMany({ where: { userId } }),
+      prisma.session.deleteMany({ where: { userId } }),
+      prisma.application.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } })
+    ]);
 
     return NextResponse.json({
       success: true,

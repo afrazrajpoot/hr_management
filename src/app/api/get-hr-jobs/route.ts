@@ -1,10 +1,8 @@
 // app/api/hr/jobs/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/app/auth'; // Adjust path as needed
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { authOptions } from '@/app/auth';
 
 export async function GET(request: NextRequest) {
   try {
