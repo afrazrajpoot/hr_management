@@ -16,8 +16,9 @@ const getConnectionUrl = () => {
     // connection_limit: Maximum number of connections in the pool (adjust based on your DB plan)
     // pool_timeout: Maximum time (seconds) to wait for a connection from the pool
     // connect_timeout: Maximum time (seconds) to wait when establishing a connection
+    // statement_timeout: Maximum time (ms) for any query to execute - CRITICAL to prevent hanging
     const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}connection_limit=10&pool_timeout=20&connect_timeout=10`;
+    return `${url}${separator}connection_limit=10&pool_timeout=20&connect_timeout=10&statement_timeout=30000`;
   }
   
   return url;
@@ -29,7 +30,7 @@ export const prisma =
   new PrismaClient({
     log: process.env.NODE_ENV === 'development'
       ? ['query', 'error', 'warn']
-      : ['error'],
+      : ['error', 'warn'],
     datasources: {
       db: {
         url: getConnectionUrl(),
@@ -37,6 +38,11 @@ export const prisma =
     },
     // Additional configuration to handle connection issues
     errorFormat: 'minimal',
+    // Set transaction timeout to prevent hanging transactions
+    transactionOptions: {
+      maxWait: 10000, // 10s max wait for connection
+      timeout: 30000, // 30s transaction timeout
+    },
   });
 
 // ALWAYS cache the prisma instance to prevent connection pool exhaustion
@@ -80,13 +86,10 @@ const checkConnectionHealth = async () => {
 if (typeof process !== 'undefined') {
   const globalForHandlers = globalThis as any;
   if (!globalForHandlers.__prismaHandlersRegistered) {
-    // Periodic connection health check (every 5 minutes)
-    const healthCheckInterval = setInterval(async () => {
-      await checkConnectionHealth();
-    }, 5 * 60 * 1000); // 5 minutes
+    // REMOVED: Periodic health check interval - it was adding overhead
+    // Health checks are now done on-demand via /api/diagnostics endpoint
 
     const shutdown = async () => {
-      clearInterval(healthCheckInterval);
       console.log(`[${new Date().toISOString()}] [PRISMA] Shutting down...`);
       try {
         await prisma.$disconnect();

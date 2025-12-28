@@ -29,14 +29,7 @@ export async function GET(request: Request) {
     const risk = decodeURIComponent(url.searchParams.get("risk") || "");
     const status = decodeURIComponent(url.searchParams.get("status") || "");
 
-    // Debug log
-    console.log('Search parameters received:', {
-      rawSearch: url.searchParams.get("search"),
-      decodedSearch: searchTerm,
-      department,
-      risk,
-      status
-    });
+    // Avoid noisy request logging in production.
 
     // Build base where clause for users
     const userWhere: any = { hrId: session.user.id };

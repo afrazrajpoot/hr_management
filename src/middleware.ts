@@ -62,6 +62,7 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  console.log(`[REQ] ${req.method} ${req.nextUrl.pathname}`);
 
   try {
     // Get token from encrypted JWT cookie

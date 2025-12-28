@@ -2,19 +2,35 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/auth";
+import crypto from "crypto";
 
 // Set max duration for this route (60 seconds)
 export const maxDuration = 60;
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string, reqId: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`[${reqId}] ${label} timed out after ${timeoutMs}ms`)), timeoutMs)
+    ),
+  ]);
+}
+
 export async function POST(request: Request) {
+  const reqId = crypto.randomUUID();
+  const startedAt = Date.now();
+
   try {
+    console.log(`[${reqId}] update-mobility: start`);
+
     // Get session to retrieve user ID
-    const session = await getServerSession(authOptions);
+    const session = await withTimeout(getServerSession(authOptions), 10000, "getServerSession", reqId);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { department, position, salary, userId, transfer, promotion } = await request.json();
+    const body = await withTimeout(request.json(), 5000, "request.json", reqId);
+    const { department, position, salary, userId, transfer, promotion } = body as any;
 
     // Validate input
     if (!department || !position || !salary || !userId) {
@@ -41,9 +57,14 @@ export async function POST(request: Request) {
     const validatedPromotion = typeof promotion === "boolean" ? promotion.toString() : promotion || null;
 
     // Fetch existing user
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await withTimeout(
+      prisma.user.findUnique({
       where: { id: userId },
-    });
+      }),
+      10000,
+      "prisma.user.findUnique",
+      reqId
+    );
 
     if (!existingUser) {
       return NextResponse.json(
@@ -70,7 +91,8 @@ export async function POST(request: Request) {
       }
 
       // Execute everything in a transaction
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await withTimeout(
+        prisma.$transaction(async (tx) => {
         // Find all departments for the HR
         const departments = await tx.department.findMany({
           where: { hrId: session.user.id },
@@ -81,17 +103,17 @@ export async function POST(request: Request) {
           throw new Error(`Target department '${validatedDepartment}' not found`);
         }
 
-        const updates = [];
-
+        // IMPORTANT: interactive transactions run on a single connection.
+        // Do NOT execute queries in parallel (Promise.all) inside the callback.
         // Update target department
-        updates.push(tx.department.update({
+        await tx.department.update({
           where: { id: targetDepartment.id },
           data: {
             ingoing: { push: ingoingData },
             promotion: validatedPromotion || targetDepartment.promotion,
             transfer: "outgoing",
           },
-        }));
+        });
 
         // Update source department if it exists
         if (sourceDepartmentName) {
@@ -102,31 +124,35 @@ export async function POST(request: Request) {
               department: sourceDepartmentName,
               timestamp: currentTimestamp,
             };
-            updates.push(tx.department.update({
+            await tx.department.update({
               where: { id: sourceDepartment.id },
               data: {
                 outgoing: { push: outgoingData },
                 promotion: validatedPromotion || sourceDepartment.promotion,
                 transfer: "outgoing",
               },
-            }));
+            });
           }
         }
 
         // Update user
-        updates.push(tx.user.update({
+        const updatedUser = await tx.user.update({
           where: { id: userId },
           data: {
             department: userDepartments,
             position: userPositions,
             salary: validatedSalary,
           },
-        }));
+        });
 
-        const results = await Promise.all(updates);
-        return results[results.length - 1] as any; // Return the updated user
-      });
+        return updatedUser as any;
+      }),
+        30000,
+        "prisma.$transaction",
+        reqId
+      );
 
+      console.log(`[${reqId}] update-mobility: success transfer=true in ${Date.now() - startedAt}ms`);
       return NextResponse.json({
         message: "Successfully updated employee data with transfer",
         user: {
@@ -137,15 +163,21 @@ export async function POST(request: Request) {
       });
     } else {
       // Simple user update without transfer
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: {
-          department: userDepartments,
-          position: userPositions,
-          salary: validatedSalary, // Ensure salary is a string
-        },
-      });
+      const updatedUser = await withTimeout(
+        prisma.user.update({
+          where: { id: userId },
+          data: {
+            department: userDepartments,
+            position: userPositions,
+            salary: validatedSalary, // Ensure salary is a string
+          },
+        }),
+        20000,
+        "prisma.user.update",
+        reqId
+      );
 
+      console.log(`[${reqId}] update-mobility: success transfer=false in ${Date.now() - startedAt}ms`);
       return NextResponse.json({
         message: "Successfully updated employee data",
         user: {
@@ -156,7 +188,7 @@ export async function POST(request: Request) {
       });
     }
   } catch (error) {
-    console.error("Error updating employee data:", error);
+    console.error(`[${reqId}] update-mobility: error after ${Date.now() - startedAt}ms`, error);
     return NextResponse.json(
       { error: "Failed to update employee data" },
       { status: 500 }
