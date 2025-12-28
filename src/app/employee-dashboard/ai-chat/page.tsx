@@ -25,23 +25,43 @@ interface Message {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Please subscribe to access the AI assistant.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch chat history when component mounts or session changes
   useEffect(() => {
     const fetchChatHistory = async () => {
-      if (!session?.user?.id || session?.user?.paid == false) return;
+      if (!session?.user?.id) {
+        setIsLoadingHistory(false);
+        // Show subscription message for non-paid users
+        if (session?.user?.paid == false) {
+          setMessages([
+            {
+              role: "assistant",
+              content: "Please subscribe to access the AI assistant.",
+            },
+          ]);
+        }
+        return;
+      }
 
+      if (session?.user?.paid == false) {
+        setIsLoadingHistory(false);
+        setMessages([
+          {
+            role: "assistant",
+            content: "Please subscribe to access the AI assistant.",
+          },
+        ]);
+        return;
+      }
+
+      setIsLoadingHistory(true);
       try {
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
@@ -65,6 +85,14 @@ export default function ChatPage() {
         }
 
         const chatHistory = await response.json();
+        
+        // If no chat history, keep messages empty
+        if (!chatHistory || chatHistory.length === 0) {
+          setMessages([]);
+          setIsLoadingHistory(false);
+          return;
+        }
+
         // Sort by createdAt to ensure chronological order
         const sortedHistory = [...chatHistory].sort(
           (a, b) =>
@@ -93,6 +121,9 @@ export default function ChatPage() {
         setMessages(formattedMessages);
       } catch (error) {
         console.error("Error fetching chat history:", error);
+        setMessages([]);
+      } finally {
+        setIsLoadingHistory(false);
       }
     };
 
@@ -246,266 +277,230 @@ export default function ChatPage() {
     }
   };
 
+  // Check if there are real conversation messages (user has sent at least one message)
+  const hasUserMessages = messages.some(msg => msg.role === "user");
+  const showCenteredView = session?.user?.paid == true && !hasUserMessages;
+
   return (
     <AppLayout>
-      <div className="h-full w-full p-6 gradient-bg-primary">
-        <div className="h-full max-w-6xl mx-auto flex flex-col gap-6">
-          {/* Header */}
-          <div className="flex items-center gap-4 px-2">
-            <div className="ai-recommendation-icon-wrapper">
-              <Bot className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div className="flex-1">
+      <div className="h-full w-full gradient-bg-primary flex flex-col">
+        {/* Header - Fixed at top */}
+        <div className="flex-shrink-0 border-b border-input bg-card/50 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold gradient-text-primary">
-                  Genius Factor AI
-                </h1>
-                {session?.user?.paid == true && (
-                  <span className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-warning to-warning/80 text-primary-foreground text-xs font-semibold rounded-full">
-                    <Crown className="h-3 w-3" />
-                    PRO
-                  </span>
-                )}
+                <div className="ai-recommendation-icon-wrapper">
+                  <Bot className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-semibold gradient-text-primary">
+                      Genius Factor AI
+                    </h1>
+                    {session?.user?.paid == true && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-warning to-warning/80 text-primary-foreground text-xs font-semibold rounded-full">
+                        <Crown className="h-3 w-3" />
+                        PRO
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ask me anything about any policies and procedures
-              </p>
+              {session?.user?.paid == false && (
+                <Link
+                  href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                >
+                  <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 text-sm h-9">
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    Upgrade to Pro
+                  </Button>
+                </Link>
+              )}
             </div>
-            {session?.user?.paid == false && (
-              <Link
-                href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
-                className=""
-              >
-                <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Upgrade to Pro
-                </Button>
-              </Link>
-            )}
           </div>
+        </div>
 
-          {/* Chat Container */}
-          <Card className="flex-1 flex flex-col min-h-0 card-primary border border-input">
-            <CardContent className="flex-1 flex flex-col p-0 min-h-0">
-              <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
-                <div className="p-6 space-y-6">
-                  {messages.length === 0 && session?.user?.paid == true && (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <div className="ai-recommendation-card">
-                        <div className="p-4 ai-recommendation-icon-wrapper">
-                          <Bot className="h-20 w-20 text-primary-foreground" />
-                        </div>
-                      </div>
-                      <h3 className="text-2xl font-bold text-card-foreground mb-3">
-                        Welcome to Genius Factor AI Assistant
-                      </h3>
-                      <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
-                        Start a conversation by typing a message below. I'm here
-                        to help with your HR questions!
-                      </p>
-                      <div className="flex flex-wrap gap-3 mt-6 justify-center">
-                        <span className="px-3 py-1.5 badge-blue">Policies</span>
-                        <span className="px-3 py-1.5 badge-green">
-                          Procedures
-                        </span>
-                        <span className="px-3 py-1.5 badge-purple">
-                          HR Guidelines
-                        </span>
-                        <span className="px-3 py-1.5 badge-amber">
-                          Compliance
-                        </span>
+        {/* Chat Container - Flexible */}
+        <div className="flex-1 flex flex-col min-h-0 relative">
+          {showCenteredView ? (
+            /* Centered Welcome Screen with Input */
+            <div className="flex-1 flex flex-col items-center justify-center px-4">
+              <div className="max-w-3xl w-full space-y-8">
+                <div className="text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="ai-recommendation-card">
+                      <div className="p-6 ai-recommendation-icon-wrapper">
+                        <Bot className="h-16 w-16 text-primary-foreground" />
                       </div>
                     </div>
-                  )}
-
-                  {messages.map((msg, index) => (
+                  </div>
+                  <div>
+                    <h2 className="text-4xl font-bold text-card-foreground mb-2">
+                      How can I help you today?
+                    </h2>
+                    <p className="text-muted-foreground text-base">
+                      Ask me anything about policies, procedures, and HR guidelines
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Centered Input */}
+                <div className="max-w-2xl mx-auto">
+                  <div className="flex gap-3 items-center">
+                    <div className="flex-1 relative">
+                      <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Message Genius Factor AI..."
+                        disabled={isLoading || session?.user?.paid == false}
+                        className="w-full min-h-[56px] text-base rounded-2xl resize-none pl-5 pr-14 border-2 border-input focus:border-primary focus:ring-2 focus:ring-primary/20 bg-card shadow-lg"
+                        autoFocus
+                      />
+                    </div>
+                    <Button
+                      onClick={sendMessage}
+                      disabled={
+                        isLoading ||
+                        !input.trim() ||
+                        session?.user?.paid == false ||
+                        !session?.user?.fastApiToken
+                      }
+                      size="lg"
+                      className="h-[56px] w-[56px] p-0 rounded-2xl shrink-0 btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Send className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Messages View */}
+              <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
+                <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+                  {isLoadingHistory ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-muted-foreground">Loading chat history...</div>
+                    </div>
+                  ) : (
+                    messages.map((msg, index) => (
                     <div
                       key={index}
-                      className={`flex gap-4 items-start animate-fadeIn ${
-                        msg.role === "user" ? "flex-row-reverse" : "flex-row"
+                      className={`flex gap-4 items-start ${
+                        msg.role === "user" ? "justify-end" : "justify-start"
                       }`}
                     >
+                      {msg.role === "assistant" && (
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-muted to-secondary border border-input">
+                          <Bot className="h-4 w-4 text-card-foreground" />
+                        </div>
+                      )}
+                      
                       <div
-                        className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                           msg.role === "user"
-                            ? "bg-gradient-to-br from-primary to-accent"
-                            : "bg-gradient-to-br from-muted to-secondary border"
-                        }`}
-                      >
-                        {msg.role === "user" ? (
-                          <User className="h-5 w-5 text-primary-foreground" />
-                        ) : (
-                          <Bot className="h-5 w-5 text-card-foreground" />
-                        )}
-                      </div>
-
-                      <div
-                        className={`flex-1 max-w-[75%] rounded-2xl px-5 py-4 shadow-sm ${
-                          msg.role === "user"
-                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground"
-                            : "bg-gradient-to-br from-card to-secondary border border-input"
+                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-sm"
+                            : "bg-card border border-input rounded-bl-sm"
                         } ${msg.isStreaming ? "animate-pulse-subtle" : ""}`}
                       >
-                        <div className="whitespace-pre-wrap break-words leading-relaxed">
+                        <div className="whitespace-pre-wrap break-words leading-relaxed text-sm">
                           {msg.content}
                           {msg.isStreaming && (
                             <span className="ml-1 inline-flex items-center gap-1">
-                              <span className="h-2 w-2 bg-current rounded-full animate-bounce" />
+                              <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce" />
                               <span
-                                className="h-2 w-2 bg-current rounded-full animate-bounce"
+                                className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"
                                 style={{ animationDelay: "0.2s" }}
                               />
                               <span
-                                className="h-2 w-2 bg-current rounded-full animate-bounce"
+                                className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"
                                 style={{ animationDelay: "0.4s" }}
                               />
                             </span>
                           )}
                         </div>
                       </div>
+
+                      {msg.role === "user" && (
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-accent">
+                          <User className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                      )}
                     </div>
-                  ))}
+                    ))
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
 
-              {/* Input Area */}
-              <div className="border-t border-input bg-gradient-to-b from-card to-secondary p-6">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 relative">
-                    <Input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder={
-                        session?.user?.paid == false
-                          ? "Subscribe to start chatting..."
-                          : "Type your message here..."
-                      }
-                      disabled={isLoading || session?.user?.paid == false}
-                      className="flex-1 min-h-[52px] text-base rounded-xl resize-none pl-4 pr-12 border-2 border-input focus:border-primary focus:ring-2 focus:ring-primary/20 bg-card shadow-sm"
-                    />
-                    {session?.user?.paid == false && (
-                      <Lock className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <Button
-                    onClick={sendMessage}
-                    disabled={
-                      isLoading ||
-                      !input.trim() ||
-                      session?.user?.paid == false ||
-                      !session?.user?.fastApiToken
-                    }
-                    size="lg"
-                    className="h-14 w-14 p-0 rounded-xl shrink-0 btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? (
-                      <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Send className="h-6 w-6" />
-                    )}
-                  </Button>
-                </div>
-
-                {/* Status Messages */}
-                <div className="mt-3 space-y-2">
+              {/* Input Area - Fixed at bottom */}
+              <div className="flex-shrink-0 border-t border-input bg-card/50 backdrop-blur-sm">
+                <div className="max-w-4xl mx-auto px-4 py-4">
+                  {/* Status Messages */}
                   {session?.user?.paid == false && (
-                    <div className="flex items-center justify-center gap-2 px-4 py-2 bg-warning/10 rounded-lg border border-warning/20">
+                    <div className="flex items-center justify-center gap-2 px-4 py-2 bg-warning/10 rounded-lg border border-warning/20 mb-3">
                       <AlertCircle className="h-4 w-4 text-warning" />
                       <p className="text-sm text-warning">
                         ⚠️ Please subscribe to access the AI assistant.
                       </p>
                     </div>
                   )}
-                  {session?.user?.paid == true &&
-                    !session?.user?.fastApiToken && (
-                      <div className="flex items-center justify-center gap-2 px-4 py-2 bg-destructive/10 rounded-lg border border-destructive/20">
-                        <AlertCircle className="h-4 w-4 text-destructive" />
-                        <p className="text-sm text-destructive">
-                          ⚠️ Authentication token missing. Please log in again.
-                        </p>
-                      </div>
-                    )}
-
-                  {/* Quick Prompts */}
-                  {session?.user?.paid == true && (
-                    <div className="flex flex-wrap gap-2 justify-center mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setInput("What are the company's leave policies?")
-                        }
-                        className="text-xs border-input text-secondary-foreground hover:bg-secondary"
-                      >
-                        Leave Policies
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setInput("Explain the performance review process")
-                        }
-                        className="text-xs border-input text-secondary-foreground hover:bg-secondary"
-                      >
-                        Performance Reviews
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setInput("What is the remote work policy?")
-                        }
-                        className="text-xs border-input text-secondary-foreground hover:bg-secondary"
-                      >
-                        Remote Work
-                      </Button>
+                  {session?.user?.paid == true && !session?.user?.fastApiToken && (
+                    <div className="flex items-center justify-center gap-2 px-4 py-2 bg-destructive/10 rounded-lg border border-destructive/20 mb-3">
+                      <AlertCircle className="h-4 w-4 text-destructive" />
+                      <p className="text-sm text-destructive">
+                        ⚠️ Authentication token missing. Please log in again.
+                      </p>
                     </div>
                   )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Footer Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-2">
-            <div className="flex items-center gap-3 p-4 card-primary card-hover">
-              <div className="icon-wrapper-blue">
-                <Zap className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">
-                  {messages.filter((m) => m.role === "assistant").length}
+                  {/* Input Container */}
+                  <div className="flex gap-3 items-center">
+                    <div className="flex-1 relative">
+                      <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder={
+                          session?.user?.paid == false
+                            ? "Subscribe to start chatting..."
+                            : "Message Genius Factor AI..."
+                        }
+                        disabled={isLoading || session?.user?.paid == false}
+                        className="w-full min-h-[52px] text-base rounded-2xl resize-none pl-5 pr-14 border-2 border-input focus:border-primary focus:ring-2 focus:ring-primary/20 bg-card shadow-sm"
+                      />
+                      {session?.user?.paid == false && (
+                        <Lock className="absolute right-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <Button
+                      onClick={sendMessage}
+                      disabled={
+                        isLoading ||
+                        !input.trim() ||
+                        session?.user?.paid == false ||
+                        !session?.user?.fastApiToken
+                      }
+                      size="lg"
+                      className="h-[52px] w-[52px] p-0 rounded-2xl shrink-0 btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <div className="h-5 w-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Send className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-sm text-primary/80">AI Responses</div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 card-primary card-hover">
-              <div className="icon-wrapper-green">
-                <Sparkles className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-accent">
-                  {session?.user?.paid ? "PRO" : "FREE"}
-                </div>
-                <div className="text-sm text-accent/80">Subscription Plan</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 card-primary card-hover">
-              <div className="icon-wrapper-purple">
-                <Bot className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-accent">v1.0</div>
-                <div className="text-sm text-accent/80">
-                  AI Assistant Version
-                </div>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </AppLayout>
