@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Note: API route timeouts are configured per-route using the maxDuration export
+  // Example: export const maxDuration = 60; in your route.ts files
 };
 
 export default nextConfig;
