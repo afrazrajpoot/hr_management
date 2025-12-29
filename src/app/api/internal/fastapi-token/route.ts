@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/auth";
 import { prisma } from "@/lib/prisma";
+import { withTransaction } from "@/lib/prisma-helpers";
 import { fetchWithTimeout } from "@/lib/utils";
 
 // Set max duration for this route (60 seconds)
@@ -50,14 +51,16 @@ export async function POST() {
 
     const { token } = await fastApiResponse.json();
 
-    // Store the new token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        fastApiToken: token,
-        fastApiTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      },
-    });
+    // Store the new token with transaction timeout protection
+    await withTransaction(async (tx) => {
+      return await tx.user.update({
+        where: { id: user.id },
+        data: {
+          fastApiToken: token,
+          fastApiTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+    }, 10000, 15000); // maxWait: 10s, timeout: 15s (should be fast)
 
     return NextResponse.json({ token });
   } catch (error) {
