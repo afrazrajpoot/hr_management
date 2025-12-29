@@ -39,6 +39,21 @@ const SignInForm = () => {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
 
+  const getFriendlyAuthError = (code: string) => {
+    switch (code) {
+      case "CredentialsSignin":
+        return "Invalid email or password.";
+      case "AccessDenied":
+        return "Access denied. Please contact support if this seems wrong.";
+      case "OAuthAccountNotLinked":
+        return "This email is already linked to another sign-in method. Use the original provider.";
+      case "Callback":
+        return "Authentication failed. Please try again.";
+      default:
+        return "Sign-in failed. Please try again.";
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -54,10 +69,7 @@ const SignInForm = () => {
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
-      const errorMessage =
-        errorParam === "Callback"
-          ? "Authentication failed. Please try again."
-          : errorParam;
+      const errorMessage = getFriendlyAuthError(errorParam);
       setError(errorMessage);
       toast.error(errorMessage);
     }
@@ -103,8 +115,9 @@ const SignInForm = () => {
       });
 
       if (result?.error) {
-        setError("Invalid credentials. Please try again.");
-        toast.error("Invalid credentials. Please try again.");
+        const msg = getFriendlyAuthError(result.error);
+        setError(msg);
+        toast.error(msg);
       } else {
         setJustSignedIn(true);
         toast.success("Sign-in successful!");

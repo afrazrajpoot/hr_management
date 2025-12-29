@@ -1,4 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import 'server-only';
+
+// Global fix for BigInt serialization errors (e.g., Prisma raw queries returning bigint)
+if (typeof BigInt !== 'undefined' && typeof (BigInt.prototype as any).toJSON !== 'function') {
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+}
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -27,7 +35,7 @@ const createPrismaClient = () => {
   return new PrismaClient({
     log: process.env.NODE_ENV === 'development'
       ? ['query', 'error', 'warn']
-      : ['error'],
+      : ['error', 'warn', 'info', 'query'], // Log queries in production for monitoring
     
     datasources: {
       db: {

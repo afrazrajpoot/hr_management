@@ -119,27 +119,30 @@ const SignUpForm = () => {
     const email = data.email.toLowerCase();
 
     try {
-      const result = await signIn("credentials", {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber,
-        email: email,
-        password: data.password,
-        role: data.role,
-        action: "signup",
-        redirect: false,
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phoneNumber: data.phoneNumber,
+          email,
+          password: data.password,
+          role: data.role,
+        }),
       });
 
-      if (result?.error) {
-        setError(result.error);
-        toast.error(result.error);
-      } else {
-        toast.success(
-          "Account created successfully! Please verify your email."
-        );
-        // Redirect to email verification page
-        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message = payload?.error || "Registration failed";
+        setError(message);
+        toast.error(message);
+        return;
       }
+
+      toast.success("Account created successfully! Please verify your email.");
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     } catch (error) {
       const errorMessage = "An error occurred. Please try again.";
       setError(errorMessage);
