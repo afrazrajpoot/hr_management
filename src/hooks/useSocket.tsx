@@ -28,20 +28,26 @@ export const useSocket = () => {
     setSocket(socketIo);
 
     // Listen for notification events
-    socketIo.on("notification", (notification: Notification) => {
-      setNotifications((prev) => [
-        ...prev,
-        {
-          id: notification.id,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          reportId: notification.reportId,
-          userId: notification.userId,
-          timestamp: notification.timestamp,
-        },
-      ]);
-    });
+    // Limit array size to prevent memory leak (keep last 50 notifications)
+    const notificationHandler = (notification: Notification) => {
+      setNotifications((prev) => {
+        const newNotifications = [
+          ...prev,
+          {
+            id: notification.id,
+            type: notification.type,
+            title: notification.title,
+            message: notification.message,
+            reportId: notification.reportId,
+            userId: notification.userId,
+            timestamp: notification.timestamp,
+          },
+        ];
+        return newNotifications.slice(-50); // Keep only last 50 notifications
+      });
+    };
+
+    socketIo.on("notification", notificationHandler);
 
     // Trigger the Socket.IO server initialization
     fetch("/api/socket").catch((err) =>
@@ -50,6 +56,9 @@ export const useSocket = () => {
 
     // Clean up on component unmount
     return () => {
+      // Remove event listener to prevent memory leak
+      socketIo.off("notification", notificationHandler);
+      // Disconnect socket
       socketIo.disconnect();
     };
   }, []);

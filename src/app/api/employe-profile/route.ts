@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/auth";
 import { prisma } from "@/lib/prisma";
+import { withTransaction } from "@/lib/prisma-helpers";
 import bcrypt from "bcrypt";
 
 // Set max duration for this route (60 seconds)
@@ -212,8 +213,8 @@ export async function POST(req: NextRequest) {
     let user;
 
     try {
-      // Start transaction
-      const result = await prisma.$transaction(async (tx: any) => {
+      // Start transaction with timeout and connection health check
+      const result = await withTransaction(async (tx: any) => {
         // Prepare user update data
         const userData: any = {
           firstName: data.firstName,

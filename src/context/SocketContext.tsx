@@ -541,8 +541,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for hr_notification event and save data in state
+    // Limit array size to prevent memory leak (keep last 100 notifications)
     socketInstance.on("hr_notification", (data) => {
-      setHrNotifications((prev) => [...prev, data]);
+      setHrNotifications((prev) => {
+        const newNotifications = [...prev, data];
+        return newNotifications.slice(-100); // Keep only last 100 notifications
+      });
     });
 
     socketInstance.on("error", (error) => {
@@ -552,9 +556,29 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     setSocket(socketInstance);
 
     return () => {
+      // Clear timeout to prevent memory leak
       if (ringTimeoutRef.current) {
         clearTimeout(ringTimeoutRef.current);
+        ringTimeoutRef.current = null;
       }
+      
+      // Remove all event listeners to prevent memory leaks
+      socketInstance.off("connect_error");
+      socketInstance.off("disconnect");
+      socketInstance.off("connect");
+      socketInstance.off("reconnect");
+      socketInstance.off("reconnect_error");
+      socketInstance.off("reconnect_failed");
+      socketInstance.off("subscription_confirmed");
+      socketInstance.off("notification");
+      socketInstance.off("reports_info");
+      socketInstance.off("mobility_info");
+      socketInstance.off("mobility_analysis");
+      socketInstance.off("department_info");
+      socketInstance.off("hr_notification");
+      socketInstance.off("error");
+      
+      // Disconnect socket
       socketInstance.disconnect();
     };
   }, [session, triggerBellRing, isAdmin, emitDashboardEvents]);

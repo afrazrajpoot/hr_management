@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
+import { withTransaction } from "@/lib/prisma-helpers";
 import { authOptions } from "@/app/auth";
 
 // Set max duration for this route (60 seconds)
@@ -26,8 +27,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create new company and update user in a transaction
-    const company = await prisma.$transaction(async (tx) => {
+    // Create new company and update user in a transaction with timeout
+    const company = await withTransaction(async (tx) => {
       // Check if user exists and has HR role
       const user = await tx.user.findUnique({
         where: { id: userId },

@@ -218,9 +218,16 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
     if (socket) {
       socket.emit("subscribe_hr_notifications", { hr_id: hrId });
 
-      socket.on("hr_subscription_confirmed", (data: any) => {});
+      // Store handler reference for cleanup
+      const subscriptionHandler = (data: any) => {
+        // Handler logic if needed
+      };
+
+      socket.on("hr_subscription_confirmed", subscriptionHandler);
 
       return () => {
+        // Remove event listener to prevent memory leak
+        socket.off("hr_subscription_confirmed", subscriptionHandler);
         socket.emit("unsubscribe_hr_notifications", { hr_id: hrId });
       };
     }

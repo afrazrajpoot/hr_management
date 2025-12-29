@@ -4,108 +4,156 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Connection pool configuration
-// These settings help prevent connection pool exhaustion and timeouts
-const getConnectionUrl = () => {
+// Production-optimized Prisma client configuration for AWS
+const createPrismaClient = () => {
   const url = process.env.DATABASE_URL || '';
   
-  // If DATABASE_URL doesn't have connection pool parameters, add them
-  // This prevents connection pool exhaustion and 10-minute timeout issues
-  if (url && !url.includes('connection_limit') && !url.includes('pool_timeout')) {
-    // Add connection pool parameters to prevent exhaustion
-    // connection_limit: Maximum number of connections in the pool (adjust based on your DB plan)
-    // pool_timeout: Maximum time (seconds) to wait for a connection from the pool
-    // connect_timeout: Maximum time (seconds) to wait when establishing a connection
-    // statement_timeout: Maximum time (ms) for any query to execute - CRITICAL to prevent hanging
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}connection_limit=10&pool_timeout=20&connect_timeout=10&statement_timeout=30000`;
-  }
-  
-  return url;
-};
+  // AWS-specific optimizations
+  // Connection pool configuration to prevent exhaustion
+  const connectionParams = [
+    'connection_limit=10',      // Limit concurrent connections (critical for preventing pool exhaustion)
+    'pool_timeout=20',          // Max time to wait for a connection from the pool
+    'connect_timeout=10',       // Max time to establish a new connection
+    'statement_timeout=30000',  // 30s query timeout (increased for complex queries)
+    'idle_in_transaction_session_timeout=15000', // Prevent idle transactions from holding connections
+  ].join('&');
 
-// Production-optimized Prisma client configuration
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+  // Only add params if they're not already in the URL
+  const finalUrl = url.includes('?') 
+    ? (url.includes('connection_limit') ? url : `${url}&${connectionParams}`)
+    : `${url}?${connectionParams}`;
+
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development'
       ? ['query', 'error', 'warn']
-      : ['error', 'warn'],
+      : ['error'],
+    
     datasources: {
       db: {
-        url: getConnectionUrl(),
+        url: finalUrl,
       },
     },
-    // Additional configuration to handle connection issues
+    
+    // Serverless optimizations
     errorFormat: 'minimal',
-    // Set transaction timeout to prevent hanging transactions
+    
+    // Tighter timeouts for AWS Lambda/serverless
     transactionOptions: {
-      maxWait: 10000, // 10s max wait for connection
-      timeout: 30000, // 30s transaction timeout
+      maxWait: 10000,   // 10s max wait for connection from pool
+      timeout: 30000,   // 30s transaction timeout
     },
   });
+};
 
-// ALWAYS cache the prisma instance to prevent connection pool exhaustion
-// This is critical for serverless/edge environments and prevents creating
-// new connections on every request
-if (!globalForPrisma.prisma) {
+// Global instance with connection pooling
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
-// Connection health check and recovery
-const checkConnectionHealth = async () => {
+// Optional: Add middleware for logging and monitoring
+prisma.$use(async (params, next) => {
+  const start = Date.now();
+  const result = await next(params);
+  const duration = Date.now() - start;
+  
+  // Log slow queries (adjust threshold as needed)
+  if (duration > 5000) {
+    console.warn(`[PRISMA] Slow query (${duration}ms):`, {
+      model: params.model,
+      action: params.action,
+      duration: `${duration}ms`,
+    });
+  }
+  
+  return result;
+});
+
+/**
+ * Check database connection health
+ * Returns true if connection is healthy, false otherwise
+ */
+export async function checkConnectionHealth(): Promise<boolean> {
   try {
-    // Simple query to test connection health
+    // Simple query to test connection
     await prisma.$queryRaw`SELECT 1`;
     return true;
   } catch (error: any) {
-    console.error(`[${new Date().toISOString()}] [PRISMA] Connection health check failed:`, error?.message || error);
+    console.error(`[${new Date().toISOString()}] [PRISMA] Connection health check failed:`, error.message);
     
-    // Only attempt reconnect if it's a connection-related error
-    // Prisma error codes: P1001 = Connection error, P1008 = Operations timed out
-    if (error?.code === 'P1001' || error?.code === 'P1008') {
+    // Try to reconnect if connection is lost
+    if (error.code === 'P1001' || error.code === 'P1008' || error.message?.includes('connection')) {
       try {
-        // Try to reconnect (connect is idempotent - won't create new connection if already connected)
+        await prisma.$disconnect();
         await prisma.$connect();
-        // Test the connection again
-        await prisma.$queryRaw`SELECT 1`;
         console.log(`[${new Date().toISOString()}] [PRISMA] Reconnected successfully`);
         return true;
-      } catch (reconnectError: any) {
-        console.error(`[${new Date().toISOString()}] [PRISMA] Reconnection failed:`, reconnectError?.message || reconnectError);
+      } catch (reconnectError) {
+        console.error(`[${new Date().toISOString()}] [PRISMA] Reconnection failed:`, reconnectError);
         return false;
       }
     }
     
-    // For other errors, assume connection is okay (might be query error, not connection)
     return false;
-  }
-};
-
-// Only add graceful shutdown handlers once
-if (typeof process !== 'undefined') {
-  const globalForHandlers = globalThis as any;
-  if (!globalForHandlers.__prismaHandlersRegistered) {
-    // REMOVED: Periodic health check interval - it was adding overhead
-    // Health checks are now done on-demand via /api/diagnostics endpoint
-
-    const shutdown = async () => {
-      console.log(`[${new Date().toISOString()}] [PRISMA] Shutting down...`);
-      try {
-        await prisma.$disconnect();
-        console.log(`[${new Date().toISOString()}] [PRISMA] Disconnected`);
-      } catch (error) {
-        console.error(`[${new Date().toISOString()}] [PRISMA] Error during shutdown:`, error);
-      }
-    };
-
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
-    process.on('beforeExit', shutdown);
-    
-    globalForHandlers.__prismaHandlersRegistered = true;
   }
 }
 
-// Export connection health check function for use in API routes if needed
-export { checkConnectionHealth };
+// Connection health monitoring (runs every 5 minutes in production)
+// Store interval ID to allow cleanup on shutdown
+let healthCheckIntervalId: NodeJS.Timeout | null = null;
+
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+  const healthCheckInterval = 5 * 60 * 1000; // 5 minutes
+  
+  if (!(globalThis as any).__prismaHealthCheckRunning) {
+    healthCheckIntervalId = setInterval(async () => {
+      const isHealthy = await checkConnectionHealth();
+      if (!isHealthy) {
+        console.warn(`[${new Date().toISOString()}] [PRISMA] Connection health check failed - monitoring...`);
+      }
+    }, healthCheckInterval);
+    
+    (globalThis as any).__prismaHealthCheckRunning = true;
+    (globalThis as any).__prismaHealthCheckIntervalId = healthCheckIntervalId;
+    console.log('[PRISMA] Connection health monitoring started');
+  }
+}
+
+// Graceful shutdown handler
+if (typeof process !== 'undefined') {
+  const shutdownHandler = async () => {
+    console.log('[PRISMA] Shutting down gracefully...');
+    
+    // Clear health check interval to prevent memory leak
+    if (healthCheckIntervalId) {
+      clearInterval(healthCheckIntervalId);
+      healthCheckIntervalId = null;
+      console.log('[PRISMA] Health check interval cleared');
+    }
+    
+    // Also clear from global if it exists
+    const globalIntervalId = (globalThis as any).__prismaHealthCheckIntervalId;
+    if (globalIntervalId) {
+      clearInterval(globalIntervalId);
+      (globalThis as any).__prismaHealthCheckIntervalId = null;
+    }
+    
+    try {
+      await prisma.$disconnect();
+      console.log('[PRISMA] Disconnected successfully');
+    } catch (error) {
+      console.error('[PRISMA] Error during shutdown:', error);
+    }
+  };
+
+  // Register once
+  if (!(globalThis as any).__prismaHandlersRegistered) {
+    process.on('beforeExit', shutdownHandler);
+    process.on('SIGTERM', shutdownHandler);
+    process.on('SIGINT', shutdownHandler);
+    (globalThis as any).__prismaHandlersRegistered = true;
+  }
+}
+
+export default prisma;
