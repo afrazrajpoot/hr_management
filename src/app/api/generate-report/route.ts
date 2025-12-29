@@ -1,6 +1,7 @@
 // app/api/generate-report/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { withTransaction } from "@/lib/prisma-helpers";
 
 // Set max duration for report generation (60 seconds)
 export const maxDuration = 60;
@@ -21,7 +22,8 @@ export async function POST(req: Request) {
       data_sources_and_methodology,
       genius_factor_score,
     } = body?.report || {};
-    const report = await prisma.$transaction(async (tx) => {
+    // Use withTransaction helper to ensure timeout and connection health check
+    const report = await withTransaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: body.userId },
       });
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
           risk_analysis: body.risk_analysis || {},
         },
       });
-    });
+    }, 10000, 25000); // maxWait: 10s, timeout: 25s
 
 
 

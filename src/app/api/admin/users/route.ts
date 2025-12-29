@@ -346,11 +346,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete related records first, then the user
-    await prisma.$transaction([
-      prisma.account.deleteMany({ where: { userId } }),
-      prisma.session.deleteMany({ where: { userId } }),
-      prisma.application.deleteMany({ where: { userId } }),
-      prisma.user.delete({ where: { id: userId } })
+    // Wrap batch transaction with timeout to prevent hanging
+    await Promise.race([
+      prisma.$transaction([
+        prisma.account.deleteMany({ where: { userId } }),
+        prisma.session.deleteMany({ where: { userId } }),
+        prisma.application.deleteMany({ where: { userId } }),
+        prisma.user.delete({ where: { id: userId } })
+      ]),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Transaction timeout after 25 seconds')), 25000)
+      ),
     ]);
 
     return NextResponse.json({

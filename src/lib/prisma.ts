@@ -10,12 +10,13 @@ const createPrismaClient = () => {
   
   // AWS-specific optimizations
   // Connection pool configuration to prevent exhaustion
+  // Reduced connection_limit to 5 for better resource management in production
   const connectionParams = [
-    'connection_limit=10',      // Limit concurrent connections (critical for preventing pool exhaustion)
-    'pool_timeout=20',          // Max time to wait for a connection from the pool
-    'connect_timeout=10',       // Max time to establish a new connection
-    'statement_timeout=30000',  // 30s query timeout (increased for complex queries)
-    'idle_in_transaction_session_timeout=15000', // Prevent idle transactions from holding connections
+    'connection_limit=5',       // Reduced from 10 to prevent pool exhaustion (critical for preventing hangs)
+    'pool_timeout=15',          // Reduced from 20s - max time to wait for a connection from the pool
+    'connect_timeout=8',        // Reduced from 10s - max time to establish a new connection
+    'statement_timeout=25000',  // 25s query timeout (reduced from 30s)
+    'idle_in_transaction_session_timeout=10000', // Reduced from 15s - prevent idle transactions from holding connections
   ].join('&');
 
   // Only add params if they're not already in the URL
@@ -73,24 +74,44 @@ prisma.$use(async (params, next) => {
 /**
  * Check database connection health
  * Returns true if connection is healthy, false otherwise
+ * Uses a lightweight query with timeout to avoid holding connections
  */
 export async function checkConnectionHealth(): Promise<boolean> {
   try {
-    // Simple query to test connection
-    await prisma.$queryRaw`SELECT 1`;
+    // Use a lightweight query with explicit timeout to avoid holding connections
+    // This query should complete in < 1 second
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1 as health_check`,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Health check timeout')), 3000)
+      ),
+    ]);
     return true;
   } catch (error: any) {
-    console.error(`[${new Date().toISOString()}] [PRISMA] Connection health check failed:`, error.message);
+    // Don't log timeout errors as they're expected if pool is busy
+    if (!error.message?.includes('timeout')) {
+      console.error(`[${new Date().toISOString()}] [PRISMA] Connection health check failed:`, error.message);
+    }
     
-    // Try to reconnect if connection is lost
+    // Try to reconnect if connection is lost (but don't hold connection during reconnect)
     if (error.code === 'P1001' || error.code === 'P1008' || error.message?.includes('connection')) {
       try {
-        await prisma.$disconnect();
-        await prisma.$connect();
+        // Use timeout for reconnect to avoid hanging
+        await Promise.race([
+          (async () => {
+            await prisma.$disconnect();
+            await prisma.$connect();
+          })(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Reconnect timeout')), 5000)
+          ),
+        ]);
         console.log(`[${new Date().toISOString()}] [PRISMA] Reconnected successfully`);
         return true;
-      } catch (reconnectError) {
-        console.error(`[${new Date().toISOString()}] [PRISMA] Reconnection failed:`, reconnectError);
+      } catch (reconnectError: any) {
+        if (!reconnectError.message?.includes('timeout')) {
+          console.error(`[${new Date().toISOString()}] [PRISMA] Reconnection failed:`, reconnectError);
+        }
         return false;
       }
     }
@@ -99,24 +120,30 @@ export async function checkConnectionHealth(): Promise<boolean> {
   }
 }
 
-// Connection health monitoring (runs every 5 minutes in production)
+// Connection health monitoring (runs every 10 minutes in production)
 // Store interval ID to allow cleanup on shutdown
+// Increased interval to reduce connection usage
 let healthCheckIntervalId: NodeJS.Timeout | null = null;
 
 if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
-  const healthCheckInterval = 5 * 60 * 1000; // 5 minutes
+  const healthCheckInterval = 10 * 60 * 1000; // 10 minutes (increased from 5 to reduce connection usage)
   
   if (!(globalThis as any).__prismaHealthCheckRunning) {
     healthCheckIntervalId = setInterval(async () => {
-      const isHealthy = await checkConnectionHealth();
-      if (!isHealthy) {
-        console.warn(`[${new Date().toISOString()}] [PRISMA] Connection health check failed - monitoring...`);
+      try {
+        const isHealthy = await checkConnectionHealth();
+        if (!isHealthy) {
+          console.warn(`[${new Date().toISOString()}] [PRISMA] Connection health check failed - monitoring...`);
+        }
+      } catch (error) {
+        // Silently handle errors to prevent health check from causing issues
+        // Health check failures are logged in checkConnectionHealth
       }
     }, healthCheckInterval);
     
     (globalThis as any).__prismaHealthCheckRunning = true;
     (globalThis as any).__prismaHealthCheckIntervalId = healthCheckIntervalId;
-    console.log('[PRISMA] Connection health monitoring started');
+    console.log('[PRISMA] Connection health monitoring started (every 10 minutes)');
   }
 }
 
