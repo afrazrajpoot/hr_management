@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { withTransaction } from '@/lib/prisma-helpers';
 
 
 export const authOptions: AuthOptions = {
@@ -138,10 +139,14 @@ export const authOptions: AuthOptions = {
           userUpdateData.fastApiTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
         }
 
-        const updatedUser = await prisma.user.update({
-          where: { id: user.id },
-          data: userUpdateData,
-        });
+        // Use transaction with timeout to prevent connection pool exhaustion
+        // This update includes nested Account upsert which can hold connections
+        const updatedUser = await withTransaction(async (tx) => {
+          return await tx.user.update({
+            where: { id: user.id },
+            data: userUpdateData,
+          });
+        }, 10000, 20000); // maxWait: 10s, timeout: 20s (auth should be fast)
 
         const effectiveFastApiToken =
           fetchedFastApiToken || (hasValidFastApiToken ? (user.fastApiToken as any) : (updatedUser.fastApiToken as any)) || null;
