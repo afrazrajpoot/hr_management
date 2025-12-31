@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendWelcomeEmail } from '@/lib/mail';
+import crypto from 'crypto';
 
 // Set max duration for this route (30 seconds)
 export const maxDuration = 30;
@@ -28,12 +29,18 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Update user to mark email as verified and clear verification token
+        // Generate one-time auto-login token (valid for 5 minutes)
+        const autoLoginToken = crypto.randomBytes(32).toString('hex');
+        const autoLoginExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+        // Update user to mark email as verified and set auto-login token
         const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
                 emailVerified: new Date(),
                 verificationToken: null,
+                autoLoginToken: autoLoginToken,
+                autoLoginExpiry: autoLoginExpiry,
             },
         });
 
@@ -51,6 +58,9 @@ export async function POST(request: NextRequest) {
             message: 'Email verified successfully',
             verified: true,
             role: updatedUser.role,
+            email: updatedUser.email,
+            userId: updatedUser.id,
+            autoLoginToken: autoLoginToken,
         });
     } catch (error) {
         console.error('Email verification error:', error);

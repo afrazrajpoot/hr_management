@@ -15,13 +15,14 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
+        autoLoginToken: { label: 'Auto Login Token', type: 'text' },
         firstName: { label: 'First Name', type: 'text' },
         lastName: { label: 'Last Name', type: 'text' },
         phoneNumber: { label: 'Phone Number', type: 'text' },
         role: { label: 'Role', type: 'text' },
       },
       async authorize(credentials): Promise<any> {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.email) {
           throw new Error('Missing credentials');
         }
 
@@ -33,11 +34,38 @@ export const authOptions: AuthOptions = {
         let user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
+
         // Option A: DO NOT auto-create users during login.
         // This prevents accidental "zombie" accounts when users mistype their email.
         if (!user) {
           return null;
+        }
+
+        // Check if using auto-login token (after email verification)
+        if (credentials.autoLoginToken) {
+          if (
+            user.autoLoginToken === credentials.autoLoginToken &&
+            user.autoLoginExpiry &&
+            new Date(user.autoLoginExpiry) > new Date()
+          ) {
+            // Valid auto-login token, clear it after use
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                autoLoginToken: null,
+                autoLoginExpiry: null,
+              },
+            });
+            // Continue to token generation below
+          } else {
+            throw new Error('Invalid or expired auto-login token');
+          }
         } else {
+          // Standard password authentication
+          if (!credentials?.password) {
+            throw new Error('Missing credentials');
+          }
+
           if (!user.password) {
             throw new Error('Invalid credentials');
           }
@@ -194,7 +222,7 @@ export const authOptions: AuthOptions = {
           token.paid = user.paid;
           token.fastApiToken = user.fastApiToken;
           token.lastFetch = Date.now();
-          
+
           // Only fetch account for access token if needed
           try {
             const dbAccount = await prisma.account.findUnique({
@@ -220,8 +248,8 @@ export const authOptions: AuthOptions = {
         // IMPORTANT: Skip if lastFetch is missing (old tokens) to prevent DB storm after restart
         if (!user && token.userId) {
           const sixtyMinutesInMs = 60 * 60 * 1000;
-          const shouldRefresh = trigger === 'update' || 
-                               (token.lastFetch && (Date.now() - token.lastFetch) > sixtyMinutesInMs);
+          const shouldRefresh = trigger === 'update' ||
+            (token.lastFetch && (Date.now() - token.lastFetch) > sixtyMinutesInMs);
 
           if (shouldRefresh) {
             try {

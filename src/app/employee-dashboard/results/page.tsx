@@ -40,6 +40,18 @@ import {
   Lock,
   Eye,
   EyeOff,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  TrendingUp as TrendingUpIcon,
+  Users as UsersIcon,
+  BarChart,
+  Award as AwardIcon,
+  Building,
+  BriefcaseBusiness,
+  Target as TargetIcon2,
+  Book,
+  Heart,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
@@ -55,108 +67,427 @@ interface Assessment {
   createdAt: string;
   updatedAt: string;
   userId: string;
-  geniusFactorScore: number;
-  alignmentScore?: number | string;
-  geniusFactorProfileJson: {
+  hrId: string;
+  departement: string;
+  
+  // New structure from API
+  executive_summary: string;
+  genius_factor_score: number;
+  retention_risk_score: number;
+  mobility_opportunity_score: number;
+  
+  // Nested objects - may be undefined for unpaid users
+  genius_factor_profile?: {
     primary_genius_factor: string;
-    secondary_genius_factor: string;
+    secondary_genius_factor: string | null;
     key_strengths: string[];
-    weakness: string[];
+    energy_sources: string[];
+    development_areas: string[];
     description: string;
-    secondary_description: string;
-    energy_sources?: string[];
   };
-  executiveSummary: string;
-  currentRoleAlignmentAnalysisJson?: {
-    alignment_score: number | string;
-    retention_risk_level: string;
+  
+  current_role_alignment_analysis?: {
+    alignment_score: number;
     strengths_utilized: string[];
     underutilized_talents: string[];
+    retention_risk_factors: string[];
+    immediate_actions: string[];
   };
-  internalCareerOpportunitiesJson?: {
-    primary_industry: string;
-    secondary_industry?: string;
-    transition_timeline?: Record<string, string>;
-    recommended_departments?: string[];
-    specific_role_suggestions?: string[];
+  
+  internal_career_opportunities?: {
+    primary_industries: string[];
+    secondary_industries: string[];
+    recommended_departments: string[];
+    role_suggestions: Array<{
+      role_title: string;
+      department: string;
+      match_score: number;
+      required_skills: string[];
+      timeline: string;
+      salary_impact: string;
+    }>;
+    transition_strategy: string;
   };
-  retentionAndMobilityStrategiesJson?: any;
+  
+  retention_and_mobility_strategies?: {
+    retention_strategies: string[];
+    mobility_recommendations: string[];
+    development_support_needed: string[];
+    expected_outcomes: string[];
+  };
+  
+  development_action_plan?: {
+    thirty_day_goals: string[];
+    ninety_day_goals: string[];
+    six_month_goals: string[];
+    networking_strategy: Record<string, string[]>;
+  };
+  
+  personalized_resources?: {
+    affirmations: string[];
+    learning_resources: Array<{
+      type: string;
+      title: string;
+      provider?: string;
+      author?: string;
+    }>;
+    reflection_questions: string[];
+    mindfulness_practices: string[];
+  };
+  
+  data_sources_and_methodology?: {
+    assessment_data_used: boolean;
+    user_data_used: boolean;
+    static_context_used: boolean;
+    score_calculation_method: string;
+  };
+  
+  generated_at: string;
+  report_version: string;
+  
+  risk_analysis?: {
+    scores: {
+      genius_factor_score: number;
+      retention_risk_score: number;
+      mobility_opportunity_score: number;
+    };
+    trends: {
+      risk_factors: string[];
+      mobility_trends: string;
+      retention_trends: string;
+    };
+    company: string;
+    genius_factors: string[];
+    recommendations: string[];
+    analysis_summary: string;
+  };
+  
+  // Legacy field for compatibility
+  _limited_access?: boolean;
 }
 
-const isValid = (value: any): boolean => {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "string") {
-    const lower = value.toLowerCase().trim();
+// Helper function to safely extract array values
+const safeArray = (value: any): any[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return [value];
+  return [];
+};
+
+// Helper function to safely extract text from learning resources
+const getLearningResourceText = (resource: any): string => {
+  if (typeof resource === 'string') return resource;
+  if (typeof resource === 'object') {
+    if (resource.title) return resource.title;
+    if (resource.name) return resource.name;
+    return JSON.stringify(resource);
+  }
+  return String(resource);
+};
+
+// Safe access helper for nested objects
+const safeGet = <T,>(obj: any, path: string, defaultValue: T): T => {
+  if (!obj) return defaultValue;
+  
+  const keys = path.split('.');
+  let result = obj;
+  
+  for (const key of keys) {
+    if (result === null || result === undefined) {
+      return defaultValue;
+    }
+    result = result[key];
+  }
+  
+  return result === undefined ? defaultValue : result;
+};
+
+// Executive Summary Display Component
+const ExecutiveSummaryDisplay = ({ summary }: { summary: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  try {
+    const MAX_LENGTH = 300;
+    const displayText = isExpanded ? summary : summary.slice(0, MAX_LENGTH);
+    const needsExpansion = summary.length > MAX_LENGTH;
+    
     return (
-      lower !== "" &&
-      lower !== "not specified" &&
-      lower !== "none identified" &&
-      lower !== "n/a"
+      <div>
+        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+          {displayText}
+          {!isExpanded && needsExpansion && '...'}
+        </p>
+        {needsExpansion && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="mt-3 text-sm text-primary hover:underline font-medium"
+          >
+            {isExpanded ? 'Show Less' : 'Read More'}
+          </button>
+        )}
+      </div>
     );
+  } catch {
+    return <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>;
   }
-  if (Array.isArray(value)) {
-    return value.length > 0 && value.some((item) => isValid(item));
-  }
-  if (typeof value === "object") {
-    return (
-      Object.keys(value).length > 0 &&
-      Object.values(value).some((item) => isValid(item))
-    );
-  }
-  return true;
+};
+
+// Score Display Component
+const ScoreDisplay = ({ 
+  score, 
+  label, 
+  icon, 
+  color = "primary" 
+}: { 
+  score: number; 
+  label: string; 
+  icon: React.ReactNode;
+  color?: string;
+}) => {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "success";
+    if (score >= 60) return "primary";
+    if (score >= 40) return "warning";
+    return "destructive";
+  };
+
+  const scoreColor = getScoreColor(score);
+  
+  return (
+    <Card className={`card-${scoreColor} card-hover`}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className={`icon-wrapper-${scoreColor} p-2`}>
+                {icon}
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  {label}
+                </div>
+                <div className="text-3xl font-bold">
+                  {score}
+                  <span className="text-lg text-muted-foreground">/100</span>
+                </div>
+              </div>
+            </div>
+            <div className="pt-2">
+              <Progress 
+                value={score} 
+                className={`h-2 bg-${scoreColor}/20`}
+                indicatorClassName={`bg-${scoreColor}`}
+              />
+            </div>
+          </div>
+          <Badge className={`bg-${scoreColor}`}>
+            {score >= 80 ? "Excellent" : 
+             score >= 60 ? "Good" : 
+             score >= 40 ? "Fair" : "Poor"}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Premium Section Component
+const PremiumSection = ({ 
+  title, 
+  icon, 
+  description, 
+  content, 
+  isPaid,
+  showAllContent,
+  onTogglePreview 
+}: { 
+  title: string;
+  icon: React.ReactNode;
+  description: string;
+  content: React.ReactNode;
+  isPaid: boolean;
+  showAllContent: boolean;
+  onTogglePreview: () => void;
+}) => {
+  const shouldBlur = !isPaid && !showAllContent;
+  
+  return (
+    <Card className="card-primary card-hover relative overflow-hidden">
+      {shouldBlur && (
+        <div className="absolute inset-0 z-10 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+            <div className="bg-primary/10 p-4 rounded-full mb-4">
+              <Lock className="w-12 h-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Premium Content</h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Upgrade to unlock full Genius Factor analysis
+            </p>
+            <Button
+              onClick={onTogglePreview}
+              className="btn-gradient-primary"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview Content
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className={`icon-wrapper-${shouldBlur ? "amber" : "blue"} p-2`}>
+              {icon}
+            </div>
+            <div>
+              <div className="text-lg font-semibold flex items-center gap-2">
+                {title}
+                {shouldBlur && (
+                  <Badge
+                    variant="outline"
+                    className="border-amber-200 text-amber-700 bg-amber-50"
+                  >
+                    <Lock className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {description}
+              </div>
+            </div>
+          </div>
+          {shouldBlur && showAllContent && (
+            <Badge
+              variant="outline"
+              className="cursor-pointer hover:bg-amber-50"
+              onClick={onTogglePreview}
+            >
+              <EyeOff className="w-3 h-3 mr-1" />
+              Hide
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="relative">
+          {content}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Marketing Blur Boxes Component
+const MarketingBlurBoxes = ({ isPaid, onUpgradeClick }: { 
+  isPaid: boolean; 
+  onUpgradeClick: () => void 
+}) => {
+  const marketingFeatures = [
+    {
+      icon: <BarChart className="w-6 h-6 text-primary" />,
+      title: "Advanced Career Analytics",
+      description: "Detailed breakdown of your career path potential",
+    },
+    {
+      icon: <TrendingUpIcon className="w-6 h-6 text-success" />,
+      title: "Personalized Growth Plan",
+      description: "Custom 90-day action plan with milestone tracking",
+    },
+    {
+      icon: <UsersIcon className="w-6 h-6 text-accent" />,
+      title: "Mentor Matching",
+      description: "Connect with industry experts in your field",
+    },
+    {
+      icon: <AwardIcon className="w-6 h-6 text-warning" />,
+      title: "Skill Certification",
+      description: "Get certified in your identified genius areas",
+    }
+  ];
+
+  if (isPaid) return null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {marketingFeatures.map((feature, index) => (
+        <div key={index} className="relative overflow-hidden rounded-xl border border-input bg-card">
+          <div className="absolute inset-0 z-10 backdrop-blur-md">
+            <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+              <Lock className="w-8 h-8 text-primary mb-2" />
+              <p className="text-sm font-medium">Premium Feature</p>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="mb-4">
+              <div className="w-12 h-12 flex items-center justify-center mb-3">
+                {feature.icon}
+              </div>
+              <h3 className="font-semibold mb-2">{feature.title}</h3>
+              <p className="text-sm text-muted-foreground">{feature.description}</p>
+            </div>
+            <Button 
+              onClick={onUpgradeClick}
+              size="sm" 
+              className="w-full btn-gradient-primary"
+            >
+              Unlock Feature
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default function Results() {
-  const { data, isLoading, error } = useGetAssessmentResultsQuery<any>();
+  const { data: apiResponse, isLoading, error } = useGetAssessmentResultsQuery<any>();
   const { data: session } = useSession();
 
   const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const [selectedAssessment, setSelectedAssessment] =
-    useState<Assessment | null>(null);
+  const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isPaid, setIsPaid] = useState(true); // Assume paid by default
-  const [showAllContent, setShowAllContent] = useState(false); // For preview mode
+  const [isPaid, setIsPaid] = useState(false);
+  const [showAllContent, setShowAllContent] = useState(false);
   const assessmentsPerPage = 5;
 
   useEffect(() => {
-    if (data) {
-      const assessmentsData = Array.isArray(data) ? data : data.data || [];
-      if (!Array.isArray(assessmentsData)) {
-        console.error("Invalid data format from RTK Query:", data);
-        setAssessments([]);
-        return;
+    if (apiResponse) {
+      console.log("API Data received:", apiResponse);
+      
+      // Check paid status
+      if (apiResponse.paid !== undefined) {
+        setIsPaid(apiResponse.paid);
       }
 
-      // Check if user has access to full data by checking if any assessment has complete data
-      const hasFullAccess = assessmentsData.some(
-        (assessment: Assessment) =>
-          assessment.currentRoleAlignmentAnalysisJson ||
-          assessment.internalCareerOpportunitiesJson ||
-          assessment.retentionAndMobilityStrategiesJson
-      );
+      // Extract assessments data
+      let assessmentsData: Assessment[] = [];
+      if (apiResponse.reports && Array.isArray(apiResponse.reports)) {
+        assessmentsData = apiResponse.reports;
+      }
 
-      // If the API explicitly returns paid status, use it. Otherwise fallback to data check.
-      if (data.paid !== undefined) {
-        setIsPaid(data.paid);
+      if (assessmentsData.length > 0) {
+        const sortedAssessments = [...assessmentsData].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        setAssessments(sortedAssessments);
+        setSelectedAssessment(sortedAssessments[0]);
       } else {
-        setIsPaid(hasFullAccess);
+        setAssessments([]);
+        setSelectedAssessment(null);
       }
-
-      const sortedAssessments = [...assessmentsData].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      setAssessments(sortedAssessments);
-      setSelectedAssessment(sortedAssessments[0] || null);
-      setCurrentPage(1);
     } else if (error) {
-      console.error("Error from RTK Query:", error);
+      console.error("Error loading data:", error);
       setAssessments([]);
       setSelectedAssessment(null);
-      setIsPaid(true); // Default to paid on error
     }
-  }, [data, error]);
+  }, [apiResponse, error]);
 
   const handleAssessmentClick = (assessment: Assessment) => {
     setSelectedAssessment(assessment);
@@ -164,14 +495,6 @@ export default function Results() {
     if (resultsHeader) {
       resultsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  };
-
-  // Calculate score color
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "success";
-    if (score >= 60) return "primary";
-    if (score >= 40) return "warning";
-    return "destructive";
   };
 
   const totalPages = Math.ceil(assessments.length / assessmentsPerPage);
@@ -188,122 +511,11 @@ export default function Results() {
     }
   };
 
-  // Render section with blur effect for unpaid users
-  const renderSection = (
-    title: string,
-    icon: React.ReactNode,
-    description: string,
-    content: React.ReactNode,
-    isPremium: boolean = false,
-    showBlur: boolean = false,
-    unblurredContent: React.ReactNode = null
-  ) => {
-    const shouldBlur = !isPaid && isPremium;
-    const isVisible = isPaid || showAllContent || !shouldBlur;
-
-    return (
-      <Card className="card-primary card-hover relative overflow-hidden">
-        {shouldBlur && !unblurredContent && (
-          <div
-            className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${
-              isVisible ? "opacity-0 pointer-events-none" : "opacity-100"
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-              <div className="bg-primary/10 p-4 rounded-full mb-4">
-                <Lock className="w-12 h-12 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Premium Content</h3>
-              <p className="text-muted-foreground mb-6 max-w-md">
-                Unlock your full Genius Factor analysis including detailed
-                career insights, alignment scores, and personalized development
-                plans.
-              </p>
-              <Button
-                onClick={() => setShowAllContent(true)}
-                className="btn-gradient-primary"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Preview Full Analysis
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div
-                className={`icon-wrapper-${shouldBlur ? "amber" : "blue"} p-2`}
-              >
-                {icon}
-              </div>
-              <div>
-                <div className="text-lg font-semibold flex items-center gap-2">
-                  {title}
-                  {shouldBlur && (
-                    <Badge
-                      variant="outline"
-                      className="border-amber-200 text-amber-700 bg-amber-50"
-                    >
-                      <Lock className="w-3 h-3 mr-1" />
-                      Premium
-                    </Badge>
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {description}
-                </div>
-              </div>
-            </div>
-            {shouldBlur && isVisible && (
-              <Badge
-                variant="outline"
-                className="cursor-pointer hover:bg-amber-50"
-                onClick={() => setShowAllContent(false)}
-              >
-                <EyeOff className="w-3 h-3 mr-1" />
-                Hide
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {unblurredContent && <div className="mb-6">{unblurredContent}</div>}
-          <div className="relative">
-            {shouldBlur && unblurredContent && (
-              <div
-                className={`absolute inset-0 z-10 backdrop-blur-sm transition-all duration-300 ${
-                  isVisible ? "opacity-0 pointer-events-none" : "opacity-100"
-                }`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                  <div className="bg-primary/10 p-4 rounded-full mb-4">
-                    <Lock className="w-12 h-12 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">Premium Content</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md">
-                    Unlock your full Genius Factor analysis including detailed
-                    career insights, alignment scores, and personalized
-                    development plans.
-                  </p>
-                  <Button
-                    onClick={() => setShowAllContent(true)}
-                    className="btn-gradient-primary"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Preview Full Analysis
-                  </Button>
-                </div>
-              </div>
-            )}
-            {content}
-          </div>
-        </CardContent>
-      </Card>
-    );
+  const scrollToUpgrade = () => {
+    const header = document.getElementById("results-header");
+    if (header) {
+      header.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   if (isLoading) {
@@ -321,16 +533,15 @@ export default function Results() {
           <div className="max-w-2xl mx-auto">
             <Card className="card-primary border-destructive/20 bg-destructive/5">
               <CardContent className="pt-8 pb-6 text-center space-y-6">
-                <div className="icon-wrapper-blue mx-auto">
+                <div className="mx-auto">
                   <AlertCircle className="w-12 h-12 text-destructive" />
                 </div>
                 <div className="space-y-3">
-                  <h2 className="text-2xl font-bold gradient-text-primary">
+                  <h2 className="text-2xl font-bold">
                     Error Loading Results
                   </h2>
                   <p className="text-muted-foreground">
-                    Unable to load your assessment results. Please try again
-                    later.
+                    Unable to load your assessment results. Please try again later.
                   </p>
                 </div>
                 <Button
@@ -338,7 +549,6 @@ export default function Results() {
                   variant="outline"
                   className="border-input"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh Page
                 </Button>
               </CardContent>
@@ -371,8 +581,7 @@ export default function Results() {
                         Unlock Your Full Potential
                       </h3>
                       <p className="text-amber-700 text-sm">
-                        Upgrade to access complete career insights, detailed
-                        analysis, and personalized recommendations.
+                        Upgrade to access complete career insights, detailed analysis, and personalized recommendations.
                       </p>
                     </div>
                   </div>
@@ -391,12 +600,6 @@ export default function Results() {
           </motion.div>
         )}
 
-        {/* Decorative Background Elements */}
-        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-15" />
-          <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-15" />
-        </div>
-
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div
@@ -404,7 +607,7 @@ export default function Results() {
             className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
           >
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold gradient-text-primary">
+              <h1 className="text-3xl md:text-4xl font-bold">
                 Your Genius Factor Profile
               </h1>
               <p className="text-muted-foreground mt-2">
@@ -416,75 +619,79 @@ export default function Results() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {isPaid ? (
+              {selectedAssessment && (
                 <>
                   <PDFReport
                     assessment={selectedAssessment}
                     employee={
                       session?.user?.firstName + " " + session?.user?.lastName
                     }
-                    genius_factor_score={selectedAssessment?.geniusFactorScore}
+                    genius_factor_score={selectedAssessment.genius_factor_score}
                   />
                   <Button variant="outline" className="border-input">
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
                 </>
-              ) : (
-                <Button variant="outline" className="border-input" disabled>
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Full Report (Upgrade Required)
-                </Button>
               )}
             </div>
           </div>
 
+          <MarketingBlurBoxes 
+            isPaid={isPaid} 
+            onUpgradeClick={scrollToUpgrade}
+          />
+
           {selectedAssessment ? (
             <>
-              {/* Genius Score Hero Card - Always visible */}
+              {/* Genius Score Hero Card */}
               <Card className="card-primary border-0 gradient-bg-primary">
                 <CardContent className="p-8">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <div className="ai-recommendation-icon-wrapper">
-                          <Brain className="w-8 h-8 text-white" />
+                        <div>
+                          <Brain className="w-8 h-8 text-primary" />
                         </div>
-                        <h2 className="text-2xl font-bold gradient-text-primary">
+                        <h2 className="text-2xl font-bold">
                           Overall Genius Score
                         </h2>
                       </div>
                       <div className="flex items-baseline gap-3">
-                        <div className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-purple-500 bg-clip-text text-transparent">
-                          {selectedAssessment.geniusFactorScore}
+                        <div className="text-5xl lg:text-6xl font-bold">
+                          {selectedAssessment.genius_factor_score}
                           <span className="text-2xl lg:text-3xl text-muted-foreground">
                             /100
                           </span>
                         </div>
                         <Badge
-                          className={`badge-${getScoreColor(
-                            selectedAssessment.geniusFactorScore
-                          )} text-lg`}
+                          className={`text-lg ${selectedAssessment.genius_factor_score >= 80 ? 'bg-success' : 
+                            selectedAssessment.genius_factor_score >= 60 ? 'bg-primary' : 
+                            selectedAssessment.genius_factor_score >= 40 ? 'bg-warning' : 'bg-destructive'}`}
                         >
                           <Star className="w-4 h-4 mr-1" />
-                          {selectedAssessment.geniusFactorScore >= 80
+                          {selectedAssessment.genius_factor_score >= 80
                             ? "Exceptional"
-                            : selectedAssessment.geniusFactorScore >= 60
+                            : selectedAssessment.genius_factor_score >= 60
                             ? "Strong"
-                            : selectedAssessment.geniusFactorScore >= 40
+                            : selectedAssessment.genius_factor_score >= 40
                             ? "Developing"
                             : "Emerging"}
                         </Badge>
                       </div>
                       <p className="text-muted-foreground max-w-2xl">
-                        Your strongest area is{" "}
-                        <strong className="text-primary">
-                          {
-                            selectedAssessment.geniusFactorProfileJson
-                              .primary_genius_factor
-                          }
-                        </strong>{" "}
-                        with a score of {selectedAssessment.geniusFactorScore}
+                        {selectedAssessment.genius_factor_profile?.primary_genius_factor ? (
+                          <>
+                            Your strongest area is{" "}
+                            <strong className="text-primary">
+                              {selectedAssessment.genius_factor_profile.primary_genius_factor}
+                            </strong>
+                            <br />
+                            Your Genius Factor score reflects your talent-passion alignment. Having a primary & secondary genius may impact the score.
+                          </>
+                        ) : (
+                          "Complete assessment to see your genius factors"
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-col items-center">
@@ -492,7 +699,7 @@ export default function Results() {
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="text-center">
                             <div className="text-4xl font-bold">
-                              {selectedAssessment.geniusFactorScore}
+                              {selectedAssessment.genius_factor_score}
                             </div>
                             <div className="text-sm text-muted-foreground">
                               Score
@@ -513,13 +720,11 @@ export default function Results() {
                             cy="50"
                             r="45"
                             fill="none"
-                            stroke={`hsl(var(--${getScoreColor(
-                              selectedAssessment.geniusFactorScore
-                            )}))`}
+                            stroke="hsl(var(--primary))"
                             strokeWidth="10"
                             strokeLinecap="round"
                             strokeDasharray={`${
-                              (selectedAssessment.geniusFactorScore / 100) * 283
+                              (selectedAssessment.genius_factor_score / 100) * 283
                             } 283`}
                             transform="rotate(-90 50 50)"
                           />
@@ -530,47 +735,89 @@ export default function Results() {
                 </CardContent>
               </Card>
 
-              {/* Genius Factors Grid - Always visible */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Primary Genius Factor */}
-                <Card className="card-primary card-hover">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="icon-wrapper-blue p-2">
-                        <Target className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">
-                          Primary Genius Factor
+              {/* Additional Scores Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <ScoreDisplay
+                  score={selectedAssessment.retention_risk_score}
+                  label="Retention Risk Score"
+                  icon={<Shield className="w-5 h-5" />}
+                  color="warning"
+                />
+                <ScoreDisplay
+                  score={selectedAssessment.mobility_opportunity_score}
+                  label="Mobility Opportunity Score"
+                  icon={<TrendingUp className="w-5 h-5" />}
+                  color="success"
+                />
+                <ScoreDisplay
+                  score={safeGet(selectedAssessment.current_role_alignment_analysis, 'alignment_score', 50)}
+                  label="Role Alignment Score"
+                  icon={<Target className="w-5 h-5" />}
+                  color="primary"
+                />
+              </div>
+
+              {/* Genius Factors Grid */}
+              {selectedAssessment.genius_factor_profile && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Primary Genius Factor */}
+                  <Card className="card-primary card-hover">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2">
+                          <Target className="w-5 h-5 text-primary" />
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          Your dominant talent
+                        <div>
+                          <div className="text-lg font-semibold">
+                            Primary Genius Factor
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Your dominant talent
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-primary">
+                          {selectedAssessment.genius_factor_profile.primary_genius_factor || "Not identified"}
+                        </span>
+                        <Badge className="bg-primary">
+                          <Zap className="w-3 h-3 mr-1" />
+                          Primary
+                        </Badge>
+                      </div>
+                      
+                      {selectedAssessment.genius_factor_profile.description && (
+                        <p className="text-sm text-muted-foreground">
+                          {selectedAssessment.genius_factor_profile.description}
+                        </p>
+                      )}
+
+                      <div className="mt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Award className="w-4 h-4 text-success" />
+                          <span className="text-sm font-medium">
+                            Key Strengths
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                          {safeArray(selectedAssessment.genius_factor_profile.key_strengths).map(
+                            (strength, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20"
+                              >
+                                <CheckCircle className="w-4 h-4 text-success" />
+                                <span className="text-sm">{strength}</span>
+                              </div>
+                            )
+                          )}
                         </div>
                       </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-primary">
-                        {
-                          selectedAssessment.geniusFactorProfileJson
-                            .primary_genius_factor
-                        }
-                      </span>
-                      <Badge className="badge-blue">
-                        <Zap className="w-3 h-3 mr-1" />
-                        Primary
-                      </Badge>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {selectedAssessment.geniusFactorProfileJson.description}
-                    </p>
-                    {selectedAssessment.geniusFactorProfileJson
-                      ?.energy_sources &&
-                      isValid(
-                        selectedAssessment.geniusFactorProfileJson
-                          .energy_sources
-                      ) && (
+
+                      {selectedAssessment.genius_factor_profile.energy_sources && 
+                       selectedAssessment.genius_factor_profile.energy_sources.length > 0 && (
                         <div className="mt-4">
                           <div className="flex items-center gap-2 mb-3">
                             <Sparkles className="w-4 h-4 text-warning" />
@@ -579,7 +826,7 @@ export default function Results() {
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {selectedAssessment.geniusFactorProfileJson.energy_sources.map(
+                            {safeArray(selectedAssessment.genius_factor_profile.energy_sources).map(
                               (source, index) => (
                                 <Badge
                                   key={index}
@@ -593,81 +840,73 @@ export default function Results() {
                           </div>
                         </div>
                       )}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                {/* Secondary Genius Factor */}
-                <Card className="card-primary card-hover">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                      <div className="icon-wrapper-purple p-2">
-                        <TargetIcon className="w-5 h-5 text-accent" />
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold">
-                          Secondary Genius Factor
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Supporting talents
-                        </div>
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-accent">
-                        {selectedAssessment.geniusFactorProfileJson
-                          .secondary_genius_factor === "None Identified"
-                          ? "Primary Focus"
-                          : selectedAssessment.geniusFactorProfileJson
-                              .secondary_genius_factor}
-                      </span>
-                      <Badge className="badge-purple">
-                        <Star className="w-3 h-3 mr-1" />
-                        Secondary
-                      </Badge>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {selectedAssessment.geniusFactorProfileJson
-                        .secondary_description ||
-                        "Your primary genius factor is highly dominant, indicating focused expertise in this area."}
-                    </p>
-                    {selectedAssessment.geniusFactorProfileJson
-                      ?.key_strengths &&
-                      isValid(
-                        selectedAssessment.geniusFactorProfileJson.key_strengths
-                      ) && (
-                        <div className="mt-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Award className="w-4 h-4 text-success" />
-                            <span className="text-sm font-medium">
-                              Key Strengths
-                            </span>
+                  {/* Secondary Genius Factor */}
+                  {selectedAssessment.genius_factor_profile.secondary_genius_factor && (
+                    <Card className="card-primary card-hover">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="p-2">
+                            <TargetIcon className="w-5 h-5 text-accent" />
                           </div>
-                          <div className="grid grid-cols-1 gap-2">
-                            {selectedAssessment.geniusFactorProfileJson.key_strengths.map(
-                              (strength, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20"
-                                >
-                                  <CheckCircle className="w-4 h-4 text-success" />
-                                  <span className="text-sm">{strength}</span>
-                                </div>
-                              )
-                            )}
+                          <div>
+                            <div className="text-lg font-semibold">
+                              Secondary Genius Factor
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Supporting talents
+                            </div>
                           </div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl font-bold text-accent">
+                            {selectedAssessment.genius_factor_profile.secondary_genius_factor}
+                          </span>
+                          <Badge className="bg-accent">
+                            <Star className="w-3 h-3 mr-1" />
+                            Secondary
+                          </Badge>
                         </div>
-                      )}
-                  </CardContent>
-                </Card>
-              </div>
+                        
+                        {selectedAssessment.genius_factor_profile.development_areas && 
+                         selectedAssessment.genius_factor_profile.development_areas.length > 0 && (
+                          <div className="mt-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Lightbulb className="w-4 h-4 text-warning" />
+                              <span className="text-sm font-medium">
+                                Development Areas
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                              {safeArray(selectedAssessment.genius_factor_profile.development_areas).map(
+                                (area, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
+                                  >
+                                    <TrendingUp className="w-4 h-4 text-warning" />
+                                    <span className="text-sm">{area}</span>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
 
-              {/* Executive Summary - Always visible */}
+              {/* Executive Summary */}
               <Card className="card-primary card-hover">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="icon-wrapper-green p-2">
+                    <div className="p-2">
                       <BookOpen className="w-5 h-5 text-success" />
                     </div>
                     <div>
@@ -681,452 +920,429 @@ export default function Results() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
-                    <p className="leading-relaxed">
-                      {selectedAssessment.executiveSummary}
-                    </p>
-                  </div>
+                  <ExecutiveSummaryDisplay 
+                    summary={selectedAssessment.executive_summary} 
+                  />
                 </CardContent>
               </Card>
 
-              {/* Current Role Alignment - Premium */}
-              {renderSection(
-                "Current Role Alignment",
-                <BarChart3 className="w-5 h-5 text-warning" />,
-                "Fit with your current position",
-                selectedAssessment.currentRoleAlignmentAnalysisJson ? (
-                  <div className="space-y-6">
-                    {selectedAssessment.currentRoleAlignmentAnalysisJson
-                      ?.strengths_utilized && (
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4 text-success" />
-                          Strengths Being Utilized
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.strengths_utilized.map(
-                            (strength, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20"
-                              >
-                                <Target className="w-4 h-4 text-success" />
-                                <span className="text-sm">{strength}</span>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedAssessment.currentRoleAlignmentAnalysisJson
-                      ?.underutilized_talents && (
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Lightbulb className="w-4 h-4 text-warning" />
-                          Growth Opportunities
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {selectedAssessment.currentRoleAlignmentAnalysisJson.underutilized_talents.map(
-                            (talent, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
-                              >
-                                <TrendingUp className="w-4 h-4 text-warning" />
-                                <span className="text-sm">{talent}</span>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  !selectedAssessment.alignmentScore && !isPaid && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No alignment data available</p>
-                    </div>
-                  )
-                ),
-                true,
-                true,
-                // Unblurred Content (Alignment Score)
-                selectedAssessment.alignmentScore ||
-                  selectedAssessment.currentRoleAlignmentAnalysisJson
-                    ?.alignment_score ? (
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-warning/5 border border-warning/20">
-                    <div>
-                      <div className="text-sm font-medium text-warning">
-                        Alignment Score
-                      </div>
-                      <div className="text-2xl font-bold">
-                        {selectedAssessment.alignmentScore ||
-                          selectedAssessment.currentRoleAlignmentAnalysisJson
-                            ?.alignment_score}
-                      </div>
-                    </div>
-                    {selectedAssessment.currentRoleAlignmentAnalysisJson
-                      ?.retention_risk_level && (
-                      <Badge
-                        className={`badge-${
-                          selectedAssessment.currentRoleAlignmentAnalysisJson.retention_risk_level
-                            ?.toLowerCase()
-                            .includes("low")
-                            ? "green"
-                            : "amber"
-                        }`}
-                      >
-                        <Shield className="w-3 h-3 mr-1" />
-                        {
-                          selectedAssessment.currentRoleAlignmentAnalysisJson
-                            .retention_risk_level
-                        }
-                      </Badge>
-                    )}
-                  </div>
-                ) : null
-              )}
-
-              {/* Internal Career Opportunities - Premium */}
-              {renderSection(
-                "Career Opportunities",
-                <Globe className="w-5 h-5 text-accent" />,
-                "Internal pathways and suggestions",
-                selectedAssessment.internalCareerOpportunitiesJson ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary" />
-                          Primary Industry
-                        </h4>
-                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                          <div className="text-lg font-semibold text-primary">
-                            {
-                              selectedAssessment.internalCareerOpportunitiesJson
-                                .primary_industry
-                            }
-                          </div>
-                        </div>
-
-                        {selectedAssessment.internalCareerOpportunitiesJson
-                          .secondary_industry && (
-                          <>
-                            <h4 className="font-semibold flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-accent" />
-                              Secondary Industry
-                            </h4>
-                            <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
-                              <div className="text-lg font-semibold text-accent">
-                                {
-                                  selectedAssessment
-                                    .internalCareerOpportunitiesJson
-                                    .secondary_industry
-                                }
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-success" />
-                          Transition Timeline
-                        </h4>
-                        <div className="space-y-3">
-                          {Object.entries(
-                            selectedAssessment.internalCareerOpportunitiesJson
-                              .transition_timeline || {}
-                          ).map(([key, value], index) => (
-                            <div
-                              key={index}
-                              className="flex flex-col gap-1 p-2 rounded-lg bg-success/5 border border-success/20"
-                            >
-                              <span className="text-sm font-medium capitalize">
-                                {key.replace("_", " ")}
-                              </span>
-                              <Badge className="badge-green whitespace-normal break-words">
-                                {value}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {selectedAssessment.internalCareerOpportunitiesJson
-                      .recommended_departments && (
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-primary" />
-                          Recommended Departments
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson.recommended_departments.map(
-                            (dept, index) => (
-                              <Badge key={index} className="badge-blue">
-                                {dept}
-                              </Badge>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedAssessment.internalCareerOpportunitiesJson
-                      .specific_role_suggestions && (
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Target className="w-4 h-4 text-accent" />
-                          Role Suggestions
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {selectedAssessment.internalCareerOpportunitiesJson.specific_role_suggestions.map(
-                            (role, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center gap-2 p-2 rounded-lg bg-accent/5 border border-accent/20"
-                              >
-                                <Sparkles className="w-4 h-4 text-accent" />
-                                <span className="text-sm">{role}</span>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No career opportunity data available</p>
-                  </div>
-                ),
-                true,
-                true
-              )}
-
-              {/* Action Plan & Resources Grid - Premium */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Development Action Plan - Premium */}
-                {renderSection(
-                  "Development Plan",
-                  <Target className="w-5 h-5 text-success" />,
-                  "Short-term to long-term goals",
-                  selectedAssessment.developmentActionPlanJson ? (
-                    <div className="space-y-4">
-                      {selectedAssessment.developmentActionPlanJson
-                        .thirty_day_goals && (
-                        <div>
-                          <h4 className="font-semibold mb-2 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-primary" />
-                            30-Day Goals
-                          </h4>
-                          <ul className="space-y-2">
-                            {selectedAssessment.developmentActionPlanJson.thirty_day_goals.map(
-                              (goal, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2 text-sm"
-                                >
-                                  <div className="icon-wrapper-blue p-1 mt-0.5">
-                                    <CheckCircle className="w-3 h-3 text-primary" />
-                                  </div>
-                                  {goal}
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                      {selectedAssessment.developmentActionPlanJson
-                        .ninety_day_goals && (
-                        <div>
-                          <h4 className="font-semibold mb-2 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-warning" />
-                            90-Day Goals
-                          </h4>
-                          <ul className="space-y-2">
-                            {selectedAssessment.developmentActionPlanJson.ninety_day_goals.map(
-                              (goal, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2 text-sm"
-                                >
-                                  <div className="icon-wrapper-amber p-1 mt-0.5">
-                                    <Target className="w-3 h-3 text-warning" />
-                                  </div>
-                                  {goal}
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No development plan available</p>
-                    </div>
-                  ),
-                  true,
-                  true
-                )}
-
-                {/* Personalized Resources - Premium */}
-                {renderSection(
-                  "Personalized Resources",
-                  <BookMarked className="w-5 h-5 text-accent" />,
-                  "Tools for your growth journey",
-                  selectedAssessment.personalizedResourcesJson ? (
-                    <div className="space-y-4">
-                      {selectedAssessment.personalizedResourcesJson
-                        .learning_resources && (
-                        <div>
-                          <h4 className="font-semibold mb-2 flex items-center gap-2">
-                            <BookOpen className="w-4 h-4 text-success" />
-                            Learning Resources
-                          </h4>
-                          <ul className="space-y-2">
-                            {selectedAssessment.personalizedResourcesJson.learning_resources.map(
-                              (resource, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-start gap-2 text-sm"
-                                >
-                                  <div className="icon-wrapper-green p-1 mt-0.5">
-                                    <Sparkles className="w-3 h-3 text-success" />
-                                  </div>
-                                  {resource}
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                      {selectedAssessment.personalizedResourcesJson
-                        .affirmations && (
-                        <div>
-                          <h4 className="font-semibold mb-2 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            Affirmations
+              {/* Current Role Alignment Analysis - Only for paid users */}
+              {selectedAssessment.current_role_alignment_analysis && (
+                <PremiumSection
+                  title="Current Role Alignment"
+                  icon={<BarChart3 className="w-5 h-5 text-warning" />}
+                  description="How well your current role fits your genius factors"
+                  isPaid={isPaid}
+                  showAllContent={showAllContent}
+                  onTogglePreview={() => setShowAllContent(!showAllContent)}
+                  content={
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            Strengths Utilized
                           </h4>
                           <div className="space-y-2">
-                            {selectedAssessment.personalizedResourcesJson.affirmations.map(
-                              (affirmation, index) => (
+                            {safeArray(selectedAssessment.current_role_alignment_analysis.strengths_utilized).map(
+                              (strength, index) => (
                                 <div
                                   key={index}
-                                  className="p-2 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
+                                  className="p-3 rounded-lg bg-success/5 border border-success/20"
                                 >
-                                  "{affirmation}"
+                                  <div className="font-medium text-success">{strength}</div>
                                 </div>
                               )
                             )}
                           </div>
                         </div>
+
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <Lightbulb className="w-4 h-4 text-warning" />
+                            Underutilized Talents
+                          </h4>
+                          <div className="space-y-2">
+                            {safeArray(selectedAssessment.current_role_alignment_analysis.underutilized_talents).map(
+                              (talent, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 rounded-lg bg-warning/5 border border-warning/20"
+                                >
+                                  <div className="font-medium text-warning">{talent}</div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-destructive" />
+                            Retention Risk Factors
+                          </h4>
+                          <div className="space-y-2">
+                            {safeArray(selectedAssessment.current_role_alignment_analysis.retention_risk_factors).map(
+                              (risk, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 rounded-lg bg-destructive/5 border border-destructive/20"
+                                >
+                                  <div className="font-medium text-destructive">{risk}</div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <Rocket className="w-4 h-4 text-primary" />
+                            Immediate Actions
+                          </h4>
+                          <div className="space-y-2">
+                            {safeArray(selectedAssessment.current_role_alignment_analysis.immediate_actions).map(
+                              (action, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 rounded-lg bg-primary/5 border border-primary/20"
+                                >
+                                  <div className="font-medium text-primary">{action}</div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                />
+              )}
+
+              {/* Career Opportunities - Only for paid users */}
+              {selectedAssessment.internal_career_opportunities && (
+                <PremiumSection
+                  title="Career Opportunities"
+                  icon={<Globe className="w-5 h-5 text-accent" />}
+                  description="Internal pathways and suggestions"
+                  isPaid={isPaid}
+                  showAllContent={showAllContent}
+                  onTogglePreview={() => setShowAllContent(!showAllContent)}
+                  content={
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <Building className="w-4 h-4 text-primary" />
+                            Primary Industries
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {safeArray(selectedAssessment.internal_career_opportunities.primary_industries).map(
+                              (industry, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="border-primary/20 text-primary bg-primary/5"
+                                >
+                                  {industry}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <BriefcaseBusiness className="w-4 h-4 text-success" />
+                            Secondary Industries
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {safeArray(selectedAssessment.internal_career_opportunities.secondary_industries).map(
+                              (industry, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="border-success/20 text-success bg-success/5"
+                                >
+                                  {industry}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {selectedAssessment.internal_career_opportunities.role_suggestions && 
+                       selectedAssessment.internal_career_opportunities.role_suggestions.length > 0 && (
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <TargetIcon2 className="w-4 h-4 text-accent" />
+                            Role Suggestions
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {safeArray(selectedAssessment.internal_career_opportunities.role_suggestions).map(
+                              (role, index) => (
+                                <Card key={index} className="border-accent/20">
+                                  <CardContent className="p-4">
+                                    <div className="space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <h5 className="font-bold text-lg text-accent">
+                                          {role.role_title}
+                                        </h5>
+                                        <Badge className="bg-accent">
+                                          {role.match_score}% Match
+                                        </Badge>
+                                      </div>
+                                      
+                                      <div className="text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                          <Briefcase className="w-3 h-3" />
+                                          {role.department}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <Calendar className="w-3 h-3" />
+                                          {role.timeline}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <TrendingUp className="w-3 h-3" />
+                                          {role.salary_impact}
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="pt-2">
+                                        <h6 className="text-sm font-semibold mb-1">Required Skills:</h6>
+                                        <div className="flex flex-wrap gap-1">
+                                          {safeArray(role.required_skills).map((skill, skillIndex) => (
+                                            <Badge key={skillIndex} variant="secondary" className="text-xs">
+                                              {skill}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedAssessment.internal_career_opportunities.transition_strategy && (
+                        <div className="space-y-4">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-warning" />
+                            Transition Strategy
+                          </h4>
+                          <Card className="bg-warning/5 border-warning/20">
+                            <CardContent className="p-4">
+                              <p className="text-sm leading-relaxed">
+                                {selectedAssessment.internal_career_opportunities.transition_strategy}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <BookMarked className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No personalized resources available</p>
-                    </div>
-                  ),
-                  true,
-                  true
-                )}
-              </div>
+                  }
+                />
+              )}
 
-              {/* Additional Sections - Premium */}
-              {selectedAssessment.retentionAndMobilityStrategiesJson &&
-                renderSection(
-                  "Retention Strategies",
-                  <Shield className="w-5 h-5 text-primary" />,
-                  "Organizational support recommendations",
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {selectedAssessment.retentionAndMobilityStrategiesJson
-                      .retention_strategies && (
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-sm">
-                          Retention Focus
-                        </h4>
-                        <ul className="space-y-1">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.retention_strategies
-                            .slice(0, 3)
-                            .map((strategy, index) => (
-                              <li
-                                key={index}
-                                className="text-sm flex items-center gap-2"
-                              >
-                                <CheckCircle className="w-3 h-3 text-primary" />
-                                {strategy}
-                              </li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
+              {/* Action Plan & Resources Grid - Only for paid users */}
+              {(selectedAssessment.development_action_plan || selectedAssessment.personalized_resources) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Development Action Plan */}
+                  {selectedAssessment.development_action_plan && (
+                    <PremiumSection
+                      title="Development Plan"
+                      icon={<Target className="w-5 h-5 text-success" />}
+                      description="Short-term to long-term goals"
+                      isPaid={isPaid}
+                      showAllContent={showAllContent}
+                      onTogglePreview={() => setShowAllContent(!showAllContent)}
+                      content={
+                        <div className="space-y-6">
+                          {selectedAssessment.development_action_plan.thirty_day_goals && 
+                           selectedAssessment.development_action_plan.thirty_day_goals.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-primary" />
+                                30-Day Goals
+                              </h4>
+                              <ul className="space-y-2">
+                                {safeArray(selectedAssessment.development_action_plan.thirty_day_goals).map(
+                                  (goal, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-start gap-2 text-sm"
+                                    >
+                                      <div className="p-1 mt-0.5">
+                                        <CheckCircle className="w-3 h-3 text-primary" />
+                                      </div>
+                                      <span>{goal}</span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
 
-                    {selectedAssessment.retentionAndMobilityStrategiesJson
-                      .development_support && (
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-sm">
-                          Development Support
-                        </h4>
-                        <ul className="space-y-1">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.development_support
-                            .slice(0, 3)
-                            .map((support, index) => (
-                              <li
-                                key={index}
-                                className="text-sm flex items-center gap-2"
-                              >
-                                <TrendingUp className="w-3 h-3 text-success" />
-                                {support}
-                              </li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
+                          {selectedAssessment.development_action_plan.ninety_day_goals && 
+                           selectedAssessment.development_action_plan.ninety_day_goals.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-warning" />
+                                90-Day Goals
+                              </h4>
+                              <ul className="space-y-2">
+                                {safeArray(selectedAssessment.development_action_plan.ninety_day_goals).map(
+                                  (goal, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-start gap-2 text-sm"
+                                    >
+                                      <div className="p-1 mt-0.5">
+                                        <Target className="w-3 h-3 text-warning" />
+                                      </div>
+                                      <span>{goal}</span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
 
-                    {selectedAssessment.retentionAndMobilityStrategiesJson
-                      .internal_mobility_recommendations && (
-                      <div className="space-y-2">
-                        <h4 className="font-semibold text-sm">
-                          Mobility Recommendations
-                        </h4>
-                        <ul className="space-y-1">
-                          {selectedAssessment.retentionAndMobilityStrategiesJson.internal_mobility_recommendations
-                            .slice(0, 3)
-                            .map((rec, index) => (
-                              <li
-                                key={index}
-                                className="text-sm flex items-center gap-2"
-                              >
-                                <Globe className="w-3 h-3 text-accent" />
-                                {rec}
-                              </li>
-                            ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>,
-                  true,
-                  true
-                )}
+                          {selectedAssessment.development_action_plan.six_month_goals && 
+                           selectedAssessment.development_action_plan.six_month_goals.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-success" />
+                                6-Month Goals
+                              </h4>
+                              <ul className="space-y-2">
+                                {safeArray(selectedAssessment.development_action_plan.six_month_goals).map(
+                                  (goal, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-start gap-2 text-sm"
+                                    >
+                                      <div className="p-1 mt-0.5">
+                                        <Rocket className="w-3 h-3 text-success" />
+                                      </div>
+                                      <span>{goal}</span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      }
+                    />
+                  )}
+
+                  {/* Personalized Resources */}
+                  {selectedAssessment.personalized_resources && (
+                    <PremiumSection
+                      title="Personalized Resources"
+                      icon={<BookMarked className="w-5 h-5 text-accent" />}
+                      description="Tools for your growth journey"
+                      isPaid={isPaid}
+                      showAllContent={showAllContent}
+                      onTogglePreview={() => setShowAllContent(!showAllContent)}
+                      content={
+                        <div className="space-y-6">
+                          {selectedAssessment.personalized_resources.learning_resources && 
+                           selectedAssessment.personalized_resources.learning_resources.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Book className="w-4 h-4 text-success" />
+                                Learning Resources
+                              </h4>
+                              <div className="space-y-2">
+                                {safeArray(selectedAssessment.personalized_resources.learning_resources).map(
+                                  (resource, index) => (
+                                    <Card key={index} className="border-success/20">
+                                      <CardContent className="p-3">
+                                        <div className="flex items-start gap-3">
+                                          <BookOpen className="w-5 h-5 text-success mt-0.5" />
+                                          <div className="flex-1">
+                                            <div className="font-medium">{resource.title}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                              {resource.type} • {resource.provider || resource.author || 'Various'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {selectedAssessment.personalized_resources.affirmations && 
+                           selectedAssessment.personalized_resources.affirmations.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-primary" />
+                                Affirmations
+                              </h4>
+                              <div className="space-y-2">
+                                {safeArray(selectedAssessment.personalized_resources.affirmations).map(
+                                  (affirmation, index) => (
+                                    <div
+                                      key={index}
+                                      className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
+                                    >
+                                      "{affirmation}"
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {selectedAssessment.personalized_resources.mindfulness_practices && 
+                           selectedAssessment.personalized_resources.mindfulness_practices.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                <Heart className="w-4 h-4 text-warning" />
+                                Mindfulness Practices
+                              </h4>
+                              <div className="space-y-2">
+                                {safeArray(selectedAssessment.personalized_resources.mindfulness_practices).map(
+                                  (practice, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-start gap-2 p-2 text-sm"
+                                    >
+                                      <div className="icon-wrapper-amber p-1 mt-0.5">
+                                        <Sparkles className="w-3 h-3 text-warning" />
+                                      </div>
+                                      <span>{practice}</span>
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      }
+                    />
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <Card className="card-primary">
               <CardContent className="pt-12 pb-12 text-center">
-                <div className="icon-wrapper-purple mx-auto mb-6 p-4">
+                <div className="mx-auto mb-6 p-4">
                   <Brain className="h-12 w-12 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold gradient-text-primary mb-4">
+                <h3 className="text-2xl font-bold mb-4">
                   No Assessments Completed
                 </h3>
                 <p className="text-muted-foreground mb-6">
@@ -1142,27 +1358,27 @@ export default function Results() {
             </Card>
           )}
 
-          {/* Assessment History - Always visible */}
-          <Card className="card-primary" id="assessment-history">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="icon-wrapper-blue p-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-lg font-semibold">
-                    Assessment History
+          {/* Assessment History */}
+          {assessments.length > 0 && (
+            <Card className="card-primary" id="assessment-history">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <div className="p-2">
+                    <FileText className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Your previous assessments
+                  <div>
+                    <div className="text-lg font-semibold">
+                      Assessment History
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Your previous assessments
+                    </div>
                   </div>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {paginatedAssessments.length > 0 ? (
-                  paginatedAssessments.map((assessment) => (
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {paginatedAssessments.map((assessment) => (
                     <div
                       key={assessment.id}
                       className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
@@ -1191,202 +1407,90 @@ export default function Results() {
                               <div className="text-sm text-muted-foreground">
                                 {new Date(
                                   assessment.createdAt
-                                ).toLocaleDateString()}
+                                ).toLocaleDateString()} • {assessment.genius_factor_profile?.primary_genius_factor || "Pending Analysis"}
                               </div>
                             </div>
-                          </div>
-                          <div className="text-sm text-muted-foreground line-clamp-2 ml-11">
-                            {assessment.executiveSummary.substring(0, 100)}...
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <div className="flex items-center gap-2">
                             <div className="text-2xl font-bold">
-                              {assessment.geniusFactorScore}
+                              {assessment.genius_factor_score}
                             </div>
                             <div className="text-sm text-muted-foreground">
                               /100
                             </div>
                           </div>
-                          <Badge
-                            className={`badge-${getScoreColor(
-                              assessment.geniusFactorScore
-                            )}`}
-                          >
-                            {assessment.geniusFactorScore >= 80
+                          <Badge>
+                            {assessment.genius_factor_score >= 80
                               ? "Exceptional"
-                              : assessment.geniusFactorScore >= 60
+                              : assessment.genius_factor_score >= 60
                               ? "Strong"
-                              : assessment.geniusFactorScore >= 40
+                              : assessment.genius_factor_score >= 40
                               ? "Developing"
                               : "Emerging"}
                           </Badge>
                         </div>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="icon-wrapper-blue mx-auto mb-4 p-3">
-                      <FileText className="w-8 h-8 text-primary" />
-                    </div>
-                    <p className="text-muted-foreground">
-                      No assessment history available
-                    </p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
 
-              {totalPages > 1 && (
-                <Pagination className="mt-8">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() =>
-                          handlePageChange(Math.max(1, currentPage - 1))
-                        }
-                        className={
-                          currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-muted"
-                        }
-                      />
-                    </PaginationItem>
-                    {Array.from(
-                      { length: totalPages },
-                      (_, index) => index + 1
-                    ).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(page)}
-                          isActive={currentPage === page}
+                {totalPages > 1 && (
+                  <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            handlePageChange(Math.max(1, currentPage - 1))
+                          }
                           className={
-                            currentPage === page
-                              ? "bg-primary text-primary-foreground"
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
                               : "cursor-pointer hover:bg-muted"
                           }
-                        >
-                          {page}
-                        </PaginationLink>
+                        />
                       </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() =>
-                          handlePageChange(
-                            Math.min(totalPages, currentPage + 1)
-                          )
-                        }
-                        className={
-                          currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-muted"
-                        }
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Recommended Actions */}
-          <Card className="card-primary">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="ai-recommendation-icon-wrapper text-white">
-                  <Rocket className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold ">Recommended Next Steps</h3>
-                  <p className="">Personalized actions based on your profile</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Link href="/employee-dashboard/career-Pathways">
-                  <div className="quick-action-item group cursor-pointer">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="icon-wrapper-blue">
-                        <TrendingUp className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">Explore Career Paths</h4>
-                        <p className="text-sm">Based on your profile</p>
-                      </div>
-                    </div>
-                    <div className="text-xs  transition-colors">
-                      Discover roles that match your genius factor
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/employee-dashboard/development">
-                  <div className="quick-action-item group cursor-pointer">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="icon-wrapper-green">
-                        <Target className="w-6 h-6 text-success" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold ">Skill Development</h4>
-                        <p className="text-sm">Personalized roadmap</p>
-                      </div>
-                    </div>
-                    <div className="text-xs  transition-colors">
-                      Build skills aligned with your strengths
-                    </div>
-                  </div>
-                </Link>
-
-                {!isPaid ? (
-                  <div
-                    className="quick-action-item group cursor-pointer"
-                    onClick={() => {
-                      // Scroll to upgrade section or show modal
-                      document
-                        .getElementById("results-header")
-                        ?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="icon-wrapper-purple">
-                        <Lock className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold ">Unlock Full Analysis</h4>
-                        <p className="text-sm ">Premium features</p>
-                      </div>
-                    </div>
-                    <div className="text-xs  transition-colors">
-                      Access complete career insights
-                    </div>
-                  </div>
-                ) : (
-                  <Link href="/employee-dashboard/assessment">
-                    <div className="quick-action-item group cursor-pointer">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="icon-wrapper-purple">
-                          <Brain className="w-6 h-6 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold ">Track Progress</h4>
-                          <p className="text-sm ">Retake assessment</p>
-                        </div>
-                      </div>
-                      <div className="text-xs  transition-colors">
-                        Monitor your development over time
-                      </div>
-                    </div>
-                  </Link>
+                      {Array.from(
+                        { length: totalPages },
+                        (_, index) => index + 1
+                      ).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                            className={
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground"
+                                : "cursor-pointer hover:bg-muted"
+                            }
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            handlePageChange(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
+                          className={
+                            currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer hover:bg-muted"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </AppLayout>
   );
 }
-
-// Add missing imports
-import { RefreshCw } from "lucide-react";

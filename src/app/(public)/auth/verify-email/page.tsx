@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ function VerifyEmailContent() {
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [otp, setOtp] = useState("");
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || session?.user?.email;
@@ -44,30 +44,43 @@ function VerifyEmailContent() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Email verified successfully! Redirecting...");
+        setMessage("Email verified successfully! Signing you in...");
         setIsSuccess(true);
 
-        // Update session to reflect email verification
-        await update();
+        // Automatically sign in using the auto-login token
+        const result = await signIn("credentials", {
+          email: data.email,
+          autoLoginToken: data.autoLoginToken,
+          redirect: false,
+        });
 
-        // Redirect based on role with proper path
-        setTimeout(() => {
-          const role = data.role || session?.user?.role;
-          let redirectPath = "/employee-dashboard"; // Default fallback
+        if (result?.error) {
+          setMessage("Auto sign-in failed. Please sign in manually.");
+          setIsSuccess(false);
+          setTimeout(() => {
+            router.push("/auth/sign-in");
+          }, 2000);
+        } else {
+          setMessage("Sign-in successful! Redirecting...");
+          setIsSuccess(true);
 
-          // Map role to correct dashboard path
-          if (role === "Admin") {
-            redirectPath = "/dashboard";
-          } else if (role === "HR") {
-            redirectPath = "/hr-dashboard";
-          } else if (role === "Employee") {
-            redirectPath = "/employee-dashboard";
-          }
+          // Redirect based on role
+          setTimeout(() => {
+            const role = data.role;
+            let redirectPath = "/employee-dashboard"; // Default fallback
 
-          // Use window.location for hard navigation with verified flag
-          // This bypasses middleware email verification check since JWT not immediately updated
-          window.location.href = `${redirectPath}?verified=true`;
-        }, 2000);
+            // Map role to correct dashboard path
+            if (role === "Admin") {
+              redirectPath = "/dashboard";
+            } else if (role === "HR") {
+              redirectPath = "/hr-dashboard";
+            } else if (role === "Employee") {
+              redirectPath = "/employee-dashboard";
+            }
+
+            router.push(redirectPath);
+          }, 1500);
+        }
       } else {
         setMessage(data.error || "Verification failed");
         setIsSuccess(false);
@@ -196,6 +209,7 @@ function VerifyEmailContent() {
                   }
                   className="text-center text-2xl tracking-widest h-14 font-mono"
                   maxLength={6}
+                  disabled={isLoading}
                 />
               </div>
 

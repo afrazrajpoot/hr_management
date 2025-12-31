@@ -27,6 +27,9 @@ import {
   Save,
   X,
   Pencil,
+  ChevronDown,
+  Search,
+  Check,
 } from "lucide-react";
 import { Employee } from "../../../types/profileTypes";
 
@@ -52,12 +55,110 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
 }: any) => {
   const [newSkill, setNewSkill] = useState<string>("");
   const [newProficiency, setNewProficiency] = useState<number>(50);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Use react-hook-form's useFieldArray for proper array management
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "skills",
   });
+
+  // Standard skills list with categories
+  const standardSkills = [
+    // Web Development
+    { name: "React", category: "Frontend" },
+    { name: "TypeScript", category: "Frontend" },
+    { name: "JavaScript", category: "Frontend" },
+    { name: "HTML/CSS", category: "Frontend" },
+    { name: "Next.js", category: "Frontend" },
+    { name: "Vue.js", category: "Frontend" },
+    { name: "Angular", category: "Frontend" },
+    
+    // Backend
+    { name: "Node.js", category: "Backend" },
+    { name: "Python", category: "Backend" },
+    { name: "Java", category: "Backend" },
+    { name: "PHP", category: "Backend" },
+    { name: "C#", category: "Backend" },
+    { name: "Go", category: "Backend" },
+    { name: "Rust", category: "Backend" },
+    
+    // Databases
+    { name: "SQL", category: "Database" },
+    { name: "MongoDB", category: "Database" },
+    { name: "PostgreSQL", category: "Database" },
+    { name: "MySQL", category: "Database" },
+    { name: "Redis", category: "Database" },
+    
+    // Cloud & DevOps
+    { name: "AWS", category: "Cloud" },
+    { name: "Docker", category: "DevOps" },
+    { name: "Kubernetes", category: "DevOps" },
+    { name: "Git", category: "DevOps" },
+    { name: "CI/CD", category: "DevOps" },
+    
+    // Mobile
+    { name: "React Native", category: "Mobile" },
+    { name: "Flutter", category: "Mobile" },
+    { name: "Swift", category: "Mobile" },
+    { name: "Kotlin", category: "Mobile" },
+    
+    // Web3 & Blockchain
+    { name: "Solidity", category: "Web3" },
+    { name: "Smart Contracts", category: "Web3" },
+    { name: "Ethers.js", category: "Web3" },
+    { name: "Web3.js", category: "Web3" },
+    { name: "Hardhat", category: "Web3" },
+    
+    // Soft Skills
+    { name: "Communication", category: "Soft Skills" },
+    { name: "Problem Solving", category: "Soft Skills" },
+    { name: "Team Leadership", category: "Soft Skills" },
+    { name: "Project Management", category: "Soft Skills" },
+    { name: "Agile/Scrum", category: "Soft Skills" },
+    
+    // Data & AI
+    { name: "Data Analysis", category: "Data & AI" },
+    { name: "Machine Learning", category: "Data & AI" },
+    { name: "TensorFlow", category: "Data & AI" },
+    { name: "PyTorch", category: "Data & AI" },
+  ];
+
+  // Filter skills based on search term
+  const filteredSkills = standardSkills.filter(skill =>
+    skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    skill.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Group skills by category
+  const skillsByCategory = filteredSkills.reduce((acc, skill) => {
+    if (!acc[skill.category]) {
+      acc[skill.category] = [];
+    }
+    acc[skill.category].push(skill);
+    return acc;
+  }, {} as Record<string, typeof standardSkills>);
+
+  // Handle selecting a skill from dropdown
+  const handleSelectStandardSkill = (skillName: string) => {
+    if (!skillName) return;
+    
+    // Check for duplicates
+    const isDuplicate = fields.some(
+      (field: any) => field.name.toLowerCase() === skillName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      // You could show a toast notification here
+      console.log(`Skill "${skillName}" already exists`);
+      return;
+    }
+
+    setNewSkill(skillName);
+    setIsDropdownOpen(false);
+    setSearchTerm(""); // Clear search after selection
+  };
 
   // Handle adding a new skill
   const handleAddSkill = () => {
@@ -106,6 +207,14 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     return "primary";
   };
 
+  // Get proficiency color value for slider styling
+  const getProficiencyColorValue = (level: number) => {
+    if (level <= 25) return "var(--color-destructive)";
+    if (level <= 50) return "var(--color-warning)";
+    if (level <= 75) return "var(--color-success)";
+    return "var(--color-primary)";
+  };
+
   return (
     <motion.div
       variants={{
@@ -123,7 +232,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card-primary card-hover">
+      <Card className="card-primary card-hover border border-input">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex items-center gap-4">
             <div className="icon-wrapper-blue p-3">
@@ -185,73 +294,242 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   <Target className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Add New Skill</h3>
+                  <h3 className="font-semibold text-lg text-foreground">
+                    Add New Skill
+                  </h3>
                   <p className="text-sm text-muted-foreground">
-                    Add a skill and set your proficiency level
+                    Select from standard skills or type a custom one
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-3 mb-4">
-                <div className="relative flex-1">
-                  <div className="icon-wrapper-blue absolute left-3 top-1/2 transform -translate-y-1/2 p-2">
-                    <Hash className="h-4 w-4 text-primary" />
-                  </div>
-                  <Input
-                    placeholder="e.g., React, Python, Project Management"
-                    value={newSkill}
-                    onChange={(e) => setNewSkill(e.target.value)}
-                    onKeyPress={handleSkillKeyPress}
-                    className="pl-14 border-input focus:border-primary h-12"
-                  />
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    onClick={handleAddSkill}
-                    className="btn-gradient-primary px-6 h-12"
+              {/* Clean Dropdown UI - No hover effects */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2 text-foreground">
+                  Browse Standard Skills
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full flex items-center justify-between p-3 pl-14 text-left rounded-lg border border-input bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <Plus className="h-4 w-4" />
-                    Add
-                  </Button>
-                </motion.div>
+                    <div className="flex items-center gap-3">
+                      <div className="icon-wrapper-blue p-2">
+                        <ChevronDown className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium">
+                        {newSkill || "Select a skill from the list"}
+                      </span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground ${isDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-50 w-full mt-2 bg-card border border-input rounded-lg shadow-lg max-h-96 overflow-y-auto"
+                    >
+                      {/* Search Bar */}
+                      <div className="sticky top-0 bg-card border-b border-input p-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type="text"
+                            placeholder="Search skills..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 border-0 bg-background focus-visible:ring-0 focus-visible:ring-offset-0"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Skills List */}
+                      <div className="p-2">
+                        {Object.entries(skillsByCategory).map(([category, skills]) => (
+                          <div key={category} className="mb-4 last:mb-0">
+                            <div className="px-3 py-2 mb-2">
+                              <Badge 
+                                variant="outline" 
+                                className="badge-blue bg-primary/10 text-primary border-primary/20"
+                              >
+                                {category}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1">
+                              {skills.map((skill) => {
+                                const isSelected = newSkill === skill.name;
+                                const isAlreadyAdded = fields.some(
+                                  (field: any) => field.name.toLowerCase() === skill.name.toLowerCase()
+                                );
+                                
+                                return (
+                                  <button
+                                    key={skill.name}
+                                    type="button"
+                                    onClick={() => handleSelectStandardSkill(skill.name)}
+                                    disabled={isAlreadyAdded}
+                                    className={`w-full flex items-center justify-between p-3 rounded-md text-sm ${
+                                      isSelected
+                                        ? 'bg-primary/10 text-primary border border-primary/20'
+                                        : isAlreadyAdded
+                                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                        : 'bg-transparent text-card-foreground border border-transparent'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`icon-wrapper-blue p-1.5 ${isSelected ? 'bg-primary/20' : ''}`}>
+                                        <Code className="h-3.5 w-3.5 text-primary" />
+                                      </div>
+                                      <span className="font-medium">{skill.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      {isAlreadyAdded && (
+                                        <Badge variant="outline" className="badge-green border-success/20 bg-success/10 text-success">
+                                          Added
+                                        </Badge>
+                                      )}
+                                      {isSelected && <Check className="h-4 w-4 text-primary" />}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="sticky bottom-0 bg-card border-t border-input p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            {filteredSkills.length} skills found
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="text-xs font-medium text-primary"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                  <Lightbulb className="h-3 w-3 text-warning" />
+                  Select a skill or type below to add a custom one
+                </p>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground font-medium">
-                    Proficiency Level
-                  </span>
-                  <span className="text-sm font-medium">
-                    {newProficiency}% - {getProficiencyText(newProficiency)}
-                  </span>
+              {/* Skill Input and Proficiency */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">
+                    Skill Name
+                  </label>
+                  <div className="relative">
+                    <div className="icon-wrapper-blue absolute left-3 top-1/2 transform -translate-y-1/2 p-2">
+                      <Hash className="h-4 w-4 text-primary" />
+                    </div>
+                    <Input
+                      placeholder="Type your custom skill here..."
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={handleSkillKeyPress}
+                      className="pl-14 border-input focus:border-primary h-12 text-base bg-background"
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-muted-foreground">0%</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={newProficiency}
-                    onChange={(e) => setNewProficiency(Number(e.target.value))}
-                    className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer smooth-slider"
-                    style={{
-                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${newProficiency}%, #e5e7eb ${newProficiency}%, #e5e7eb 100%)`,
-                    }}
-                  />
-                  <span className="text-xs text-muted-foreground">100%</span>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
-                <Lightbulb className="h-4 w-4 text-warning" />
-                <span>Add skills to improve your career recommendations</span>
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground">
+                        Proficiency Level
+                      </label>
+                      <p className="text-sm text-muted-foreground">
+                        Set your skill level
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-lg font-bold text-primary">
+                        {newProficiency}%
+                      </span>
+                      <p className="text-sm font-medium">
+                        {getProficiencyText(newProficiency)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-medium text-muted-foreground min-w-8">
+                        0%
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={newProficiency}
+                        onChange={(e) => setNewProficiency(Number(e.target.value))}
+                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth"
+                        style={{
+                          background: `linear-gradient(to right, 
+                            var(--color-primary) 0%, 
+                            var(--color-primary) ${newProficiency}%, 
+                            var(--color-muted) ${newProficiency}%, 
+                            var(--color-muted) 100%)`,
+                        }}
+                      />
+                      <span className="text-xs font-medium text-muted-foreground min-w-8">
+                        100%
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between px-2">
+                      {["Beginner", "Intermediate", "Advanced", "Expert"].map((level, index) => (
+                        <div key={level} className="flex flex-col items-center">
+                          <div className={`h-2 w-2 rounded-full mb-1 ${
+                            newProficiency > index * 25 ? 'bg-primary' : 'bg-muted'
+                          }`} />
+                          <span className="text-xs text-muted-foreground">{level}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-input">
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4 text-warning" />
+                    <span>Add relevant skills to improve job matches</span>
+                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      onClick={handleAddSkill}
+                      disabled={!newSkill.trim()}
+                      className="btn-gradient-primary px-8 h-12 text-primary-foreground"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Skill
+                    </Button>
+                  </motion.div>
+                </div>
               </div>
             </motion.div>
           )}
 
+          {/* Rest of the component without hover effects */}
           <div className="space-y-4">
             {fields.length === 0 ? (
               <motion.div
@@ -283,7 +561,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                       <Code className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg text-foreground">
                         {isEditing ? "Edit Your Skills" : "Your Skills"}
                       </h3>
                       <p className="text-sm text-muted-foreground">
@@ -328,14 +606,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     {fields.map((field: any, index: number) => {
                       const proficiency = field.proficiency || 0;
                       const proficiencyColor = getProficiencyColor(proficiency);
-                      const colorValue =
-                        proficiencyColor === "destructive"
-                          ? "#ef4444"
-                          : proficiencyColor === "warning"
-                          ? "#f59e0b"
-                          : proficiencyColor === "success"
-                          ? "#10b981"
-                          : "#3b82f6";
+                      const colorValue = getProficiencyColorValue(proficiency);
 
                       return (
                         <motion.div
@@ -357,11 +628,11 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                             y: -10,
                             transition: { duration: 0.15 },
                           }}
-                          className={`group p-5 rounded-xl border ${
+                          className={`p-5 rounded-xl border ${
                             isEditing
                               ? "border-primary/30 bg-primary/5"
                               : "border-input bg-card"
-                          } hover:bg-muted/20 transition-all duration-200`}
+                          }`}
                         >
                           <div className="flex justify-between items-start mb-4">
                             <div className="flex items-start gap-3 flex-1">
@@ -393,7 +664,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                     </div>
                                     <div className="mt-1">
                                       <Badge
-                                        className={`badge-${proficiencyColor}`}
+                                        className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
                                       >
                                         {proficiency}% -{" "}
                                         {getProficiencyText(proficiency)}
@@ -402,12 +673,12 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                   </div>
                                 ) : (
                                   <>
-                                    <h4 className="text-base font-semibold">
+                                    <h4 className="text-base font-semibold text-card-foreground">
                                       {field.name}
                                     </h4>
                                     <div className="mt-2">
                                       <Badge
-                                        className={`badge-${proficiencyColor}`}
+                                        className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
                                       >
                                         {proficiency}% -{" "}
                                         {getProficiencyText(proficiency)}
@@ -422,7 +693,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                               <motion.button
                                 type="button"
                                 onClick={() => handleRemoveSkill(index)}
-                                className="icon-wrapper-blue hover:bg-destructive/20 hover:text-destructive transition-colors ml-2"
+                                className="icon-wrapper-blue"
                                 whileHover={{ scale: 1.2, rotate: 90 }}
                                 whileTap={{ scale: 0.9 }}
                               >
@@ -463,13 +734,13 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                             Number(e.target.value)
                                           );
                                         }}
-                                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer smooth-slider"
+                                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth"
                                         style={{
                                           background: `linear-gradient(to right, ${colorValue} 0%, ${colorValue} ${
                                             proficiencyField.value || 0
-                                          }%, #e5e7eb ${
+                                          }%, var(--color-muted) ${
                                             proficiencyField.value || 0
-                                          }%, #e5e7eb 100%)`,
+                                          }%, var(--color-muted) 100%)`,
                                         }}
                                       />
                                     )}
@@ -495,7 +766,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                               <div className="space-y-2">
                                 <div className="w-full bg-muted rounded-full h-2">
                                   <div
-                                    className={`progress-bar-primary rounded-full h-2 ${
+                                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
                                       proficiencyColor === "destructive"
                                         ? "bg-destructive"
                                         : proficiencyColor === "warning"
@@ -537,19 +808,21 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   <Sparkles className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-lg">Skill Summary</h4>
+                  <h4 className="font-semibold text-lg text-foreground">
+                    Skill Summary
+                  </h4>
                   <p className="text-sm text-muted-foreground">
                     Overview of your professional competencies
                   </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 rounded-lg bg-card border">
-                  <p className="text-2xl font-bold">{fields.length}</p>
+                <div className="text-center p-4 rounded-lg bg-card border border-input">
+                  <p className="text-2xl font-bold text-foreground">{fields.length}</p>
                   <p className="text-xs text-muted-foreground">Total Skills</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-card border">
-                  <p className="text-2xl font-bold">
+                <div className="text-center p-4 rounded-lg bg-card border border-input">
+                  <p className="text-2xl font-bold text-foreground">
                     {Math.round(
                       fields.reduce(
                         (acc: any, field: any) =>
@@ -563,8 +836,8 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     Avg Proficiency
                   </p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-card border">
-                  <p className="text-2xl font-bold">
+                <div className="text-center p-4 rounded-lg bg-card border border-input">
+                  <p className="text-2xl font-bold text-foreground">
                     {
                       fields.filter(
                         (field: any) => (field.proficiency || 0) >= 75
@@ -573,8 +846,8 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   </p>
                   <p className="text-xs text-muted-foreground">Expert Skills</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-card border">
-                  <p className="text-2xl font-bold">
+                <div className="text-center p-4 rounded-lg bg-card border border-input">
+                  <p className="text-2xl font-bold text-foreground">
                     {
                       fields.filter(
                         (field: any) => (field.proficiency || 0) <= 50
@@ -601,7 +874,9 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   <Lightbulb className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-medium text-sm">Editing Mode Active</h4>
+                  <h4 className="font-medium text-sm text-foreground">
+                    Editing Mode Active
+                  </h4>
                   <p className="text-xs text-muted-foreground">
                     You can now edit skill names, adjust proficiency levels, add
                     new skills, or remove existing ones. Click "Save Changes"

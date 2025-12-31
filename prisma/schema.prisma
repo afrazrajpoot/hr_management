@@ -9,10 +9,10 @@ datasource db {
 
 model User {
   id            String      @id @default(uuid())
-  firstName     String
-  lastName      String
+  firstName     String?
+  lastName      String?
   phoneNumber   String?
-  email         String      @unique
+  email         String?     @unique
   password      String?
   role          String?
   paid          Boolean     @default(false)
@@ -130,7 +130,6 @@ model Employee {
   hireDate      DateTime?
 
  manager        String?
-  annualSalary  String?
 
  
   bio           String?
@@ -139,7 +138,6 @@ model Employee {
   education     Json?
   experience    Json?
   resume        String?
-  employer      String?
   user          User?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
