@@ -13,6 +13,7 @@ import {
   Crown,
   AlertCircle,
   Lock,
+  Trash2,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { useSession } from "next-auth/react";
@@ -30,6 +31,7 @@ export default function ChatPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isClearing, setIsClearing] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +75,7 @@ export default function ChatPage() {
         }
 
         const response = await fetch(
-          `https://api.geniusfactor.ai/chat/${session.user.id}`,
+          `${process.env.NEXT_PUBLIC_PYTHON_URL}/chat/${session.user.id}`,
           {
             method: "GET",
             headers,
@@ -270,6 +272,41 @@ export default function ChatPage() {
     }
   };
 
+  const clearChatHistory = async () => {
+    if (!session?.user?.id || isClearing) return;
+
+    setIsClearing(true);
+
+    try {
+      const response = await fetch(`/api/chat/clear`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: session.user.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Clear messages in state
+      setMessages([]);
+    } catch (error) {
+      console.error("Error clearing chat history:", error);
+      // Optionally show an error message to the user
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Failed to clear chat history. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey && !isLoading) {
       e.preventDefault();
@@ -306,16 +343,34 @@ export default function ChatPage() {
                   </div>
                 </div>
               </div>
-              {session?.user?.paid == false && (
-                <Link
-                  href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
-                >
-                  <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 text-sm h-9">
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    Upgrade to Pro
+              <div className="flex items-center gap-2">
+                {hasUserMessages && session?.user?.paid == true && (
+                  <Button
+                    onClick={clearChatHistory}
+                    disabled={isClearing}
+                    variant="destructive"
+                    size="sm"
+                    className="h-8 px-3 text-xs"
+                  >
+                    {isClearing ? (
+                      <div className="h-3 w-3 border-2 border-destructive border-t-transparent rounded-full animate-spin mr-2" />
+                    ) : (
+                      <Trash2 className="h-3 w-3 mr-1" />
+                    )}
+                    Clear Chat
                   </Button>
-                </Link>
-              )}
+                )}
+                {session?.user?.paid == false && (
+                  <Link
+                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                  >
+                    <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 text-sm h-9">
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      Upgrade to Pro
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -339,7 +394,7 @@ export default function ChatPage() {
                       How can I help you today?
                     </h2>
                     <p className="text-muted-foreground text-base">
-                      Ask me anything about policies, procedures, and HR guidelines
+                      Ask me anything about career pathway recommendations
                     </p>
                   </div>
                 </div>

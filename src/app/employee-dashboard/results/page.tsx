@@ -56,6 +56,7 @@ import {
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
 import PDFReport from "@/components/employee/PDFReport";
 import Loader from "@/components/Loader";
@@ -447,6 +448,7 @@ const MarketingBlurBoxes = ({ isPaid, onUpgradeClick }: {
 export default function Results() {
   const { data: apiResponse, isLoading, error } = useGetAssessmentResultsQuery<any>();
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
 
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessment, setSelectedAssessment] = useState<Assessment | null>(null);
@@ -458,7 +460,7 @@ export default function Results() {
   useEffect(() => {
     if (apiResponse) {
       console.log("API Data received:", apiResponse);
-      
+
       // Check paid status
       if (apiResponse.paid !== undefined) {
         setIsPaid(apiResponse.paid);
@@ -477,7 +479,7 @@ export default function Results() {
         );
 
         setAssessments(sortedAssessments);
-        setSelectedAssessment(sortedAssessments[0]);
+        // Don't set selectedAssessment here - let the next useEffect handle it
       } else {
         setAssessments([]);
         setSelectedAssessment(null);
@@ -488,6 +490,37 @@ export default function Results() {
       setSelectedAssessment(null);
     }
   }, [apiResponse, error]);
+
+  // Handle URL parameter to select specific assessment
+  useEffect(() => {
+    if (assessments.length > 0) {
+      const assessmentId = searchParams.get('id');
+
+      if (assessmentId) {
+        // Find the assessment with the matching ID
+        const targetAssessment = assessments.find(
+          (assessment) => assessment.id.toString() === assessmentId
+        );
+
+        if (targetAssessment) {
+          setSelectedAssessment(targetAssessment);
+          // Scroll to top when assessment is selected via URL
+          setTimeout(() => {
+            const resultsHeader = document.getElementById("results-header");
+            if (resultsHeader) {
+              resultsHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }, 100);
+        } else {
+          // If assessment not found, select the most recent one
+          setSelectedAssessment(assessments[0]);
+        }
+      } else {
+        // If no ID parameter, select the most recent assessment
+        setSelectedAssessment(assessments[0]);
+      }
+    }
+  }, [assessments, searchParams]);
 
   const handleAssessmentClick = (assessment: Assessment) => {
     setSelectedAssessment(assessment);

@@ -12,182 +12,334 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import PDFReport from "../employee/PDFReport";
+import {
+  User,
+  Briefcase,
+  Building,
+  CheckCircle,
+  Clock,
+  Target,
+  BarChart3,
+  TrendingUp,
+  Zap,
+  Lightbulb,
+  Users,
+  BookOpen,
+  Brain,
+  Calendar,
+  Shield,
+  Award,
+  X,
+  Sparkles,
+  Heart,
+  Star,
+  MapPin,
+  ArrowRight,
+  Bookmark,
+  Flag,
+  Coffee,
+  TargetIcon,
+  Cpu,
+  PieChart,
+  LineChart,
+  BrainCircuit,
+  Rocket,
+  Gem,
+  Crown,
+  Trophy,
+  Medal,
+  TrendingUpIcon
+} from "lucide-react";
 
 const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
   if (!assessment) return null;
 
+  // Extract relevant paths for clarity - adapted to the passed structure
+  const report = assessment.report || {};
+  const geniusFactorProfile = assessment.geniusFactorProfile || report.geniusFactorProfileJson || {};
+  const currentRoleAlignment = assessment.currentRoleAlignment || report.currentRoleAlignmentAnalysisJson || {};
+  const careerOpportunities = assessment.careerOpportunities || report.internalCareerOpportunitiesJson || {};
+  const retentionStrategies = assessment.retentionStrategies || report.retentionAndMobilityStrategiesJson || {};
+  const developmentPlan = assessment.developmentPlan || report.developmentActionPlanJson || {};
+  const personalizedResources = assessment.personalizedResources || report.personalizedResourcesJson || {};
+  const dataSources = assessment.dataSources || report.dataSourcesAndMethodologyJson || {};
+
+  // Format full name from passed structure
+  const fullName = assessment.employee || '';
+  // Format position and department (handling arrays or strings)
+  const position = Array.isArray(assessment.position) ? assessment.position[assessment.position.length - 1] : assessment.position;
+  const department = Array.isArray(assessment.department) ? assessment.department[assessment.department.length - 1] : assessment.department;
+  // Avatar fallback
+  const avatarInitial = assessment.avatar || assessment.firstName?.charAt(0)?.toUpperCase() || '?';
+
+  // Status and completion based on passed data
+  const status = assessment.status || "Completed";
+  const completionRate = assessment.completionRate || 100;
+  const geniusFactorScore = assessment.genius_factor_score || assessment.geniusScore || report.geniusFactorScore || 0;
+  const dateCompleted = assessment.dateCompleted ? new Date(assessment.dateCompleted).toLocaleDateString() : new Date(report.createdAt || Date.now()).toLocaleDateString();
+
+  // Format learning resources as strings
+  const formattedLearningResources = personalizedResources.learning_resources?.map((res: any) => {
+    if (res.type === "Book") {
+      return `${res.type}: "${res.title}" by ${res.author}`;
+    }
+    return `${res.type}: "${res.title}" on ${res.provider}`;
+  }) || [];
+
+  // Format networking strategy as flattened array of strings
+  const formattedNetworkingStrategy = [
+    ...(developmentPlan.networking_strategy?.["Join professional groups"] || []),
+    ...(developmentPlan.networking_strategy?.["Attend industry conferences"] || []),
+    ...(developmentPlan.networking_strategy?.["Engage on professional platforms"] || [])
+  ].map((item: string) => `• ${item}`);
+
+  // For career pathways, adapt from role_suggestions (group by timeline or flatten)
+  // Since no object structure, we'll flatten role suggestions for now
+  const roleSuggestions = careerOpportunities.role_suggestions?.map((role: any) => 
+    `${role.role_title} (${role.department} - ${role.timeline}) - Match: ${role.match_score}%`
+  ) || [];
+
+  // For required skill development, flatten from role_suggestions
+  const requiredSkills = careerOpportunities.role_suggestions?.reduce((acc: string[], role: any) => {
+    return [...acc, ...role.required_skills];
+  }, []) || [];
+
+  // Retention risk level derivation (simple based on alignment_score for now)
+  const retentionRiskLevel = currentRoleAlignment.alignment_score < 70 ? "High" : currentRoleAlignment.alignment_score < 85 ? "Medium" : "Low";
+
+  // Current role assessment description (use executiveSummary or derive)
+  const roleAssessmentDescription = assessment.executiveSummary || report.executiveSummary || "Analysis of how your current role aligns with your genius factors.";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto rounded-lg p-0 card scrollbar-hide card">
+      <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto rounded-xl p-0 border-2 border-border bg-card shadow-2xl scrollbar-hide">
         {/* Header Section */}
-        <DialogHeader className="card p-8 rounded-t-lg">
-          <DialogTitle className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-lg flex items-center justify-center shadow-lg border">
-              <span className="text-3xl font-bold">{assessment.avatar}</span>
-            </div>
-            <div className="flex-1">
-              <div className="text-4xl font-bold mb-2">
-                <p>{assessment.employee}</p>
+        <DialogHeader className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-8 rounded-t-xl border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg border-2 border-primary/20">
+                  <User className="w-10 h-10 text-primary-foreground" />
+                  <div className="absolute -top-1 -right-1 bg-primary p-1.5 rounded-full border-2 border-card">
+                    <Trophy className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                </div>
               </div>
-              <div className="text-lg font-medium flex items-center gap-2">
-                {typeof assessment.position === "string" ? assessment.position : assessment?.position[assessment.position.length - 1]}
-                <span> {" - "} </span>
-                {typeof assessment.department === "string" ? assessment.department : Array.isArray(assessment.department)
-                  ? assessment.department[assessment.department.length - 1] : "N/A"
-                }
-                {/* <span>{assessment.position}</span>
-                <span className="w-1 h-1 rounded-full"></span>
-                <span>{assessment.department}</span> */}
+              <div className="flex-1">
+                <DialogTitle className="text-3xl font-bold text-card-foreground mb-2 flex items-center gap-3">
+                  <span>{fullName}</span>
+                  <span className="text-sm px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <Sparkles className="w-3 h-3 inline mr-1" />
+                    Genius Profile
+                  </span>
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground text-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4" />
+                      <span>{position}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Building className="w-4 h-4" />
+                      <span>{department}</span>
+                    </div>
+                  </div>
+                </DialogDescription>
               </div>
             </div>
-          </DialogTitle>
-          <DialogDescription className="mt-4 text-lg">
-            Comprehensive assessment insights and personalized career roadmap
-          </DialogDescription>
-          <div className="w-full max-w-[10vw]">
-            <PDFReport assessment={assessment.report} employee={assessment.employee} genius_factor_score={assessment.genius_factor_score} />
           </div>
         </DialogHeader>
 
         {/* Content Section */}
         <div className="p-8 space-y-8">
           {/* Assessment Summary */}
-          <Card className="card shadow-lg rounded-lg overflow-hidden">
-            <CardHeader className="card border-b p-6">
-              <CardTitle className="text-2xl font-bold">
-                <p> Assessment Overview</p>
-              </CardTitle>
+          <Card className="card-primary card-hover border border-border">
+            <CardHeader className="border-b border-border p-6">
+              <div className="flex items-center gap-3">
+                <div className="icon-wrapper-blue">
+                  <Target className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold text-card-foreground">
+                    Assessment Overview
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Complete assessment insights and progress tracking
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="p-4 rounded-lg border">
-                  <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                    Status
+                <div className="p-5 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      {status === "Completed" ? (
+                        <CheckCircle className="w-4 h-4 text-success" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-warning animate-pulse" />
+                      )}
+                    </div>
+                    <div className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">
+                      Status
+                    </div>
                   </div>
-                  <div className="text-lg font-bold">{assessment.status}</div>
+                  <div className="text-lg font-bold text-card-foreground">{status}</div>
                 </div>
-                <div className="p-4 rounded-lg border">
-                  <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                    Completion
+
+                <div className="p-5 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <BarChart3 className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">
+                      Completion
+                    </div>
                   </div>
-                  <div className="text-lg font-bold">
-                    {assessment.completionRate}%
+                  <div className="text-lg font-bold text-card-foreground">
+                    {completionRate}%
                   </div>
                 </div>
-                {assessment.status === "Completed" && (
+
+                {status === "Completed" && (
                   <>
-                    <div className="p-4 rounded-lg border-2">
-                      <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                        Genius Score
+                    <div className="p-5 rounded-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/15 transition-all">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-primary/20">
+                          <Brain className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="text-xs uppercase tracking-wide font-semibold text-primary">
+                          Genius Score
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold">
-                        {assessment?.genius_factor_score}
-                        /100
+                      <div className="text-2xl font-bold gradient-text-primary">
+                        {geniusFactorScore}/100
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg border">
-                      <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                        Completed
+
+                    <div className="p-5 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Calendar className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">
+                          Completed
+                        </div>
                       </div>
-                      <div className="text-lg font-bold">
-                        {assessment.dateCompleted}
+                      <div className="text-lg font-bold text-card-foreground">
+                        {dateCompleted}
                       </div>
                     </div>
                   </>
                 )}
               </div>
-              <div className="p-6 rounded-lg border">
-                <div className="text-sm uppercase tracking-wide font-semibold mb-3">
-                  Executive Summary
+              
+              <div className="p-6 rounded-lg border border-border bg-secondary/30">
+                <div className="flex items-center gap-3 mb-4">
+                  <Lightbulb className="w-5 h-5 text-warning" />
+                  <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                    Executive Summary
+                  </div>
                 </div>
-                <p>{assessment.executiveSummary}</p>
+                <p className="text-card-foreground leading-relaxed">
+                  {assessment.executiveSummary || report.executiveSummary}
+                </p>
               </div>
             </CardContent>
           </Card>
 
           {/* Genius Factor Profile */}
-          {assessment.status === "Completed" && (
-            <Card className="shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="p-6">
-                <CardTitle className="text-2xl font-bold">
-                  <p> Genius Factor Profile</p>
-                </CardTitle>
-                <CardDescription>
-                  <p> Your unique cognitive strengths and natural talents</p>
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="p-6 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-purple">
+                    <BrainCircuit className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Genius Factor Profile
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Your unique cognitive strengths and natural talents
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <p className="text-sm uppercase tracking-wide font-semibold mb-3">
-                        Primary Genius Factor
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Crown className="w-5 h-5 text-warning" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Primary Genius Factor
+                        </div>
+                      </div>
+                      <p className="text-xl font-bold text-card-foreground mb-4">
+                        {geniusFactorProfile.primary_genius_factor}
                       </p>
-                      <p className="text-xl font-bold mb-4">
-                        {assessment.geniusFactorProfile.primary_genius_factor}
-                      </p>
-                      <p className="leading-relaxed">
-                        {assessment.geniusFactorProfile.description}
+                      <p className="text-muted-foreground leading-relaxed">
+                        {geniusFactorProfile.description}
                       </p>
                     </div>
 
-                    {assessment.geniusFactorProfile.secondary_genius_factor && (
-                      <div className="p-6 rounded-lg border">
-                        <p className="text-sm uppercase tracking-wide font-semibold mb-3">
-                          Secondary Genius Factor
-                        </p>
-                        <div className="text-lg font-bold mb-3">
-                          {
-                            assessment.geniusFactorProfile
-                              .secondary_genius_factor === 'None Identified' ? "The primary genius factor is more dominant, as response did not indicate a secondary genius factor." : assessment.geniusFactorProfile.secondary_genius_factor
-                          }
+                    {geniusFactorProfile.secondary_genius_factor && geniusFactorProfile.secondary_genius_factor !== 'None Identified' && (
+                      <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Gem className="w-5 h-5 text-muted-foreground" />
+                          <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                            Secondary Genius Factor
+                          </div>
                         </div>
-                        {assessment.geniusFactorProfile
-                          .secondary_description && (
-                            <p className="leading-relaxed">
-                              {
-                                assessment.geniusFactorProfile
-                                  .secondary_description
-                              }
-                            </p>
-                          )}
+                        <div className="text-lg font-bold text-card-foreground mb-3">
+                          {geniusFactorProfile.secondary_genius_factor}
+                        </div>
+                        {geniusFactorProfile.secondary_description && (
+                          <p className="text-muted-foreground leading-relaxed">
+                            {geniusFactorProfile.secondary_description}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
 
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <p className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Key Strengths
-                      </p>
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Zap className="w-5 h-5 text-warning" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Key Strengths
+                        </div>
+                      </div>
                       <div className="space-y-3">
-                        {assessment.geniusFactorProfile.key_strengths.map(
+                        {geniusFactorProfile.key_strengths?.map(
                           (strength: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0"></div>
-                              <span>
-                                <p> {strength}</p>
-                              </span>
+                            <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                              <div className="w-2 h-2 rounded-full bg-primary"></div>
+                              <span className="text-card-foreground">{strength}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Energy Sources
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Coffee className="w-5 h-5 text-success" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Energy Sources
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.geniusFactorProfile.energy_sources.map(
+                        {geniusFactorProfile.energy_sources?.map(
                           (source: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0"></div>
-                              <span>{source}</span>
+                            <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
+                              <div className="w-2 h-2 rounded-full bg-primary"></div>
+                              <span className="text-card-foreground">{source}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
                   </div>
@@ -197,93 +349,113 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           )}
 
           {/* Current Role Alignment */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Current Role Alignment
-                </CardTitle>
-                <CardDescription>
-                  How well your current role matches your genius factor
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-green">
+                    <TargetIcon className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Current Role Alignment
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      How well your current role matches your genius factor
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-3">
-                        Assessment Overview
+                    <div className="p-6 rounded-lg border border-border bg-secondary/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <PieChart className="w-5 h-5 text-primary" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Assessment Overview
+                        </div>
                       </div>
-                      <p className="leading-relaxed">
-                        {assessment.currentRoleAlignment.assessment}
+                      <p className="text-card-foreground leading-relaxed">
+                        {roleAssessmentDescription}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="p-6 rounded-lg border">
-                        <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                          Strengths Utilized
+                      <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                        <div className="flex items-center gap-3 mb-4">
+                          <TrendingUpIcon className="w-5 h-5 text-success" />
+                          <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                            Strengths Utilized
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          {assessment.currentRoleAlignment.strengths_utilized.map(
+                          {currentRoleAlignment.strengths_utilized?.map(
                             (strength: string, index: number) => (
-                              <div
-                                key={index}
-                                className="flex items-start gap-3"
-                              >
-                                <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                                <span className="text-sm">{strength}</span>
+                              <div key={index} className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
+                                <span className="text-sm text-card-foreground">{strength}</span>
                               </div>
                             )
-                          )}
+                          ) || []}
                         </div>
                       </div>
 
-                      <div className="p-6 rounded-lg border">
-                        <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                          Underutilized Talents
+                      <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Lightbulb className="w-5 h-5 text-warning" />
+                          <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                            Underutilized Talents
+                          </div>
                         </div>
                         <div className="space-y-2">
-                          {assessment.currentRoleAlignment.underutilized_talents.map(
+                          {currentRoleAlignment.underutilized_talents?.map(
                             (talent: string, index: number) => (
-                              <div
-                                key={index}
-                                className="flex items-start gap-3"
-                              >
-                                <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                                <span className="text-sm">{talent}</span>
+                              <div key={index} className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-warning"></div>
+                                <span className="text-sm text-card-foreground">{talent}</span>
                               </div>
                             )
-                          )}
+                          ) || []}
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border-2 text-center">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-2">
-                        Alignment Score
+                    <div className="p-6 rounded-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 text-center">
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <LineChart className="w-5 h-5 text-primary" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-primary">
+                          Alignment Score
+                        </div>
                       </div>
-                      <div className="text-4xl font-bold mb-2">
-                        {assessment.currentRoleAlignment.alignment_score}%
+                      <div className="text-4xl font-bold gradient-text-primary mb-4">
+                        {currentRoleAlignment.alignment_score || 0}%
                       </div>
-                      <div className="w-full rounded-full h-3 bg-opacity-30">
+                      <div className="w-full rounded-full h-3 bg-muted">
                         <div
-                          className="h-3 rounded-full transition-all duration-300"
+                          className="h-3 rounded-full progress-bar-primary transition-all duration-300"
                           style={{
-                            width: `${assessment.currentRoleAlignment.alignment_score}%`,
+                            width: `${currentRoleAlignment.alignment_score || 0}%`,
                           }}
                         ></div>
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-3">
-                        Retention Risk Level
+                    <div className="p-6 rounded-lg border border-border bg-card">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Shield className="w-5 h-5 text-destructive" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Retention Risk Level
+                        </div>
                       </div>
-                      <div className="text-lg font-bold">
-                        {assessment.currentRoleAlignment.retention_risk_level}
+                      <div className={`text-lg font-bold ${
+                        retentionRiskLevel === "High" ? "text-destructive" :
+                        retentionRiskLevel === "Medium" ? "text-warning" :
+                        "text-success"
+                      }`}>
+                        {retentionRiskLevel}
                       </div>
                     </div>
                   </div>
@@ -293,130 +465,79 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           )}
 
           {/* Career Opportunities */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Career Opportunities
-                </CardTitle>
-                <CardDescription>
-                  Strategic pathways for professional growth
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-blue">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Career Opportunities
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Strategic pathways for professional growth
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Career Pathways
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Flag className="w-5 h-5 text-primary" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Career Pathways
+                        </div>
                       </div>
                       <div className="space-y-4">
-                        {Object.entries(
-                          assessment.careerOpportunities.career_pathways
-                        ).map(([track, path]: any, index) => (
-                          <div key={index}>
-                            <div className="text-xs font-medium mb-1">
-                              {track.toUpperCase()}
-                            </div>
-                            <p>{path}</p>
+                        {roleSuggestions.map((path: string, index: number) => (
+                          <div key={index} className="p-3 rounded-lg bg-secondary/30">
+                            <p className="text-sm text-card-foreground">{path}</p>
                           </div>
                         ))}
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg border">
-                        <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                          Primary Industry
-                        </div>
-                        <div className="font-bold">
-                          {assessment.careerOpportunities.primary_industry}
-                        </div>
-                      </div>
-                      <div className="p-4 rounded-lg border">
-                        <div className="text-xs uppercase tracking-wide font-semibold mb-2">
-                          Secondary Industry
-                        </div>
-                        <div className="font-bold">
-                          {assessment.careerOpportunities.secondary_industry}
-                        </div>
-                      </div>
-                    </div>
                   </div>
-
-                  {/* <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Transition Timeline
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-4">
-                          <div className="text-xs font-bold px-3 py-1 rounded-full min-w-[60px] text-center">
-                            6M
-                          </div>
-                          <p className="text-sm">
-                            {
-                              assessment.careerOpportunities
-                                .transition_timeline["6_months"]
-                            }
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-4">
-                          <div className="text-xs font-bold px-3 py-1 rounded-full min-w-[60px] text-center">
-                            1Y
-                          </div>
-                          <p className="text-sm">
-                            {
-                              assessment.careerOpportunities
-                                .transition_timeline["1_year"]
-                            }
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-4">
-                          <div className="text-xs font-bold px-3 py-1 rounded-full min-w-[60px] text-center">
-                            2Y
-                          </div>
-                          <p className="text-sm">
-                            {
-                              assessment.careerOpportunities
-                                .transition_timeline["2_years"]
-                            }
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div> */}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Recommended Departments
+                  <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Building className="w-5 h-5 text-primary" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Recommended Departments
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {assessment.careerOpportunities.recommended_departments.map(
-                        (dept: any, index: any) => (
+                      {careerOpportunities.recommended_departments?.map(
+                        (dept: string, index: number) => (
                           <span
                             key={index}
-                            className="px-3 py-1 rounded-full text-sm font-medium border"
+                            className="px-3 py-1 rounded-full text-sm font-medium border border-border bg-secondary/30 text-card-foreground hover:bg-secondary/50 transition-colors"
                           >
                             {dept}
                           </span>
                         )
-                      )}
+                      ) || []}
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Role Suggestions
+                  <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Briefcase className="w-5 h-5 text-primary" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Role Suggestions
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      {assessment.careerOpportunities.specific_role_suggestions.map(
-                        (role: any, index: any) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                            <span className="text-sm">{role}</span>
+                      {roleSuggestions.map(
+                        (role: string, index: number) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                            <span className="text-sm text-card-foreground">{role}</span>
                           </div>
                         )
                       )}
@@ -424,15 +545,18 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                   </div>
                 </div>
 
-                <div className="p-6 rounded-lg border">
-                  <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                    Required Skill Development
+                <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Award className="w-5 h-5 text-warning" />
+                    <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                      Required Skill Development
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {assessment.careerOpportunities.required_skill_development.map(
-                      (skill: any, index: any) => (
-                        <div key={index} className="p-3 rounded-lg border">
-                          <span className="text-sm font-medium">{skill}</span>
+                    {[...new Set(requiredSkills)].map( // Dedupe skills
+                      (skill: string, index: number) => (
+                        <div key={index} className="p-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                          <span className="text-sm font-medium text-card-foreground">{skill}</span>
                         </div>
                       )
                     )}
@@ -441,64 +565,81 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
               </CardContent>
             </Card>
           )}
+
           {/* Retention Strategies */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Retention & Mobility Strategies
-                </CardTitle>
-                <CardDescription>
-                  Strategies to maximize engagement and growth
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-amber">
+                    <Heart className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Retention & Mobility Strategies
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Strategies to maximize engagement and growth
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Development Support
+                  <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Users className="w-5 h-5 text-success" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Development Support
+                      </div>
                     </div>
                     <div className="space-y-3">
-                      {assessment.retentionStrategies.development_support.map(
+                      {retentionStrategies.development_support_needed?.map(
                         (support: string, index: number) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                            <span className="text-sm">{support}</span>
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
+                            <span className="text-sm text-card-foreground">{support}</span>
                           </div>
                         )
-                      )}
+                      ) || []}
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Retention Strategies
+                  <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="w-5 h-5 text-primary" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Retention Strategies
+                      </div>
                     </div>
                     <div className="space-y-3">
-                      {assessment.retentionStrategies.retention_strategies.map(
+                      {retentionStrategies.retention_strategies?.map(
                         (strategy: string, index: number) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                            <span className="text-sm">{strategy}</span>
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                            <span className="text-sm text-card-foreground">{strategy}</span>
                           </div>
                         )
-                      )}
+                      ) || []}
                     </div>
                   </div>
 
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Mobility Recommendations
+                  <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Rocket className="w-5 h-5 text-primary" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Mobility Recommendations
+                      </div>
                     </div>
                     <div className="space-y-3">
-                      {assessment.retentionStrategies.internal_mobility_recommendations.map(
+                      {retentionStrategies.mobility_recommendations?.map(
                         (recommendation: string, index: number) => (
-                          <div key={index} className="flex items-start gap-3">
-                            <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                            <span className="text-sm">{recommendation}</span>
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                            <span className="text-sm text-card-foreground">{recommendation}</span>
                           </div>
                         )
-                      )}
+                      ) || []}
                     </div>
                   </div>
                 </div>
@@ -507,94 +648,104 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           )}
 
           {/* Development Action Plan */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Development Action Plan
-                </CardTitle>
-                <CardDescription>
-                  Your personalized roadmap to success
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-green">
+                    <Bookmark className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Development Action Plan
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Your personalized roadmap to success
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-opacity-80">
+                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-blue-500">
                           30
                         </div>
-                        <div className="text-sm uppercase tracking-wide font-semibold">
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
                           Day Goals
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.developmentPlan.thirty_day_goals.map(
+                        {developmentPlan.thirty_day_goals?.map(
                           (goal: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                              <span className="text-sm">{goal}</span>
+                            <div key={index} className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                              <span className="text-sm text-card-foreground">{goal}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-opacity-80">
+                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-green-500">
                           90
                         </div>
-                        <div className="text-sm uppercase tracking-wide font-semibold">
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
                           Day Goals
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.developmentPlan.ninety_day_goals.map(
+                        {developmentPlan.ninety_day_goals?.map(
                           (goal: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                              <span className="text-sm">{goal}</span>
+                            <div key={index} className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                              <span className="text-sm text-card-foreground">{goal}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-opacity-80">
+                        <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold bg-purple-500">
                           6M
                         </div>
-                        <div className="text-sm uppercase tracking-wide font-semibold">
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
                           Month Goals
                         </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.developmentPlan.six_month_goals.map(
+                        {developmentPlan.six_month_goals?.map(
                           (goal: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                              <span className="text-sm">{goal}</span>
+                            <div key={index} className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                              <span className="text-sm text-card-foreground">{goal}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Networking Strategy
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Users className="w-5 h-5 text-primary" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Networking Strategy
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.developmentPlan.networking_strategy.map(
+                        {formattedNetworkingStrategy.map(
                           (strategy: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"></div>
-                              <span className="text-sm">{strategy}</span>
+                            <div key={index} className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                              <span className="text-sm text-card-foreground">{strategy}</span>
                             </div>
                           )
                         )}
@@ -607,49 +758,58 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           )}
 
           {/* Personalized Resources */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Personalized Resources
-                </CardTitle>
-                <CardDescription>
-                  Tools and practices to support your growth journey
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-purple">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Personalized Resources
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Tools and practices to support your growth journey
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Daily Affirmations
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Sparkles className="w-5 h-5 text-warning" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Daily Affirmations
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.personalizedResources.affirmations.map(
+                        {personalizedResources.affirmations?.map(
                           (affirmation: string, index: number) => (
-                            <div key={index} className="p-3 rounded-lg border">
-                              <span className="text-sm italic">
+                            <div key={index} className="p-4 rounded-lg border border-border bg-secondary/30">
+                              <span className="text-sm italic text-card-foreground">
                                 "{affirmation}"
                               </span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Learning Resources
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Learning Resources
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.personalizedResources.learning_resources.map(
+                        {formattedLearningResources.map(
                           (resource: string, index: number) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-3 p-3 rounded-lg border"
-                            >
-                              <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0"></div>
-                              <span className="text-sm">{resource}</span>
+                            <div key={index} className="p-3 rounded-lg border border-border bg-secondary/30">
+                              <span className="text-sm text-card-foreground">{resource}</span>
                             </div>
                           )
                         )}
@@ -658,41 +818,41 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
                   </div>
 
                   <div className="space-y-6">
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Reflection Questions
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Brain className="w-5 h-5 text-warning" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Reflection Questions
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.personalizedResources.reflection_questions.map(
+                        {personalizedResources.reflection_questions?.map(
                           (question: string, index: number) => (
-                            <div key={index} className="p-4 rounded-lg border">
-                              <span className="text-sm font-medium">
+                            <div key={index} className="p-4 rounded-lg border border-border bg-secondary/30">
+                              <span className="text-sm font-medium text-card-foreground">
                                 {question}
                               </span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
 
-                    <div className="p-6 rounded-lg border">
-                      <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                        Mindfulness Practices
+                    <div className="p-6 rounded-lg border border-border bg-card hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Medal className="w-5 h-5 text-success" />
+                        <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                          Mindfulness Practices
+                        </div>
                       </div>
                       <div className="space-y-3">
-                        {assessment.personalizedResources.mindfulness_practices.map(
+                        {personalizedResources.mindfulness_practices?.map(
                           (practice: string, index: number) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-3 p-3 rounded-lg border"
-                            >
-                              <div className="w-8 h-8 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-opacity-80">
-                                {index + 1}
-                              </div>
-                              <span className="text-sm">{practice}</span>
+                            <div key={index} className="p-3 rounded-lg border border-border bg-secondary/30">
+                              <span className="text-sm text-card-foreground">{practice}</span>
                             </div>
                           )
-                        )}
+                        ) || []}
                       </div>
                     </div>
                   </div>
@@ -702,27 +862,36 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
           )}
 
           {/* Data Sources and Methodology */}
-          {assessment.status === "Completed" && (
-            <Card className="border shadow-lg rounded-lg overflow-hidden">
-              <CardHeader className="border-b p-6">
-                <CardTitle className="text-2xl font-bold">
-                  Assessment Methodology
-                </CardTitle>
-                <CardDescription>
-                  Technical details and data sources used in this assessment
-                </CardDescription>
+          {status === "Completed" && (
+            <Card className="card-primary card-hover border border-border">
+              <CardHeader className="border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-amber">
+                    <Cpu className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-card-foreground">
+                      Assessment Methodology
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Technical details and data sources used in this assessment
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="p-6 rounded-lg border">
-                    <div className="text-sm uppercase tracking-wide font-semibold mb-4">
-                      Assessment Methodology
+                  <div className="p-6 rounded-lg border border-border bg-secondary/30">
+                    <div className="flex items-center gap-3 mb-4">
+                      <BrainCircuit className="w-5 h-5 text-primary" />
+                      <div className="text-sm uppercase tracking-wide font-semibold text-muted-foreground">
+                        Assessment Methodology
+                      </div>
                     </div>
-                    <p className="leading-relaxed">
-                      {assessment.dataSources.methodology}
+                    <p className="text-card-foreground leading-relaxed">
+                      {dataSources.score_calculation_method || "Scores were calculated using advanced AI models based on assessment responses, profile data, and industry benchmarks."}
                     </p>
                   </div>
-
                 </div>
               </CardContent>
             </Card>
@@ -731,12 +900,15 @@ const AssessmentDetailsModal = ({ assessment, isOpen, onClose }: any) => {
 
         {/* Footer */}
         <div className="p-8 pt-0">
-          <div className="p-6 rounded-lg border">
+          <div className="p-6 rounded-lg border border-border bg-gradient-to-r from-primary/5 to-primary/10">
             <div className="text-center">
-              <div className="text-sm mb-2">
-                Assessment completed with advanced AI-powered analytics
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <div className="text-sm font-medium text-card-foreground">
+                  Assessment completed with advanced AI-powered analytics
+                </div>
               </div>
-              <div className="text-xs">
+              <div className="text-xs text-muted-foreground">
                 This comprehensive analysis combines multiple data points to
                 provide actionable insights for career development
               </div>

@@ -1,5 +1,5 @@
-import React, { useState, KeyboardEvent } from "react";
-import { Control, Controller, useFieldArray } from "react-hook-form";
+import React, { useState, KeyboardEvent, useEffect, useCallback } from "react";
+import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 import {
   Card,
   CardHeader,
@@ -30,6 +30,7 @@ import {
   ChevronDown,
   Search,
   Check,
+  Download,
 } from "lucide-react";
 import { Employee } from "../../../types/profileTypes";
 
@@ -57,6 +58,16 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
   const [newProficiency, setNewProficiency] = useState<number>(50);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [suggestedSkills, setSuggestedSkills] = useState<string[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
+  const [dynamicSkills, setDynamicSkills] = useState<{ name: string; category: string }[]>([]); // New state for dynamic search skills
+  const [isLoadingDynamic, setIsLoadingDynamic] = useState<boolean>(false); // Loading for dynamic search
+
+  // Watch the profession field from the form
+  const profession = useWatch({
+    control,
+    name: "profession",
+  });
 
   // Use react-hook-form's useFieldArray for proper array management
   const { fields, append, remove, update } = useFieldArray({
@@ -125,14 +136,17 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     { name: "PyTorch", category: "Data & AI" },
   ];
 
-  // Filter skills based on search term
-  const filteredSkills = standardSkills.filter(skill =>
+  // Filter standard skills based on search term
+  const filteredStandardSkills = standardSkills.filter(skill =>
     skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     skill.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Group skills by category
-  const skillsByCategory = filteredSkills.reduce((acc, skill) => {
+  // Combine filtered standard + dynamic skills for display
+  const allFilteredSkills = [...filteredStandardSkills, ...dynamicSkills];
+
+  // Group skills by category (including dynamic)
+  const skillsByCategory = allFilteredSkills.reduce((acc, skill) => {
     if (!acc[skill.category]) {
       acc[skill.category] = [];
     }
@@ -140,7 +154,86 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     return acc;
   }, {} as Record<string, typeof standardSkills>);
 
-  // Handle selecting a skill from dropdown
+  // Fetch AI-recommended skills based on profession (unchanged)
+  const fetchSuggestedSkills = async () => {
+    if (!profession || isLoadingSuggestions) return;
+
+    setIsLoadingSuggestions(true);
+    try {
+      const response = await fetch('/api/recommend-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profession }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch suggestions');
+      }
+
+      const data = await response.json();
+      setSuggestedSkills(data.skills || []);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      setSuggestedSkills([]);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  // New: Fetch dynamic skills based on search term (using recommend API, treat search as profession)
+  const fetchDynamicSkills = useCallback(async (term: string) => {
+    if (term.length < 3 || isLoadingDynamic) return;
+
+    setIsLoadingDynamic(true);
+    try {
+      const response = await fetch('/api/recommend-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profession: term }), // Fix: Send as 'profession' to match API expectation
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dynamic skills');
+      }
+
+      const data = await response.json();
+      // Transform to match standard skill format, with "AI Suggested" category
+      const dynamic = (data.skills || []).map((skill: string) => ({
+        name: skill,
+        category: "AI Suggested",
+      }));
+      setDynamicSkills(dynamic);
+    } catch (error) {
+      console.error('Error fetching dynamic skills:', error);
+      setDynamicSkills([]);
+    } finally {
+      setIsLoadingDynamic(false);
+    }
+  }, []); // Remove isLoadingDynamic from deps to prevent infinite loop
+
+  // Debounced search for dynamic skills
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm) {
+        fetchDynamicSkills(searchTerm);
+      } else {
+        setDynamicSkills([]);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, fetchDynamicSkills]);
+
+  // Auto-fetch profession suggestions when profession changes and editing mode is active (unchanged)
+  useEffect(() => {
+    if (isEditing && profession) {
+      fetchSuggestedSkills();
+    } else {
+      setSuggestedSkills([]);
+    }
+  }, [profession, isEditing]);
+
+  // Handle selecting a skill from dropdown (updated to handle both standard and dynamic)
   const handleSelectStandardSkill = (skillName: string) => {
     if (!skillName) return;
     
@@ -158,9 +251,29 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     setNewSkill(skillName);
     setIsDropdownOpen(false);
     setSearchTerm(""); // Clear search after selection
+    setDynamicSkills([]); // Clear dynamic on selection
   };
 
-  // Handle adding a new skill
+  // Handle selecting a suggested skill (unchanged)
+  const handleSelectSuggestedSkill = (skillName: string) => {
+    if (!skillName) return;
+
+    // Check for duplicates (same as standard skills)
+    const isDuplicate = fields.some(
+      (field: any) => field.name.toLowerCase() === skillName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      console.log(`Skill "${skillName}" already exists`);
+      return;
+    }
+
+    // Set as new skill with default proficiency
+    setNewSkill(skillName);
+    setNewProficiency(50);
+  };
+
+  // Handle adding a new skill (unchanged)
   const handleAddSkill = () => {
     if (!newSkill.trim()) return;
 
@@ -298,136 +411,281 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     Add New Skill
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Select from standard skills or type a custom one
+                    Select from standard skills, AI suggestions, or type a custom one
                   </p>
                 </div>
               </div>
 
-              {/* Clean Dropdown UI - No hover effects */}
+              {/* Professional Dropdown UI */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-foreground">
-                  Browse Standard Skills
+                <label className="block text-sm font-semibold mb-2 text-foreground tracking-wide">
+                  Browse Skills
                 </label>
                 <div className="relative">
-                  <button
+                  <motion.button
+                    whileHover={{ y: -1 }}
+                    whileTap={{ y: 0 }}
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full flex items-center justify-between p-3 pl-14 text-left rounded-lg border border-input bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full flex items-center justify-between p-4 pl-12 pr-4 text-left rounded-xl border-2 border-input/50 bg-card/80 text-card-foreground shadow-sm hover:shadow-md hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-200"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="icon-wrapper-blue p-2">
-                        <ChevronDown className="h-4 w-4 text-primary" />
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="icon-wrapper-blue p-2 rounded-lg bg-primary/10">
+                        <Search className="h-4 w-4 text-primary" />
                       </div>
-                      <span className="text-sm font-medium">
-                        {newSkill || "Select a skill from the list"}
+                      <span className="text-sm font-medium text-muted-foreground/80">
+                        {newSkill || "Search or select a skill..."}
                       </span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground ${isDropdownOpen ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {isDropdownOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute z-50 w-full mt-2 bg-card border border-input rounded-lg shadow-lg max-h-96 overflow-y-auto"
+                      animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      {/* Search Bar */}
-                      <div className="sticky top-0 bg-card border-b border-input p-3">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="text"
-                            placeholder="Search skills..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 border-0 bg-background focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
-                        </div>
-                      </div>
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    </motion.div>
+                  </motion.button>
 
-                      {/* Skills List */}
-                      <div className="p-2">
-                        {Object.entries(skillsByCategory).map(([category, skills]) => (
-                          <div key={category} className="mb-4 last:mb-0">
-                            <div className="px-3 py-2 mb-2">
-                              <Badge 
-                                variant="outline" 
-                                className="badge-blue bg-primary/10 text-primary border-primary/20"
-                              >
-                                {category}
-                              </Badge>
+                  {/* Enhanced Dropdown Menu */}
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute z-50 w-full mt-2 bg-card border border-input/50 rounded-2xl shadow-xl overflow-hidden max-h-96"
+                      >
+                        {/* Professional Search Bar */}
+                        <div className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-input/30 p-4">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                            <Input
+                              type="text"
+                              placeholder="Search skills (AI enhances after 3 chars)..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="pl-10 pr-4 h-10 border-0 bg-background/50 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:bg-background rounded-lg text-sm placeholder:text-muted-foreground/70"
+                            />
+                          </div>
+                          {isLoadingDynamic && (
+                            <div className="flex items-center justify-center py-3 px-4 bg-accent/5 rounded-lg mt-2">
+                              <div className="relative">
+                                <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                              </div>
+                              <span className="ml-2 text-xs font-medium text-primary/80">Enhancing with AI...</span>
                             </div>
-                            <div className="space-y-1">
-                              {skills.map((skill) => {
-                                const isSelected = newSkill === skill.name;
-                                const isAlreadyAdded = fields.some(
-                                  (field: any) => field.name.toLowerCase() === skill.name.toLowerCase()
-                                );
-                                
-                                return (
-                                  <button
-                                    key={skill.name}
-                                    type="button"
-                                    onClick={() => handleSelectStandardSkill(skill.name)}
-                                    disabled={isAlreadyAdded}
-                                    className={`w-full flex items-center justify-between p-3 rounded-md text-sm ${
-                                      isSelected
-                                        ? 'bg-primary/10 text-primary border border-primary/20'
-                                        : isAlreadyAdded
-                                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                        : 'bg-transparent text-card-foreground border border-transparent'
+                          )}
+                        </div>
+
+                        {/* Skills List - Professional Layout */}
+                        <div className="p-4 max-h-72 overflow-y-auto">
+                          {allFilteredSkills.length === 0 && !isLoadingDynamic ? (
+                            <div className="text-center py-8">
+                              <Sparkles className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                              <p className="text-sm text-muted-foreground">No skills match your search. Try something else!</p>
+                            </div>
+                          ) : (
+                            Object.entries(skillsByCategory).map(([category, skills]) => (
+                              <div key={category} className="mb-4 last:mb-0">
+                                <div className="px-3 py-2 mb-3">
+                                  <Badge 
+                                    variant="secondary" 
+                                    className={`text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+                                      category === "AI Suggested" 
+                                        ? "bg-gradient-to-r from-accent/20 to-primary/20 text-accent border-accent/30" 
+                                        : "bg-gradient-to-r from-primary/20 to-blue-100/20 text-primary border-primary/30"
                                     }`}
                                   >
-                                    <div className="flex items-center gap-3">
-                                      <div className={`icon-wrapper-blue p-1.5 ${isSelected ? 'bg-primary/20' : ''}`}>
-                                        <Code className="h-3.5 w-3.5 text-primary" />
-                                      </div>
-                                      <span className="font-medium">{skill.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      {isAlreadyAdded && (
-                                        <Badge variant="outline" className="badge-green border-success/20 bg-success/10 text-success">
-                                          Added
-                                        </Badge>
-                                      )}
-                                      {isSelected && <Check className="h-4 w-4 text-primary" />}
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Footer */}
-                      <div className="sticky bottom-0 bg-card border-t border-input p-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            {filteredSkills.length} skills found
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setIsDropdownOpen(false)}
-                            className="text-xs font-medium text-primary"
-                          >
-                            Close
-                          </button>
+                                    {category} ({skills.length})
+                                  </Badge>
+                                </div>
+                                <div className="space-y-2">
+                                  {skills.map((skill, idx) => {
+                                    const isSelected = newSkill === skill.name;
+                                    const isAlreadyAdded = fields.some(
+                                      (field: any) => field.name.toLowerCase() === skill.name.toLowerCase()
+                                    );
+                                    
+                                    return (
+                                      <motion.button
+                                        key={skill.name}
+                                        type="button"
+                                        onClick={() => handleSelectStandardSkill(skill.name)}
+                                        disabled={isAlreadyAdded}
+                                        whileHover={{ x: 4, scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className={`group w-full flex items-center justify-between p-4 rounded-lg text-left transition-all duration-150 ${
+                                          isSelected
+                                            ? 'bg-primary/10 border border-primary/30 shadow-md'
+                                            : isAlreadyAdded
+                                            ? 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+                                            : 'hover:bg-accent/10 border border-transparent hover:border-accent/20'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-3 flex-1">
+                                          <div className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
+                                            isSelected ? 'bg-primary/20' : 'bg-muted/20 group-hover:bg-accent/20'
+                                          }`}>
+                                            <Code className="h-4 w-4 text-primary/80" />
+                                          </div>
+                                          <span className={`font-medium transition-colors ${
+                                            isSelected ? 'text-primary' : 'text-foreground'
+                                          }`}>
+                                            {skill.name}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                          {isAlreadyAdded && (
+                                            <Badge variant="outline" className="text-xs px-2 py-1 bg-primary/10 text-primary border-primary/20">
+                                              <Check className="w-3 h-3 mr-1" />
+                                              Added
+                                            </Badge>
+                                          )}
+                                          {isSelected && (
+                                            <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                                              <Check className="h-4 w-4 text-primary" />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </motion.button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))
+                          )}
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
+
+                        {/* Professional Footer */}
+                        <div className="sticky bottom-0 bg-card/95 backdrop-blur-sm border-t border-input/30 p-4">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground/70 font-medium">
+                              {allFilteredSkills.length} results {dynamicSkills.length > 0 && `• ${dynamicSkills.length} AI-enhanced`}
+                            </span>
+                            <motion.button
+                              type="button"
+                              onClick={() => {
+                                setIsDropdownOpen(false);
+                                setSearchTerm("");
+                                setDynamicSkills([]);
+                              }}
+                              whileHover={{ scale: 1.05 }}
+                              className="flex items-center gap-1 text-primary/80 hover:text-primary font-medium transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                              Close
+                            </motion.button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                  <Lightbulb className="h-3 w-3 text-warning" />
-                  Select a skill or type below to add a custom one
+                <p className="text-xs text-muted-foreground/70 mt-3 flex items-center gap-2">
+                  <Lightbulb className="h-3 w-3 text-warning/80" />
+                  <span>Pro tip: AI suggests relevant skills based on your search</span>
                 </p>
               </div>
 
-              {/* Skill Input and Proficiency */}
+              {/* AI Suggestions Section (unchanged) */}
+              {profession && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/5 border border-accent/20"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-wrapper-purple p-2 rounded-lg bg-accent/20">
+                        <Download className="h-5 w-5 text-accent" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-base text-foreground">
+                          AI Suggestions for {profession}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Recommended skills based on your profession (technical, soft, or any field)
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={fetchSuggestedSkills}
+                      disabled={isLoadingSuggestions || !profession}
+                      variant="outline"
+                      size="sm"
+                      className="border-accent text-accent hover:bg-accent/10 h-8 px-3"
+                    >
+                      {isLoadingSuggestions ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin"></div>
+                          <span className="text-xs">AI...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          <span className="text-xs">Refresh</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {isLoadingSuggestions ? (
+                    <div className="text-center py-8">
+                      <div className="relative inline-block">
+                        <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                        <Sparkles className="absolute inset-0 h-10 w-10 text-primary/30 animate-pulse" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-3">Generating tailored suggestions...</p>
+                    </div>
+                  ) : suggestedSkills.length > 0 ? (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {suggestedSkills.map((skill) => {
+                        const isAlreadyAdded = fields.some(
+                          (field: any) => field.name.toLowerCase() === skill.toLowerCase()
+                        );
+                        return (
+                          <motion.button
+                            key={skill}
+                            type="button"
+                            onClick={() => handleSelectSuggestedSkill(skill)}
+                            disabled={isAlreadyAdded}
+                            whileHover={{ scale: 1.02 }}
+                            className={`group w-full flex items-center justify-between p-3 rounded-lg text-sm transition-all ${
+                              isAlreadyAdded
+                                ? 'bg-muted/30 text-muted-foreground cursor-not-allowed'
+                                : 'bg-transparent text-card-foreground hover:bg-accent/10 border border-transparent hover:border-accent/20'
+                            }`}
+                          >
+                            <span className="font-medium">{skill}</span>
+                            {isAlreadyAdded ? (
+                              <Badge variant="outline" className="text-xs px-2 py-0.5 bg-primary/10 text-primary border-primary/20">
+                                <Check className="w-3 h-3 mr-1" />
+                                Added
+                              </Badge>
+                            ) : (
+                              <motion.div
+                                className="w-5 h-5 rounded-full bg-accent/20 border-2 border-accent/30 opacity-0 group-hover:opacity-100 transition-opacity"
+                                initial={{ scale: 0 }}
+                                whileHover={{ scale: 1 }}
+                              >
+                                <Check className="h-4 w-4 text-accent m-0.5" />
+                              </motion.div>
+                            )}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Sparkles className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">No suggestions yet. Click 'Refresh' or update your profession.</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Skill Input and Proficiency (unchanged) */}
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-foreground">
@@ -529,7 +787,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
             </motion.div>
           )}
 
-          {/* Rest of the component without hover effects */}
+          {/* Rest of the component (unchanged) */}
           <div className="space-y-4">
             {fields.length === 0 ? (
               <motion.div
@@ -573,10 +831,10 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   {fields.length > 0 && (
                     <div className="flex items-center gap-3">
                       <div className="hidden sm:flex items-center gap-2">
-                        <div className="icon-wrapper-green p-2">
-                          <BarChart3 className="w-4 h-4 text-success" />
+                        <div className="icon-wrapper-blue p-2">
+                          <BarChart3 className="w-4 h-4 text-primary" />
                         </div>
-                        <Badge className="badge-green">
+                        <Badge className="badge-blue">
                           <TrendingUp className="w-3 h-3 mr-1" />
                           {Math.round(
                             fields.reduce(

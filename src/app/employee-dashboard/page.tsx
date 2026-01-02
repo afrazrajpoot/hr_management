@@ -99,7 +99,7 @@ const mapJsonToDashboardData = (
       })
     ) || [];
 
-  return {
+  const result = {
     recentAssessments,
     assessmentProgress: {
       current: parseInt(data.assessmentProgress) || 0,
@@ -116,6 +116,11 @@ const mapJsonToDashboardData = (
     aiRecommendation:
       data.careerRecommendation || "No recommendation available yet.",
   };
+
+  console.log("Career recommendation in mapping:", data.careerRecommendation);
+  console.log("Final aiRecommendation:", result.aiRecommendation);
+
+  return result;
 };
 
 export default function Dashboard() {
@@ -152,6 +157,7 @@ export default function Dashboard() {
               },
             }
           );
+          console.log("Dashboard API response:", res.data);
           setApiData(res.data);
         } catch (error) {
           console.error("Error fetching dashboard data:", error);
@@ -166,7 +172,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (apiData && !isLoading) {
       const assessmenReport: any = assessmentData.assessmentReports;
+      console.log("Mapping data - apiData:", apiData);
+      console.log("Mapping data - assessmentReport:", assessmenReport);
       const mappedData = mapJsonToDashboardData(apiData, assessmenReport);
+      console.log("Mapped dashboard data:", mappedData);
       setDashboardData(mappedData);
     }
   }, [apiData, isLoading]);
@@ -232,37 +241,55 @@ export default function Dashboard() {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Progress Card */}
-          <div className="card-primary card-hover">
-            <div className="flex items-center justify-between mb-4">
-              <div className="icon-wrapper-blue">
-                <Target className="w-5 h-5 text-primary" />
-              </div>
-              <Badge className="badge-blue">Progress</Badge>
-            </div>
-            <h3 className="text-2xl font-bold text-card-foreground mb-2">
-              {Number(dashboardData.assessmentProgress.percentage) > 100
-                ? 100
-                : dashboardData.assessmentProgress.percentage.toFixed(0)}
-              %
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {dashboardData.assessmentProgress.current} of{" "}
-              {dashboardData.assessmentProgress.total} questions
-            </p>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div
-                className="progress-bar-primary"
-                style={{
-                  width: `${dashboardData.assessmentProgress.percentage}%`,
-                }}
-              ></div>
-            </div>
-          </div>
+          <div className="card-primary card-hover min-w-0 overflow-hidden">
+  <div className="flex items-center justify-between mb-4">
+    <div className="icon-wrapper-blue">
+      <Target className="w-5 h-5 text-primary" />
+    </div>
+    <Badge className="badge-blue">Progress</Badge>
+  </div>
+  
+  <h3 className="text-2xl font-bold text-card-foreground mb-2">
+    {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+  </h3>
+  
+  <p className="text-sm text-muted-foreground mb-4 truncate">
+    {dashboardData.assessmentProgress.current} of {dashboardData.assessmentProgress.total} questions
+  </p>
+  
+  {/* Progress Bar Container */}
+  <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden">
+    {/* Animated Gradient Progress Bar */}
+    <div 
+      className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+      style={{ 
+        width: `${Math.min(dashboardData.assessmentProgress.percentage, 100)}%`,
+        background: "linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)",
+        backgroundSize: "200% 100%",
+        animation: "gradient-shift 2s ease infinite"
+      }}
+    >
+      {/* Progress Bar Glow Effect */}
+      <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+      
+      {/* Progress Percentage Indicator */}
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-white">
+        {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+      </div>
+    </div>
+  </div>
+  
+  {/* Progress Labels */}
+  <div className="flex justify-between text-xs text-gray-500 mt-2 px-1">
+    <span>0%</span>
+    <span>100%</span>
+  </div>
+</div>
 
           {/* Completed Assessments */}
-          <div className="card-primary card-hover">
+          <div className="card-primary card-hover min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-green">
                 <Trophy className="w-5 h-5 text-accent" />
@@ -275,14 +302,14 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground mb-2">
               Completed Assessments
             </p>
-            <div className="flex items-center text-sm text-success">
+            <div className="flex items-center text-sm text-success truncate">
               <TrendingUp className="w-4 h-4 mr-1" />
               <span>+3 from last month</span>
             </div>
           </div>
 
           {/* Average Score */}
-          <div className="card-primary card-hover">
+          <div className="card-primary card-hover min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-amber">
                 <Star className="w-5 h-5 text-warning" />
@@ -290,10 +317,10 @@ export default function Dashboard() {
               <Badge className="badge-amber">Performance</Badge>
             </div>
             <h3 className="text-2xl font-bold text-card-foreground mb-2">
-              {dashboardData.averageScore}%
+              {typeof dashboardData.averageScore === 'number' ? dashboardData.averageScore.toFixed(2) : '0.00'}%
             </h3>
             <p className="text-sm text-muted-foreground mb-2">Average Score</p>
-            <div className="flex items-center text-sm text-warning">
+            <div className="flex items-center text-sm text-warning truncate">
               {dashboardData.averageScore > 70 ? (
                 <>
                   <TrendingUp className="w-4 h-4 mr-1" />
@@ -311,7 +338,7 @@ export default function Dashboard() {
           </div>
 
           {/* Career Matches */}
-          <div className="card-primary card-hover">
+          <div className="card-primary card-hover min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="icon-wrapper-purple">
                 <Users className="w-5 h-5 text-accent" />
@@ -322,7 +349,7 @@ export default function Dashboard() {
               {dashboardData.careerMatches}
             </h3>
             <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
-            <div className="flex items-center text-sm text-accent">
+            <div className="flex items-center text-sm text-accent truncate">
               <Sparkles className="w-4 h-4 mr-1" />
               <span>New recommendations available</span>
             </div>
@@ -397,7 +424,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
           {/* Recent Assessments */}
           <div id="recent-assessments" className="card-primary card-hover">
             <div className="flex items-center justify-between mb-6">
@@ -417,7 +444,11 @@ export default function Dashboard() {
             <div className="space-y-3">
               {paginatedAssessments.length > 0 ? (
                 paginatedAssessments.map((assessment) => (
-                  <div key={assessment.id} className="assessment-item group">
+                  <Link
+                    key={assessment.id}
+                    href={`/employee-dashboard/results?id=${assessment.id}`}
+                    className="assessment-item group block cursor-pointer"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div
@@ -470,16 +501,18 @@ export default function Dashboard() {
                           <Button
                             size="sm"
                             className="btn-gradient-primary text-primary-foreground border-0"
-                            asChild
+                            onClick={(e) => {
+                              e.preventDefault();
+                              // Navigate to assessment instead of results
+                              window.location.href = "/employee-dashboard/assessment";
+                            }}
                           >
-                            <Link href="/employee-dashboard/assessment">
-                              Continue
-                            </Link>
+                            Continue
                           </Button>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <div className="text-center py-8">
@@ -552,110 +585,27 @@ export default function Dashboard() {
                 </Pagination>
               </div>
             )}
-
-            <Button
-              variant="outline"
-              className="w-full mt-6 border-input text-secondary-foreground hover:bg-secondary"
-              asChild
-            >
-              <Link href="/employee-dashboard/results">
-                View All Results
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
+<div className="flex justify-center">
+<Button
+  variant="outline"
+  className="group w-52 mx-auto mt-6 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200"
+  asChild
+>
+  <Link href="/employee-dashboard/results" className="flex items-center justify-center">
+    <span className="font-medium">View All Results</span>
+    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+  </Link>
+</Button>
+</div>
           </div>
 
-          {/* Career Recommendations */}
-          <div className="card-primary card-hover">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="icon-wrapper-purple">
-                  <TrendingUp className="w-5 h-5 text-accent" />
-                </div>
-                <h2 className="text-xl font-bold text-card-foreground">
-                  AI Career Recommendations
-                </h2>
-              </div>
-              <Badge className="badge-purple">
-                {dashboardData.recentRecommendations.length} matches
-              </Badge>
-            </div>
-
-            <div className="space-y-4">
-              {dashboardData.recentRecommendations.length > 0 ? (
-                dashboardData.recentRecommendations.map((rec, index) => (
-                  <div key={index} className="assessment-item group">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-full bg-accent/10">
-                        {rec.trending ? (
-                          <TrendingUp className="w-4 h-4 text-accent" />
-                        ) : (
-                          <Briefcase className="w-4 h-4 text-accent" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-card-foreground group-hover:text-accent transition-colors">
-                            {rec.title}
-                          </h4>
-                          {rec.trending && (
-                            <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground border-0 text-xs">
-                              <TrendingUp className="w-3 h-3 mr-1" />
-                              Trending
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {rec.industry}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold gradient-text-primary">
-                          {rec.matchScore}%
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Match Score
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-input">
-                      <span className="text-sm text-muted-foreground">
-                        High compatibility with your skills
-                      </span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent transition-colors" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    No recommendations available yet.
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Complete an assessment to get personalized recommendations
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <Button
-              variant="outline"
-              className="w-full mt-6 border-input text-secondary-foreground hover:bg-secondary"
-              asChild
-            >
-              <Link href="/employee-dashboard/career-Pathways">
-                Explore All Pathways
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
+         
         </div>
 
         {/* Quick Actions - Card version */}
         <Card className="card-primary card-hover border-dashed border-2 border-primary/20 dark:border-primary/30 overflow-hidden">
           <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-2 mb-6">
               <div className="icon-wrapper-blue">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
