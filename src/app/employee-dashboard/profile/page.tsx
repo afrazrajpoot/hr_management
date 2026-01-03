@@ -219,7 +219,7 @@ const EmployeeProfilePage: React.FC = () => {
 
   // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
-    const fields = [
+    const textFields = [
       employee.firstName,
       employee.lastName,
       employee.email,
@@ -231,10 +231,17 @@ const EmployeeProfilePage: React.FC = () => {
       employee.position,
       employee.bio,
     ];
-    const filledFields = fields.filter(
+    const filledTextFields = textFields.filter(
       (field) => field && field.trim() !== ""
     ).length;
-    return Math.round((filledFields / fields.length) * 100);
+    
+    // Skills count as 1 field if at least one skill is added
+    const hasSkills = employee.skills && employee.skills.length > 0 ? 1 : 0;
+    
+    const totalFields = textFields.length + 1; // +1 for skills
+    const filledFields = filledTextFields + hasSkills;
+    
+    return Math.round((filledFields / totalFields) * 100);
   };
 
   const profileCompletion = calculateProfileCompletion();

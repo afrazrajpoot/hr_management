@@ -390,35 +390,39 @@ export default function Assessments() {
 
   const employeeData = useMemo(
     () =>
-      data?.employees?.map((employee: any) => ({
-        id: employee.id,
-        name: `${employee.firstName} ${
-          employee.lastName !== "Not provide" ? employee.lastName : ""
-        }`.trim(),
-        email: employee.email,
-        phoneNumber: employee.phoneNumber,
-        department: Array.isArray(employee.department)
-          ? employee.department
-          : employee.department
-          ? [employee.department]
-          : ["Unknown"],
-        position: Array.isArray(employee.position)
-          ? employee.position
-          : employee.position
-          ? [employee.position]
-          : ["Unknown"],
-        reports: employee.reports || [],
-        avatar: `${employee.firstName[0]}${
-          employee.lastName !== "Not provide"
-            ? employee.lastName[0]
-            : employee.firstName[1] || employee.firstName[0]
-        }`,
-        ...employee.employee,
-        salary: employee.salary,
-        role: employee.role,
-        createdAt: employee.createdAt,
-        updatedAt: employee.updatedAt,
-      })) || [],
+      data?.employees?.map((employee: any) => {
+        const firstName = employee.firstName || "";
+        const lastName =
+          employee.lastName && employee.lastName !== "Not provide"
+            ? employee.lastName
+            : "";
+        const avatarFirst = firstName[0] || "?";
+        const avatarSecond = lastName[0] || firstName[1] || firstName[0] || "?";
+
+        return {
+          id: employee.id,
+          name: `${firstName} ${lastName}`.trim() || "Unknown",
+          email: employee.email,
+          phoneNumber: employee.phoneNumber,
+          department: Array.isArray(employee.department)
+            ? employee.department
+            : employee.department
+            ? [employee.department]
+            : ["Unknown"],
+          position: Array.isArray(employee.position)
+            ? employee.position
+            : employee.position
+            ? [employee.position]
+            : ["Unknown"],
+          reports: employee.reports || [],
+          avatar: `${avatarFirst}${avatarSecond}`,
+          ...employee.employee,
+          salary: employee.salary,
+          role: employee.role,
+          createdAt: employee.createdAt,
+          updatedAt: employee.updatedAt,
+        };
+      }) || [],
     [data]
   );
 
