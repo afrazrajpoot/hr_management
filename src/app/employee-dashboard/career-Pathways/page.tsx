@@ -102,6 +102,10 @@ export default function CareerPathways() {
     sortOrder: "desc",
   });
 
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
   const [applyingJobIds, setApplyingJobIds] = useState(new Set<string>());
@@ -117,6 +121,16 @@ export default function CareerPathways() {
   const [getRecommendations, { data, isLoading, isError, error, isSuccess }] =
     useCreateCareerPathwayRecommendationsMutation();
 
+  const fetchRecommendations = useCallback((pageNum: number) => {
+    const hrId = session?.user?.hrId || `hr-${Math.random().toString(36).substring(7)}`;
+    getRecommendations({
+      recruiter_id: hrId,
+      employee_id: session.user.id,
+      page: pageNum,
+      limit,
+    });
+  }, [getRecommendations, session?.user?.hrId, session?.user?.id, limit]);
+
   // Truncate description for card preview
   const truncateDescription = (
     description: string,
@@ -125,6 +139,18 @@ export default function CareerPathways() {
     if (description.length <= maxLength) return description;
     return description.substring(0, maxLength).trim() + "...";
   };
+
+  // Accumulate recommendations on success
+  useEffect(() => {
+    if (isSuccess && data) {
+      const newRecs = mapApiToCareerData(data);
+      setRecommendations((prev) => 
+        page === 1 ? newRecs : [...prev, ...newRecs]
+      );
+      setHasMore(data.hasMore || false);
+      setTotal(data.total || 0);
+    }
+  }, [isSuccess, data, page]);
 
   // Fetch applied jobs on component mount
   useEffect(() => {
@@ -151,7 +177,7 @@ export default function CareerPathways() {
     fetchAppliedJobs();
   }, [status, session?.user?.id]);
 
-  // Debug session and mutation
+  // Initial fetch
   useEffect(() => {
     if (
       status === "authenticated" &&
@@ -159,13 +185,7 @@ export default function CareerPathways() {
       !hasFetchedRef.current
     ) {
       hasFetchedRef.current = true;
-      // Use existing HR ID or generate a random one
-      const hrId = session.user.hrId || `hr-${Math.random().toString(36).substring(7)}`;
-      
-      getRecommendations({
-        recruiter_id: hrId,
-        employee_id: session.user.id,
-      });
+      fetchRecommendations(1);
     } else if (
       status !== "authenticated" ||
       !session?.user?.id
@@ -175,17 +195,12 @@ export default function CareerPathways() {
       );
       hasFetchedRef.current = false;
     }
-  }, [getRecommendations, status, session?.user?.hrId, session?.user?.id]);
-
-  const allRecommendations = useMemo(() => {
-    if (!data?.recommendations) return [];
-    return mapApiToCareerData(data);
-  }, [data]);
+  }, [fetchRecommendations, status, session?.user?.id]);
 
   const filteredAndSortedRecommendations = useMemo(() => {
-    if (!allRecommendations.length) return [];
+    if (!recommendations.length) return [];
 
-    let filtered = allRecommendations.filter((career: any) => {
+    let filtered = recommendations.filter((career: any) => {
       if (
         debouncedSearch &&
         !career.title.toLowerCase().includes(debouncedSearch.toLowerCase()) &&
@@ -235,32 +250,20 @@ export default function CareerPathways() {
     });
 
     return filtered;
-  }, [allRecommendations, filters, debouncedSearch]);
+  }, [recommendations, filters, debouncedSearch]);
 
   const loadMore = useCallback(() => {
-    if (data?.hasMore && !isLoading) {
-      setPage((prev) => prev + 1);
-    }
-  }, [data?.hasMore, isLoading]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [
-    debouncedSearch,
-    filters.industry,
-    filters.type,
-    filters.minScore,
-    filters.maxScore,
-    filters.sortBy,
-    filters.sortOrder,
-  ]);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchRecommendations(nextPage);
+  }, [fetchRecommendations, page]);
 
   useEffect(() => {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
           document.documentElement.offsetHeight - 100 &&
-        data?.hasMore &&
+        hasMore &&
         !isLoading
       ) {
         loadMore();
@@ -268,7 +271,7 @@ export default function CareerPathways() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [data?.hasMore, isLoading, loadMore]);
+  }, [hasMore, isLoading, loadMore]);
 
   const toggleSaved = (jobId: string) => {
     setSavedJobs((prev) =>
@@ -445,7 +448,7 @@ export default function CareerPathways() {
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
               Showing {filteredAndSortedRecommendations.length} career matches
-              {data?.total && ` of ${data.total}`}
+              {total ? ` of ${total}` : ''}
             </p>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -626,12 +629,6 @@ export default function CareerPathways() {
             </div>
           )}
 
-          {!data?.hasMore && filteredAndSortedRecommendations.length > 0 && (
-            <div className="text-center py-4 text-muted-foreground">
-              No more recommendations to load
-            </div>
-          )}
-
           {filteredAndSortedRecommendations.length === 0 && !isLoading && (
             <Card className="card-primary">
               <CardContent className="pt-12 pb-12 text-center">
@@ -648,8 +645,7 @@ export default function CareerPathways() {
             </Card>
           )}
 
-          {data?.hasMore && !isLoading && (
-            <div className="text-center">
+<div className="text-center">
               <Button
                 onClick={loadMore}
                 variant="outline"
@@ -659,7 +655,6 @@ export default function CareerPathways() {
                 Load More Recommendations
               </Button>
             </div>
-          )}
         </div>
       </div>
     </AppLayout>
