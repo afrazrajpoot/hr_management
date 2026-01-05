@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, Github, Chrome } from "lucide-react";
 import Loader from "@/components/Loader";
+import CookieConsent from "@/components/CookieConsent";
 
 type FormData = {
   email: string;
@@ -348,7 +349,7 @@ const SignInForm = () => {
           </CardContent>
 
           <CardFooter className="pt-4">
-            <motion.div variants={itemVariants} className="w-full text-center">
+            <motion.div variants={itemVariants} className="w-full text-center space-y-2">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link
@@ -358,10 +359,14 @@ const SignInForm = () => {
                   Sign up
                 </Link>
               </p>
+              <p className="text-xs text-muted-foreground">
+                For the best experience, we recommend using a desktop or laptop device.
+              </p>
             </motion.div>
           </CardFooter>
         </Card>
       </motion.div>
+      <CookieConsent />
     </div>
   );
 };
