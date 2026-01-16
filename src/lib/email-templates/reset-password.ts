@@ -116,16 +116,16 @@ export const getPasswordResetEmailHtml = (otp: string, recipientName?: string) =
                                                 Verification Code
                                             </div>
                                             <div class="otp-code" style="
-                                                background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
-                                                color: #ffffff;
+                                                background-color: #f1f5f9;
+                                                color: #1e293b;
                                                 font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
                                                 font-size: 32px;
-                                                font-weight: 600;
+                                                font-weight: 700;
                                                 letter-spacing: 8px;
                                                 padding: 25px 40px;
                                                 border-radius: 8px;
                                                 display: inline-block;
-                                                box-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
+                                                border: 2px solid #dc2626;
                                                 margin: 10px 0;
                                             ">
                                                 ${otp}
@@ -313,26 +313,19 @@ export const getPasswordResetEmailHtml = (otp: string, recipientName?: string) =
                                         
                                         <!-- Legal Links -->
                                         <div style="margin-bottom: 25px;">
-                                            <a href="https://geniusfactorai.com/privacy" style="
+                                            <a href="https://geniusfactorai.com/privacy-policy" style="
                                                 color: #64748b;
                                                 text-decoration: none;
                                                 font-size: 12px;
                                                 margin: 0 10px;
                                             ">Privacy Policy</a>
                                             <span style="color: #cbd5e1;">•</span>
-                                            <a href="https://geniusfactorai.com/terms" style="
+                                            <a href="https://geniusfactorai.com/terms-of-service" style="
                                                 color: #64748b;
                                                 text-decoration: none;
                                                 font-size: 12px;
                                                 margin: 0 10px;
                                             ">Terms of Service</a>
-                                            <span style="color: #cbd5e1;">•</span>
-                                            <a href="https://geniusfactorai.com/security" style="
-                                                color: #64748b;
-                                                text-decoration: none;
-                                                font-size: 12px;
-                                                margin: 0 10px;
-                                            ">Security Policy</a>
                                         </div>
                                         
                                         <!-- Copyright -->

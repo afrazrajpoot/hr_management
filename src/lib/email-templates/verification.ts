@@ -1,4 +1,52 @@
-export const getVerificationEmailHtml = (otp: string, recipientName?: string) => `
+export const getVerificationEmailHtml = (otp: string, recipientName?: string, defaultPassword?: string) => {
+  // Default password section HTML (only shown if defaultPassword is provided)
+  const defaultPasswordSection = defaultPassword ? `
+                            <!-- Default Password Section -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                                <tr>
+                                    <td style="
+                                        background-color: #fef3c7;
+                                        border-left: 4px solid #f59e0b;
+                                        padding: 20px;
+                                        border-radius: 4px;
+                                    ">
+                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr>
+                                                <td width="30" valign="top" style="padding-right: 15px;">
+                                                    <div style="color: #f59e0b; font-size: 18px;">🔑</div>
+                                                </td>
+                                                <td>
+                                                    <div style="font-size: 15px; font-weight: 600; color: #92400e; margin-bottom: 10px;">
+                                                        Your Temporary Password
+                                                    </div>
+                                                    <div style="
+                                                        background-color: #ffffff;
+                                                        border: 2px dashed #f59e0b;
+                                                        border-radius: 6px;
+                                                        padding: 12px 20px;
+                                                        margin: 10px 0;
+                                                        text-align: center;
+                                                    ">
+                                                        <code style="
+                                                            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+                                                            font-size: 18px;
+                                                            font-weight: 700;
+                                                            color: #92400e;
+                                                            letter-spacing: 1px;
+                                                        ">${defaultPassword}</code>
+                                                    </div>
+                                                    <div style="font-size: 13px; color: #78350f; line-height: 1.5; margin-top: 10px;">
+                                                        <strong>⚠️ Important:</strong> If you haven't set your password already, you can use this default password to log in. We strongly recommend changing it from your Profile page after logging in for security purposes.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+  ` : '';
+  
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,16 +144,16 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                                                 Verification Code
                                             </div>
                                             <div class="otp-code" style="
-                                                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-                                                color: #ffffff;
+                                                background-color: #f1f5f9;
+                                                color: #1e293b;
                                                 font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
                                                 font-size: 32px;
-                                                font-weight: 600;
+                                                font-weight: 700;
                                                 letter-spacing: 8px;
                                                 padding: 25px 40px;
                                                 border-radius: 8px;
                                                 display: inline-block;
-                                                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+                                                border: 2px solid #6366f1;
                                                 margin: 10px 0;
                                             ">
                                                 ${otp}
@@ -117,6 +165,8 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                                     </td>
                                 </tr>
                             </table>
+                            
+                            ${defaultPasswordSection}
                             
                             <!-- Instructions -->
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 40px 0;">
@@ -283,33 +333,42 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
                                     <td style="text-align: center;">
                                         <!-- Company Info -->
                                         <div style="font-size: 14px; color: #475569; margin-bottom: 20px; line-height: 1.5;">
-                                            <strong>Genius Factor AI Inc.</strong><br>
+                                            <strong><a href="https://geniusfactor.ai" style="color: #475569; text-decoration: none;">Genius Factor AI Inc.</a></strong><br>
                                             123 Innovation Drive, Suite 500<br>
                                             San Francisco, CA 94107
                                         </div>
                                         
+                                        <!-- Platform Link -->
+                                        <div style="margin-bottom: 20px;">
+                                            <a href="https://geniusfactor.ai" style="
+                                                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                                                color: white;
+                                                text-decoration: none;
+                                                font-weight: 600;
+                                                font-size: 14px;
+                                                padding: 12px 24px;
+                                                border-radius: 6px;
+                                                display: inline-block;
+                                            ">
+                                                Visit Our Platform →
+                                            </a>
+                                        </div>
+                                        
                                         <!-- Legal Links -->
                                         <div style="margin-bottom: 25px;">
-                                            <a href="https://geniusfactorai.com/privacy" style="
+                                            <a href="https://geniusfactor.ai/privacy-policy" style="
                                                 color: #64748b;
                                                 text-decoration: none;
                                                 font-size: 12px;
                                                 margin: 0 10px;
                                             ">Privacy Policy</a>
                                             <span style="color: #cbd5e1;">•</span>
-                                            <a href="https://geniusfactorai.com/terms" style="
+                                            <a href="https://geniusfactor.ai/terms-of-service" style="
                                                 color: #64748b;
                                                 text-decoration: none;
                                                 font-size: 12px;
                                                 margin: 0 10px;
                                             ">Terms of Service</a>
-                                            <span style="color: #cbd5e1;">•</span>
-                                            <a href="https://geniusfactorai.com/security" style="
-                                                color: #64748b;
-                                                text-decoration: none;
-                                                font-size: 12px;
-                                                margin: 0 10px;
-                                            ">Security</a>
                                         </div>
                                         
                                         <!-- Copyright -->
@@ -335,6 +394,7 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string) =>
 </body>
 </html>
 `;
+};
 
 export const emailStyles = {
   companyName: "Genius Factor AI",

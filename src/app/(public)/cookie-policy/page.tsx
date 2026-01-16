@@ -45,10 +45,10 @@ const CookiePolicyPage = () => {
                 1. What Are Cookies
               </h2>
               <p>
-                Cookies are small text files that are stored on your device when you
-                visit our website. They help us provide you with a better browsing
-                experience by remembering your preferences and understanding how you
-                use our platform.
+                Cookies are small text files that are stored on your device when
+                you visit our website. They help us provide you with a better
+                browsing experience by remembering your preferences and
+                understanding how you use our platform.
               </p>
             </section>
 
@@ -60,10 +60,13 @@ const CookiePolicyPage = () => {
               <div className="bg-slate-700/30 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-green-400" />
-                  <h3 className="text-lg font-medium text-white">Essential Cookies</h3>
+                  <h3 className="text-lg font-medium text-white">
+                    Essential Cookies
+                  </h3>
                 </div>
                 <p className="text-sm text-slate-300 mb-2">
-                  These cookies are necessary for the website to function and cannot be switched off.
+                  These cookies are necessary for the website to function and
+                  cannot be switched off.
                 </p>
                 <ul className="list-disc pl-6 text-sm space-y-1">
                   <li>Authentication and security cookies</li>
@@ -75,10 +78,13 @@ const CookiePolicyPage = () => {
               <div className="bg-slate-700/30 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Settings className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-medium text-white">Functional Cookies</h3>
+                  <h3 className="text-lg font-medium text-white">
+                    Functional Cookies
+                  </h3>
                 </div>
                 <p className="text-sm text-slate-300 mb-2">
-                  These cookies enable the website to provide enhanced functionality and personalization.
+                  These cookies enable the website to provide enhanced
+                  functionality and personalization.
                 </p>
                 <ul className="list-disc pl-6 text-sm space-y-1">
                   <li>User preference settings (theme, language)</li>
@@ -90,10 +96,13 @@ const CookiePolicyPage = () => {
               <div className="bg-slate-700/30 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Cookie className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-medium text-white">Analytics Cookies</h3>
+                  <h3 className="text-lg font-medium text-white">
+                    Analytics Cookies
+                  </h3>
                 </div>
                 <p className="text-sm text-slate-300 mb-2">
-                  These cookies help us understand how visitors interact with our website.
+                  These cookies help us understand how visitors interact with
+                  our website.
                 </p>
                 <ul className="list-disc pl-6 text-sm space-y-1">
                   <li>Page view tracking</li>
@@ -111,24 +120,25 @@ const CookiePolicyPage = () => {
               <p>We use cookies for the following purposes:</p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
-                  <strong className="text-white">Authentication:</strong> To keep you
-                  logged in and maintain secure sessions
+                  <strong className="text-white">Authentication:</strong> To
+                  keep you logged in and maintain secure sessions
                 </li>
                 <li>
-                  <strong className="text-white">User Experience:</strong> To remember
-                  your preferences and settings
+                  <strong className="text-white">User Experience:</strong> To
+                  remember your preferences and settings
                 </li>
                 <li>
-                  <strong className="text-white">Analytics:</strong> To understand how
-                  our platform is used and identify areas for improvement
+                  <strong className="text-white">Analytics:</strong> To
+                  understand how our platform is used and identify areas for
+                  improvement
                 </li>
                 <li>
-                  <strong className="text-white">Security:</strong> To protect against
-                  fraud and unauthorized access
+                  <strong className="text-white">Security:</strong> To protect
+                  against fraud and unauthorized access
                 </li>
                 <li>
-                  <strong className="text-white">Performance:</strong> To monitor
-                  application performance and user interactions
+                  <strong className="text-white">Performance:</strong> To
+                  monitor application performance and user interactions
                 </li>
               </ul>
             </section>
@@ -138,8 +148,8 @@ const CookiePolicyPage = () => {
                 4. Third-Party Cookies
               </h2>
               <p>
-                We may use third-party services that set their own cookies. These
-                include:
+                We may use third-party services that set their own cookies.
+                These include:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
@@ -147,8 +157,8 @@ const CookiePolicyPage = () => {
                   authentication with external providers
                 </li>
                 <li>
-                  <strong className="text-white">Analytics Services:</strong> For
-                  website usage analysis (when consented to)
+                  <strong className="text-white">Analytics Services:</strong>{" "}
+                  For website usage analysis (when consented to)
                 </li>
                 <li>
                   <strong className="text-white">Error Monitoring:</strong> For
@@ -166,26 +176,26 @@ const CookiePolicyPage = () => {
                 5. Cookie Consent
               </h2>
               <p>
-                When you first visit our website, you'll see a cookie consent banner
-                that allows you to:
+                When you first visit our website, you'll see a cookie consent
+                banner that allows you to:
               </p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
-                  <strong className="text-white">Accept All:</strong> Enable all cookies
-                  for the best experience
+                  <strong className="text-white">Accept All:</strong> Enable all
+                  cookies for the best experience
                 </li>
                 <li>
-                  <strong className="text-white">Decline Non-Essential:</strong> Only
-                  allow essential cookies required for basic functionality
+                  <strong className="text-white">Decline Non-Essential:</strong>{" "}
+                  Only allow essential cookies required for basic functionality
                 </li>
                 <li>
-                  <strong className="text-white">Dismiss:</strong> Hide the banner
-                  (essential cookies will still be used)
+                  <strong className="text-white">Dismiss:</strong> Hide the
+                  banner (essential cookies will still be used)
                 </li>
               </ul>
               <p className="mt-3">
-                You can change your cookie preferences at any time by clearing your
-                browser's cookies or contacting us.
+                You can change your cookie preferences at any time by clearing
+                your browser's cookies or contacting us.
               </p>
             </section>
 
@@ -196,20 +206,20 @@ const CookiePolicyPage = () => {
               <p>You can control cookies through your browser settings:</p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
-                  <strong className="text-white">Chrome:</strong> Settings → Privacy and
-                  security → Cookies and other site data
+                  <strong className="text-white">Chrome:</strong> Settings →
+                  Privacy and security → Cookies and other site data
                 </li>
                 <li>
-                  <strong className="text-white">Firefox:</strong> Settings → Privacy &
-                  Security → Cookies and Site Data
+                  <strong className="text-white">Firefox:</strong> Settings →
+                  Privacy & Security → Cookies and Site Data
                 </li>
                 <li>
-                  <strong className="text-white">Safari:</strong> Preferences → Privacy
-                  → Manage Website Data
+                  <strong className="text-white">Safari:</strong> Preferences →
+                  Privacy → Manage Website Data
                 </li>
                 <li>
-                  <strong className="text-white">Edge:</strong> Settings → Cookies and
-                  site permissions → Cookies and site data
+                  <strong className="text-white">Edge:</strong> Settings →
+                  Cookies and site permissions → Cookies and site data
                 </li>
               </ul>
               <p className="mt-3 text-amber-300">
@@ -222,21 +232,21 @@ const CookiePolicyPage = () => {
               <h2 className="text-xl font-semibold text-white mb-3">
                 7. Cookie Retention
               </h2>
-              <p>
-                Different types of cookies have different lifespans:
-              </p>
+              <p>Different types of cookies have different lifespans:</p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
-                  <strong className="text-white">Session Cookies:</strong> Deleted when
-                  you close your browser
+                  <strong className="text-white">Session Cookies:</strong>{" "}
+                  Deleted when you close your browser
                 </li>
                 <li>
-                  <strong className="text-white">Persistent Cookies:</strong> Remain
-                  until deleted or expired (typically 30 days to 2 years)
+                  <strong className="text-white">Persistent Cookies:</strong>{" "}
+                  Remain until deleted or expired (typically 30 days to 2 years)
                 </li>
                 <li>
-                  <strong className="text-white">Authentication Cookies:</strong> May
-                  last longer for security purposes
+                  <strong className="text-white">
+                    Authentication Cookies:
+                  </strong>{" "}
+                  May last longer for security purposes
                 </li>
               </ul>
             </section>
@@ -246,10 +256,10 @@ const CookiePolicyPage = () => {
                 8. Updates to This Policy
               </h2>
               <p>
-                We may update this Cookie Policy to reflect changes in our practices
-                or legal requirements. We will notify you of significant changes by
-                updating the "Last updated" date and, where appropriate, providing
-                additional notice.
+                We may update this Cookie Policy to reflect changes in our
+                practices or legal requirements. We will notify you of
+                significant changes by updating the "Last updated" date and,
+                where appropriate, providing additional notice.
               </p>
             </section>
 
@@ -258,23 +268,24 @@ const CookiePolicyPage = () => {
                 9. Contact Us
               </h2>
               <p>
-                If you have questions about our use of cookies or this Cookie Policy,
-                please contact us:
+                If you have questions about our use of cookies or this Cookie
+                Policy, please contact us:
               </p>
               <p className="mt-2">
                 <strong className="text-white">Email:</strong>{" "}
                 privacy@geniusfactor.ai
                 <br />
-                <strong className="text-white">Subject:</strong> Cookie Policy Inquiry
+                <strong className="text-white">Subject:</strong> Cookie Policy
+                Inquiry
               </p>
             </section>
 
             <div className="bg-slate-700/50 rounded-lg p-4 mt-8">
               <p className="text-sm text-slate-400">
-                For more information about how we handle your personal data, please
-                review our{" "}
+                For more information about how we handle your personal data,
+                please review our{" "}
                 <Link
-                  href="/privacy"
+                  href="/privacy-policy"
                   className="text-blue-400 hover:text-blue-300 underline"
                 >
                   Privacy Policy

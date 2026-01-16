@@ -701,7 +701,7 @@ const getTransporter = async (): Promise<nodemailer.Transporter | null> => {
 };
 
 // Send verification email with retry
-export const sendVerificationEmail = async (email: string, token: string): Promise<{
+export const sendVerificationEmail = async (email: string, token: string, defaultPassword?: string): Promise<{
   messageId: string;
   success: boolean;
   error?: any;
@@ -721,7 +721,7 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
       from: `"Genius Factor" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Verify Your Email Address',
-      html: getVerificationEmailHtml(token),
+      html: getVerificationEmailHtml(token, undefined, defaultPassword),
       text: `
         Verify Your Email Address
         
@@ -731,6 +731,12 @@ export const sendVerificationEmail = async (email: string, token: string): Promi
         ${token}
         
         This code will expire in 24 hours.
+        
+        ${defaultPassword ? `Your Temporary Password: ${defaultPassword}
+        
+        ⚠️ Important: If you haven't set your password already, you can use this default password to log in. We strongly recommend changing it from your Profile page after logging in for security purposes.
+        ` : ''}
+        Platform URL: https://geniusfactor.ai
         
         If you didn't create an account, you can safely ignore this email.
         
@@ -846,7 +852,7 @@ export const sendPasswordResetEmail = async (email: string, token: string): Prom
 };
 
 // Send welcome email with retry
-export const sendWelcomeEmail = async (email: string, firstName: string): Promise<{
+export const sendWelcomeEmail = async (email: string, firstName: string, defaultPassword?: string): Promise<{
   messageId: string;
   success: boolean;
   error?: any;
@@ -860,21 +866,27 @@ export const sendWelcomeEmail = async (email: string, firstName: string): Promis
       return { messageId: 'no-transporter', success: false };
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-    const dashboardUrl = appUrl ? `${appUrl}/employee-dashboard` : '#';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://geniusfactor.ai';
+    const dashboardUrl = appUrl ? `${appUrl}/employee-dashboard` : 'https://geniusfactor.ai/employee-dashboard';
 
     const mailOptions = {
       from: `"Genius Factor" <${process.env.SMTP_USER}>`,
       to: email,
       subject: 'Welcome to Genius Factor!',
-      html: getWelcomeEmailHtml(firstName, dashboardUrl),
+      html: getWelcomeEmailHtml(firstName, dashboardUrl, defaultPassword),
       text: `
         Welcome to Genius Factor, ${firstName}!
         
         Your account is now fully activated and ready to use.
         
+        ${defaultPassword ? `Your Temporary Password: ${defaultPassword}
+        
+        ⚠️ Important: If you haven't set your password already, you can use this default password to log in. We strongly recommend changing it from your Profile page after logging in for security purposes.
+        ` : ''}
         Get started by entering your dashboard and completing your profile:
         ${dashboardUrl}
+        
+        Platform URL: https://geniusfactor.ai
         
         We're excited to help you discover and develop your unique talents!
         

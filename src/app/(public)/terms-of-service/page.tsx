@@ -123,7 +123,7 @@ const TermsOfServicePage = () => {
               <p>
                 Your use of the Platform is also governed by our{" "}
                 <Link
-                  href="/privacy"
+                  href="/privacy-policy"
                   className="text-blue-400 hover:text-blue-300"
                 >
                   Privacy Policy

@@ -435,9 +435,9 @@ const SignUpForm = () => {
                     >
                       Employee
                     </SelectItem>
-                    <SelectItem value="HR" className="select-dropdown-item">
+                    {/* <SelectItem value="HR" className="select-dropdown-item">
                       HR
-                    </SelectItem>
+                    </SelectItem> */}
                     {/* <SelectItem value="Admin" className="select-dropdown-item">
                       Admin
                     </SelectItem> */}
@@ -463,14 +463,14 @@ const SignUpForm = () => {
                 >
                   I agree to the{" "}
                   <Link
-                    href="/terms"
+                    href="/terms-of-service"
                     className="text-primary hover:text-primary/80"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
-                    href="/privacy"
+                    href="/privacy-policy"
                     className="text-primary hover:text-primary/80"
                   >
                     Privacy Policy
