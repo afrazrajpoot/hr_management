@@ -58,7 +58,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
   // Group fields for better organization
   const basicInfoFields = personalInfoFields.filter((f) =>
-    ["firstName", "lastName", "email", "password", "phone"].includes(f.field)
+    ["firstName", "lastName", "email", "phone"].includes(f.field)
   );
 
   const addressFields = personalInfoFields.filter((f) =>
@@ -177,13 +177,12 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
                     <div
-                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
-                        basicInfoComplete >= 80
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${basicInfoComplete >= 80
                           ? "bg-success"
                           : basicInfoComplete >= 50
-                          ? "bg-warning"
-                          : "bg-destructive"
-                      }`}
+                            ? "bg-warning"
+                            : "bg-destructive"
+                        }`}
                       style={{ width: `${basicInfoComplete}%` }}
                     />
                   </div>
@@ -241,13 +240,12 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
                     <div
-                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
-                        addressComplete >= 80
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${addressComplete >= 80
                           ? "bg-success"
                           : addressComplete >= 50
-                          ? "bg-warning"
-                          : "bg-destructive"
-                      }`}
+                            ? "bg-warning"
+                            : "bg-destructive"
+                        }`}
                       style={{ width: `${addressComplete}%` }}
                     />
                   </div>
@@ -270,9 +268,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                         duration: 0.3,
                       },
                     }}
-                    className={`group ${
-                      field.field === "address" ? "md:col-span-2" : ""
-                    }`}
+                    className={`group ${field.field === "address" ? "md:col-span-2" : ""
+                      }`}
                   >
                     <InfoField
                       {...field}
@@ -307,13 +304,12 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 <div className="flex items-center gap-2">
                   <div className="w-32 bg-muted rounded-full h-2">
                     <div
-                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
-                        additionalComplete >= 80
+                      className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${additionalComplete >= 80
                           ? "bg-success"
                           : additionalComplete >= 50
-                          ? "bg-warning"
-                          : "bg-destructive"
-                      }`}
+                            ? "bg-warning"
+                            : "bg-destructive"
+                        }`}
                       style={{ width: `${additionalComplete}%` }}
                     />
                   </div>
@@ -429,9 +425,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-2 h-2 rounded-full ${
-                          basicInfoComplete >= 100 ? "bg-success" : "bg-warning"
-                        }`}
+                        className={`w-2 h-2 rounded-full ${basicInfoComplete >= 100 ? "bg-success" : "bg-warning"
+                          }`}
                       />
                       <p className="text-sm text-muted-foreground">
                         Complete all basic information fields for better profile
@@ -440,9 +435,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     </div>
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-2 h-2 rounded-full ${
-                          addressComplete >= 100 ? "bg-success" : "bg-warning"
-                        }`}
+                        className={`w-2 h-2 rounded-full ${addressComplete >= 100 ? "bg-success" : "bg-warning"
+                          }`}
                       />
                       <p className="text-sm text-muted-foreground">
                         Add your complete address for location-based
@@ -451,11 +445,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     </div>
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-2 h-2 rounded-full ${
-                          getFieldValue(bioField?.field || "")
+                        className={`w-2 h-2 rounded-full ${getFieldValue(bioField?.field || "")
                             ? "bg-success"
                             : "bg-warning"
-                        }`}
+                          }`}
                       />
                       <p className="text-sm text-muted-foreground">
                         A professional bio increases your profile completeness

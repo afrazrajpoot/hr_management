@@ -24,6 +24,7 @@ import {
   Brain,
   ChevronDown,
   ChevronUp,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,12 @@ const navigation = [
     href: "/employee-dashboard/profile",
     icon: User,
     color: "from-indigo-500 to-indigo-600",
+  },
+  {
+    name: "Security",
+    href: "/employee-dashboard/change-password",
+    icon: Lock,
+    color: "from-slate-500 to-slate-600",
   },
   {
     name: "Genius AI",
@@ -146,11 +153,8 @@ export function AppSidebar() {
       {/* Navigation */}
       <nav className="relative z-10 flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
-          // Hide Community link if user is paid
-          if (item.name === "Community" && session?.user?.paid) {
-            return null;
-          }
-          
+
+
           const isActive = location === item.href;
           return (
             <Link
@@ -166,10 +170,10 @@ export function AppSidebar() {
               style={
                 isActive
                   ? {
-                      background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                      "--tw-gradient-from": item.color.split(" ")[1],
-                      "--tw-gradient-to": item.color.split(" ")[3],
-                    } as any
+                    background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                    "--tw-gradient-from": item.color.split(" ")[1],
+                    "--tw-gradient-to": item.color.split(" ")[3],
+                  } as any
                   : {}
               }
             >

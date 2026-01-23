@@ -219,29 +219,39 @@ const EmployeeProfilePage: React.FC = () => {
 
   // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
-    const textFields = [
-      employee.firstName,
-      employee.lastName,
-      employee.email,
-      employee.phone,
-      employee.address,
-      employee.dateOfBirth,
-      employee.hireDate,
-      employee.department,
-      employee.position,
-      employee.bio,
-    ];
-    const filledTextFields = textFields.filter(
-      (field) => field && field.trim() !== ""
-    ).length;
-    
-    // Skills count as 1 field if at least one skill is added
-    const hasSkills = employee.skills && employee.skills.length > 0 ? 1 : 0;
-    
-    const totalFields = textFields.length + 1; // +1 for skills
-    const filledFields = filledTextFields + hasSkills;
-    
-    return Math.round((filledFields / totalFields) * 100);
+    // 1. Personal Tab Completion
+    const personalFields = ["firstName", "lastName", "email", "phone", "address", "dateOfBirth", "bio"];
+    const isPersonalComplete = personalFields.every(field =>
+      employee[field as keyof Employee] && employee[field as keyof Employee].toString().trim() !== ""
+    );
+
+    // 2. Employment Tab Completion
+    const employmentFieldList = ["employer", "hireDate", "department", "position", "manager"];
+    // Check either annualSalary or salary
+    const hasSalary = (employee.annualSalary && employee.annualSalary.toString().trim() !== "") ||
+      (employee.salary && employee.salary.toString().trim() !== "");
+
+    const isEmploymentComplete = employmentFieldList.every(field =>
+      employee[field as keyof Employee] && employee[field as keyof Employee].toString().trim() !== ""
+    ) && hasSalary;
+
+    // 3. Skills Tab Completion
+    const isSkillsComplete = employee.skills && employee.skills.length > 0;
+
+    // 4. Experience Tab Completion (Requires both Experience and Education)
+    const isExperienceComplete = (
+      (employee.experience && employee.experience.length > 0) &&
+      (employee.education && employee.education.length > 0)
+    );
+
+    // Calculate total percentage (25% per tab)
+    let percentage = 0;
+    if (isPersonalComplete) percentage += 25;
+    if (isEmploymentComplete) percentage += 25;
+    if (isSkillsComplete) percentage += 25;
+    if (isExperienceComplete) percentage += 25;
+
+    return percentage;
   };
 
   const profileCompletion = calculateProfileCompletion();
@@ -298,13 +308,12 @@ const EmployeeProfilePage: React.FC = () => {
                 </p>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div
-                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
-                      profileCompletion >= 80
-                        ? "bg-success"
-                        : profileCompletion >= 50
+                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${profileCompletion >= 80
+                      ? "bg-success"
+                      : profileCompletion >= 50
                         ? "bg-warning"
                         : "bg-destructive"
-                    }`}
+                      }`}
                     style={{ width: `${profileCompletion}%` }}
                   />
                 </div>
@@ -449,8 +458,8 @@ const EmployeeProfilePage: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <SkillsTab 
-                      isEditing={isEditing} 
+                    <SkillsTab
+                      isEditing={isEditing}
                       control={control}
                       onEdit={() => setIsEditing(true)}
                       onSave={handleSubmit(handleSave)}
@@ -462,8 +471,8 @@ const EmployeeProfilePage: React.FC = () => {
                 <TabsContent value="experience" className="mt-0">
                   <div className="space-y-6">
                     <div className="card-primary p-6">
-                      <ExperienceTab 
-                        isEditing={isEditing} 
+                      <ExperienceTab
+                        isEditing={isEditing}
                         control={control}
                         onEdit={() => setIsEditing(true)}
                         onSave={handleSubmit(handleSave)}
@@ -472,8 +481,8 @@ const EmployeeProfilePage: React.FC = () => {
                     </div>
 
                     <div className="card-primary p-6">
-                      <EducationTab 
-                        isEditing={isEditing} 
+                      <EducationTab
+                        isEditing={isEditing}
                         control={control}
                         onEdit={() => setIsEditing(true)}
                         onSave={handleSubmit(handleSave)}
