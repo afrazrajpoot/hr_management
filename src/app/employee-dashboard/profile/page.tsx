@@ -3,7 +3,7 @@ import React, { useState, ChangeEvent, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import {
   useCreateOrUpdateEmployeeMutation,
@@ -33,10 +33,103 @@ import {
   Upload,
 } from "lucide-react";
 
+const onboardingSteps = [
+  {
+    tab: "personal",
+    title: "Personal Information",
+    description:
+      "Manage your personal details and contact information. Make sure your name, contact, and bio are up to date!",
+  },
+  {
+    tab: "employment",
+    title: "Employment Details",
+    description:
+      "Update your job details, department, and manager. Keeping this section current helps HR and managers know your role.",
+  },
+  {
+    tab: "skills",
+    title: "Skills & Expertise",
+    description:
+      "Showcase your professional skills and competencies. Add all relevant skills to boost your profile strength!",
+  },
+  {
+    tab: "experience",
+    title: "Experience & Education",
+    description:
+      "Add your work experience, education, and upload your resume. This helps you stand out for new opportunities!",
+  },
+];
+
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("personal");
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [onboardingStep, setOnboardingStep] = useState<number>(0);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+
+  const updateModalPosition = useCallback(() => {
+    if (!showOnboarding) return;
+    const activeTabValue = onboardingSteps[onboardingStep].tab;
+    const element = document.getElementById(`tab-trigger-${activeTabValue}`);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      setModalPosition({
+        top: rect.top,
+        left: rect.left + rect.width / 2,
+      });
+    }
+  }, [onboardingStep, showOnboarding]);
+
+  useEffect(() => {
+    if (showOnboarding) {
+      const timer = setTimeout(updateModalPosition, 100);
+      window.addEventListener("resize", updateModalPosition);
+      window.addEventListener("scroll", updateModalPosition);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("resize", updateModalPosition);
+        window.removeEventListener("scroll", updateModalPosition);
+      };
+    }
+  }, [showOnboarding, onboardingStep, updateModalPosition]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceTour = urlParams.get('tour') === 'true';
+      const seen = localStorage.getItem("profileOnboardingSeen");
+
+      if (!seen || forceTour) {
+        setShowOnboarding(true);
+        setOnboardingStep(0);
+        setActiveTab(onboardingSteps[0].tab);
+        if (forceTour) {
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, []);
+
+  const handleNextOnboarding = () => {
+    if (onboardingStep < onboardingSteps.length - 1) {
+      const nextStep = onboardingStep + 1;
+      setOnboardingStep(nextStep);
+      setActiveTab(onboardingSteps[nextStep].tab);
+    } else {
+      setShowOnboarding(false);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("profileOnboardingSeen", "true");
+      }
+    }
+  };
+
+  const handleCloseOnboarding = () => {
+    setShowOnboarding(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("profileOnboardingSeen", "true");
+    }
+  };
 
   const {
     data: employeeData,
@@ -220,29 +313,57 @@ const EmployeeProfilePage: React.FC = () => {
   // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
     // 1. Personal Tab Completion
-    const personalFields = ["firstName", "lastName", "email", "phone", "address", "dateOfBirth", "bio"];
-    const isPersonalComplete = personalFields.every(field =>
-      employee[field as keyof Employee] && employee[field as keyof Employee].toString().trim() !== ""
+    const personalFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "dateOfBirth",
+      "bio",
+    ];
+    const isPersonalComplete = personalFields.every(
+      (field) =>
+        employee &&
+        employee[field as keyof Employee] &&
+        employee[field as keyof Employee]?.toString().trim() !== ""
     );
 
     // 2. Employment Tab Completion
-    const employmentFieldList = ["employer", "hireDate", "department", "position", "manager"];
+    const employmentFieldList = [
+      "employer",
+      "hireDate",
+      "department",
+      "position",
+      "manager",
+    ];
     // Check either annualSalary or salary
-    const hasSalary = (employee.annualSalary && employee.annualSalary.toString().trim() !== "") ||
-      (employee.salary && employee.salary.toString().trim() !== "");
+    const hasSalary =
+      (employee &&
+        employee.annualSalary &&
+        employee.annualSalary.toString().trim() !== "") ||
+      (employee && employee.salary && employee.salary.toString().trim() !== "");
 
-    const isEmploymentComplete = employmentFieldList.every(field =>
-      employee[field as keyof Employee] && employee[field as keyof Employee].toString().trim() !== ""
-    ) && hasSalary;
+    const isEmploymentComplete =
+      employmentFieldList.every(
+        (field) =>
+          employee &&
+          employee[field as keyof Employee] &&
+          employee[field as keyof Employee]?.toString().trim() !== ""
+      ) && hasSalary;
 
     // 3. Skills Tab Completion
-    const isSkillsComplete = employee.skills && employee.skills.length > 0;
+    const isSkillsComplete =
+      employee && employee.skills && employee.skills.length > 0;
 
     // 4. Experience Tab Completion (Requires both Experience and Education)
-    const isExperienceComplete = (
-      (employee.experience && employee.experience.length > 0) &&
-      (employee.education && employee.education.length > 0)
-    );
+    const isExperienceComplete =
+      employee &&
+      employee.experience &&
+      employee.experience.length > 0 &&
+      employee &&
+      employee.education &&
+      employee.education.length > 0;
 
     // Calculate total percentage (25% per tab)
     let percentage = 0;
@@ -258,6 +379,98 @@ const EmployeeProfilePage: React.FC = () => {
 
   return (
     <AppLayout>
+      {/* Onboarding Modal - Dynamic Tour */}
+      <AnimatePresence>
+        {showOnboarding && (modalPosition.top > 0 || modalPosition.left > 0) && (
+          <div className="fixed inset-0 z-50 pointer-events-none">
+            {/* Backdrop - Only allow clicking to close if needed */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseOnboarding}
+              className="absolute inset-0 bg-black/20 pointer-events-auto backdrop-blur-[2px]"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, y: "-80%", scale: 0.9, x: "-50%" }}
+              animate={{
+                opacity: 1,
+                top: modalPosition.top - 20,
+                x: "-50%",
+                y: "-100%",
+                scale: 1,
+                left: modalPosition.left
+              }}
+              exit={{ opacity: 0, y: "-80%", scale: 0.9, x: "-50%" }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+                opacity: { duration: 0.2 }
+              }}
+              className="absolute w-full max-w-sm pointer-events-auto"
+            >
+              <div className="relative bg-white dark:bg-card rounded-2xl shadow-2xl p-6 border border-black/5 dark:border-white/10 overflow-hidden">
+                {/* Decorative background pulse */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+
+                {/* Close Button */}
+                <button
+                  className="absolute top-4 right-4 text-muted-foreground hover:text-primary transition-colors"
+                  onClick={handleCloseOnboarding}
+                  aria-label="Close onboarding"
+                >
+                  <span className="text-xl">&times;</span>
+                </button>
+
+                {/* Content with its own animation for step changes */}
+                <motion.div
+                  key={onboardingStep}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="flex h-2 w-2 rounded-full bg-primary animate-ping" />
+                    <h2 className="text-lg font-bold gradient-text-primary">
+                      {onboardingSteps[onboardingStep].title}
+                    </h2>
+                  </div>
+
+                  <p className="mb-6 text-sm text-muted-foreground leading-relaxed">
+                    {onboardingSteps[onboardingStep].description}
+                  </p>
+                </motion.div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <div className="flex gap-1.5">
+                    {onboardingSteps.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === onboardingStep ? "w-6 bg-primary" : "w-1.5 bg-primary/20"
+                          }`}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    className="btn-gradient-primary px-5 py-2 text-sm rounded-xl transition-all duration-200 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
+                    onClick={handleNextOnboarding}
+                  >
+                    {onboardingStep === onboardingSteps.length - 1
+                      ? "Get Started"
+                      : "Next Step"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Arrow pointing down */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-card rotate-45 border-b border-r border-black/5 dark:border-white/10" />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       <Toaster
         theme="system"
         position="top-right"
@@ -370,6 +583,7 @@ const EmployeeProfilePage: React.FC = () => {
               <TabsList className="grid w-full grid-cols-4 bg-transparent border-none rounded-xl h-14">
                 <TabsTrigger
                   value="personal"
+                  id="tab-trigger-personal"
                   className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
                   <span className="text-sm font-medium">Personal</span>
@@ -377,6 +591,7 @@ const EmployeeProfilePage: React.FC = () => {
 
                 <TabsTrigger
                   value="employment"
+                  id="tab-trigger-employment"
                   className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
                   <span className="text-sm font-medium">Employment</span>
@@ -384,6 +599,7 @@ const EmployeeProfilePage: React.FC = () => {
 
                 <TabsTrigger
                   value="skills"
+                  id="tab-trigger-skills"
                   className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
                   <span className="text-sm font-medium">Skills</span>
@@ -391,6 +607,7 @@ const EmployeeProfilePage: React.FC = () => {
 
                 <TabsTrigger
                   value="experience"
+                  id="tab-trigger-experience"
                   className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
                 >
                   <span className="text-sm font-medium">Experience</span>
