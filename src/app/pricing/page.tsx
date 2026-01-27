@@ -100,9 +100,9 @@ const PricingPage: React.FC = () => {
       });
 
       if (response.data.success && response.data.checkoutUrl) {
-        toast.success(`Redirecting to ${product.name} checkout...`);
+        toast.success(`Opening ${product.name} checkout in a new tab...`);
         setTimeout(() => {
-          window.location.href = response.data.checkoutUrl;
+          window.open(response.data.checkoutUrl, '_blank');
         }, 500);
       } else {
         throw new Error("Failed to get checkout URL");
@@ -111,8 +111,8 @@ const PricingPage: React.FC = () => {
       console.error("Payment error:", error);
       toast.error(
         error.response?.data?.error ||
-          error.message ||
-          "Payment initialization failed"
+        error.message ||
+        "Payment initialization failed"
       );
     } finally {
       setLoadingId(null);
@@ -137,11 +137,10 @@ const PricingPage: React.FC = () => {
             {products.map((product) => (
               <div
                 key={product.name}
-                className={`card-primary p-8 border-2 rounded-3xl shadow-lg flex flex-col transition-all hover:scale-[1.02] ${
-                  product.highlight
-                    ? "border-primary ring-4 ring-primary/10"
-                    : "border-transparent"
-                }`}
+                className={`card-primary p-8 border-2 rounded-3xl shadow-lg flex flex-col transition-all hover:scale-[1.02] ${product.highlight
+                  ? "border-primary ring-4 ring-primary/10"
+                  : "border-transparent"
+                  }`}
               >
                 {product.highlight && (
                   <div className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
@@ -176,11 +175,10 @@ const PricingPage: React.FC = () => {
                 <button
                   onClick={() => handlePurchase(product)}
                   disabled={!!loadingId}
-                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
-                    product.highlight
-                      ? "bg-primary text-white hover:opacity-90"
-                      : "bg-secondary text-foreground hover:bg-secondary/80"
-                  } disabled:opacity-50`}
+                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${product.highlight
+                    ? "bg-primary text-white hover:opacity-90"
+                    : "bg-secondary text-foreground hover:bg-secondary/80"
+                    } disabled:opacity-50`}
                 >
                   {loadingId === product.name ? (
                     <>
