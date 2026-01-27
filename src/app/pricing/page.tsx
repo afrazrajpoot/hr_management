@@ -9,36 +9,79 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 
-const product = {
-  name: "ELITE MEMBERSHIP",
-  price: "$117.99",
-  period: "/month",
-  description: "Genius Factor AI Career Intelligence Platform Access",
-  features: [
-    "Unlimited Access to AI Learning Platform",
-    "Career Intelligence Tools",
-    "Exclusive Resources & Webinars",
-  ],
-  // Use the product slug from your SamCart URL
-  samcartProductSlug: "genius-factor-academy-elite-membership",
-  // Your actual checkout URL
-  checkoutUrl:
-    "https://mystoregfa.samcart.com/products/genius-factor-academy-elite-membership",
-};
+const products = [
+  {
+    name: "ESSENTIAL MEMBERSHIP",
+    price: "$79.99",
+    period: "/month",
+    description: "Core Career Assessment & AI Insights",
+    checkoutUrl:
+      "https://mystoregfa.samcart.com/products/genius-factor-academy-essential-membership",
+    features: [
+      "AI Career Intelligence",
+      "Standard Assessment Tools",
+      "Digital Learning Library",
+    ],
+    highlight: false,
+  },
+  {
+    name: "ELITE MEMBERSHIP",
+    price: "$117.99",
+    period: "/month",
+    description: "Genius Factor AI Career Intelligence Platform Access",
+    checkoutUrl:
+      "https://mystoregfa.samcart.com/products/genius-factor-academy-elite-membership",
+    features: [
+      "Unlimited AI Learning Platform",
+      "Career Intelligence Tools",
+      "Exclusive Resources & Webinars",
+      "Priority Support",
+    ],
+    highlight: true,
+  },
+  {
+    name: "CAREER ACCELERATOR",
+    price: "$2,499.99",
+    period: " once",
+    description: "Intensive Career Transformation Program",
+    checkoutUrl:
+      "https://mystoregfa.samcart.com/products/genius-factor-career-alignment-accelerator-course",
+    features: [
+      "4-Week Virtual Course",
+      "Live Group coaching Calls",
+      "Career Alignment Blueprint",
+    ],
+    highlight: false,
+  },
+  {
+    name: "MASTERMIND PROGRAM",
+    price: "$17,999.99",
+    period: " once",
+    description: "Exclusive High-Level Executive Coaching",
+    checkoutUrl:
+      "https://mystoregfa.samcart.com/products/mastermind-coaching-program",
+    features: [
+      "1-on-1 Strategy Sessions",
+      "VIP Event Access",
+      "Lifetime Community Membership",
+    ],
+    highlight: false,
+  },
+];
 
 const PricingPage: React.FC = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handlePurchase = async () => {
+  const handlePurchase = async (product: (typeof products)[0]) => {
     if (!session) {
       toast.error("Please sign in to continue");
       router.push("/auth/sign-in");
       return;
     }
 
-    setLoading(true);
+    setLoadingId(product.name);
 
     try {
       const response = await axios.post("/api/payment/create-order", {
@@ -57,9 +100,7 @@ const PricingPage: React.FC = () => {
       });
 
       if (response.data.success && response.data.checkoutUrl) {
-        toast.success("Redirecting to checkout...");
-
-        // Small delay for user feedback
+        toast.success(`Redirecting to ${product.name} checkout...`);
         setTimeout(() => {
           window.location.href = response.data.checkoutUrl;
         }, 500);
@@ -68,57 +109,95 @@ const PricingPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Payment error:", error);
-
-      const errorMessage =
+      toast.error(
         error.response?.data?.error ||
-        error.message ||
-        "Failed to initialize payment";
-
-      toast.error(errorMessage);
+          error.message ||
+          "Payment initialization failed"
+      );
     } finally {
-      setLoading(false);
+      setLoadingId(null);
     }
   };
 
   return (
     <AppLayout>
-      <div className="min-h-screen gradient-bg-primary py-20 px-6 flex justify-center">
-        <div className="card-primary p-10 max-w-md w-full border-2 rounded-3xl shadow-lg text-center">
-          <h2 className="text-3xl font-bold mb-4">{product.name}</h2>
-          <p className="text-muted-foreground mb-6">{product.description}</p>
-
-          <div className="flex items-baseline justify-center gap-2 mb-6">
-            <span className="text-4xl font-extrabold">{product.price}</span>
-            <span className="text-muted-foreground">{product.period}</span>
+      <div className="min-h-screen gradient-bg-primary py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
+              Choose Your Path to Mastery
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Select the plan that best aligns with your career goals and let AI
+              accelerate your progress.
+            </p>
           </div>
 
-          <div className="space-y-3 mb-8">
-            {product.features.map((f) => (
-              <div key={f} className="flex items-center gap-3 justify-center">
-                <Check className="w-4 h-4 text-success" />
-                <span className="text-sm">{f}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <div
+                key={product.name}
+                className={`card-primary p-8 border-2 rounded-3xl shadow-lg flex flex-col transition-all hover:scale-[1.02] ${
+                  product.highlight
+                    ? "border-primary ring-4 ring-primary/10"
+                    : "border-transparent"
+                }`}
+              >
+                {product.highlight && (
+                  <div className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
+                    Most Popular
+                  </div>
+                )}
+                <h2 className="text-xl font-bold mb-2 text-center">
+                  {product.name}
+                </h2>
+                <p className="text-muted-foreground text-sm mb-6 text-center h-10">
+                  {product.description}
+                </p>
+
+                <div className="flex items-baseline justify-center gap-1 mb-8">
+                  <span className="text-3xl font-extrabold">
+                    {product.price}
+                  </span>
+                  <span className="text-muted-foreground text-sm">
+                    {product.period}
+                  </span>
+                </div>
+
+                <div className="space-y-4 mb-8 flex-grow">
+                  {product.features.map((f) => (
+                    <div key={f} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-success shrink-0 mt-0.5" />
+                      <span className="text-sm">{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handlePurchase(product)}
+                  disabled={!!loadingId}
+                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${
+                    product.highlight
+                      ? "bg-primary text-white hover:opacity-90"
+                      : "bg-secondary text-foreground hover:bg-secondary/80"
+                  } disabled:opacity-50`}
+                >
+                  {loadingId === product.name ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    "Get Started"
+                  )}
+                </button>
+
+                <div className="mt-4 text-[10px] text-muted-foreground flex items-center justify-center gap-2">
+                  <Shield className="w-3 h-3" />
+                  Secure checkout via SamCart
+                </div>
               </div>
             ))}
-          </div>
-
-          <button
-            onClick={handlePurchase}
-            disabled={loading}
-            className="w-full py-4 px-6 bg-primary text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 transition-opacity"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              "Purchase Now"
-            )}
-          </button>
-
-          <div className="mt-4 text-xs text-muted-foreground flex items-center justify-center gap-2">
-            <Shield className="w-3 h-3" />
-            Secure payment via SamCart
           </div>
         </div>
       </div>
