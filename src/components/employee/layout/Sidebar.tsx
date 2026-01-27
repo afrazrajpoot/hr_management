@@ -42,6 +42,12 @@ const navigation = [
     color: "from-blue-500 to-blue-600",
   },
   {
+    name: "Profile",
+    href: "/employee-dashboard/profile",
+    icon: User,
+    color: "from-indigo-500 to-indigo-600",
+  },
+  {
     name: "Assessment",
     href: "/employee-dashboard/assessment",
     icon: ClipboardList,
@@ -64,12 +70,6 @@ const navigation = [
     href: "/employee-dashboard/development",
     icon: BookOpen,
     color: "from-rose-500 to-rose-600",
-  },
-  {
-    name: "Profile",
-    href: "/employee-dashboard/profile",
-    icon: User,
-    color: "from-indigo-500 to-indigo-600",
   },
   {
     name: "Security",
@@ -115,7 +115,7 @@ export function AppSidebar() {
     <div
       className={cn(
         "flex flex-col h-screen transition-all duration-300 sidebar-container relative",
-        isCollapsed ? "w-20" : "w-64"
+        isCollapsed ? "w-20" : "w-64",
       )}
     >
       {/* Sidebar background pattern */}
@@ -167,7 +167,7 @@ export function AppSidebar() {
               className={cn(
                 "sidebar-nav-item group flex items-center",
                 isActive ? "sidebar-nav-item-active" : "",
-                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
+                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3",
               )}
               style={
                 isActive
@@ -184,7 +184,7 @@ export function AppSidebar() {
                   "sidebar-nav-icon-wrapper",
                   isActive
                     ? "sidebar-nav-icon-wrapper-active"
-                    : "sidebar-nav-icon-wrapper-inactive"
+                    : "sidebar-nav-icon-wrapper-inactive",
                 )}
               >
                 <item.icon
@@ -192,7 +192,7 @@ export function AppSidebar() {
                     "w-5 h-5 transition-colors duration-300",
                     isActive
                       ? "text-white"
-                      : "text-gray-400 group-hover:text-gray-300"
+                      : "text-gray-400 group-hover:text-gray-300",
                   )}
                 />
               </div>
@@ -203,7 +203,7 @@ export function AppSidebar() {
                       "font-medium transition-colors duration-300",
                       isActive
                         ? "text-white"
-                        : "text-gray-300 group-hover:text-white"
+                        : "text-gray-300 group-hover:text-white",
                     )}
                   >
                     {item.name}
@@ -226,7 +226,7 @@ export function AppSidebar() {
             <div
               className={cn(
                 "sidebar-notification-wrapper flex items-center gap-2 p-3 cursor-pointer",
-                isCollapsed ? "justify-center" : "justify-between"
+                isCollapsed ? "justify-center" : "justify-between",
               )}
               onClick={() => setShowNotifications(!showNotifications)}
             >
@@ -250,13 +250,13 @@ export function AppSidebar() {
                       "flex items-center gap-1 text-xs",
                       isConnected
                         ? "sidebar-status-online"
-                        : "sidebar-status-connecting"
+                        : "sidebar-status-connecting",
                     )}
                   >
                     <div
                       className={cn(
                         "w-2 h-2 rounded-full animate-pulse",
-                        isConnected ? "bg-emerald-400" : "bg-amber-400"
+                        isConnected ? "bg-emerald-400" : "bg-amber-400",
                       )}
                     />
                     {isConnected ? "Live" : "Connecting..."}
@@ -277,7 +277,7 @@ export function AppSidebar() {
                   "absolute z-50 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden transition-all duration-200",
                   isCollapsed
                     ? "left-full bottom-0 ml-4 w-80" // Collapsed: Pop out to right
-                    : "bottom-full left-0 right-0 mb-4" // Expanded: Pop up above
+                    : "bottom-full left-0 right-0 mb-4", // Expanded: Pop up above
                 )}
               >
                 {/* Popup Header */}
@@ -323,7 +323,7 @@ export function AppSidebar() {
                             "group p-3 rounded-lg transition-colors duration-200 border border-transparent",
                             !notification.read
                               ? "bg-blue-500/5 border-blue-500/10 hover:bg-blue-500/10"
-                              : "hover:bg-gray-800/50"
+                              : "hover:bg-gray-800/50",
                           )}
                         >
                           <div className="flex items-start gap-3">
@@ -332,7 +332,7 @@ export function AppSidebar() {
                                 "mt-0.5 p-1.5 rounded-full shrink-0",
                                 !notification.read
                                   ? "bg-blue-500/20"
-                                  : "bg-gray-800"
+                                  : "bg-gray-800",
                               )}
                             >
                               {notification.type === "success" ? (
@@ -341,7 +341,7 @@ export function AppSidebar() {
                                     "w-3.5 h-3.5",
                                     !notification.read
                                       ? "text-blue-400"
-                                      : "text-gray-400"
+                                      : "text-gray-400",
                                   )}
                                 />
                               ) : (
@@ -350,7 +350,7 @@ export function AppSidebar() {
                                     "w-3.5 h-3.5",
                                     !notification.read
                                       ? "text-blue-400"
-                                      : "text-gray-400"
+                                      : "text-gray-400",
                                   )}
                                 />
                               )}
@@ -361,7 +361,7 @@ export function AppSidebar() {
                                   "text-sm leading-snug",
                                   !notification.read
                                     ? "text-gray-100 font-medium"
-                                    : "text-gray-400"
+                                    : "text-gray-400",
                                 )}
                               >
                                 {notification.data.message}
@@ -369,7 +369,7 @@ export function AppSidebar() {
                               <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
                                 <span>
                                   {new Date(
-                                    notification.timestamp
+                                    notification.timestamp,
                                   ).toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -378,7 +378,7 @@ export function AppSidebar() {
                                 <span>•</span>
                                 <span>
                                   {new Date(
-                                    notification.timestamp
+                                    notification.timestamp,
                                   ).toLocaleDateString()}
                                 </span>
                               </p>
@@ -457,7 +457,7 @@ export function AppSidebar() {
             "w-full transition-all duration-300",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-gray-700/50"
+              : "justify-start hover:bg-gray-700/50",
           )}
         >
           {theme === "dark" ? (
@@ -488,7 +488,7 @@ export function AppSidebar() {
             "w-full transition-all duration-300",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-red-500/10 text-red-400 hover:text-red-300"
+              : "justify-start hover:bg-red-500/10 text-red-400 hover:text-red-300",
           )}
         >
           <div className="flex items-center gap-2">
