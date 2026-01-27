@@ -89,6 +89,12 @@ const navigation = [
     icon: Users,
     color: "from-cyan-500 to-cyan-600",
   },
+  {
+    name: "Pricing",
+    href: "/pricing",
+    icon: Sparkles,
+    color: "from-yellow-500 to-yellow-600",
+  },
 ];
 
 export function AppSidebar() {
@@ -103,7 +109,7 @@ export function AppSidebar() {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const unreadNotifications = notifications.filter((n) => !n.read).length;
 
   return (
     <div
@@ -153,8 +159,6 @@ export function AppSidebar() {
       {/* Navigation */}
       <nav className="relative z-10 flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
-
-
           const isActive = location === item.href;
           return (
             <Link
@@ -162,18 +166,16 @@ export function AppSidebar() {
               href={item.href}
               className={cn(
                 "sidebar-nav-item group flex items-center",
-                isActive
-                  ? "sidebar-nav-item-active"
-                  : "",
+                isActive ? "sidebar-nav-item-active" : "",
                 isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
               )}
               style={
                 isActive
-                  ? {
-                    background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                    "--tw-gradient-from": item.color.split(" ")[1],
-                    "--tw-gradient-to": item.color.split(" ")[3],
-                  } as any
+                  ? ({
+                      background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                      "--tw-gradient-from": item.color.split(" ")[1],
+                      "--tw-gradient-to": item.color.split(" ")[3],
+                    } as any)
                   : {}
               }
             >
@@ -246,7 +248,9 @@ export function AppSidebar() {
                   <div
                     className={cn(
                       "flex items-center gap-1 text-xs",
-                      isConnected ? "sidebar-status-online" : "sidebar-status-connecting"
+                      isConnected
+                        ? "sidebar-status-online"
+                        : "sidebar-status-connecting"
                     )}
                   >
                     <div
@@ -323,27 +327,60 @@ export function AppSidebar() {
                           )}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={cn(
-                              "mt-0.5 p-1.5 rounded-full shrink-0",
-                              !notification.read ? "bg-blue-500/20" : "bg-gray-800"
-                            )}>
-                              {notification.type === 'success' ? (
-                                <CheckCircle className={cn("w-3.5 h-3.5", !notification.read ? "text-blue-400" : "text-gray-400")} />
+                            <div
+                              className={cn(
+                                "mt-0.5 p-1.5 rounded-full shrink-0",
+                                !notification.read
+                                  ? "bg-blue-500/20"
+                                  : "bg-gray-800"
+                              )}
+                            >
+                              {notification.type === "success" ? (
+                                <CheckCircle
+                                  className={cn(
+                                    "w-3.5 h-3.5",
+                                    !notification.read
+                                      ? "text-blue-400"
+                                      : "text-gray-400"
+                                  )}
+                                />
                               ) : (
-                                <Bell className={cn("w-3.5 h-3.5", !notification.read ? "text-blue-400" : "text-gray-400")} />
+                                <Bell
+                                  className={cn(
+                                    "w-3.5 h-3.5",
+                                    !notification.read
+                                      ? "text-blue-400"
+                                      : "text-gray-400"
+                                  )}
+                                />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={cn(
-                                "text-sm leading-snug",
-                                !notification.read ? "text-gray-100 font-medium" : "text-gray-400"
-                              )}>
+                              <p
+                                className={cn(
+                                  "text-sm leading-snug",
+                                  !notification.read
+                                    ? "text-gray-100 font-medium"
+                                    : "text-gray-400"
+                                )}
+                              >
                                 {notification.data.message}
                               </p>
                               <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
-                                <span>{new Date(notification.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>
+                                  {new Date(
+                                    notification.timestamp
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
                                 <span>•</span>
-                                <span>{new Date(notification.timestamp).toLocaleDateString()}</span>
+                                <span>
+                                  {new Date(
+                                    notification.timestamp
+                                  ).toLocaleDateString()}
+                                </span>
                               </p>
                             </div>
                             {!notification.read && (
@@ -358,7 +395,9 @@ export function AppSidebar() {
                       <div className="w-12 h-12 rounded-full bg-gray-800/50 flex items-center justify-center mb-3">
                         <Bell className="w-6 h-6 text-gray-600" />
                       </div>
-                      <p className="text-sm font-medium text-gray-300">No notifications</p>
+                      <p className="text-sm font-medium text-gray-300">
+                        No notifications
+                      </p>
                       <p className="text-xs text-gray-500 mt-1 max-w-[150px]">
                         We'll notify you when something important happens.
                       </p>

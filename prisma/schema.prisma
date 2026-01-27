@@ -270,5 +270,19 @@ model EmployeeChat {
   message   String
   response  String?
   createdAt DateTime @default(now())
+}
 
+model SubscriptionAttempt {
+  id              String   @id @default(uuid())
+  userId          String
+  planName        String
+  price           String
+  status          String   @default("PENDING")
+  samcartOrderId  String?
+  checkoutUrl     String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("subscription_attempts")
 }
