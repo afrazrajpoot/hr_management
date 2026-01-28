@@ -87,6 +87,8 @@
 
     /* Text gradient variables (different for light & dark) */
     --text-gradient-purple: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    --text-gradient-green: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    --text-gradient-blue: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
 
     /* Purple Theme Colors - Using #6366F1 and #8B5CF6 as base */
     --purple-50: #f5f3ff;
@@ -112,6 +114,10 @@
     --status-success: #f0fdf4;
     --status-warning: #fffbeb;
     --status-error: #fef2f2;
+    --status-secondary: #f3f4f6;
+    --status-pink: #fdf2f8;
+    --status-indigo: #eef2ff;
+    --status-teal: #f0fdfa;
 
     /* Gradients - Light Mode */
     --gradient-subtle: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -163,6 +169,8 @@
 
     /* Brighter gradient for text in dark mode */
     --text-gradient-purple: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+    --text-gradient-green: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+    --text-gradient-blue: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
 
     /* Matte Black/Gray Gradient for Dark Mode */
     --gradient-layout: linear-gradient(135deg, #000000 0%, #121212 25%, #1a1a1a 50%, #121212 75%, #000000 100%);
@@ -179,6 +187,10 @@
     --status-success: rgba(34, 197, 94, 0.1);
     --status-warning: rgba(234, 179, 8, 0.1);
     --status-error: rgba(239, 68, 68, 0.1);
+    --status-secondary: rgba(156, 163, 175, 0.1);
+    --status-pink: rgba(236, 72, 153, 0.1);
+    --status-indigo: rgba(99, 102, 241, 0.1);
+    --status-teal: rgba(20, 184, 166, 0.1);
 
     /* Gradients - Dark Mode (Matte) */
     --gradient-subtle: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
@@ -291,9 +303,24 @@
         @apply ring-purple-400 border-purple-400;
     }
 
-    /* Text Gradient - Now using CSS variable that changes per theme */
-    .text-gradient-purple {
+    /* Text Gradient */
+    .text-gradient-purple,
+    .gradient-text-primary {
         background: var(--text-gradient-purple);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-gradient-green {
+        background: var(--text-gradient-green);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-gradient-blue {
+        background: var(--text-gradient-blue);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -427,6 +454,10 @@
 
     .bg-status-error {
         background: var(--status-error);
+    }
+
+    .bg-status-secondary {
+        background: var(--status-secondary);
     }
 
     /* Professional Gradients */
@@ -733,6 +764,54 @@
         background-color: rgba(239, 68, 68, 0.1);
         color: #f87171;
         border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-secondary {
+        background-color: #f3f4f6;
+        color: #374151;
+        border: 1px solid #e5e7eb;
+    }
+
+    .dark .badge-secondary {
+        background-color: rgba(156, 163, 175, 0.1);
+        color: #9ca3af;
+        border-color: rgba(156, 163, 175, 0.2);
+    }
+
+    .badge-pink {
+        background-color: #fdf2f8;
+        color: #be185d;
+        border: 1px solid #fbcfe8;
+    }
+
+    .dark .badge-pink {
+        background-color: rgba(236, 72, 153, 0.1);
+        color: #f472b6;
+        border-color: rgba(236, 72, 153, 0.2);
+    }
+
+    .badge-indigo {
+        background-color: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+    }
+
+    .dark .badge-indigo {
+        background-color: rgba(99, 102, 241, 0.1);
+        color: #818cf8;
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .badge-teal {
+        background-color: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid #ccfbf1;
+    }
+
+    .dark .badge-teal {
+        background-color: rgba(20, 184, 166, 0.1);
+        color: #2dd4bf;
+        border-color: rgba(20, 184, 166, 0.2);
     }
 
     /* Icon wrappers using same tokens */

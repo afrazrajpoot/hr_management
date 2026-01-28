@@ -272,11 +272,11 @@ export default function UploadJobsPage() {
       case "csv":
       case "xlsx":
       case "xls":
-        return <FileSpreadsheet className="w-8 h-8 text-success" />;
+        return <FileSpreadsheet className="w-8 h-8 text-green-600 dark:text-green-400" />;
       case "pdf":
-        return <FileText className="w-8 h-8 text-destructive" />;
+        return <FileText className="w-8 h-8 text-red-600 dark:text-red-400" />;
       default:
-        return <FileText className="w-8 h-8 text-primary" />;
+        return <FileText className="w-8 h-8 text-purple-600 dark:text-purple-400" />;
     }
   };
 
@@ -286,25 +286,33 @@ export default function UploadJobsPage() {
       icon: Users,
       label: "Bulk Upload",
       value: "100+",
-      color: "from-primary to-purple-600",
+      gradient: "bg-gradient-purple",
+      iconBg: "icon-brand",
+      textColor: "gradient-text-primary",
     },
     {
       icon: Database,
       label: "AI Processing",
       value: "Instant",
-      color: "from-success to-green-500",
+      gradient: "bg-gradient-to-r from-green-500 to-green-400",
+      iconBg: "icon-success",
+      textColor: "text-green-600 dark:text-green-400",
     },
     {
       icon: Shield,
       label: "Secure",
       value: "256-bit",
-      color: "from-warning to-amber-500",
+      gradient: "bg-gradient-to-r from-amber-500 to-amber-400",
+      iconBg: "icon-warning",
+      textColor: "text-amber-600 dark:text-amber-400",
     },
     {
       icon: Award,
       label: "Smart Parse",
       value: "Auto",
-      color: "from-blue-500 to-cyan-500",
+      gradient: "bg-gradient-to-r from-blue-500 to-cyan-500",
+      iconBg: "icon-info",
+      textColor: "text-blue-600 dark:text-blue-400",
     },
   ];
 
@@ -313,78 +321,87 @@ export default function UploadJobsPage() {
     {
       icon: Download,
       label: "Download Template",
-      color: "from-primary to-purple-600",
+      gradient: "bg-gradient-purple",
+      iconBg: "icon-brand",
     },
     {
       icon: Target,
       label: "AI Job Generator",
-      color: "from-success to-green-500",
+      gradient: "bg-gradient-to-r from-green-500 to-green-400",
+      iconBg: "icon-success",
     },
     {
       icon: BarChart3,
       label: "Market Analysis",
-      color: "from-warning to-amber-500",
+      gradient: "bg-gradient-to-r from-amber-500 to-amber-400",
+      iconBg: "icon-warning",
     },
-    { icon: Zap, label: "Quick Post", color: "from-blue-500 to-cyan-500" },
+    {
+      icon: Zap,
+      label: "Quick Post",
+      gradient: "bg-gradient-to-r from-blue-500 to-cyan-500",
+      iconBg: "icon-info",
+    },
   ];
 
   return (
     <HRLayout>
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-8">
-        <div className=" mx-auto">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-8">
+        <div className="mx-auto">
           {/* Header with decorative elements */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 mb-8">
-            <div className="decorative-gradient-blur-blue -top-20 -right-20" />
-            <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-purple p-8 mb-8 shadow-lg">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
             <div className="relative z-10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="sidebar-logo-wrapper">
+                    <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                       <Briefcase className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                      <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                         Job Management Portal
                       </h1>
-                      <p className="text-muted-foreground mt-2">
+                      <p className="text-purple-100 mt-2">
                         Upload bulk jobs or create individual listings with
                         AI-powered assistance
                       </p>
                     </div>
                   </div>
                 </div>
-
-                {/* <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all">
-                    <Download className="h-4 w-4" />
-                    Template
-                  </button>
-                </div> */}
               </div>
             </div>
           </div>
 
-          {/* Quick Stats */}
+          {/* Quick Stats with Bubble Effects */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {quickStats.map((stat, index) => (
               <div
                 key={index}
-                className="card-primary card-hover border-0 shadow-lg"
+                className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light"
               >
-                <div className="p-4">
+                {/* Bubble Effect */}
+                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -translate-y-8 translate-x-4 group-hover:scale-110 transition-transform duration-500 ${index === 0
+                  ? "bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10"
+                  : index === 1
+                    ? "bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10"
+                    : index === 2
+                      ? "bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10"
+                      : "bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10"
+                  }`} />
+
+                <div className="p-4 relative z-10">
                   <div className="flex items-center gap-3">
-                    <div
-                      className={`h-12 w-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}
-                    >
-                      <stat.icon className="h-5 w-5 text-white" />
+                    <div className={`${stat.iconBg} group-hover:scale-110 transition-transform duration-300`}>
+                      <stat.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-foreground">
+                      <div className={`text-2xl font-bold ${stat.textColor}`}>
                         {stat.value}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-subtle dark:text-subtle-dark">
                         {stat.label}
                       </div>
                     </div>
@@ -399,13 +416,13 @@ export default function UploadJobsPage() {
             {/* Main Content Area */}
             <div className="lg:col-span-2 space-y-6">
               {/* Action Buttons */}
-              <div className="card-primary border-0 shadow-xl">
+              <div className="card-purple border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
                 <div className="p-6">
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Button
+                    <button
                       onClick={handleUpload}
                       disabled={loading || !file}
-                      className="flex-1 h-14 btn-gradient-primary text-lg font-medium"
+                      className="flex-1 h-14 btn-purple rounded-xl text-lg font-medium hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <div className="flex items-center space-x-3">
@@ -419,34 +436,42 @@ export default function UploadJobsPage() {
                           <ArrowUpRight className="w-4 h-4 opacity-80" />
                         </div>
                       )}
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => setIsCreateModalOpen(true)}
-                      variant="outline"
-                      className="flex-1 h-14 border-primary text-primary hover:bg-primary/10 text-lg"
+                      className="flex-1 h-14 relative overflow-hidden group bg-white dark:bg-transparent border-2 border-purple-200 dark:border-purple-800 rounded-xl transition-all duration-300 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/10"
                     >
-                      <Plus className="w-5 h-5 mr-2" />
-                      Create Job
-                    </Button>
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative flex items-center justify-center space-x-2 text-lg font-medium text-purple-700 dark:text-purple-300 group-hover:text-purple-900 dark:group-hover:text-purple-100">
+                        <Plus className="w-5 h-5" />
+                        <span>Create Individual Job</span>
+                      </div>
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Upload Area */}
-              <div className="card-primary border-0 shadow-xl overflow-hidden">
-                <div className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border p-6">
+              <div className="card-purple relative overflow-hidden border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+                {/* Purple gradient accent */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-purple" />
+
+                <div className="bg-gradient-to-r from-purple-500/5 to-transparent border-b border-matte dark:border-matte p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-bold text-foreground">
+                      <h2 className="text-xl font-bold text-on-matte dark:text-on-matte flex items-center gap-2">
+                        <div className="icon-brand p-2 rounded-lg">
+                          <Cloud className="h-5 w-5" />
+                        </div>
                         Upload Your Job Data
                       </h2>
-                      <p className="text-muted-foreground mt-1">
+                      <p className="text-subtle dark:text-subtle-dark mt-1">
                         Drag and drop or click to browse job files
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-success"></div>
-                      <span className="text-xs text-muted-foreground">
+                      <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                      <span className="text-xs text-subtle dark:text-subtle-dark">
                         Ready
                       </span>
                     </div>
@@ -455,13 +480,12 @@ export default function UploadJobsPage() {
 
                 <div className="p-6">
                   <div
-                    className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
-                      dragActive
-                        ? "border-primary bg-gradient-to-r from-primary/5 to-primary/10"
-                        : file
-                        ? "border-success bg-gradient-to-r from-success/5 to-success/10"
-                        : "border-border hover:border-primary/50 bg-gradient-to-r from-transparent to-primary/5"
-                    }`}
+                    className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${dragActive
+                      ? "border-purple-accent bg-gradient-to-r from-purple-500/5 to-purple-600/10 dark:from-purple-500/10 dark:to-purple-600/20"
+                      : file
+                        ? "border-green-500 bg-gradient-to-r from-green-500/5 to-green-600/10 dark:from-green-500/10 dark:to-green-600/20"
+                        : "border-matte dark:border-matte hover:border-purple-accent bg-gradient-to-r from-transparent to-purple-500/5 dark:to-purple-600/10"
+                      }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
@@ -478,43 +502,43 @@ export default function UploadJobsPage() {
                     <div className="flex flex-col items-center justify-center p-12 text-center">
                       {file ? (
                         <div className="flex flex-col items-center space-y-4">
-                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-success/20 to-green-600/20 flex items-center justify-center mb-2">
+                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-green-500/20 to-green-600/20 dark:from-green-500/30 dark:to-green-600/30 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                             {getFileIcon(file.name)}
                           </div>
                           <div className="text-center">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="font-bold text-foreground text-lg">
+                              <p className="font-bold text-on-matte dark:text-on-matte text-lg">
                                 {file.name}
                               </p>
-                              <CheckCircle className="w-5 h-5 text-success" />
+                              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-subtle dark:text-subtle-dark">
                               {(file.size / 1024 / 1024).toFixed(2)} MB • Ready
                               to upload
                             </p>
                           </div>
                           <div className="flex items-center gap-2 mt-2">
-                            <div className="h-2 w-2 rounded-full bg-success animate-pulse"></div>
-                            <span className="text-xs text-success">
+                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span className="text-xs text-green-600 dark:text-green-400">
                               File validated
                             </span>
                           </div>
                         </div>
                       ) : (
                         <>
-                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center mb-4">
-                            <Cloud className="w-10 h-10 text-primary" />
+                          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/20 dark:from-purple-500/30 dark:to-purple-600/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <Cloud className="w-10 h-10 text-purple-600 dark:text-purple-400" />
                           </div>
                           <div className="mb-4">
-                            <p className="font-bold text-foreground text-lg mb-1">
+                            <p className="font-bold text-on-matte dark:text-on-matte text-lg mb-1">
                               Choose a file or drag it here
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-subtle dark:text-subtle-dark">
                               CSV, Excel, ODT, or PDF files • Max 100MB
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                          <div className="flex items-center gap-2 text-sm text-subtle dark:text-subtle-dark">
+                            <div className="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
                             <span>Secure cloud processing</span>
                           </div>
                         </>
@@ -526,23 +550,26 @@ export default function UploadJobsPage() {
 
               {/* Uploaded Jobs List */}
               {uploadedJobs.length > 0 && (
-                <div className="card-primary border-0 shadow-xl">
-                  <div className="bg-gradient-to-r from-success/5 to-transparent border-b border-border p-6">
+                <div className="card-purple relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+                  {/* Green gradient accent */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-green-400" />
+
+                  <div className="bg-gradient-to-r from-green-500/5 to-transparent border-b border-matte dark:border-matte p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="icon-wrapper-green">
-                          <CheckCircle className="h-5 w-5 text-success" />
+                        <div className="icon-success p-2 rounded-lg">
+                          <CheckCircle className="h-5 w-5" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-foreground">
+                          <h3 className="text-xl font-bold text-on-matte dark:text-on-matte">
                             Uploaded Jobs
                           </h3>
-                          <p className="text-muted-foreground mt-1">
+                          <p className="text-subtle dark:text-subtle-dark mt-1">
                             {uploadedJobs.length} jobs successfully processed
                           </p>
                         </div>
                       </div>
-                      <Badge className="badge-green">
+                      <Badge className="badge-success">
                         {uploadedJobs.length} Jobs
                       </Badge>
                     </div>
@@ -553,30 +580,30 @@ export default function UploadJobsPage() {
                       {uploadedJobs.map((job, index) => (
                         <div
                           key={job.id}
-                          className="flex items-center p-4 border border-border rounded-lg hover:bg-muted/30 transition-colors group"
+                          className="flex items-center p-4 border border-matte dark:border-matte rounded-lg hover:bg-gray-50/50 dark:hover:bg-matte-gray-subtle/30 transition-colors group"
                         >
-                          <div className="icon-wrapper-blue mr-3">
-                            <Briefcase className="w-4 h-4 text-primary" />
+                          <div className="icon-info mr-3">
+                            <Briefcase className="w-4 h-4" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-bold text-foreground group-hover:text-primary transition-colors">
+                            <p className="font-bold text-on-matte dark:text-on-matte group-hover:text-purple-accent transition-colors">
                               {job.title}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-subtle dark:text-subtle-dark">
                               ID: {job.id}
                             </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-success" />
-                            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                            <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <ChevronRight className="w-4 h-4 text-subtle dark:text-subtle-dark opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                           </div>
                         </div>
                       ))}
                     </div>
 
-                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-success/5 to-transparent">
-                      <p className="text-center text-sm">
-                        <span className="font-bold text-success">
+                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/20">
+                      <p className="text-center text-sm text-on-matte dark:text-on-matte">
+                        <span className="font-bold text-green-600 dark:text-green-400">
                           {uploadedJobs.length}
                         </span>{" "}
                         job{uploadedJobs.length !== 1 ? "s" : ""} successfully
@@ -588,64 +615,66 @@ export default function UploadJobsPage() {
               )}
 
               {/* File Requirements */}
-              <div className="card-primary border-0 shadow-xl">
+              <div className="card-purple border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
                 <div className="p-6">
-                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                    <Database className="h-5 w-5 text-primary" />
+                  <h3 className="font-bold text-on-matte dark:text-on-matte mb-4 flex items-center gap-2">
+                    <div className="icon-info bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg">
+                      <Database className="h-5 w-5" />
+                    </div>
                     Supported Formats
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                        <div className="icon-wrapper-green">
-                          <FileSpreadsheet className="h-4 w-4 text-success" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20 transition-colors">
+                        <div className="icon-success bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                          <FileSpreadsheet className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="font-medium text-gray-900 dark:text-white">
                             Spreadsheets
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
                             .csv, .xlsx, .xls
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                        <div className="icon-wrapper-blue">
-                          <FileText className="h-4 w-4 text-primary" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                        <div className="icon-info bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                          <FileText className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="font-medium text-gray-900 dark:text-white">
                             Documents
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
                             .pdf, .odt
                           </p>
                         </div>
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                        <div className="icon-wrapper-amber">
-                          <Shield className="h-4 w-4 text-warning" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors">
+                        <div className="icon-warning bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                          <Shield className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="font-medium text-gray-900 dark:text-white">
                             Security
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-amber-600 dark:text-amber-400">
                             256-bit encryption
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                        <div className="icon-wrapper-purple">
-                          <Sparkles className="h-4 w-4 text-purple-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/20 transition-colors">
+                        <div className="icon-brand bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                          <Sparkles className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="font-medium text-gray-900 dark:text-white">
                             AI Processing
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-purple-600 dark:text-purple-400">
                             Smart job parsing
                           </p>
                         </div>
@@ -659,17 +688,23 @@ export default function UploadJobsPage() {
 
           {/* Create Job Modal */}
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-0 shadow-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-0 shadow-2xl bg-white dark:bg-matte-gray-medium">
               <div className="relative">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
-                <DialogHeader className="pt-6">
-                  <DialogTitle className="text-2xl font-bold text-foreground">
-                    Create New Job
-                  </DialogTitle>
-                  <DialogDescription className="text-muted-foreground">
-                    Fill in the details to create a new job posting with AI
-                    assistance
-                  </DialogDescription>
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-purple" />
+                <DialogHeader className="pt-8 px-8">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-accent">
+                      <Briefcase className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-2xl font-bold text-gradient-purple">
+                        Create New Job
+                      </DialogTitle>
+                      <DialogDescription className="text-base text-gray-500 dark:text-gray-400">
+                        Fill in the details to create a new job posting with AI assistance
+                      </DialogDescription>
+                    </div>
+                  </div>
                 </DialogHeader>
               </div>
 
@@ -679,9 +714,9 @@ export default function UploadJobsPage() {
                     <div>
                       <Label
                         htmlFor="title"
-                        className="flex items-center gap-2 mb-2"
+                        className="flex items-center gap-2 mb-2 text-on-matte dark:text-on-matte"
                       >
-                        <Target className="h-4 w-4 text-primary" />
+                        <Target className="h-4 w-4 text-purple-accent" />
                         Job Title *
                       </Label>
                       <Input
@@ -690,13 +725,13 @@ export default function UploadJobsPage() {
                         value={formData.title}
                         onChange={handleInputChange}
                         placeholder="e.g., Senior Software Engineer"
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="location" className="mb-2">
+                      <Label htmlFor="location" className="mb-2 text-on-matte dark:text-on-matte">
                         Location
                       </Label>
                       <Input
@@ -705,12 +740,12 @@ export default function UploadJobsPage() {
                         value={formData.location}
                         onChange={handleInputChange}
                         placeholder="e.g., Remote or Lahore, PK"
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="salary" className="mb-2">
+                      <Label htmlFor="salary" className="mb-2 text-on-matte dark:text-on-matte">
                         Salary (Optional)
                       </Label>
                       <Input
@@ -720,19 +755,19 @@ export default function UploadJobsPage() {
                         value={formData.salary}
                         onChange={handleInputChange}
                         placeholder="e.g., 50000"
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="type" className="mb-2">
+                      <Label htmlFor="type" className="mb-2 text-on-matte dark:text-on-matte">
                         Job Type
                       </Label>
                       <Select
                         value={formData.type}
                         onValueChange={handleSelectChange}
                       >
-                        <SelectTrigger className="border-border/50">
+                        <SelectTrigger className="input-purple border-matte dark:border-matte">
                           <SelectValue placeholder="Select job type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -747,7 +782,7 @@ export default function UploadJobsPage() {
 
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="companyName" className="mb-2">
+                      <Label htmlFor="companyName" className="mb-2 text-on-matte dark:text-on-matte">
                         Company Name
                       </Label>
                       <Input
@@ -756,12 +791,12 @@ export default function UploadJobsPage() {
                         value={formData.companyName}
                         onChange={handleInputChange}
                         placeholder="e.g., Tech Innovators Inc."
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="companyAbout" className="mb-2">
+                      <Label htmlFor="companyAbout" className="mb-2 text-on-matte dark:text-on-matte">
                         About Company
                       </Label>
                       <Textarea
@@ -771,12 +806,12 @@ export default function UploadJobsPage() {
                         onChange={handleInputChange}
                         placeholder="Brief description of the company..."
                         rows={3}
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="skills" className="mb-2">
+                      <Label htmlFor="skills" className="mb-2 text-on-matte dark:text-on-matte">
                         Skills (comma-separated)
                       </Label>
                       <Input
@@ -785,7 +820,7 @@ export default function UploadJobsPage() {
                         value={formData.skills}
                         onChange={handleInputChange}
                         placeholder="e.g., JavaScript, React, Node.js"
-                        className="border-border/50 focus:border-primary"
+                        className="input-purple border-matte dark:border-matte"
                       />
                     </div>
                   </div>
@@ -795,26 +830,23 @@ export default function UploadJobsPage() {
                   <div className="flex items-center justify-between">
                     <Label
                       htmlFor="description"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 text-on-matte dark:text-on-matte"
                     >
-                      <FileText className="h-4 w-4 text-primary" />
+                      <FileText className="h-4 w-4 text-purple-accent" />
                       Job Description *
                     </Label>
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
                       onClick={generateDescription}
                       disabled={!formData.title || generateLoading}
-                      className="gap-2"
+                      className="btn-purple-outline flex items-center gap-2 px-3 py-1.5 text-sm hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Sparkles
-                        className={`h-4 w-4 ${
-                          generateLoading ? "animate-spin" : ""
-                        }`}
+                        className={`h-4 w-4 ${generateLoading ? "animate-spin" : ""
+                          }`}
                       />
                       AI Generate
-                    </Button>
+                    </button>
                   </div>
                   <Textarea
                     id="description"
@@ -823,10 +855,10 @@ export default function UploadJobsPage() {
                     onChange={handleInputChange}
                     placeholder="Enter job description or use AI to generate one..."
                     rows={6}
-                    className="border-border/50 focus:border-primary"
+                    className="input-purple border-matte dark:border-matte"
                     required
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-subtle dark:text-subtle-dark">
                     Click the AI Generate button to create a professional job
                     description automatically
                   </p>
@@ -834,20 +866,19 @@ export default function UploadJobsPage() {
               </div>
 
               <DialogFooter className="mt-6 gap-3">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="border-border hover:border-primary"
+                  className="px-4 py-2 text-sm rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors"
                 >
                   Cancel
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={handleCreateJob}
                   disabled={
                     !formData.title || !formData.description || createLoading
                   }
-                  className="btn-gradient-primary"
+                  className="btn-purple px-4 py-2 text-sm rounded-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {createLoading ? (
                     <div className="flex items-center space-x-2">
@@ -857,7 +888,7 @@ export default function UploadJobsPage() {
                   ) : (
                     "Create Job"
                   )}
-                </Button>
+                </button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -867,44 +898,46 @@ export default function UploadJobsPage() {
             open={isPreviewModalOpen}
             onOpenChange={setIsPreviewModalOpen}
           >
-            <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-[90vw] border-0 shadow-2xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] w-[95vw] sm:w-[90vw] border-0 shadow-2xl bg-white dark:bg-matte-gray-medium">
               <div className="relative">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
-                <DialogHeader className="pt-6">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-purple" />
+                <DialogHeader className="pt-8 px-8">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <DialogTitle className="text-2xl font-bold text-foreground">
-                        AI-Generated Description Preview
-                      </DialogTitle>
-                      <DialogDescription className="text-muted-foreground">
-                        Review the professionally crafted job description
-                      </DialogDescription>
-                    </div>
-                    <div className="icon-wrapper-purple">
-                      <Sparkles className="h-5 w-5 text-purple-600" />
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                        <Sparkles className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-700 to-blue-700 dark:from-indigo-300 dark:to-blue-300 bg-clip-text text-transparent">
+                          AI-Generated Preview
+                        </DialogTitle>
+                        <DialogDescription className="text-base text-gray-500 dark:text-gray-400">
+                          Review the professionally crafted job description
+                        </DialogDescription>
+                      </div>
                     </div>
                   </div>
                 </DialogHeader>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto p-6 rounded-xl border border-border bg-card mt-4">
-                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-transparent">
-                  <h2 className="text-2xl font-bold mb-2 text-foreground">
+              <div className="max-h-[60vh] overflow-y-auto p-6 rounded-xl border border-matte dark:border-matte bg-white dark:bg-matte-gray-medium mt-4">
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-purple-500/5 to-transparent border border-purple-500/20">
+                  <h2 className="text-2xl font-bold mb-2 text-on-matte dark:text-on-matte">
                     {formData.title}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 text-subtle dark:text-subtle-dark">
                     <div className="flex items-center gap-1">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                      <div className="h-1.5 w-1.5 rounded-full bg-purple-500"></div>
                       <span>{formData.location || "Remote"}</span>
                     </div>
                     <span>•</span>
                     <div className="flex items-center gap-1">
-                      <div className="h-1.5 w-1.5 rounded-full bg-success"></div>
+                      <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
                       <span>{formData.type.replace("_", " ")}</span>
                     </div>
                     <span>•</span>
                     <div className="flex items-center gap-1">
-                      <div className="h-1.5 w-1.5 rounded-full bg-warning"></div>
+                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500"></div>
                       <span>
                         {formData.salary
                           ? `$${parseInt(formData.salary).toLocaleString()}`
@@ -915,14 +948,14 @@ export default function UploadJobsPage() {
                   {formData.companyName && (
                     <div className="mt-3 flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-purple-600"></div>
-                      <span className="font-semibold text-foreground">
+                      <span className="font-semibold text-on-matte dark:text-on-matte">
                         {formData.companyName}
                       </span>
                     </div>
                   )}
                 </div>
                 <div
-                  className="prose prose-sm max-w-none leading-relaxed text-foreground"
+                  className="prose prose-sm max-w-none leading-relaxed text-on-matte dark:text-on-matte"
                   dangerouslySetInnerHTML={{
                     __html: processDescriptionForDisplay(
                       previewDescription
@@ -932,31 +965,30 @@ export default function UploadJobsPage() {
               </div>
 
               <DialogFooter className="mt-6 gap-3">
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setIsPreviewModalOpen(false)}
-                  className="border-border hover:border-primary"
+                  className="btn-purple-outline px-4 py-2 text-sm rounded-lg hover:scale-105 transition-all duration-200"
                 >
                   Close Preview
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
                   onClick={handleUseDescription}
-                  className="btn-gradient-primary"
+                  className="btn-purple px-4 py-2 text-sm rounded-lg hover:shadow-xl transition-all duration-300"
                 >
                   Use This Description
-                </Button>
+                </button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
           {/* Footer */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="mt-8 pt-6 border-t border-matte dark:border-matte">
+            <div className="flex items-center justify-between text-sm text-subtle dark:text-subtle-dark">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-success"></div>
+                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
                   <span>Secure job uploads</span>
                 </div>
                 <span>•</span>
@@ -964,9 +996,6 @@ export default function UploadJobsPage() {
                 <span>•</span>
                 <span>Instant processing</span>
               </div>
-              {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-                Need Help? <ChevronRight className="h-3 w-3" />
-              </button> */}
             </div>
           </div>
         </div>

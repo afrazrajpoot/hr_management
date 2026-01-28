@@ -188,8 +188,8 @@ export default function HRJobsPage() {
     if (!text) {
       return (
         <div className="text-center py-8">
-          <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <p className="text-muted-foreground">No recommendation available.</p>
+          <Sparkles className="w-12 h-12 text-subtle dark:text-subtle-dark mx-auto mb-4 opacity-50" />
+          <p className="text-subtle dark:text-subtle-dark">No recommendation available.</p>
         </div>
       );
     }
@@ -217,8 +217,8 @@ export default function HRJobsPage() {
             ) {
               return (
                 <div key={idx} className="relative">
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary to-accent rounded-full"></div>
-                  <h3 className="font-semibold text-lg text-foreground mb-3 mt-4 pl-4">
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>
+                  <h3 className="font-semibold text-lg text-on-matte dark:text-on-matte mb-3 mt-4 pl-4">
                     {trimmedLine}
                   </h3>
                 </div>
@@ -229,14 +229,14 @@ export default function HRJobsPage() {
               const text = trimmedLine.substring(1).trim();
               return (
                 <div key={idx} className="flex gap-4 pl-4">
-                  <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary"></div>
-                  <p className="text-foreground/80 leading-relaxed">{text}</p>
+                  <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-purple-500"></div>
+                  <p className="text-on-matte/80 dark:text-on-matte/80 leading-relaxed">{text}</p>
                 </div>
               );
             }
 
             return (
-              <p key={idx} className="text-foreground/80 leading-relaxed pl-4">
+              <p key={idx} className="text-on-matte/80 dark:text-on-matte/80 leading-relaxed pl-4">
                 {trimmedLine}
               </p>
             );
@@ -246,7 +246,7 @@ export default function HRJobsPage() {
     } catch (err) {
       console.error("Error rendering text:", err);
       return (
-        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border overflow-auto">
+        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border border-matte dark:border-matte overflow-auto">
           {text}
         </pre>
       );
@@ -258,8 +258,8 @@ export default function HRJobsPage() {
     if (!text) {
       return (
         <div className="text-center py-8">
-          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <p className="text-muted-foreground">No description available.</p>
+          <FileText className="w-12 h-12 text-subtle dark:text-subtle-dark mx-auto mb-4 opacity-50" />
+          <p className="text-subtle dark:text-subtle-dark">No description available.</p>
         </div>
       );
     }
@@ -280,8 +280,8 @@ export default function HRJobsPage() {
             ) {
               return (
                 <div key={idx} className="relative">
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"></div>
-                  <h3 className="font-semibold text-xl text-foreground mb-4 pl-4">
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>
+                  <h3 className="font-semibold text-xl text-on-matte dark:text-on-matte mb-4 pl-4">
                     {trimmedLine}
                   </h3>
                 </div>
@@ -309,8 +309,8 @@ export default function HRJobsPage() {
                     if (!bulletText) return null;
                     return (
                       <li key={bulletIdx} className="flex gap-3">
-                        <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-primary"></div>
-                        <span className="text-foreground/80">{bulletText}</span>
+                        <div className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-purple-500"></div>
+                        <span className="text-on-matte/80 dark:text-on-matte/80">{bulletText}</span>
                       </li>
                     );
                   })}
@@ -337,10 +337,10 @@ export default function HRJobsPage() {
                     if (!numText) return null;
                     return (
                       <li key={numIdx} className="flex gap-3">
-                        <span className="flex-shrink-0 font-semibold text-primary">
+                        <span className="flex-shrink-0 font-semibold text-purple-600 dark:text-purple-400">
                           {numIdx + 1}.
                         </span>
-                        <span className="text-foreground/80">{numText}</span>
+                        <span className="text-on-matte/80 dark:text-on-matte/80">{numText}</span>
                       </li>
                     );
                   })}
@@ -350,7 +350,7 @@ export default function HRJobsPage() {
 
             if (trimmedLine) {
               return (
-                <p key={idx} className="text-foreground/80 leading-relaxed">
+                <p key={idx} className="text-on-matte/80 dark:text-on-matte/80 leading-relaxed">
                   {trimmedLine}
                 </p>
               );
@@ -363,7 +363,7 @@ export default function HRJobsPage() {
     } catch (err) {
       console.error("Error formatting description:", err);
       return (
-        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border overflow-auto">
+        <pre className="whitespace-pre-wrap text-sm bg-card p-6 rounded-lg border border-matte dark:border-matte overflow-auto">
           {text}
         </pre>
       );
@@ -374,23 +374,23 @@ export default function HRJobsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "OPEN":
-        return "badge-green";
+        return "badge-success";
       case "CLOSED":
-        return "badge-amber";
+        return "badge-warning";
       case "DRAFT":
-        return "badge-purple";
+        return "badge-brand";
       default:
-        return "badge-blue";
+        return "badge-info";
     }
   };
 
   // Get match score badge style
   const getMatchScoreBadge = (score: string) => {
     const scoreNum = parseInt(score);
-    if (scoreNum >= 80) return "badge-green";
-    if (scoreNum >= 60) return "badge-blue";
-    if (scoreNum >= 40) return "badge-amber";
-    return "badge-purple";
+    if (scoreNum >= 80) return "badge-success";
+    if (scoreNum >= 60) return "badge-info";
+    if (scoreNum >= 40) return "badge-warning";
+    return "badge-brand";
   };
 
   if (status === "loading" || isLoading) {
@@ -399,7 +399,7 @@ export default function HRJobsPage() {
         <div className="p-8 flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader />
-            <p className="mt-4 text-muted-foreground">Loading jobs...</p>
+            <p className="mt-4 text-subtle dark:text-subtle-dark">Loading jobs...</p>
           </div>
         </div>
       </HRLayout>
@@ -410,12 +410,12 @@ export default function HRJobsPage() {
     return (
       <HRLayout>
         <div className="p-8 text-center">
-          <div className="card-primary max-w-md mx-auto">
-            <div className="icon-wrapper-amber mx-auto w-16 h-16 mb-4 flex items-center justify-center">
-              <Briefcase className="w-8 h-8 text-amber-600" />
+          <div className="card-purple max-w-md mx-auto bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+            <div className="icon-warning mx-auto w-16 h-16 mb-4 flex items-center justify-center">
+              <Briefcase className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Access Required</h3>
-            <p className="text-muted-foreground mb-4">
+            <h3 className="text-lg font-semibold mb-2 text-on-matte dark:text-on-matte">Access Required</h3>
+            <p className="text-subtle dark:text-subtle-dark mb-4">
               {error || "Please sign in to view your jobs and applications."}
             </p>
           </div>
@@ -426,64 +426,64 @@ export default function HRJobsPage() {
 
   return (
     <HRLayout>
-      <div className="gradient-bg-primary min-h-screen p-6">
+      <div className="bg-layout-purple min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <Button onClick={fetchJobs} variant="outline" className="gap-2">
+                <button
+                  onClick={fetchJobs}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors"
+                >
                   <RefreshCw className="w-4 h-4" />
                   Refresh
-                </Button>
-                {/* <Button className="btn-gradient-primary gap-2">
-                  <Briefcase className="w-4 h-4" />
-                  Post New Job
-                </Button> */}
+                </button>
               </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="card-primary card-hover">
-                <div className="flex items-center gap-4">
-                  <div className="icon-wrapper-blue">
-                    <Briefcase className="w-6 h-6 text-blue-600" />
+              {/* Total Jobs Card */}
+              <div className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-full -translate-y-8 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+                <div className="flex items-center gap-4 p-4 relative z-10">
+                  <div className="icon-info group-hover:scale-110 transition-transform duration-300">
+                    <Briefcase className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Jobs</p>
-                    <p className="text-2xl font-bold">{jobs.length}</p>
+                    <p className="text-sm text-subtle dark:text-subtle-dark">Total Jobs</p>
+                    <p className="text-2xl font-bold gradient-text-primary">{jobs.length}</p>
                   </div>
                 </div>
               </div>
-              <div className="card-primary card-hover">
-                <div className="flex items-center gap-4">
-                  <div className="icon-wrapper-green">
-                    <Users className="w-6 h-6 text-green-600" />
+
+              {/* Total Applications Card */}
+              <div className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-full -translate-y-8 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+                <div className="flex items-center gap-4 p-4 relative z-10">
+                  <div className="icon-success group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Total Applications
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {jobs.reduce(
-                        (acc, job) => acc + job.applications.length,
-                        0
-                      )}
+                    <p className="text-sm text-subtle dark:text-subtle-dark">Total Applications</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
+                      {jobs.reduce((acc, job) => acc + job.applications.length, 0)}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="card-primary card-hover">
-                <div className="flex items-center gap-4">
-                  <div className="icon-wrapper-purple">
-                    <Sparkles className="w-6 h-6 text-purple-600" />
+
+              {/* Pending Reviews Card */}
+              <div className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-full -translate-y-8 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+                <div className="flex items-center gap-4 p-4 relative z-10">
+                  <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+                    <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Pending Reviews
-                    </p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-sm text-subtle dark:text-subtle-dark">Pending Reviews</p>
+                    <p className="text-2xl font-bold gradient-text-primary">
                       {jobs.reduce(
                         (acc, job) =>
                           acc +
@@ -496,16 +496,17 @@ export default function HRJobsPage() {
                   </div>
                 </div>
               </div>
-              <div className="card-primary card-hover">
-                <div className="flex items-center gap-4">
-                  <div className="icon-wrapper-amber">
-                    <Clock className="w-6 h-6 text-amber-600" />
+
+              {/* Active Positions Card */}
+              <div className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-full -translate-y-8 translate-x-4 group-hover:scale-110 transition-transform duration-500" />
+                <div className="flex items-center gap-4 p-4 relative z-10">
+                  <div className="icon-warning group-hover:scale-110 transition-transform duration-300">
+                    <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
-                      Active Positions
-                    </p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-sm text-subtle dark:text-subtle-dark">Active Positions</p>
+                    <p className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
                       {jobs.filter((job) => job.status === "OPEN").length}
                     </p>
                   </div>
@@ -516,21 +517,13 @@ export default function HRJobsPage() {
 
           {/* Jobs List */}
           {jobs.length === 0 ? (
-            <div className="card-primary text-center py-16">
-              <div className="icon-wrapper-blue w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                <Briefcase className="w-10 h-10 text-blue-600" />
+            <div className="card-purple text-center py-16 bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+              <div className="icon-info w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <Briefcase className="w-10 h-10" />
               </div>
-              <h3 className="text-2xl font-semibold mb-3">
+              <h3 className="text-2xl font-semibold mb-3 text-on-matte dark:text-on-matte">
                 No jobs posted yet
               </h3>
-              {/* <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                Create your first job posting to start receiving applications
-                from qualified candidates.
-              </p> */}
-              {/* <Button className="btn-gradient-primary gap-2">
-                <Briefcase className="w-4 h-4" />
-                Create Your First Job Posting
-              </Button> */}
             </div>
           ) : (
             <div className="space-y-6">
@@ -540,13 +533,13 @@ export default function HRJobsPage() {
                 const statusBadgeClass = getStatusBadge(job.status);
 
                 return (
-                  <div key={job.id} className="card-primary card-hover">
+                  <div key={job.id} className="card-purple card-hover border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
                     <div className="p-6">
                       {/* Job Header */}
                       <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h2 className="text-2xl font-bold text-foreground">
+                            <h2 className="text-2xl font-bold text-on-matte dark:text-on-matte">
                               {job.title}
                             </h2>
                             <Badge className={`${statusBadgeClass} px-3 py-1`}>
@@ -555,7 +548,7 @@ export default function HRJobsPage() {
                           </div>
 
                           {/* Job Details */}
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-subtle dark:text-subtle-dark mb-4">
                             <div className="flex items-center gap-2">
                               <Briefcase className="w-4 h-4" />
                               <span>{job.type.replace("_", " ")}</span>
@@ -583,63 +576,43 @@ export default function HRJobsPage() {
 
                           {/* Job Description Preview */}
                           <div className="mb-6">
-                            <p className="text-foreground/70 whitespace-pre-line mb-2">
+                            <p className="text-on-matte/70 dark:text-on-matte/70 whitespace-pre-line mb-2">
                               {firstTwoLines}
                             </p>
                             {hasMoreLines && (
-                              <Button
-                                size="sm"
-                                variant="link"
+                              <button
                                 onClick={() => openJobDescriptionModal(job)}
-                                className="gap-1 pl-0"
+                                className="flex items-center gap-1 pl-0 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors text-sm"
                               >
                                 Read full description
                                 <ChevronRight className="w-4 h-4" />
-                              </Button>
+                              </button>
                             )}
                           </div>
                         </div>
-
-                        {/* Quick Actions */}
-                        {/* <div className="flex flex-col sm:flex-row lg:flex-col gap-2">
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Users className="w-4 h-4" />
-                            Manage
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="btn-gradient-primary gap-2"
-                          >
-                            <FileText className="w-4 h-4" />
-                            View All Applicants
-                          </Button>
-                        </div> */}
                       </div>
 
                       {/* Applications Section */}
-                      <div className="border-t pt-6">
+                      <div className="border-t border-matte dark:border-matte pt-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-2">
                             <Users className="w-5 h-5" />
-                            <h3 className="text-lg font-semibold">
+                            <h3 className="text-lg font-semibold text-on-matte dark:text-on-matte">
                               Applications ({job.applications.length})
                             </h3>
                           </div>
-                          <Badge variant="outline" className="bg-secondary/50">
+                          <Badge variant="outline" className="bg-gray-100/50 dark:bg-matte-gray-subtle/50">
                             {job.applications.length} candidate
                             {job.applications.length !== 1 ? "s" : ""}
                           </Badge>
                         </div>
 
                         {job.applications.length === 0 ? (
-                          <div className="text-center py-8 border rounded-lg bg-secondary/20">
-                            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-                            <p className="text-muted-foreground">
-                              No applications yet
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Applications will appear here once candidates
-                              apply
+                          <div className="text-center py-8 border border-matte dark:border-matte rounded-lg bg-gray-50/50 dark:bg-matte-gray-subtle/20">
+                            <Users className="w-12 h-12 text-subtle dark:text-subtle-dark mx-auto mb-3 opacity-50" />
+                            <p className="text-subtle dark:text-subtle-dark">No applications yet</p>
+                            <p className="text-sm text-subtle dark:text-subtle-dark mt-1">
+                              Applications will appear here once candidates apply
                             </p>
                           </div>
                         ) : (
@@ -652,13 +625,13 @@ export default function HRJobsPage() {
                               return (
                                 <div
                                   key={app.id}
-                                  className="assessment-item group"
+                                  className="group p-4 rounded-lg border border-matte dark:border-matte hover:border-purple-accent hover:bg-gray-50/50 dark:hover:bg-matte-gray-subtle/30 transition-all duration-300"
                                 >
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-start gap-4">
                                       {/* Applicant Avatar */}
                                       <div className="relative">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                                        <div className="w-12 h-12 bg-gradient-purple rounded-full flex items-center justify-center">
                                           <User className="w-6 h-6 text-white" />
                                         </div>
                                         {app.scoreMatch && (
@@ -673,22 +646,22 @@ export default function HRJobsPage() {
                                       {/* Applicant Info */}
                                       <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                          <h4 className="font-semibold">
+                                          <h4 className="font-semibold text-on-matte dark:text-on-matte">
                                             {app.user.firstName}{" "}
                                             {app.user.lastName}
                                           </h4>
                                           <Badge
                                             variant="outline"
-                                            className="text-xs"
+                                            className="text-xs border-matte dark:border-matte"
                                           >
                                             {app.user.position[0] ||
                                               "Position not specified"}
                                           </Badge>
                                         </div>
-                                        <p className="text-sm text-muted-foreground mb-2">
+                                        <p className="text-sm text-subtle dark:text-subtle-dark mb-2">
                                           {app.user.email}
                                         </p>
-                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-3 text-xs text-subtle dark:text-subtle-dark">
                                           <span>
                                             Dept:{" "}
                                             {app.user.department[0] || "N/A"}
@@ -706,10 +679,7 @@ export default function HRJobsPage() {
 
                                     {/* Action Buttons */}
                                     <div className="flex items-center gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="gap-2"
+                                      <button
                                         onClick={() =>
                                           openRecommendationModal(
                                             app.aiRecommendation,
@@ -718,14 +688,11 @@ export default function HRJobsPage() {
                                             job.id
                                           )
                                         }
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg btn-purple-outline hover:scale-105 transition-all duration-200"
                                       >
                                         <Sparkles className="w-4 h-4" />
                                         AI Analysis
-                                      </Button>
-                                      {/* <Button size="sm" className="gap-2">
-                                        <Mail className="w-4 h-4" />
-                                        Contact
-                                      </Button> */}
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
@@ -744,26 +711,29 @@ export default function HRJobsPage() {
 
         {/* Job Description Modal */}
         <Dialog open={!!selectedJob} onOpenChange={closeJobDescriptionModal}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light border-0 shadow-2xl">
             <div className="relative">
               {/* Decorative gradient */}
               <div className="decorative-gradient-blur-blue -top-20 -right-20 opacity-30"></div>
               <div className="decorative-gradient-blur-purple -bottom-20 -left-20 opacity-30"></div>
 
+              {/* Purple gradient top border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-purple" />
+
               <DialogHeader className="p-8 pb-0">
                 <div className="flex items-start justify-between">
                   <div>
-                    <DialogTitle className="text-3xl font-bold mb-2">
+                    <DialogTitle className="text-3xl font-bold mb-2 text-on-matte dark:text-on-matte">
                       {selectedJob?.title}
                     </DialogTitle>
                     <div className="flex items-center gap-3">
-                      <Badge className="badge-blue">
+                      <Badge className="badge-info">
                         {selectedJob?.type.replace("_", " ")}
                       </Badge>
                       {selectedJob?.location && (
                         <Badge
                           variant="outline"
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 border-matte dark:border-matte"
                         >
                           <MapPin className="w-3 h-3" />
                           {selectedJob.location}
@@ -772,7 +742,7 @@ export default function HRJobsPage() {
                       {selectedJob?.salary && (
                         <Badge
                           variant="outline"
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 border-matte dark:border-matte"
                         >
                           <DollarSign className="w-3 h-3" />$
                           {selectedJob.salary.toLocaleString()}
@@ -781,7 +751,7 @@ export default function HRJobsPage() {
                     </div>
                   </div>
                 </div>
-                <DialogDescription className="mt-4 text-lg">
+                <DialogDescription className="mt-4 text-lg text-subtle dark:text-subtle-dark">
                   Full job description and requirements
                 </DialogDescription>
               </DialogHeader>
@@ -800,45 +770,45 @@ export default function HRJobsPage() {
           open={!!selectedRecommendation}
           onOpenChange={closeRecommendationModal}
         >
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
-            <div className="ai-recommendation-card">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light border-0 shadow-2xl">
+            <div className="card-purple relative">
               {/* Decorative gradient */}
               <div className="decorative-gradient-blur-blue -top-20 -right-20 opacity-40"></div>
               <div className="decorative-gradient-blur-purple -bottom-20 -left-20 opacity-40"></div>
 
+              {/* Purple gradient top border */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-purple" />
+
               <DialogHeader className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 p-6">
                   <div className="flex items-center gap-4">
-                    <div className="ai-recommendation-icon-wrapper">
-                      <Sparkles className="w-6 h-6 text-white" />
+                    <div className="icon-brand p-3 rounded-lg">
+                      <Sparkles className="w-6 h-6" />
                     </div>
                     <div>
-                      <DialogTitle className="text-2xl font-bold">
+                      <DialogTitle className="text-2xl font-bold text-on-matte dark:text-on-matte">
                         AI Candidate Analysis
                       </DialogTitle>
-                      <DialogDescription>
+                      <DialogDescription className="text-subtle dark:text-subtle-dark">
                         Detailed assessment of candidate suitability
                       </DialogDescription>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
+                  <button
                     onClick={refreshRecommendation}
                     disabled={isRefreshing}
-                    className="gap-2"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg btn-purple-outline hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <RefreshCw
-                      className={`w-4 h-4 ${
-                        isRefreshing ? "animate-spin" : ""
-                      }`}
+                      className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""
+                        }`}
                     />
                     {isRefreshing ? "Regenerating..." : "Refresh Analysis"}
-                  </Button>
+                  </button>
                 </div>
               </DialogHeader>
 
-              <div className="relative z-10 mt-6">
+              <div className="relative z-10 mt-6 p-6">
                 {cleanAndRenderText(selectedRecommendation?.recommendation)}
               </div>
             </div>

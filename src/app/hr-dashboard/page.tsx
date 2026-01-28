@@ -51,13 +51,13 @@ import Link from "next/link";
 
 const getDepartmentColor = (departmentName: string): string => {
   const departmentColors: { [key: string]: string } = {
-    IT: "hsl(var(--primary))",
+    IT: "var(--color-chart-1)",
     AI: "#9333ea",
-    Development: "#3b82f6",
+    Development: "var(--color-chart-2)",
     Security: "hsl(var(--destructive))",
     Corporate: "hsl(var(--muted-foreground))",
-    Finance: "hsl(var(--success))",
-    Sales: "#ef4444",
+    Finance: "var(--color-chart-3)",
+    Sales: "var(--color-chart-4)",
     Leadership: "#f59e0b",
     Strategy: "#6b7280",
     Marketing: "#ec4899",
@@ -75,7 +75,7 @@ const getDepartmentColor = (departmentName: string): string => {
     Unknown: "hsl(var(--muted-foreground))",
   };
 
-  return departmentColors[departmentName] || "hsl(var(--primary))";
+  return departmentColors[departmentName] || "var(--color-chart-5)";
 };
 
 const getScoreRangeColor = (range: string): string => {
@@ -85,15 +85,15 @@ const getScoreRangeColor = (range: string): string => {
     "41-60": "#eab308",
     "61-80": "hsl(var(--success))",
     "81-100": "#06b6d4",
-    "Low (0-30)": "hsl(var(--success))",
-    "Medium (31-60)": "hsl(var(--warning))",
-    "High (61-100)": "hsl(var(--destructive))",
-    Low: "hsl(var(--success))",
-    Medium: "hsl(var(--warning))",
-    High: "hsl(var(--destructive))",
+    "Low (0-30)": "#22c55e",
+    "Medium (31-60)": "#f59e0b",
+    "High (61-100)": "#ef4444",
+    Low: "#22c55e",
+    Medium: "#f59e0b",
+    High: "#ef4444",
   };
 
-  return scoreRangeColors[range] || "hsl(var(--primary))";
+  return scoreRangeColors[range] || "var(--color-chart-1)";
 };
 
 const StatCard = ({
@@ -511,14 +511,16 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleRefresh}
-                className={`flex items-center gap-2 btn-purple border-0 ${isRefreshing ? "opacity-80 cursor-not-allowed" : ""
+                className={`flex items-center gap-2 !bg-white hover:!bg-gray-50 shadow-sm border border-purple-100 rounded-lg px-4 py-2 font-medium transition-all ${isRefreshing ? "opacity-80 cursor-not-allowed" : ""
                   }`}
                 disabled={isRefreshing}
               >
                 <RefreshCw
-                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 text-[#6366F1] ${isRefreshing ? "animate-spin" : ""}`}
                 />
-                {isRefreshing ? "Refreshing..." : "Refresh Data"}
+                <span className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
+                  {isRefreshing ? "Refreshing..." : "Refresh Data"}
+                </span>
               </button>
               <Badge
                 className={`px-3 py-1.5 rounded-full font-medium border-0 backdrop-blur-sm ${isConnected ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-100"
@@ -586,7 +588,7 @@ export default function Dashboard() {
                     Assessment completion rates by department
                   </CardDescription>
                 </div>
-                <Badge className="badge-info">
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +18% Growth
                 </Badge>
@@ -653,7 +655,7 @@ export default function Dashboard() {
                     Talent score ranges across organization
                   </CardDescription>
                 </div>
-                <Badge className="badge-brand">
+                <Badge className="bg-purple-100 text-purple-700 border-purple-200">
                   <Award className="h-3 w-3 mr-1" />
                   Talent Metrics
                 </Badge>
@@ -728,7 +730,7 @@ export default function Dashboard() {
                     Risk distribution across departments
                   </CardDescription>
                 </div>
-                <Badge className="badge-success">
+                <Badge className="bg-green-100 text-green-700 border-green-200">
                   <Shield className="h-3 w-3 mr-1" />
                   Low Risk
                 </Badge>
@@ -788,7 +790,7 @@ export default function Dashboard() {
                     Monthly movement across departments
                   </CardDescription>
                 </div>
-                <Badge className="badge-warning">
+                <Badge className="bg-amber-100 text-amber-700 border-amber-200">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   Growing
                 </Badge>
@@ -910,10 +912,10 @@ export default function Dashboard() {
                         <td className="py-3 px-4">
                           <Badge
                             className={`${dept.retention_risk_score <= 30
-                              ? "badge-success"
+                              ? "bg-green-100 text-green-700 border-green-200"
                               : dept.retention_risk_score <= 60
-                                ? "badge-warning"
-                                : "badge-error"
+                                ? "bg-amber-100 text-amber-700 border-amber-200"
+                                : "bg-red-100 text-red-700 border-red-200"
                               }`}
                           >
                             {dept.retention_risk_score}%
@@ -947,13 +949,13 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 px-4">
                           {dept.genius_factor_score >= 75 ? (
-                            <Badge className="badge-success">
+                            <Badge className="bg-green-100 text-green-700 border-green-200">
                               High Potential
                             </Badge>
                           ) : dept.genius_factor_score >= 50 ? (
-                            <Badge className="badge-info">Developing</Badge>
+                            <Badge className="bg-blue-100 text-blue-700 border-blue-200">Developing</Badge>
                           ) : (
-                            <Badge className="badge-warning">Needs Support</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-200">Needs Support</Badge>
                           )}
                         </td>
                       </tr>
@@ -1053,7 +1055,7 @@ export default function Dashboard() {
                           {dept.name}
                         </span>
                       </div>
-                      <Badge className="bg-primary/20 text-primary-foreground border-0">
+                      <Badge className="bg-purple-100 text-purple-700 border-purple-200">
                         {dept.completion}%
                       </Badge>
                     </div>
@@ -1081,6 +1083,6 @@ export default function Dashboard() {
           </button> */}
         </div>
       </div>
-    </HRLayout>
+    </HRLayout >
   );
 }

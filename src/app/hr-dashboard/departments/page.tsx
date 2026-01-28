@@ -427,7 +427,7 @@ const DepartmentDashboard = () => {
     <HRLayout>
       <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
         {/* Header with decorative elements */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+        <div className="relative overflow-hidden  bg-gradient-purple rounded-2xl p-6">
           <div className="decorative-gradient-blur-blue -top-20 -right-20" />
           <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
 
@@ -438,10 +438,10 @@ const DepartmentDashboard = () => {
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                     Department Analytics
                   </h1>
-                  <p className="text-muted-foreground mt-2">
+                  <p className="text-purple-100 mt-2">
                     Workforce distribution and mobility insights
                   </p>
                 </div>
@@ -449,12 +449,12 @@ const DepartmentDashboard = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex bg-card rounded-lg p-1 border border-border">
+              <div className="flex bg-white/95 backdrop-blur-sm rounded-lg p-1 border border-white/20">
                 <button
                   onClick={() => setActiveView("all")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeView === "all"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                    ? "bg-gradient-purple text-white shadow-md"
+                    : "text-gray-500 hover:text-gray-900"
                     }`}
                 >
                   All Departments
@@ -462,8 +462,8 @@ const DepartmentDashboard = () => {
                 <button
                   onClick={() => setActiveView("active")}
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeView === "active"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                    ? "bg-gradient-purple text-white shadow-md"
+                    : "text-gray-500 hover:text-gray-900"
                     }`}
                 >
                   Active Only
@@ -476,19 +476,23 @@ const DepartmentDashboard = () => {
         {/* Summary Cards - Fixed Icon Positioning */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Total Departments */}
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-600/5 to-transparent dark:from-purple-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-5 w-5 text-primary" />
+                    <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+                      <Building2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Total Departments
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold gradient-text-primary">
                         {deptData.length}
                       </div>
                     </div>
@@ -499,19 +503,23 @@ const DepartmentDashboard = () => {
           </Card>
 
           {/* Card 2: Total Employees */}
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-600/5 to-transparent dark:from-blue-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center flex-shrink-0">
-                      <Users className="h-5 w-5 text-success" />
+                    <div className="icon-info group-hover:scale-110 transition-transform duration-300">
+                      <Users className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Total Employees
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                         {totalEmployees}
                       </div>
                     </div>
@@ -522,28 +530,36 @@ const DepartmentDashboard = () => {
           </Card>
 
           {/* Card 3: Net Movement */}
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect - Dynamic color based on movement */}
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${netMovement >= 0 ? 'from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10' : 'from-red-500/10 to-red-600/5 dark:from-red-500/20 dark:to-red-600/10'} rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500`} />
+            <div className={`absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${netMovement >= 0 ? 'from-green-600/5 to-transparent dark:from-green-600/10 dark:to-transparent' : 'from-red-600/5 to-transparent dark:from-red-600/10 dark:to-transparent'} rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100`} />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-purple-600/10 flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                    <div className={`group-hover:scale-110 transition-transform duration-300 p-2 rounded-lg ${netMovement >= 0 ? 'bg-status-success text-green-600 dark:text-green-400' : 'bg-status-error text-red-600 dark:text-red-400'}`}>
+                      <TrendingUp className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Net Movement
                       </p>
                       <div className="flex items-end gap-2">
                         <span
-                          className={`text-3xl font-bold ${netMovement >= 0 ? "text-success" : "text-destructive"
+                          className={`text-3xl font-bold ${netMovement >= 0
+                            ? "bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent"
+                            : "bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent"
                             }`}
                         >
                           {netMovement >= 0 ? "+" : ""}
                           {netMovement}
                         </span>
                         <Badge
-                          className={`${netMovement >= 0 ? "badge-green" : "badge-amber"
+                          className={`${netMovement >= 0
+                            ? "badge-success text-green-700 dark:text-green-300"
+                            : "badge-error text-red-700 dark:text-red-300"
                             }`}
                         >
                           {netMovement >= 0 ? "Growth" : "Decline"}
@@ -557,19 +573,23 @@ const DepartmentDashboard = () => {
           </Card>
 
           {/* Card 4: Active Departments */}
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-600/5 to-transparent dark:from-amber-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-warning/20 to-amber-600/10 flex items-center justify-center flex-shrink-0">
-                      <Target className="h-5 w-5 text-warning" />
+                    <div className="icon-warning group-hover:scale-110 transition-transform duration-300">
+                      <Target className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Active Departments
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
                         {filteredDepartments.length}
                       </div>
                     </div>

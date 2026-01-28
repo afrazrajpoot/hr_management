@@ -56,13 +56,13 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
   const getStatusColor = (status: any) => {
     switch (status) {
       case "Completed":
-        return "badge-green";
+        return "badge-success";
       case "In Progress":
-        return "badge-amber";
+        return "badge-warning";
       case "Not Started":
-        return "bg-muted text-muted-foreground";
+        return "bg-muted text-subtle dark:text-subtle-dark";
       default:
-        return "bg-muted text-muted-foreground";
+        return "bg-muted text-subtle dark:text-subtle-dark";
     }
   };
 
@@ -114,8 +114,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               isActive={currentPage === page}
               className={
                 currentPage === page
-                  ? "btn-gradient-primary text-white"
-                  : "cursor-pointer hover:bg-muted border-border"
+                  ? "btn-purple text-white"
+                  : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
               }
             >
               {page}
@@ -134,8 +134,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
             isActive={currentPage === 1}
             className={
               currentPage === 1
-                ? "btn-gradient-primary text-white"
-                : "cursor-pointer hover:bg-muted border-border"
+                ? "btn-purple text-white"
+                : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
             }
           >
             1
@@ -161,8 +161,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               isActive={currentPage === page}
               className={
                 currentPage === page
-                  ? "btn-gradient-primary text-white"
-                  : "cursor-pointer hover:bg-muted border-border"
+                  ? "btn-purple text-white"
+                  : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
               }
             >
               {page}
@@ -187,8 +187,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
               isActive={currentPage === totalReportPages}
               className={
                 currentPage === totalReportPages
-                  ? "btn-gradient-primary text-white"
-                  : "cursor-pointer hover:bg-muted border-border"
+                  ? "btn-purple text-white"
+                  : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
               }
             >
               {totalReportPages}
@@ -202,22 +202,26 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
   };
 
   return (
-    <Card className="card-primary card-hover group border-0 shadow-lg overflow-hidden h-[420px] flex flex-col">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-purple-600" />
+    <Card className="card-purple relative overflow-hidden group border-0 shadow-lg overflow-hidden h-[420px] flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+      {/* Top gradient line */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600" />
+
+      {/* Subtle bubble effect */}
+      <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-purple-500/5 to-purple-600/5 dark:from-purple-500/10 dark:to-purple-600/10 rounded-full opacity-50 group-hover:opacity-70 transition-opacity" />
 
       <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-purple-600/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-lg font-bold text-primary">
+            <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+              <span className="text-lg font-bold text-purple-600 dark:text-purple-300">
                 {employee.avatar}
               </span>
             </div>
             <div>
-              <CardTitle className="text-lg text-foreground group-hover:text-primary transition-colors">
+              <CardTitle className="text-lg text-on-matte dark:text-on-matte group-hover:text-purple-accent transition-colors">
                 {employee.name}
               </CardTitle>
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-subtle dark:text-subtle-dark">
                 {typeof employee.position === "string"
                   ? employee.position
                   : employee?.position[employee.position.length - 1]}
@@ -225,20 +229,21 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                 {typeof employee.department === "string"
                   ? employee.department
                   : Array.isArray(employee.department)
-                  ? employee.department[employee.department.length - 1]
-                  : "N/A"}
+                    ? employee.department[employee.department.length - 1]
+                    : "N/A"}
               </CardDescription>
             </div>
           </div>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-4 flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="icon-wrapper-blue">
-              <FileText className="h-4 w-4 text-primary" />
+            <div className="icon-info">
+              <FileText className="h-4 w-4" />
             </div>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-sm font-medium text-on-matte dark:text-on-matte">
               {employee.reports.length > 0
                 ? "Genius Factor Career Assessment"
                 : "No Assessments"}
@@ -256,21 +261,21 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
 
         {/* Score Display */}
         {status === "Completed" && overallScore > 0 && (
-          <div className="bg-gradient-to-r from-success/5 to-transparent rounded-lg p-3">
+          <div className="bg-status-success rounded-lg p-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <div className="icon-wrapper-green">
-                  <Award className="h-4 w-4 text-success" />
+                <div className="icon-success">
+                  <Award className="h-4 w-4" />
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-subtle dark:text-subtle-dark">
                   Genius Score
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="text-2xl font-bold text-success">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {Math.round(overallScore)}
                 </div>
-                <span className="text-xs text-muted-foreground">/100</span>
+                <span className="text-xs text-subtle dark:text-subtle-dark">/100</span>
               </div>
             </div>
           </div>
@@ -278,28 +283,27 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
 
         <div className="space-y-2 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-subtle dark:text-subtle-dark">
               Assessment Progress
             </span>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-sm font-medium text-on-matte dark:text-on-matte">
               {completionRate}%
             </span>
           </div>
           <Progress
             value={completionRate}
-            className="h-2 progress-bar-primary"
+            className="h-2 [&>div]:bg-gradient-to-r [&>div]:from-purple-500 [&>div]:to-purple-600"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground flex-shrink-0">
+        <div className="flex items-center gap-2 text-sm text-subtle dark:text-subtle-dark flex-shrink-0">
           <Calendar className="h-4 w-4" />
           <span>
             {status === "Completed"
-              ? `Last: ${
-                  firstReport.createdAt
-                    ? new Date(firstReport.createdAt).toLocaleDateString()
-                    : "Unknown"
-                }`
+              ? `Last: ${firstReport.createdAt
+                ? new Date(firstReport.createdAt).toLocaleDateString()
+                : "Unknown"
+              }`
               : "Awaiting Assessment"}
           </span>
         </div>
@@ -310,11 +314,9 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
             <div className="space-y-4">
               <div className="space-y-2">
                 {paginatedReports.map((report: any, index: number) => (
-                  <Button
+                  <button
                     key={report.id}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full bg-gradient-to-r from-primary/5 to-primary/10 hover:from-primary/10 hover:to-primary/20 text-primary hover:text-primary border border-primary/20 hover:border-primary/40 transition-all duration-200 group"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-gradient-to-r from-purple-500/5 to-purple-600/10 hover:from-purple-500/10 hover:to-purple-600/20 text-purple-accent dark:text-purple-300 hover:text-purple-600 dark:hover:text-purple-200 border border-purple-300/30 dark:border-purple-700/50 hover:border-purple-400/50 dark:hover:border-purple-600/50 transition-all duration-200 group hover:scale-[1.02]"
                     onClick={() =>
                       handleViewReport({
                         report,
@@ -325,8 +327,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                         position: employee.position,
                         dateCompleted: report.createdAt
                           ? new Date(report.createdAt)
-                              .toISOString()
-                              .split("T")[0]
+                            .toISOString()
+                            .split("T")[0]
                           : "Unknown",
                         status: "Completed",
                         geniusScore: parseInt(
@@ -352,11 +354,11 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                       })
                     }
                   >
-                    <Eye className="w-4 h-4 mr-2" />
+                    <Eye className="w-4 h-4" />
                     View Report #
                     {(currentPage - 1) * reportsPerPage + index + 1}
                     <ChevronRight className="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                  </Button>
+                  </button>
                 ))}
               </div>
               {totalReportPages > 1 && (
@@ -370,8 +372,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                           }
                           className={
                             currentPage === 1
-                              ? "pointer-events-none opacity-50 border-border"
-                              : "cursor-pointer hover:bg-muted border-border"
+                              ? "pointer-events-none opacity-50 border-matte dark:border-matte"
+                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
                           }
                         />
                       </PaginationItem>
@@ -385,8 +387,8 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
                           }
                           className={
                             currentPage === totalReportPages
-                              ? "pointer-events-none opacity-50 border-border"
-                              : "cursor-pointer hover:bg-muted border-border"
+                              ? "pointer-events-none opacity-50 border-matte dark:border-matte"
+                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-subtle border-matte dark:border-matte"
                           }
                         />
                       </PaginationItem>
@@ -398,18 +400,11 @@ const AssessmentCard = ({ employee, onViewDetails }: any) => {
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-4 text-center">
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
-                <FileText className="h-6 w-6 text-muted-foreground" />
+                <FileText className="h-6 w-6 text-subtle dark:text-subtle-dark" />
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-subtle dark:text-subtle-dark">
                 No assessments completed yet
               </span>
-              {/* <Button
-                variant="outline"
-                size="sm"
-                className="mt-3 border-primary text-primary hover:bg-primary/10"
-              >
-                Schedule Assessment
-              </Button> */}
             </div>
           )}
         </div>
@@ -461,15 +456,13 @@ export default function Assessments() {
   const employeeData =
     data?.employees?.map((employee: any) => ({
       id: employee.id,
-      name: `${employee.firstName} ${
-        employee.lastName !== "Not provide" ? employee.lastName : ""
-      }`.trim(),
+      name: `${employee.firstName} ${employee.lastName !== "Not provide" ? employee.lastName : ""
+        }`.trim(),
       department: employee.department || "Unknown",
       position: employee.position || "Unknown",
       reports: employee.reports || [],
-      avatar: `${employee.firstName[0]}${
-        employee.lastName !== "Not provide" ? employee.lastName[0] : ""
-      }`.toUpperCase(),
+      avatar: `${employee.firstName[0]}${employee.lastName !== "Not provide" ? employee.lastName[0] : ""
+        }`.toUpperCase(),
       salary: employee.salary,
       email: employee.email,
     })) || [];
@@ -534,7 +527,7 @@ export default function Assessments() {
   if (isLoading) {
     return (
       <HRLayout>
-        <div className="min-h-screen gradient-bg-primary flex items-center justify-center">
+        <div className="min-h-screen bg-layout-purple flex items-center justify-center">
           <Loader />
         </div>
       </HRLayout>
@@ -544,16 +537,16 @@ export default function Assessments() {
   if (isError) {
     return (
       <HRLayout>
-        <div className="min-h-screen gradient-bg-primary p-6">
-          <Card className="card-primary border-0 shadow-xl">
+        <div className="min-h-screen bg-layout-purple p-6">
+          <Card className="card-purple border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
             <CardContent className="p-12 text-center">
-              <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                <FileText className="h-8 w-8 text-destructive" />
+              <div className="h-16 w-16 rounded-full bg-status-error flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-8 w-8 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <h3 className="text-lg font-semibold text-on-matte dark:text-on-matte mb-2">
                 Error loading assessments
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-subtle dark:text-subtle-dark">
                 Unable to load assessment data. Please try again later.
               </p>
             </CardContent>
@@ -565,25 +558,25 @@ export default function Assessments() {
 
   return (
     <HRLayout>
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-6 space-y-6">
         {/* Header with decorative elements */}
         <div
           id="assessments-header"
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6"
+          className="relative overflow-hidden rounded-2xl bg-gradient-purple p-8 shadow-lg"
         >
-          <div className="decorative-gradient-blur-blue -top-20 -right-20" />
-          <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-3">
-              <div className="sidebar-logo-wrapper">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                 <Target className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                   Career Assessments
                 </h1>
-                <p className="text-muted-foreground mt-2">
+                <p className="text-purple-100 mt-2">
                   Genius Factor career alignment and talent analysis (
                   {metrics.totalEmployees} employees)
                 </p>
@@ -592,21 +585,25 @@ export default function Assessments() {
           </div>
         </div>
 
-        {/* Stats Cards - FIXED ICON POSITIONING */}
+        {/* Stats Cards with Bubble Effects */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 1: Total Assessments */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-600/5 to-transparent dark:from-purple-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-purple-600/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-5 w-5 text-primary" />
+                    <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+                      <FileText className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Total Assessments
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold gradient-text-primary">
                         {metrics.totalAssessments}
                       </div>
                     </div>
@@ -616,19 +613,23 @@ export default function Assessments() {
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 2: Completed */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-green-600/5 to-transparent dark:from-green-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-success/20 to-green-600/10 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="h-5 w-5 text-success" />
+                    <div className="icon-success group-hover:scale-110 transition-transform duration-300">
+                      <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Completed
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
                         {metrics.completedCount}
                       </div>
                     </div>
@@ -638,19 +639,23 @@ export default function Assessments() {
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 3: Not Started */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-600/5 to-transparent dark:from-amber-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-warning/20 to-amber-600/10 flex items-center justify-center flex-shrink-0">
-                      <Target className="h-5 w-5 text-warning" />
+                    <div className="icon-warning group-hover:scale-110 transition-transform duration-300">
+                      <Target className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Not Started
                       </p>
-                      <div className="text-3xl font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
                         {metrics.notStartedCount}
                       </div>
                     </div>
@@ -660,16 +665,20 @@ export default function Assessments() {
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 4: Avg Genius Score */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-pink-500/10 to-pink-600/5 dark:from-pink-500/20 dark:to-pink-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-600/5 to-transparent dark:from-pink-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 flex items-center justify-center flex-shrink-0">
-                      <Award className="h-5 w-5 text-purple-600" />
+                    <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+                      <Award className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
+                      <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                         Avg Genius Score
                       </p>
                       <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -683,8 +692,7 @@ export default function Assessments() {
           </Card>
         </div>
 
-        {/* Search & Filters Section - FIXED LAYOUT */}
-        {/* Search & Filters Section - FIXED LAYOUT */}
+        {/* Search & Filters Section */}
         <div className="grid gap-6 lg:grid-cols-2">
           <SearchFilterBar
             title="Find Assessments"
@@ -710,7 +718,6 @@ export default function Assessments() {
                 value: departmentFilter,
                 onChange: setDepartmentFilter,
                 options: [
-             
                   ...Array.from(
                     new Set(
                       dashboardOptions.Departments.map((dept) => dept.option)
@@ -735,36 +742,40 @@ export default function Assessments() {
         {/* Employee Assessment Grid */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-2xl font-bold text-on-matte dark:text-on-matte">
               Employee Assessments
             </h2>
-            <Badge className="bg-primary/20 text-primary border-primary/30">
+            <Badge className="badge-brand border-purple-accent">
               {filteredEmployees.length} Results
             </Badge>
           </div>
 
           {filteredEmployees.length === 0 ? (
-            <Card className="card-primary border-0 shadow-xl">
+            <Card className="card-purple border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
               <CardContent className="p-12 text-center">
                 <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-muted-foreground" />
+                  <FileText className="h-8 w-8 text-subtle dark:text-subtle-dark" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <h3 className="text-lg font-semibold text-on-matte dark:text-on-matte mb-2">
                   No assessments found
                 </h3>
-                <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                <p className="text-subtle dark:text-subtle-dark max-w-md mx-auto mb-6">
                   {statusFilter === "Not Started"
                     ? "All employees have completed assessments. Great job!"
                     : "Try adjusting your search criteria to find what you're looking for."}
                 </p>
-                <Button
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary/10"
+                <button
+                  className="btn-purple-outline px-4 py-2 text-sm"
+                  onClick={() => {
+                    setStatusFilter("all");
+                    setDepartmentFilter("all");
+                    setSearchValue("");
+                  }}
                 >
                   {statusFilter === "Not Started"
                     ? "View Completed"
                     : "Clear Filters"}
-                </Button>
+                </button>
               </CardContent>
             </Card>
           ) : (
@@ -782,33 +793,31 @@ export default function Assessments() {
 
         {/* Pagination */}
         {data?.pagination && filteredEmployees.length > 0 && (
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-xl bg-card border border-border">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-xl glass-effect-matte border border-matte dark:border-matte">
+            <div className="text-sm text-subtle dark:text-subtle-dark">
               Showing{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {(currentPage - 1) * limit + 1}
               </span>{" "}
               to{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {Math.min(currentPage * limit, data.pagination.totalEmployees)}
               </span>{" "}
               of{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {data.pagination.totalEmployees}
               </span>{" "}
               employees
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="gap-1 border-border hover:border-primary"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-4 w-4 rotate-180" />
                 Previous
-              </Button>
+              </button>
               <div className="flex items-center gap-1">
                 {Array.from(
                   { length: Math.min(5, data.pagination.totalPages) },
@@ -816,21 +825,16 @@ export default function Assessments() {
                     const pageNum = i + 1;
                     if (data.pagination.totalPages <= 5) {
                       return (
-                        <Button
+                        <button
                           key={pageNum}
-                          variant={
-                            currentPage === pageNum ? "default" : "outline"
-                          }
-                          size="sm"
                           onClick={() => setCurrentPage(pageNum)}
-                          className={`min-w-8 h-8 ${
-                            currentPage === pageNum
-                              ? "btn-gradient-primary text-white"
-                              : "border-border"
-                          }`}
+                          className={`min-w-8 h-8 rounded-lg text-sm font-medium transition-all ${currentPage === pageNum
+                            ? "btn-purple text-white"
+                            : "border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle"
+                            }`}
                         >
                           {pageNum}
-                        </Button>
+                        </button>
                       );
                     }
                     return null;
@@ -838,38 +842,34 @@ export default function Assessments() {
                 )}
                 {data.pagination.totalPages > 5 && (
                   <>
-                    <span className="px-2 text-muted-foreground">...</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <span className="px-2 text-subtle dark:text-subtle-dark">...</span>
+                    <button
                       onClick={() => setCurrentPage(data.pagination.totalPages)}
-                      className="min-w-8 h-8 border-border"
+                      className="min-w-8 h-8 rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors"
                     >
                       {data.pagination.totalPages}
-                    </Button>
+                    </button>
                   </>
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() =>
                   setCurrentPage((prev) =>
                     Math.min(prev + 1, data.pagination.totalPages)
                   )
                 }
                 disabled={currentPage === data.pagination.totalPages}
-                className="gap-1 border-border hover:border-primary"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
+        <div className="flex items-center justify-between text-sm text-subtle dark:text-subtle-dark pt-4 border-t border-matte dark:border-matte">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500" />
@@ -880,9 +880,6 @@ export default function Assessments() {
             <span>•</span>
             <span>Avg score: {metrics.avgScore}/100</span>
           </div>
-          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-            Assessment Guide <ChevronRight className="h-3 w-3" />
-          </button> */}
         </div>
 
         {/* Assessment Details Modal */}

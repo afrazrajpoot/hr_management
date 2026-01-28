@@ -322,7 +322,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 gradient-bg-primary">
+    <header className="sticky top-0 z-50 glass-effect border-b border-border/50">
       {/* Unified gradient background */}
       {/* <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div> */}
 
@@ -337,15 +337,15 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                 <div className="absolute -left-2 -top-2 w-12 h-12 bg-gradient-to-br from-primary/10 to-purple-600/10 rounded-full blur-xl"></div>
 
                 <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
-                    <Sparkles className="w-6 h-6 text-primary-foreground" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-purple flex items-center justify-center shadow-lg">
+                    <Sparkles className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h1 className="text-2xl font-bold text-foreground">
                         {title}
                       </h1>
-                      <Badge className="bg-primary/10 text-primary border border-primary/20">
+                      <Badge className="badge-brand">
                         HR Dashboard
                       </Badge>
                     </div>
@@ -457,8 +457,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     <div className="p-4 border-b border-border bg-gradient-to-r from-secondary to-transparent">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-                            <Bell className="w-5 h-5 text-primary-foreground" />
+                          <div className="w-10 h-10 rounded-lg bg-gradient-purple flex items-center justify-center">
+                            <Bell className="w-5 h-5 text-white" />
                           </div>
                           <div>
                             <DropdownMenuLabel className="text-base font-bold p-0 text-foreground">
@@ -510,25 +510,22 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                           {notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-4 border-b border-border last:border-b-0 transition-all hover:bg-secondary/50 ${
-                                notification.status === "unread"
+                              className={`p-4 border-b border-border last:border-b-0 transition-all hover:bg-secondary/50 ${notification.status === "unread"
                                   ? "bg-primary/5 border-l-4 border-l-primary"
                                   : "border-l-4 border-l-transparent"
-                              } ${
-                                notification.id.startsWith("socket-")
+                                } ${notification.id.startsWith("socket-")
                                   ? "bg-warning/5"
                                   : ""
-                              }`}
+                                }`}
                             >
                               <div className="flex items-start gap-3">
                                 {/* Notification Icon */}
                                 <div className="flex-shrink-0 mt-1">
                                   <div
-                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                      notification.status === "unread"
-                                        ? "bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/30"
+                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${notification.status === "unread"
+                                        ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800"
                                         : "bg-secondary border border-border"
-                                    }`}
+                                      }`}
                                   >
                                     {getNotificationIcon(notification.type)}
                                   </div>
@@ -538,7 +535,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs font-medium text-primary-foreground">
+                                      <div className="w-6 h-6 rounded-full bg-gradient-purple flex items-center justify-center text-xs font-medium text-white">
                                         {getEmployeeInitials(
                                           notification.employeeName
                                         )}
@@ -555,7 +552,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                       </div>
                                     </div>
                                     {notification.status === "unread" && (
-                                      <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs">
+                                      <Badge className="badge-brand text-xs">
                                         New
                                       </Badge>
                                     )}
@@ -567,25 +564,25 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
 
                                   {notification.data?.progress !==
                                     undefined && (
-                                    <div className="mb-3">
-                                      <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs text-muted-foreground">
-                                          Progress
-                                        </span>
-                                        <span className="text-xs font-medium text-primary">
-                                          {notification.data.progress}%
-                                        </span>
+                                      <div className="mb-3">
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-xs text-muted-foreground">
+                                            Progress
+                                          </span>
+                                          <span className="text-xs font-medium text-primary">
+                                            {notification.data.progress}%
+                                          </span>
+                                        </div>
+                                        <div className="w-full bg-secondary rounded-full h-2">
+                                          <div
+                                            className="h-full rounded-full bg-gradient-purple transition-all"
+                                            style={{
+                                              width: `${notification.data.progress}%`,
+                                            }}
+                                          ></div>
+                                        </div>
                                       </div>
-                                      <div className="w-full bg-secondary rounded-full h-2">
-                                        <div
-                                          className="h-full rounded-full bg-gradient-to-r from-primary to-purple-600 transition-all"
-                                          style={{
-                                            width: `${notification.data.progress}%`,
-                                          }}
-                                        ></div>
-                                      </div>
-                                    </div>
-                                  )}
+                                    )}
 
                                   <div className="flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground">
@@ -644,10 +641,10 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                       className="flex items-center gap-3 px-3 py-2 hover:bg-secondary transition-all group border border-border"
                     >
                       <div className="relative">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center ring-2 ring-primary/30 ring-offset-2 ring-offset-background group-hover:ring-primary/50 transition-all">
-                          <User className="w-5 h-5 text-primary-foreground" />
+                        <div className="h-10 w-10 rounded-full bg-gradient-purple flex items-center justify-center ring-2 ring-purple-100 dark:ring-purple-900 ring-offset-2 ring-offset-background group-hover:ring-purple-200 dark:group-hover:ring-purple-800 transition-all">
+                          <User className="w-5 h-5 text-white" />
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background"></div>
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
                       </div>
                       <div className="hidden lg:block text-left max-w-[160px]">
                         <p className="text-sm font-semibold text-foreground truncate">
@@ -667,8 +664,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                     {/* Profile Header */}
                     <div className="p-4 bg-gradient-to-r from-secondary to-transparent">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center ring-2 ring-primary/30">
-                          <User className="w-6 h-6 text-primary-foreground" />
+                        <div className="h-12 w-12 rounded-full bg-gradient-purple flex items-center justify-center ring-2 ring-purple-100 dark:ring-purple-900">
+                          <User className="w-6 h-6 text-white" />
                         </div>
                         <div>
                           <DropdownMenuLabel className="text-base font-bold p-0 text-foreground">

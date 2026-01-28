@@ -57,8 +57,8 @@ const SearchFilterBar = ({
   dropdownBackground = "bg-card", // Changed to match your card background
 }: SearchFilterBarProps) => {
   return (
-    <Card className="card-primary card-hover border-0 shadow-xl lg:col-span-2">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
+    <Card className="card-purple card-hover border-0 shadow-xl lg:col-span-2 bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+      <CardHeader className="bg-gradient-to-r from-purple-500/5 to-transparent border-b border-matte dark:border-matte">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <CardTitle className="flex items-center gap-2 text-foreground">
@@ -70,8 +70,8 @@ const SearchFilterBar = ({
             </CardDescription>
           </div>
           {filters.length > 0 && (
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-primary"></span>
+            <div className="text-sm text-subtle dark:text-subtle-dark flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse"></span>
               <span>{filters.length} active filters</span>
             </div>
           )}
@@ -81,12 +81,12 @@ const SearchFilterBar = ({
         <div className="flex flex-col lg:flex-row gap-3 items-stretch">
           {/* Search Input - Using your theme colors */}
           <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-subtle dark:text-subtle-dark" />
             <Input
               placeholder={placeholder}
               value={searchValue}
               onChange={onSearchChange}
-              className="pl-10 h-12 border-border/50 focus:border-primary w-full bg-card text-card-foreground"
+              className="pl-10 h-12 border-matte dark:border-matte focus:border-purple-accent w-full bg-white dark:bg-matte-gray-subtle text-on-matte dark:text-on-matte shadow-sm"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && onSearchClick) {
                   onSearchClick();
@@ -99,8 +99,8 @@ const SearchFilterBar = ({
           {filters.map((filter, index) => (
             <div key={index} className={filter.className || "w-full lg:w-auto"}>
               <Select value={filter.value} onValueChange={filter.onChange}>
-                <SelectTrigger 
-                  className="h-12 border-border/50 min-w-[160px] bg-card text-card-foreground hover:bg-card/90"
+                <SelectTrigger
+                  className="h-12 border-matte dark:border-matte min-w-[160px] bg-white dark:bg-matte-gray-subtle text-on-matte dark:text-on-matte hover:bg-gray-50 dark:hover:bg-matte-gray-subtle/80 shadow-sm"
                 >
                   <SelectValue placeholder={filter.placeholder} />
                 </SelectTrigger>
@@ -126,7 +126,7 @@ const SearchFilterBar = ({
           {showSearchButton && (
             <button
               onClick={onSearchClick}
-              className="btn-gradient-primary px-6 h-12 rounded-lg text-primary-foreground font-medium flex items-center justify-center gap-2 whitespace-nowrap w-full lg:w-auto hover:opacity-90 transition-opacity"
+              className="btn-purple px-6 h-12 rounded-lg text-white font-medium flex items-center justify-center gap-2 whitespace-nowrap w-full lg:w-auto hover:shadow-lg transition-all duration-300"
             >
               <Search className="h-4 w-4" />
               Search
@@ -144,9 +144,9 @@ const SearchFilterBar = ({
                 .map((filter, index) => {
                   const option = filter.options.find(opt => opt.value === filter.value);
                   return option ? (
-                    <Badge 
-                      key={index} 
-                      variant="secondary" 
+                    <Badge
+                      key={index}
+                      variant="secondary"
                       className="bg-primary/10 text-primary border-primary/20"
                     >
                       {option.label}

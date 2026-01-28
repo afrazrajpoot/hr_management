@@ -48,28 +48,28 @@ const assessmentStatuses = ["All Statuses", "Completed", "Not Started"];
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Completed":
-      return "badge-green";
+      return "badge-success";
     case "In Progress":
-      return "badge-blue";
+      return "badge-info";
     case "Pending":
-      return "badge-amber";
+      return "badge-warning";
     case "Not Started":
-      return "bg-muted text-muted-foreground";
+      return "bg-muted text-subtle dark:text-subtle-dark";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-muted text-subtle dark:text-subtle-dark";
   }
 };
 
 const getRiskColor = (risk: string | undefined) => {
   switch (risk) {
     case "Low":
-      return "badge-green";
+      return "badge-success";
     case "Moderate":
-      return "badge-amber";
+      return "badge-warning";
     case "High":
-      return "badge-red";
+      return "badge-error";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-muted text-subtle dark:text-subtle-dark";
   }
 };
 
@@ -198,23 +198,23 @@ function EmployeesContent() {
 
   return (
     <HRLayout>
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-6 space-y-6">
         {/* Header with decorative elements */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
-          <div className="decorative-gradient-blur-blue -top-20 -right-20" />
-          <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-purple p-8 shadow-lg">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="sidebar-logo-wrapper">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                     Employee Management
                   </h1>
-                  <p className="text-muted-foreground mt-2">
+                  <p className="text-purple-100 mt-2">
                     Comprehensive workforce analytics and insights
                   </p>
                 </div>
@@ -227,7 +227,7 @@ function EmployeesContent() {
                 Export Report
               </button> */}
               <Link href="/hr-dashboard/upload-employee">
-                <button className="btn-gradient-primary flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium">
+                <button className="!bg-white !text-purple-600 dark:!bg-white dark:!text-purple-600 flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium hover:!bg-purple-50 dark:hover:!bg-purple-50 hover:shadow-xl transition-all duration-300">
                   <Plus className="h-4 w-4" />
                   Add Employee
                 </button>
@@ -236,21 +236,26 @@ function EmployeesContent() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards with Bubble Effects */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 1: Total Employees */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-600/5 to-transparent dark:from-purple-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="icon-wrapper-blue">
-                      <Users className="h-6 w-6 text-primary" />
+                    <div className="icon-brand group-hover:scale-110 transition-transform duration-300">
+                      <Users className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                       Total Employees
                     </p>
                   </div>
-                  <div className="text-3xl ml-[3vw] font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                  <div className="text-3xl ml-[3vw] font-bold gradient-text-primary">
                     {totalEmployees}
                   </div>
                 </div>
@@ -258,65 +263,74 @@ function EmployeesContent() {
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 2: Assessment Rate */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-green-600/5 dark:from-green-500/20 dark:to-green-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-green-600/5 to-transparent dark:from-green-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="icon-wrapper-green">
-                      <Target className="h-6 w-6 text-success" />
+                    <div className="icon-success group-hover:scale-110 transition-transform duration-300">
+                      <Target className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                       Assessment Rate
                     </p>
                   </div>
-                  <div className="text-3xl font-bold ml-[3vw] bg-gradient-to-r from-success to-green-600 bg-clip-text text-transparent">
+                  <div className="text-3xl font-bold ml-[3vw] bg-gradient-to-r from-green-600 to-green-400 bg-clip-text text-transparent">
                     {completionRate}%
                   </div>
                 </div>
-                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-success/10 to-green-600/10 flex items-center justify-center">
-                  <Target className="h-7 w-7 text-success" />
-                </div> */}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 3: High Risk */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/20 dark:to-amber-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-amber-600/5 to-transparent dark:from-amber-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="icon-wrapper-amber">
-                      <Shield className="h-6 w-6 text-warning" />
+                    <div className="icon-warning group-hover:scale-110 transition-transform duration-300">
+                      <Shield className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                       High Risk
                     </p>
                   </div>
-                  <div className="text-3xl ml-[3vw] font-bold bg-gradient-to-r from-warning to-amber-600 bg-clip-text text-transparent">
+                  <div className="text-3xl ml-[3vw] font-bold bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
                     {highRiskEmployees}
                   </div>
                 </div>
-                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-warning/10 to-amber-600/10 flex items-center justify-center">
-                  <Shield className="h-7 w-7 text-warning" />
-                </div> */}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-primary card-hover border-0 shadow-lg">
-            <CardContent className="p-6">
+          {/* Card 4: Active Filters */}
+          <Card className="card-purple relative overflow-hidden group card-hover border-0 shadow-lg bg-gradient-to-br from-gray-50 to-white dark:from-matte-gray-medium dark:to-matte-gray-light">
+            {/* Bubble Effect */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/20 dark:to-blue-600/10 rounded-full -translate-y-16 translate-x-8 group-hover:scale-110 transition-transform duration-500" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-600/5 to-transparent dark:from-blue-600/10 dark:to-transparent rounded-full -translate-x-6 translate-y-8 group-hover:scale-110 transition-transform duration-500 delay-100" />
+
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 ">
-                    <div className="icon-wrapper-purple">
-                      <Zap className="h-6 w-6 text-purple-600" />
+                  <div className="flex items-center gap-2">
+                    <div className="icon-info group-hover:scale-110 transition-transform duration-300">
+                      <Zap className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-sm font-medium text-subtle dark:text-subtle-dark">
                       Active Filters
                     </p>
                   </div>
-                  <div className="text-2xl ml-[3vw] font-bold text-foreground">
+                  <div className="text-2xl ml-[3vw] font-bold text-on-matte dark:text-on-matte-subtle">
                     {
                       [selectedDepartment, selectedRisk, selectedStatus].filter(
                         (item) => !item.includes("All")
@@ -324,17 +338,13 @@ function EmployeesContent() {
                     }
                   </div>
                 </div>
-                {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-600/10 to-pink-600/10 flex items-center justify-center">
-                  <Filter className="h-7 w-7 text-purple-600" />
-                </div> */}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Search & Filters Section - FIXED HEIGHTS */}
+        {/* Search & Filters Section */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Quick Stats & Search */}
           {/* Quick Stats & Search */}
           <SearchFilterBar
             title="Employee Search"
@@ -390,34 +400,37 @@ function EmployeesContent() {
         </div>
 
         {/* Employee Table */}
-        <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
+        <Card className="card-purple relative overflow-hidden group border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-matte-gray-medium dark:to-matte-gray-light">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent pointer-events-none" />
+
+          <CardHeader className="bg-gradient-to-r from-purple-600/10 to-transparent border-b border-matte dark:border-matte">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Users className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-on-matte dark:text-on-matte">
+                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   Employee Directory
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-subtle dark:text-subtle-dark">
                   {data?.pagination?.totalEmployees || 0} employees in system
                 </CardDescription>
               </div>
-              <Badge className="bg-primary/20 text-primary border-primary/30">
+              <Badge className="badge-brand border-purple-accent">
                 Page {currentPage} of {data?.pagination?.totalPages || 1}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 relative z-10">
             <div className="overflow-x-auto">
               {filteredEmployees.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <Users className="h-8 w-8 text-muted-foreground" />
+                    <Users className="h-8 w-8 text-subtle dark:text-subtle-dark" />
                   </div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">
+                  <h3 className="text-lg font-medium text-on-matte dark:text-on-matte mb-2">
                     No employees found
                   </h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
+                  <p className="text-subtle dark:text-subtle-dark max-w-md mx-auto">
                     Try adjusting your search or filter criteria to find what
                     you're looking for.
                   </p>
@@ -425,23 +438,23 @@ function EmployeesContent() {
               ) : (
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                    <tr className="border-b border-matte dark:border-matte">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Employee
                       </th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Department
                       </th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Position
                       </th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Status
                       </th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Risk Level
                       </th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">
+                      <th className="text-left p-4 font-medium text-subtle dark:text-subtle-dark">
                         Actions
                       </th>
                     </tr>
@@ -450,29 +463,26 @@ function EmployeesContent() {
                     {filteredEmployees.map((employee: any) => (
                       <tr
                         key={employee.id}
-                        className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors group"
+                        className="border-b border-matte/50 last:border-0 hover:bg-gray-50/50 dark:hover:bg-matte-gray-subtle/30 transition-colors group"
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border-2 border-border group-hover:border-primary transition-colors">
+                            <Avatar className="h-10 w-10 border-2 border-matte dark:border-matte group-hover:border-purple-accent transition-colors">
                               <AvatarImage src="/api/placeholder/40/40" />
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                                {`${employee.firstName[0]}${
-                                  employee.lastName !== "Not provide"
-                                    ? employee.lastName[0]
-                                    : ""
-                                }`.toUpperCase()}
+                              <AvatarFallback className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-medium">
+                                {`${employee.firstName[0]}${employee.lastName !== "Not provide"
+                                  ? employee.lastName[0]
+                                  : ""
+                                  }`.toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium text-foreground">{`${
-                                employee.firstName
-                              } ${
-                                employee.lastName !== "Not provide"
+                              <p className="font-medium text-on-matte dark:text-on-matte">{`${employee.firstName
+                                } ${employee.lastName !== "Not provide"
                                   ? employee.lastName
                                   : ""
-                              }`}</p>
-                              <p className="text-sm text-muted-foreground">
+                                }`}</p>
+                              <p className="text-sm text-subtle dark:text-subtle-dark">
                                 {employee.email}
                               </p>
                             </div>
@@ -481,27 +491,27 @@ function EmployeesContent() {
                         <td className="p-4">
                           <Badge
                             variant="outline"
-                            className="bg-muted/50 border-muted-foreground/30 text-foreground"
+                            className="bg-gray-100/50 dark:bg-matte-gray-subtle border-gray-300 dark:border-matte text-on-matte dark:text-on-matte-subtle"
                           >
                             {typeof employee.department === "string"
                               ? employee.department
                               : Array.isArray(employee.department)
-                              ? employee.department[
-                                  employee.department.length - 1
+                                ? employee.department[
+                                employee.department.length - 1
                                 ]
-                              : "N/A"}
+                                : "N/A"}
                           </Badge>
                         </td>
                         <td className="p-4">
                           <div className="flex flex-col">
-                            <span className="text-foreground">
+                            <span className="text-on-matte dark:text-on-matte">
                               {typeof employee.position === "string"
                                 ? employee.position
                                 : employee?.position?.[
-                                    employee.position.length - 1
-                                  ] ?? "N/A"}
+                                employee.position.length - 1
+                                ] ?? "N/A"}
                             </span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-subtle dark:text-subtle-dark">
                               ${employee.salary?.toLocaleString() || "N/A"}
                             </span>
                           </div>
@@ -540,15 +550,13 @@ function EmployeesContent() {
                           </Badge>
                         </td>
                         <td className="p-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-2 text-primary hover:text-primary hover:bg-primary/10"
+                          <button
+                            className="btn-purple-outline flex items-center gap-2 px-3 py-1.5 text-sm hover:scale-105 transition-all duration-200"
                             onClick={() => handleViewEmployee(employee)}
                           >
                             <Eye className="h-4 w-4" />
                             View
-                          </Button>
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -561,33 +569,31 @@ function EmployeesContent() {
 
         {/* Pagination */}
         {data?.pagination && data.pagination.totalEmployees > 0 && (
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-xl bg-card border border-border">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 rounded-xl glass-effect-matte border border-matte dark:border-matte">
+            <div className="text-sm text-subtle dark:text-subtle-dark">
               Showing{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {(currentPage - 1) * limit + 1}
               </span>{" "}
               to{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {Math.min(currentPage * limit, data.pagination.totalEmployees)}
               </span>{" "}
               of{" "}
-              <span className="font-bold text-foreground">
+              <span className="font-bold text-on-matte dark:text-on-matte">
                 {data.pagination.totalEmployees}
               </span>{" "}
               employees
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || isLoading}
-                className="gap-1 border-border hover:border-primary"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-4 w-4 rotate-180" />
                 Previous
-              </Button>
+              </button>
               <div className="flex items-center gap-1">
                 {Array.from(
                   { length: Math.min(5, data.pagination.totalPages) },
@@ -595,21 +601,16 @@ function EmployeesContent() {
                     const pageNum = i + 1;
                     if (data.pagination.totalPages <= 5) {
                       return (
-                        <Button
+                        <button
                           key={pageNum}
-                          variant={
-                            currentPage === pageNum ? "default" : "outline"
-                          }
-                          size="sm"
                           onClick={() => handlePageChange(pageNum)}
-                          className={`min-w-8 h-8 ${
-                            currentPage === pageNum
-                              ? "btn-gradient-primary"
-                              : "border-border"
-                          }`}
+                          className={`min-w-8 h-8 rounded-lg text-sm font-medium transition-all ${currentPage === pageNum
+                            ? "btn-purple text-white"
+                            : "border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle"
+                            }`}
                         >
                           {pageNum}
-                        </Button>
+                        </button>
                       );
                     }
                     return null;
@@ -617,32 +618,28 @@ function EmployeesContent() {
                 )}
                 {data.pagination.totalPages > 5 && (
                   <>
-                    <span className="px-2 text-muted-foreground">...</span>
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <span className="px-2 text-subtle dark:text-subtle-dark">...</span>
+                    <button
                       onClick={() =>
                         handlePageChange(data.pagination.totalPages)
                       }
-                      className="min-w-8 h-8 border-border"
+                      className="min-w-8 h-8 rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors"
                     >
                       {data.pagination.totalPages}
-                    </Button>
+                    </button>
                   </>
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={
                   currentPage >= data.pagination.totalPages || isLoading
                 }
-                className="gap-1 border-border hover:border-primary"
+                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border border-matte dark:border-matte text-subtle dark:text-subtle-dark hover:bg-gray-100 dark:hover:bg-matte-gray-subtle transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           </div>
         )}
@@ -655,7 +652,7 @@ function EmployeesContent() {
         />
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
+        <div className="flex items-center justify-between text-sm text-subtle dark:text-subtle-dark pt-4 border-t border-matte dark:border-matte">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500" />
@@ -666,9 +663,6 @@ function EmployeesContent() {
             <span>•</span>
             <span>Last updated: Just now</span>
           </div>
-          {/* <button className="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-          {/* Need Help? <ChevronRight className="h-3 w-3" />
-          </button> */}
         </div>
       </div>
     </HRLayout>
