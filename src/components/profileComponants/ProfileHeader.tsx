@@ -87,16 +87,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     >
       {/* Background Bubbles using global CSS colors */}
       <div className="relative ">
-        {/* Background Bubbles */}
-        <div className="absolute -top-12 -left-12 w-64 h-64 rounded-full blur-3xl opacity-30 bg-purple-600" />
-        <div className="absolute top-1/2 -right-16 w-48 h-48 rounded-full blur-3xl opacity-20 bg-purple-600" />
-        <div className="absolute -bottom-8 left-1/3 w-32 h-32 rounded-full blur-2xl opacity-15 bg-purple-600" />
-        <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-xl opacity-10 bg-purple-600" />
+        {/* Background Bubbles with gradient */}
+        <div className="absolute -top-12 -left-12 w-64 h-64 rounded-full blur-3xl opacity-20" style={{ background: 'var(--purple-gradient)' }} />
+        <div className="absolute top-1/2 -right-16 w-48 h-48 rounded-full blur-3xl opacity-15" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)' }} />
+        <div className="absolute -bottom-8 left-1/3 w-32 h-32 rounded-full blur-2xl opacity-10" style={{ background: 'var(--purple-gradient)' }} />
 
         <Card className="card-purple -mt-24 relative border-t-0 rounded-t-none shadow-xl border-matte overflow-hidden">
-          {/* Additional bubble inside card */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-10 bg-purple-600" />
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-5 bg-purple-600" />
+          {/* Additional bubbles inside card with gradient */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl opacity-5" style={{ background: 'var(--purple-gradient)' }} />
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-5" style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)' }} />
 
           <CardContent className="pt-0 pb-6 relative z-10">
             <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6">

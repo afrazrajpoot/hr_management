@@ -24,7 +24,15 @@ export default function RootLayout({
       <body>
         <Providers>
           <SocketProvider>
-            <Toaster />
+            <Toaster
+              theme="system"
+              position="top-right"
+              richColors
+              toastOptions={{
+                duration: 3000,
+                className: "border border-input",
+              }}
+            />
             {children}
           </SocketProvider>
         </Providers>

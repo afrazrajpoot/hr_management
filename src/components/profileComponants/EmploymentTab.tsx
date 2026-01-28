@@ -288,7 +288,7 @@ const EmploymentTab: React.FC<EmploymentTabProps> = ({
                   disabled={!isEditing}
                 />
                 {field.field === "manager" && employee.manager && (
-                  <Badge className="badge-green mt-2 inline-block">Reporting</Badge>
+                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors mt-2 inline-block">Reporting</Badge>
                 )}
               </motion.div>
             ))}

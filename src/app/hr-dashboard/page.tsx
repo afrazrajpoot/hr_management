@@ -104,27 +104,26 @@ const StatCard = ({
   trend = "up",
   description,
 }: any) => (
-  <Card className="card-primary card-hover group relative overflow-hidden border-0 shadow-lg">
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  <Card className="card-purple group relative overflow-hidden border-0 shadow-lg">
+    <div className="absolute inset-0 bg-gradient-purple opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
     <CardContent className="p-6 relative z-10">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 ">
-            <div className="icon-wrapper-blue">
-              <Icon className="h-6 w-6 text-primary" />
+            <div className="icon-brand">
+              <Icon className="h-6 w-6" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
           </div>
           <div className="flex items-end gap-3">
-            <span className="text-3xl ml-[2vw] font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="text-3xl ml-[2vw] font-bold text-gradient-purple">
               {value}
             </span>
             {change && (
               <Badge
                 variant={trend === "up" ? "default" : "secondary"}
-                className={`gap-1 px-2 py-1 rounded-full ${
-                  trend === "up" ? "badge-green" : "badge-amber"
-                }`}
+                className={`gap-1 px-2 py-1 rounded-full ${trend === "up" ? "badge-success" : "badge-warning"
+                  }`}
               >
                 <ArrowUpRight className="h-3 w-3" />
                 {change}
@@ -135,9 +134,6 @@ const StatCard = ({
             <p className="text-xs text-muted-foreground mt-3">{description}</p>
           )}
         </div>
-        {/* <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/10 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-          <Icon className="h-7 w-7 text-primary" />
-        </div> */}
       </div>
     </CardContent>
   </Card>
@@ -333,33 +329,33 @@ export default function Dashboard() {
   const avgGeniusFactor =
     departmentData.length > 0
       ? Math.round(
-          departmentData
-            .map(
-              (dept: any) => dept.metrics?.avg_scores?.genius_factor_score || 0
-            )
-            .reduce((sum: number, score: number) => sum + score, 0) /
-            departmentData.length
-        )
+        departmentData
+          .map(
+            (dept: any) => dept.metrics?.avg_scores?.genius_factor_score || 0
+          )
+          .reduce((sum: number, score: number) => sum + score, 0) /
+        departmentData.length
+      )
       : 0;
   const avgRetentionRisk =
     departmentData.length > 0
       ? Math.round(
-          departmentData.reduce(
-            (sum: number, dept: any) =>
-              sum + (dept.metrics?.avg_scores?.retention_risk_score || 0),
-            0
-          ) / departmentData.length
-        )
+        departmentData.reduce(
+          (sum: number, dept: any) =>
+            sum + (dept.metrics?.avg_scores?.retention_risk_score || 0),
+          0
+        ) / departmentData.length
+      )
       : 0;
 
   const totalCompletion =
     departmentData.length > 0
       ? Math.round(
-          departmentData.reduce(
-            (sum: number, dept: any) => sum + (dept.completion || 0),
-            0
-          ) / departmentData.length
-        )
+        departmentData.reduce(
+          (sum: number, dept: any) => sum + (dept.completion || 0),
+          0
+        ) / departmentData.length
+      )
       : 0;
 
   const handleRefresh = () => {
@@ -465,23 +461,23 @@ export default function Dashboard() {
 
   return (
     <HRLayout>
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-6 space-y-6">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-6 space-y-6">
         {/* Header with decorative elements */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
-          <div className="decorative-gradient-blur-blue -top-20 -right-20" />
-          <div className="decorative-gradient-blur-purple -bottom-20 -left-20" />
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-purple p-6 shadow-xl border border-white/20">
+          <div className="decorative-gradient-blur-blue -top-20 -right-20 opacity-50" />
+          <div className="decorative-gradient-blur-purple -bottom-20 -left-20 opacity-50" />
 
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="sidebar-logo-wrapper">
+                <div className="p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 shadow-sm">
                   <BarChart3 className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight gradient-text-primary">
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                     HR Analytics Dashboard
                   </h1>
-                  <p className="text-muted-foreground mt-2">
+                  <p className="text-purple-100 mt-2">
                     Real-time insights and workforce intelligence
                   </p>
                 </div>
@@ -490,11 +486,10 @@ export default function Dashboard() {
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-2 w-2 rounded-full ${
-                      isConnected
-                        ? "bg-green-500 animate-pulse"
-                        : "bg-amber-500"
-                    }`}
+                    className={`h-2 w-2 rounded-full ${isConnected
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-amber-500"
+                      }`}
                   />
                   <span className="text-sm font-medium">
                     {isConnected ? "Live Data Streaming" : "Demo Mode"}
@@ -516,9 +511,8 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleRefresh}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-card text-card-foreground border border-border hover:border-primary transition-all ${
-                  isRefreshing ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`flex items-center gap-2 btn-purple border-0 ${isRefreshing ? "opacity-80 cursor-not-allowed" : ""
+                  }`}
                 disabled={isRefreshing}
               >
                 <RefreshCw
@@ -527,15 +521,13 @@ export default function Dashboard() {
                 {isRefreshing ? "Refreshing..." : "Refresh Data"}
               </button>
               <Badge
-                className={`px-3 py-1.5 rounded-full font-medium ${
-                  isConnected ? "badge-green" : "badge-amber"
-                }`}
+                className={`px-3 py-1.5 rounded-full font-medium border-0 backdrop-blur-sm ${isConnected ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-100"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      isConnected ? "bg-green-500" : "bg-amber-500"
-                    }`}
+                    className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" : "bg-amber-400"
+                      }`}
                   />
                   {isConnected ? "Connected" : "Demo Mode"}
                 </div>
@@ -580,19 +572,21 @@ export default function Dashboard() {
         {/* Main Charts Grid */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Assessment Completion Chart */}
-          <Card className="card-primary card-hover border-0 shadow-xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent border-b">
+          <Card className="card-purple shadow-elevated">
+            <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-4">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2 text-foreground">
-                    <BarChart3 className="h-5 w-5 text-primary" />
+                    <div className="p-1.5 rounded-md bg-purple-50 dark:bg-purple-900/20">
+                      <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
                     Department Performance
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground">
+                  <CardDescription className="text-muted-foreground mt-1">
                     Assessment completion rates by department
                   </CardDescription>
                 </div>
-                <Badge className="badge-blue">
+                <Badge className="badge-info">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +18% Growth
                 </Badge>
@@ -659,7 +653,7 @@ export default function Dashboard() {
                     Talent score ranges across organization
                   </CardDescription>
                 </div>
-                <Badge className="badge-purple">
+                <Badge className="badge-brand">
                   <Award className="h-3 w-3 mr-1" />
                   Talent Metrics
                 </Badge>
@@ -734,7 +728,7 @@ export default function Dashboard() {
                     Risk distribution across departments
                   </CardDescription>
                 </div>
-                <Badge className="badge-green">
+                <Badge className="badge-success">
                   <Shield className="h-3 w-3 mr-1" />
                   Low Risk
                 </Badge>
@@ -794,7 +788,7 @@ export default function Dashboard() {
                     Monthly movement across departments
                   </CardDescription>
                 </div>
-                <Badge className="badge-amber">
+                <Badge className="badge-warning">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   Growing
                 </Badge>
@@ -806,7 +800,7 @@ export default function Dashboard() {
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--border))"
-                    // strokeOpacity={0.3}
+                  // strokeOpacity={0.3}
                   />
                   <XAxis
                     dataKey="month"
@@ -915,13 +909,12 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 px-4">
                           <Badge
-                            className={`${
-                              dept.retention_risk_score <= 30
-                                ? "badge-green"
-                                : dept.retention_risk_score <= 60
-                                ? "badge-amber"
-                                : "badge-red"
-                            }`}
+                            className={`${dept.retention_risk_score <= 30
+                              ? "badge-success"
+                              : dept.retention_risk_score <= 60
+                                ? "badge-warning"
+                                : "badge-error"
+                              }`}
                           >
                             {dept.retention_risk_score}%
                           </Badge>
@@ -954,13 +947,13 @@ export default function Dashboard() {
                         </td>
                         <td className="py-3 px-4">
                           {dept.genius_factor_score >= 75 ? (
-                            <Badge className="badge-green">
+                            <Badge className="badge-success">
                               High Potential
                             </Badge>
                           ) : dept.genius_factor_score >= 50 ? (
-                            <Badge className="badge-blue">Developing</Badge>
+                            <Badge className="badge-info">Developing</Badge>
                           ) : (
-                            <Badge className="badge-amber">Needs Support</Badge>
+                            <Badge className="badge-warning">Needs Support</Badge>
                           )}
                         </td>
                       </tr>
@@ -1047,11 +1040,10 @@ export default function Dashboard() {
                     >
                       <div className="flex items-center gap-2">
                         <div
-                          className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-                            index === 0
-                              ? "bg-gradient-to-br from-primary/20 to-accent/20"
-                              : "bg-secondary"
-                          }`}
+                          className={`h-8 w-8 rounded-lg flex items-center justify-center ${index === 0
+                            ? "bg-gradient-to-br from-primary/20 to-accent/20"
+                            : "bg-secondary"
+                            }`}
                         >
                           <span className="text-foreground font-bold">
                             {index + 1}

@@ -1,9 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import {
   Pagination,
   PaginationContent,
@@ -24,14 +21,11 @@ import {
   Star,
   Sparkles,
   TrendingDown,
-  ChevronRight,
-  Zap,
-  Award,
-  LineChart,
-  Briefcase,
-  Lightbulb,
   Clock,
   CheckCircle,
+  Zap,
+  LineChart,
+  Award,
 } from "lucide-react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
@@ -77,7 +71,6 @@ const mapJsonToDashboardData = (
   data: any,
   assessmentReports: any
 ): DashboardData => {
-  // Map recent assessments from assessmentReports
   const recentAssessments = assessmentReports.map((report: any) => ({
     id: report.id.toString(),
     name: `Genius Factor Assessment ${report.id}`,
@@ -86,7 +79,6 @@ const mapJsonToDashboardData = (
     score: report.geniusFactorScore,
   }));
 
-  // Map recent recommendations from internalCareerOpportunitiesJson
   const recentRecommendations =
     assessmentReports[0]?.internalCareerOpportunitiesJson?.specific_role_suggestions?.map(
       (role: string, index: number) => ({
@@ -117,9 +109,6 @@ const mapJsonToDashboardData = (
       data.careerRecommendation || "No recommendation available yet.",
   };
 
-  console.log("Career recommendation in mapping:", data.careerRecommendation);
-  console.log("Final aiRecommendation:", result.aiRecommendation);
-
   return result;
 };
 
@@ -138,7 +127,7 @@ export default function Dashboard() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [isFetching, setIsFetching] = useState(false);
   const [apiData, setApiData] = useState<any>(null);
 
@@ -157,7 +146,6 @@ export default function Dashboard() {
               },
             }
           );
-          console.log("Dashboard API response:", res.data);
           setApiData(res.data);
         } catch (error) {
           console.error("Error fetching dashboard data:", error);
@@ -171,14 +159,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (apiData && !isLoading) {
-      const assessmenReport: any = assessmentData.assessmentReports;
-      console.log("Mapping data - apiData:", apiData);
-      console.log("Mapping data - assessmentReport:", assessmenReport);
-      const mappedData = mapJsonToDashboardData(apiData, assessmenReport);
-      console.log("Mapped dashboard data:", mappedData);
+      const assessmentReports = assessmentData?.assessmentReports || [];
+      const mappedData = mapJsonToDashboardData(apiData, assessmentReports);
       setDashboardData(mappedData);
     }
-  }, [apiData, isLoading]);
+  }, [apiData, isLoading, assessmentData]);
 
   // Pagination logic
   const totalPages = Math.ceil(
@@ -191,7 +176,6 @@ export default function Dashboard() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top of Recent Assessments section
     const assessmentsSection = document.getElementById("recent-assessments");
     if (assessmentsSection) {
       assessmentsSection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -214,233 +198,232 @@ export default function Dashboard() {
   }
 
   return (
-    <AppLayout>
-      <div className="min-h-screen bg-layout-purple p-6 space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gradient-purple">
-              Welcome back, {apiData?.data?.name || "User"}
-            </h1>
-            <p className="text-muted-foreground mt-2 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              {currentDate}
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <Button
-              className="btn-purple px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-              asChild
-            >
-              <Link href="/employee-dashboard/assessment">
-                <ClipboardList className="w-4 h-4 mr-2" />
-                Continue Assessment
-              </Link>
-            </Button>
-          </div>
-        </div>
+    <>
+      {/* Inline styles for bubble animation - no external file needed */}
+      <style>{`
+        @keyframes gentle-bubble {
+          0%, 100% {
+            opacity: 0.4;
+            transform: scale(1) translate(0, 0);
+          }
+          50% {
+            opacity: 0.75;
+            transform: scale(1.15) translate(8px, -8px);
+          }
+        }
+        .bubble-glow {
+          animation: gentle-bubble 12s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {/* Progress Card */}
-          <div className="card-purple hover-lift min-w-0 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
-                  <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
-                  Progress
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
-              </h3>
-
-              <p className="text-sm text-muted-foreground mb-4 truncate">
-                {dashboardData.assessmentProgress.current} of {dashboardData.assessmentProgress.total} questions
+      <AppLayout>
+        <div className="min-h-screen bg-layout-purple p-6 space-y-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gradient-purple">
+                Welcome back, {apiData?.data?.name || "User"}
+              </h1>
+              <p className="text-muted-foreground mt-2 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                {currentDate}
               </p>
+            </div>
+            <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+              <Button
+                className="btn-purple px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                asChild
+              >
+                <Link href="/employee-dashboard/assessment">
+                  <ClipboardList className="w-4 h-4 mr-2" />
+                  Continue Assessment
+                </Link>
+              </Button>
+            </div>
+          </div>
 
-              {/* Progress Bar Container */}
-              <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-3 overflow-hidden">
-                {/* Animated Gradient Progress Bar */}
-                <div
-                  className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                  style={{
-                    width: `${Math.min(dashboardData.assessmentProgress.percentage, 100)}%`,
-                    background: "var(--purple-gradient)",
-                    backgroundSize: "200% 100%",
-                    animation: "gradient-shift 2s ease infinite"
-                  }}
-                >
-                  {/* Progress Bar Glow Effect */}
-                  <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+          {/* Key Metrics with bubble effects */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {/* Progress Card */}
+            <div className="card-purple hover-lift min-w-0 overflow-hidden relative">
+              <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500/12 dark:bg-blue-600/10 rounded-full blur-3xl -z-10 bubble-glow pointer-events-none"></div>
+              <div className="p-6 relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
+                    <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
+                    Progress
+                  </span>
+                </div>
 
-                  {/* Progress Percentage Indicator */}
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-white">
-                    {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+                </h3>
+
+                <p className="text-sm text-muted-foreground mb-4 truncate">
+                  {dashboardData.assessmentProgress.current} of {dashboardData.assessmentProgress.total} questions
+                </p>
+
+                <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-3 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                    style={{
+                      width: `${Math.min(dashboardData.assessmentProgress.percentage, 100)}%`,
+                      background: "var(--purple-gradient)",
+                      backgroundSize: "200% 100%",
+                      animation: "gradient-shift 2s ease infinite"
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-white">
+                      {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Progress Labels */}
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
-                <span>0%</span>
-                <span>100%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Completed Assessments */}
-          <div className="card-purple hover-lift min-w-0 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl">
-                  <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
+                  <span>0%</span>
+                  <span>100%</span>
                 </div>
-                <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">
-                  Achieved
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {dashboardData.completedAssessments}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                Completed Assessments
-              </p>
-              <div className="flex items-center text-sm text-green-600 dark:text-green-400 truncate">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>+3 from last month</span>
               </div>
             </div>
-          </div>
 
-          {/* Average Score */}
-          <div className="card-purple hover-lift min-w-0 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl">
-                  <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            {/* Completed Assessments */}
+            <div className="card-purple hover-lift min-w-0 overflow-hidden relative">
+              <div className="absolute -top-20 -left-20 w-80 h-80 bg-green-500/12 dark:bg-green-600/10 rounded-full blur-3xl -z-10 bubble-glow pointer-events-none"></div>
+              <div className="p-6 relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl">
+                    <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">
+                    Achieved
+                  </span>
                 </div>
-                <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-xs px-3 py-1 rounded-full">
-                  Performance
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {typeof dashboardData.averageScore === 'number' ? dashboardData.averageScore.toFixed(2) : '0.00'}%
-              </h3>
-              <p className="text-sm text-muted-foreground mb-2">Average Score</p>
-              <div className="flex items-center text-sm text-yellow-600 dark:text-yellow-400 truncate">
-                {dashboardData.averageScore > 70 ? (
-                  <>
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    <span>Excellent performance</span>
-                  </>
-                ) : dashboardData.averageScore > 0 ? (
-                  <>
-                    <TrendingDown className="w-4 h-4 mr-1" />
-                    <span>Room for improvement</span>
-                  </>
-                ) : (
-                  <span>No scores yet</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Career Matches */}
-          <div className="card-purple hover-lift min-w-0 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
-                  <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                </div>
-                <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
-                  Opportunities
-                </span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {dashboardData.careerMatches}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
-              <div className="flex items-center text-sm text-purple-600 dark:text-purple-400 truncate">
-                <Sparkles className="w-4 h-4 mr-1" />
-                <span>New recommendations available</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Career Recommendation */}
-        <div className="card-purple relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-24 -translate-x-24"></div>
-
-          <div className="relative z-10 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
-                <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  AI Career Recommendation
-                </h2>
-                <p className="text-muted-foreground">
-                  Personalized insights based on your assessment results
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {dashboardData.completedAssessments}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Completed Assessments
                 </p>
+                <div className="flex items-center text-sm text-green-600 dark:text-green-400 truncate">
+                  <TrendingUp className="w-4 h-4 mr-1" />
+                  <span>+3 from last month</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-matte-gray-dark/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-matte-gray-subtle">
-              <ReactMarkdown
-                components={{
-                  h1: ({ node, ...props }) => (
-                    <h1
-                      className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
-                      {...props}
-                    />
-                  ),
-                  h2: ({ node, ...props }) => (
-                    <h2
-                      className="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3"
-                      {...props}
-                    />
-                  ),
-                  h3: ({ node, ...props }) => (
-                    <h3
-                      className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4 mb-2"
-                      {...props}
-                    />
-                  ),
-                  p: ({ node, ...props }) => (
-                    <p
-                      className="text-muted-foreground leading-relaxed mb-4"
-                      {...props}
-                    />
-                  ),
-                  ul: ({ node, ...props }) => (
-                    <ul
-                      className="list-disc list-outside pl-5 mb-4 text-muted-foreground space-y-2"
-                      {...props}
-                    />
-                  ),
-                  li: ({ node, ...props }) => (
-                    <li className="text-base" {...props} />
-                  ),
-                  strong: ({ node, ...props }) => (
-                    <strong className="font-semibold text-purple-600 dark:text-purple-400" {...props} />
-                  ),
-                }}
-              >
-                {dashboardData.aiRecommendation}
-              </ReactMarkdown>
+            {/* Average Score */}
+            <div className="card-purple hover-lift min-w-0 overflow-hidden relative">
+              <div className="absolute -top-20 -left-20 w-80 h-80 bg-yellow-500/15 dark:bg-amber-600/12 rounded-full blur-3xl -z-10 bubble-glow pointer-events-none"></div>
+              <div className="p-6 relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl">
+                    <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-xs px-3 py-1 rounded-full">
+                    Performance
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {typeof dashboardData.averageScore === 'number' ? dashboardData.averageScore.toFixed(2) : '0.00'}%
+                </h3>
+                <p className="text-sm text-muted-foreground mb-2">Average Score</p>
+                <div className="flex items-center text-sm text-yellow-600 dark:text-yellow-400 truncate">
+                  {dashboardData.averageScore > 70 ? (
+                    <>
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                      <span>Excellent performance</span>
+                    </>
+                  ) : dashboardData.averageScore > 0 ? (
+                    <>
+                      <TrendingDown className="w-4 h-4 mr-1" />
+                      <span>Room for improvement</span>
+                    </>
+                  ) : (
+                    <span>No scores yet</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Career Matches */}
+            <div className="card-purple hover-lift min-w-0 overflow-hidden relative">
+              <div className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500/12 dark:bg-purple-600/10 rounded-full blur-3xl -z-10 bubble-glow pointer-events-none"></div>
+              <div className="p-6 relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                    <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
+                    Opportunities
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {dashboardData.careerMatches}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
+                <div className="flex items-center text-sm text-purple-600 dark:text-purple-400 truncate">
+                  <Sparkles className="w-4 h-4 mr-1" />
+                  <span>New recommendations available</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+          {/* AI Career Recommendation */}
+          <div className="card-purple relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-24 -translate-x-24"></div>
+
+            <div className="relative z-10 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                  <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    AI Career Recommendation
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Personalized insights based on your assessment results
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-matte-gray-dark/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-matte-gray-subtle">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ node, ...props }) => (
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4" {...props} />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3" {...props} />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4 mb-2" {...props} />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p className="text-muted-foreground leading-relaxed mb-4" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul className="list-disc list-outside pl-5 mb-4 text-muted-foreground space-y-2" {...props} />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="text-base" {...props} />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold text-purple-600 dark:text-purple-400" {...props} />
+                    ),
+                  }}
+                >
+                  {dashboardData.aiRecommendation}
+                </ReactMarkdown>
+              </div>
+            </div>
+          </div>
+
           {/* Recent Assessments */}
           <div id="recent-assessments" className="card-purple hover-lift">
             <div className="p-6">
@@ -470,8 +453,8 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                           <div
                             className={`p-1.5 rounded-full ${assessment.status === "Completed"
-                                ? "bg-green-100 dark:bg-green-900/20"
-                                : "bg-yellow-100 dark:bg-yellow-900/20"
+                              ? "bg-green-100 dark:bg-green-900/20"
+                              : "bg-yellow-100 dark:bg-yellow-900/20"
                               }`}
                           >
                             {assessment.status === "Completed" ? (
@@ -485,14 +468,11 @@ export default function Dashboard() {
                               {assessment.name}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                              {new Date(assessment.date).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                }
-                              )}
+                              {new Date(assessment.date).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
                             </p>
                           </div>
                         </div>
@@ -502,10 +482,12 @@ export default function Dashboard() {
                               <div className="text-lg font-bold text-gradient-purple">
                                 {assessment.score}%
                               </div>
-                              <span className={`text-xs px-2 py-1 rounded-full ${assessment.score > 70
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${assessment.score > 70
                                   ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
                                   : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
-                                }`}>
+                                  }`}
+                              >
                                 Score
                               </span>
                             </div>
@@ -551,26 +533,19 @@ export default function Dashboard() {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious
-                          onClick={() =>
-                            handlePageChange(Math.max(1, currentPage - 1))
-                          }
-                          className={`${currentPage === 1
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
+                          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                          className={`${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
                             } text-gray-700 dark:text-gray-300`}
                         />
                       </PaginationItem>
-                      {Array.from(
-                        { length: totalPages },
-                        (_, index) => index + 1
-                      ).map((page) => (
+                      {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
                         <PaginationItem key={page}>
                           <PaginationLink
                             onClick={() => handlePageChange(page)}
                             isActive={currentPage === page}
                             className={`${currentPage === page
-                                ? "btn-purple text-white"
-                                : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light text-gray-700 dark:text-gray-300"
+                              ? "btn-purple text-white"
+                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light text-gray-700 dark:text-gray-300"
                               }`}
                           >
                             {page}
@@ -579,14 +554,8 @@ export default function Dashboard() {
                       ))}
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() =>
-                            handlePageChange(
-                              Math.min(totalPages, currentPage + 1)
-                            )
-                          }
-                          className={`${currentPage === totalPages
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
+                          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                          className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
                             } text-gray-700 dark:text-gray-300`}
                         />
                       </PaginationItem>
@@ -608,101 +577,89 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Quick Actions - Card version */}
-        <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700 overflow-hidden hover-lift">
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
-                <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          {/* Quick Actions */}
+          <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700 overflow-hidden hover-lift">
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                  <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Quick Actions
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Get started with these actions
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Quick Actions
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Get started with these actions
-                </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Link
+                  href="/employee-dashboard/assessment"
+                  className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <ClipboardList className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                      Take Assessment
+                    </span>
+                    <p className="text-sm text-muted-foreground">Start new assessment</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/employee-dashboard/results"
+                  className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-green-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <LineChart className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                      View Results
+                    </span>
+                    <p className="text-sm text-muted-foreground">See your performance</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/employee-dashboard/career-pathways"
+                  className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                      Career Paths
+                    </span>
+                    <p className="text-sm text-muted-foreground">Explore opportunities</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/employee-dashboard/development"
+                  className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-yellow-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <Award className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                      Development
+                    </span>
+                    <p className="text-sm text-muted-foreground">Grow your skills</p>
+                  </div>
+                </Link>
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Take Assessment */}
-              <Link
-                href="/employee-dashboard/assessment"
-                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
-              >
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <ClipboardList className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    Take Assessment
-                  </span>
-                  <p className="text-sm text-muted-foreground">
-                    Start new assessment
-                  </p>
-                </div>
-              </Link>
-
-              {/* View Results */}
-              <Link
-                href="/employee-dashboard/results"
-                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-green-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
-              >
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <LineChart className="w-6 h-6 text-green-600 dark:text-green-400" />
-                  </div>
-                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                    View Results
-                  </span>
-                  <p className="text-sm text-muted-foreground">
-                    See your performance
-                  </p>
-                </div>
-              </Link>
-
-              {/* Career Paths */}
-              <Link
-                href="/employee-dashboard/career-pathways"
-                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
-              >
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    Career Paths
-                  </span>
-                  <p className="text-sm text-muted-foreground">
-                    Explore opportunities
-                  </p>
-                </div>
-              </Link>
-
-              {/* Development */}
-              <Link
-                href="/employee-dashboard/development"
-                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-yellow-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
-              >
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                    <Award className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-                  </div>
-                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
-                    Development
-                  </span>
-                  <p className="text-sm text-muted-foreground">
-                    Grow your skills
-                  </p>
-                </div>
-              </Link>
             </div>
           </div>
         </div>
-      </div>
-    </AppLayout>
+      </AppLayout>
+    </>
   );
 }

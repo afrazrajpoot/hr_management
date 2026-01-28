@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, ChangeEvent, useCallback, useEffect } from "react";
+
+import React, { useState, ChangeEvent, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +18,7 @@ import SkillsTab from "@/components/profileComponants/SkillsTab";
 import ExperienceTab from "@/components/profileComponants/ExperienceTab";
 import EducationTab from "@/components/profileComponants/EducationTab";
 import ResumeTab from "@/components/profileComponants/ResumeTab";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import Loader from "@/components/Loader";
 import {
   User,
@@ -31,6 +32,9 @@ import {
   Zap,
   CheckCircle,
   Upload,
+  ChevronRight,
+  X,
+  Play,
 } from "lucide-react";
 
 const onboardingSteps = [
@@ -39,26 +43,33 @@ const onboardingSteps = [
     title: "Personal Information",
     description:
       "Manage your personal details and contact information. Make sure your name, contact, and bio are up to date!",
+    icon: User,
   },
   {
     tab: "employment",
     title: "Employment Details",
     description:
       "Update your job details, department, and manager. Keeping this section current helps HR and managers know your role.",
+    icon: Briefcase,
   },
   {
     tab: "skills",
     title: "Skills & Expertise",
     description:
       "Showcase your professional skills and competencies. Add all relevant skills to boost your profile strength!",
+    icon: Award,
   },
   {
     tab: "experience",
     title: "Experience & Education",
     description:
       "Add your work experience, education, and upload your resume. This helps you stand out for new opportunities!",
+    icon: BookOpen,
   },
 ];
+
+// LocalStorage key
+const ONBOARDING_STORAGE_KEY = "employeeProfileOnboarding";
 
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
@@ -66,70 +77,126 @@ const EmployeeProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("personal");
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [onboardingStep, setOnboardingStep] = useState<number>(0);
-  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const onboardingInitialized = useRef(false);
 
-  const updateModalPosition = useCallback(() => {
-    if (!showOnboarding) return;
-    const activeTabValue = onboardingSteps[onboardingStep].tab;
-    const element = document.getElementById(`tab-trigger-${activeTabValue}`);
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      setModalPosition({
-        top: rect.top,
-        left: rect.left + rect.width / 2,
-      });
-    }
-  }, [onboardingStep, showOnboarding]);
-
+  // Check localStorage for onboarding status on page load
   useEffect(() => {
-    if (showOnboarding) {
-      const timer = setTimeout(updateModalPosition, 100);
-      window.addEventListener("resize", updateModalPosition);
-      window.addEventListener("scroll", updateModalPosition);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("resize", updateModalPosition);
-        window.removeEventListener("scroll", updateModalPosition);
-      };
-    }
-  }, [showOnboarding, onboardingStep, updateModalPosition]);
+    if (typeof window === "undefined") return;
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const forceTour = urlParams.get('tour') === 'true';
-      const seen = localStorage.getItem("profileOnboardingSeen");
+    // Reset the initialization flag on mount to allow re-checking
+    onboardingInitialized.current = false;
 
-      if (!seen || forceTour) {
+    // Check URL parameter for forcing tour
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceTour = urlParams.get("tour") === "true";
+    const forceSkipTour = urlParams.get("tour") === "false";
+
+    // Get onboarding status from localStorage
+    const onboardingStatus = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+
+    // Show onboarding if:
+    // 1. localStorage is null (first time) OR has value "true"
+    // 2. AND not forcing skip via URL
+    // 3. OR if explicitly forced via URL parameter
+    const shouldShowOnboarding =
+      forceTour ||
+      ((onboardingStatus === null || onboardingStatus === "true") && !forceSkipTour);
+
+    if (shouldShowOnboarding && !onboardingInitialized.current) {
+      onboardingInitialized.current = true;
+
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
         setShowOnboarding(true);
         setOnboardingStep(0);
         setActiveTab(onboardingSteps[0].tab);
-        if (forceTour) {
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 
-  const handleNextOnboarding = () => {
+  // Update active tab when onboarding step changes
+  useEffect(() => {
+    if (showOnboarding) {
+      setActiveTab(onboardingSteps[onboardingStep].tab);
+    }
+  }, [onboardingStep, showOnboarding]);
+
+  // Function to mark onboarding as completed (set to false in localStorage)
+  const markOnboardingAsCompleted = useCallback(() => {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, "false");
+  }, []);
+
+  // Function to reset onboarding (set to true in localStorage)
+  const resetOnboarding = useCallback(() => {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+  }, []);
+
+  const handleNextOnboarding = useCallback(async () => {
+    if (isAnimating) return;
+
+    setIsAnimating(true);
+
     if (onboardingStep < onboardingSteps.length - 1) {
       const nextStep = onboardingStep + 1;
-      setOnboardingStep(nextStep);
-      setActiveTab(onboardingSteps[nextStep].tab);
-    } else {
-      setShowOnboarding(false);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("profileOnboardingSeen", "true");
-      }
-    }
-  };
 
-  const handleCloseOnboarding = () => {
-    setShowOnboarding(false);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("profileOnboardingSeen", "true");
+      // Animate step transition
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      setOnboardingStep(nextStep);
+    } else {
+      // Finish onboarding - mark as completed
+      markOnboardingAsCompleted();
+      setShowOnboarding(false);
+      toast.success("Profile tour completed! Your profile is now ready.", {
+        duration: 3000,
+        icon: <CheckCircle className="w-5 h-5 text-green-600" />,
+      });
     }
-  };
+
+    setIsAnimating(false);
+  }, [onboardingStep, isAnimating, markOnboardingAsCompleted]);
+
+  const handlePrevOnboarding = useCallback(async () => {
+    if (isAnimating || onboardingStep === 0) return;
+
+    setIsAnimating(true);
+
+    const prevStep = onboardingStep - 1;
+
+    // Animate step transition
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    setOnboardingStep(prevStep);
+
+    setIsAnimating(false);
+  }, [onboardingStep, isAnimating]);
+
+  const handleCloseOnboarding = useCallback(() => {
+    // User closed manually - mark as completed
+    markOnboardingAsCompleted();
+    setShowOnboarding(false);
+  }, [markOnboardingAsCompleted]);
+
+  const handleSkipOnboarding = useCallback(() => {
+    // User skipped - mark as completed
+    markOnboardingAsCompleted();
+    setShowOnboarding(false);
+    toast.info("Tour skipped. You can restart it anytime.", {
+      duration: 4000,
+    });
+  }, [markOnboardingAsCompleted]);
+
+  const handleRestartOnboarding = useCallback(() => {
+    // Reset onboarding to show again
+    resetOnboarding();
+    setShowOnboarding(true);
+    setOnboardingStep(0);
+    setActiveTab(onboardingSteps[0].tab);
+  }, [resetOnboarding]);
 
   const {
     data: employeeData,
@@ -180,7 +247,7 @@ const EmployeeProfilePage: React.FC = () => {
         const saveData: any = {
           ...formData,
           ...data,
-          skills: data.skills || [], // Ensure skills is an array
+          skills: data.skills || [],
         };
         const updatedEmployee: any = await createOrUpdateEmployee(
           saveData
@@ -310,9 +377,7 @@ const EmployeeProfilePage: React.FC = () => {
     );
   }
 
-  // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
-    // 1. Personal Tab Completion
     const personalFields = [
       "firstName",
       "lastName",
@@ -329,7 +394,6 @@ const EmployeeProfilePage: React.FC = () => {
         employee[field as keyof Employee]?.toString().trim() !== ""
     );
 
-    // 2. Employment Tab Completion
     const employmentFieldList = [
       "employer",
       "hireDate",
@@ -337,7 +401,6 @@ const EmployeeProfilePage: React.FC = () => {
       "position",
       "manager",
     ];
-    // Check either annualSalary or salary
     const hasSalary =
       (employee &&
         employee.annualSalary &&
@@ -352,11 +415,9 @@ const EmployeeProfilePage: React.FC = () => {
           employee[field as keyof Employee]?.toString().trim() !== ""
       ) && hasSalary;
 
-    // 3. Skills Tab Completion
     const isSkillsComplete =
       employee && employee.skills && employee.skills.length > 0;
 
-    // 4. Experience Tab Completion (Requires both Experience and Education)
     const isExperienceComplete =
       employee &&
       employee.experience &&
@@ -365,7 +426,6 @@ const EmployeeProfilePage: React.FC = () => {
       employee.education &&
       employee.education.length > 0;
 
-    // Calculate total percentage (25% per tab)
     let percentage = 0;
     if (isPersonalComplete) percentage += 25;
     if (isEmploymentComplete) percentage += 25;
@@ -376,120 +436,165 @@ const EmployeeProfilePage: React.FC = () => {
   };
 
   const profileCompletion = calculateProfileCompletion();
+  const CurrentIcon = onboardingSteps[onboardingStep]?.icon || User;
 
   return (
     <AppLayout>
-      {/* Onboarding Modal - Dynamic Tour */}
+      {/* Onboarding Overlay */}
       <AnimatePresence>
-        {showOnboarding && (modalPosition.top > 0 || modalPosition.left > 0) && (
-          <div className="fixed inset-0 z-50 pointer-events-none">
-            {/* Backdrop - Only allow clicking to close if needed */}
+        {showOnboarding && (
+          <>
+            {/* Backdrop with slight blur */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50"
               onClick={handleCloseOnboarding}
-              className="absolute inset-0 bg-black/20 pointer-events-auto backdrop-blur-[2px]"
             />
 
+            {/* Onboarding Modal */}
             <motion.div
-              initial={{ opacity: 0, y: "-80%", scale: 0.9, x: "-50%" }}
-              animate={{
-                opacity: 1,
-                top: modalPosition.top - 20,
-                x: "-50%",
-                y: "-100%",
-                scale: 1,
-                left: modalPosition.left
-              }}
-              exit={{ opacity: 0, y: "-80%", scale: 0.9, x: "-50%" }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{
                 type: "spring",
                 stiffness: 400,
                 damping: 30,
-                opacity: { duration: 0.2 }
               }}
-              className="absolute w-full max-w-sm pointer-events-auto"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
             >
-              <div className="relative card-purple rounded-2xl shadow-prominent p-6 overflow-hidden">
-                {/* Decorative background pulse */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl animate-pulse" />
+              <div className="relative card-purple rounded-2xl shadow-prominent p-6 overflow-hidden border border-purple-200 dark:border-purple-800 mx-4">
+                {/* Animated background */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
+                <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-purple-400/5 rounded-full blur-3xl" />
 
-                {/* Close Button */}
+                {/* Close button */}
                 <button
-                  className="absolute top-4 right-4 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  className="absolute top-3 right-3 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors p-1 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30"
                   onClick={handleCloseOnboarding}
                   aria-label="Close onboarding"
                 >
-                  <span className="text-xl">&times;</span>
+                  <X className="w-5 h-5" />
                 </button>
 
-                {/* Content with its own animation for step changes */}
-                <motion.div
-                  key={onboardingStep}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="flex h-2 w-2 rounded-full bg-purple-600 dark:bg-purple-400 animate-ping" />
-                    <h2 className="text-lg font-bold text-gradient-purple">
-                      {onboardingSteps[onboardingStep].title}
-                    </h2>
+                {/* Content */}
+                <div className="relative z-10">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="p-3 rounded-xl flex-shrink-0" style={{ background: 'var(--purple-gradient)' }}>
+                      <CurrentIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h2 className="text-lg font-bold text-gradient-purple">
+                          {onboardingSteps[onboardingStep].title}
+                        </h2>
+                        <span className="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                          Step {onboardingStep + 1} of {onboardingSteps.length}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {onboardingSteps[onboardingStep].description}
+                      </p>
+                    </div>
                   </div>
 
-                  <p className="mb-6 text-sm text-muted-foreground leading-relaxed">
-                    {onboardingSteps[onboardingStep].description}
-                  </p>
-                </motion.div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <div className="flex gap-1.5">
-                    {onboardingSteps.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === onboardingStep ? "w-6 bg-purple-600 dark:bg-purple-400" : "w-1.5 bg-purple-600/20 dark:bg-purple-400/20"
-                          }`}
-                      />
-                    ))}
+                  {/* Progress indicator */}
+                  <div className="mb-6">
+                    <div className="flex gap-1.5 mb-2">
+                      {onboardingSteps.map((_, idx) => (
+                        <div
+                          key={idx}
+                          className={`h-2 flex-1 rounded-full transition-all duration-300 ${idx === onboardingStep
+                            ? "bg-purple-600 dark:bg-purple-400"
+                            : idx < onboardingStep
+                              ? "bg-purple-400 dark:bg-purple-600"
+                              : "bg-purple-200 dark:bg-purple-800"
+                            }`}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Personal Info</span>
+                      <span>Employment</span>
+                      <span>Skills</span>
+                      <span>Experience</span>
+                    </div>
                   </div>
 
-                  <button
-                    className="btn-purple px-5 py-2 text-sm rounded-xl transition-all duration-200"
-                    onClick={handleNextOnboarding}
-                  >
-                    {onboardingStep === onboardingSteps.length - 1
-                      ? "Get Started"
-                      : "Next Step"}
-                  </button>
+                  {/* Controls */}
+                  <div className="flex justify-between items-center pt-4 border-t border-border">
+                    <div className="flex gap-2">
+                      {onboardingStep > 0 && (
+                        <button
+                          className="text-sm text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 px-4 py-2 rounded-lg transition-colors border border-input hover:border-purple-300 dark:hover:border-purple-700"
+                          onClick={handlePrevOnboarding}
+                          disabled={isAnimating}
+                        >
+                          Back
+                        </button>
+                      )}
+                      <button
+                        className="text-sm text-muted-foreground hover:text-red-600 dark:hover:text-red-400 px-4 py-2 rounded-lg transition-colors"
+                        onClick={handleSkipOnboarding}
+                      >
+                        Skip Tour
+                      </button>
+                    </div>
+
+                    <button
+                      className="btn-purple px-5 py-2 text-sm rounded-lg transition-all duration-200 hover:shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleNextOnboarding}
+                      disabled={isAnimating}
+                    >
+                      {onboardingStep === onboardingSteps.length - 1
+                        ? "Complete Tour"
+                        : "Next Step"}
+                      {onboardingStep < onboardingSteps.length - 1 && (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Current tab indicator */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs text-muted-foreground">Now viewing:</span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium">
+                      {onboardingSteps[onboardingStep].tab.charAt(0).toUpperCase() + onboardingSteps[onboardingStep].tab.slice(1)} Tab
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              {/* Arrow pointing down */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card dark:bg-matte-gray-medium rotate-45 border-b border-r border-border" />
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
-      <Toaster
-        theme="system"
-        position="top-right"
-        richColors
-        toastOptions={{
-          duration: 3000,
-          className: "border border-input",
-        }}
-      />
 
       <div className="min-h-screen bg-layout-purple p-4 md:p-6">
-        {/* Decorative Background Elements */}
+        {/* Admin controls for testing */}
+        <div className="fixed bottom-4 right-4 z-40 flex flex-col gap-2">
+          {!showOnboarding && (
+            <button
+              onClick={handleRestartOnboarding}
+              className="text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+              style={{ background: 'var(--purple-gradient)' }}
+              title="Restart Tour"
+            >
+              <Play className="w-5 h-5" fill="white" />
+            </button>
+          )}
+
+        </div>
+
         <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
           <div className="absolute top-20 left-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl opacity-15" />
           <div className="absolute bottom-20 right-10 w-48 h-48 bg-purple-600/5 rounded-full blur-3xl opacity-15" />
         </div>
 
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Profile Header Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -503,10 +608,8 @@ const EmployeeProfilePage: React.FC = () => {
             />
           </motion.div>
 
-          {/* Profile Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="card-purple hover-lift relative overflow-hidden">
-              {/* Bubble Effects */}
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-green-500" />
               <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-green-400" />
 
@@ -540,7 +643,6 @@ const EmployeeProfilePage: React.FC = () => {
             </div>
 
             <div className="card-purple hover-lift relative overflow-hidden">
-              {/* Bubble Effects */}
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-blue-500" />
               <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-blue-400" />
 
@@ -563,7 +665,6 @@ const EmployeeProfilePage: React.FC = () => {
             </div>
 
             <div className="card-purple hover-lift relative overflow-hidden">
-              {/* Bubble Effects */}
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-purple-500" />
               <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-purple-400" />
 
@@ -586,11 +687,11 @@ const EmployeeProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Profile Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            ref={tabsRef}
           >
             <Tabs
               defaultValue="personal"
@@ -598,7 +699,6 @@ const EmployeeProfilePage: React.FC = () => {
               value={activeTab}
               onValueChange={setActiveTab}
             >
-              {/* Tabs Container - Keep your existing styling */}
               <div className="bg-white dark:bg-matte-gray-dark rounded-2xl p-2 shadow-subtle">
                 <TabsList className="grid w-full grid-cols-4 bg-transparent border-none h-14">
                   <TabsTrigger
@@ -728,7 +828,6 @@ const EmployeeProfilePage: React.FC = () => {
                       />
                     </div>
 
-                    {/* Resume Section (Optional) */}
                     {employee.resume && (
                       <div className="card-purple p-6">
                         <div className="flex items-center gap-3 mb-6">
@@ -760,7 +859,6 @@ const EmployeeProfilePage: React.FC = () => {
             </Tabs>
           </motion.div>
 
-          {/* Profile Tips */}
           {!isEditing && profileCompletion < 100 && (
             <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700">
               <div className="p-6">

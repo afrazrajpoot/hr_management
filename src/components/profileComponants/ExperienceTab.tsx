@@ -191,7 +191,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                                 {(exp as Experience).duration && (
                                   <>
                                     <div className="w-1 h-1 rounded-full bg-border" />
-                                    <Badge className="badge-green">
+                                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">
                                       {(exp as Experience).duration}
                                     </Badge>
                                   </>

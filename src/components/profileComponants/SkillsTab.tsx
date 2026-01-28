@@ -814,7 +814,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                       <div className="icon-wrapper-blue p-2">
                         <BarChart3 className="w-4 h-4 text-primary" />
                       </div>
-                      <Badge className="badge-blue">
+                      <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
                         <TrendingUp className="w-3 h-3 mr-1" />
                         {Math.round(
                           fields.reduce(
@@ -826,7 +826,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                         % avg
                       </Badge>
                     </div>
-                    <Badge className="badge-blue">
+                    <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors">
                       <Award className="w-3 h-3 mr-1" />
                       {
                         fields.filter(
@@ -900,7 +900,11 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                   </div>
                                   <div className="mt-1">
                                     <Badge
-                                      className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
+                                      className={`${proficiencyColor === 'destructive' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' :
+                                          proficiencyColor === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' :
+                                            proficiencyColor === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' :
+                                              'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                                        } hover:opacity-80 transition-opacity`}
                                     >
                                       {proficiency}% -{" "}
                                       {getProficiencyText(proficiency)}
@@ -914,7 +918,11 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                   </h4>
                                   <div className="mt-2">
                                     <Badge
-                                      className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
+                                      className={`${proficiencyColor === 'destructive' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800' :
+                                          proficiencyColor === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800' :
+                                            proficiencyColor === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800' :
+                                              'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                                        } hover:opacity-80 transition-opacity`}
                                     >
                                       {proficiency}% -{" "}
                                       {getProficiencyText(proficiency)}

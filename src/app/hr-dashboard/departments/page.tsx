@@ -69,38 +69,33 @@ interface DepartmentCardData {
   totalOutgoing: number;
 }
 
-interface CustomTooltipProps extends TooltipProps<number, string> {}
+interface CustomTooltipProps extends TooltipProps<number, string> { }
 
 // Professional color palette - Defined BEFORE any functions that use it
 const COLORS = [
-  "hsl(var(--primary))",
-  "#9333ea",
-  "hsl(var(--success))",
-  "hsl(var(--warning))",
-  "hsl(var(--destructive))",
-  "#06b6d4",
-  "#8b5cf6",
-  "#f59e0b",
-  "#ec4899",
-  "#10b981",
+  "var(--color-chart-1)",
+  "var(--color-chart-2)",
+  "var(--color-chart-3)",
+  "var(--color-chart-4)",
+  "var(--color-chart-5)",
 ];
 
 // Define getDepartmentColor function BEFORE it's used
 const getDepartmentColor = (department: string) => {
   const colors: Record<string, string> = {
-    Analytics: COLORS[0],
-    Design: COLORS[1],
-    IT: COLORS[2],
-    Marketing: COLORS[3],
-    Finance: COLORS[4],
-    Operations: COLORS[5],
-    Education: COLORS[6],
-    Sustainability: COLORS[7],
-    Healthcare: COLORS[8],
-    HR: COLORS[9],
-    Engineering: "hsl(var(--primary))",
-    Sales: "hsl(var(--success))",
-    Consulting: "#06b6d4",
+    Analytics: "var(--color-chart-1)",
+    Design: "var(--color-chart-2)",
+    IT: "var(--color-chart-3)",
+    Marketing: "var(--color-chart-4)",
+    Finance: "var(--color-chart-5)",
+    Operations: "var(--color-chart-1)",
+    Education: "var(--color-chart-2)",
+    Sustainability: "var(--color-chart-3)",
+    Healthcare: "var(--color-chart-4)",
+    HR: "var(--color-chart-5)",
+    Engineering: "var(--color-chart-1)",
+    Sales: "var(--color-chart-2)",
+    Consulting: "var(--color-chart-3)",
   };
   return (
     colors[department] || COLORS[Math.floor(Math.random() * COLORS.length)]
@@ -154,14 +149,14 @@ const BarChartTooltip = ({
     return (
       <div className="bg-card text-card-foreground border border-border rounded-xl p-4 shadow-xl backdrop-blur-sm min-w-[200px]">
         <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
-          <div className="h-2 w-2 rounded-full bg-primary" />
+          <div className="h-2 w-2 rounded-full bg-chart-1" />
           <h4 className="font-bold text-foreground">{label} Department</h4>
         </div>
         <div className="space-y-3">
           <div className="flex justify-between items-center py-1">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span className="text-green-600 dark:text-green-400 text-sm">
+              <div className="h-2 w-2 rounded-full bg-chart-2"></div>
+              <span className="text-muted-foreground text-sm">
                 Ingoing
               </span>
             </div>
@@ -171,8 +166,8 @@ const BarChartTooltip = ({
           </div>
           <div className="flex justify-between items-center py-1">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-red-500"></div>
-              <span className="text-red-600 dark:text-red-400 text-sm">
+              <div className="h-2 w-2 rounded-full bg-chart-1"></div>
+              <span className="text-muted-foreground text-sm">
                 Outgoing
               </span>
             </div>
@@ -186,9 +181,8 @@ const BarChartTooltip = ({
                 Net Change:
               </span>
               <span
-                className={`font-bold ${
-                  netChange >= 0 ? "text-success" : "text-destructive"
-                }`}
+                className={`font-bold ${netChange >= 0 ? "text-chart-2" : "text-chart-1"
+                  }`}
               >
                 {netChange >= 0 ? "+" : ""}
                 {netChange}
@@ -400,9 +394,8 @@ const DepartmentDashboard = () => {
 
   // Define getInitials function
   const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName?.charAt(0) || ""}${
-      lastName?.charAt(0) || ""
-    }`.toUpperCase();
+    return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""
+      }`.toUpperCase();
   };
 
   const handleCardClick = (employee: Employee, department: string) => {
@@ -459,21 +452,19 @@ const DepartmentDashboard = () => {
               <div className="flex bg-card rounded-lg p-1 border border-border">
                 <button
                   onClick={() => setActiveView("all")}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeView === "all"
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeView === "all"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   All Departments
                 </button>
                 <button
                   onClick={() => setActiveView("active")}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    activeView === "active"
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeView === "active"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   Active Only
                 </button>
@@ -545,17 +536,15 @@ const DepartmentDashboard = () => {
                       </p>
                       <div className="flex items-end gap-2">
                         <span
-                          className={`text-3xl font-bold ${
-                            netMovement >= 0 ? "text-success" : "text-destructive"
-                          }`}
+                          className={`text-3xl font-bold ${netMovement >= 0 ? "text-success" : "text-destructive"
+                            }`}
                         >
                           {netMovement >= 0 ? "+" : ""}
                           {netMovement}
                         </span>
                         <Badge
-                          className={`${
-                            netMovement >= 0 ? "badge-green" : "badge-amber"
-                          }`}
+                          className={`${netMovement >= 0 ? "badge-green" : "badge-amber"
+                            }`}
                         >
                           {netMovement >= 0 ? "Growth" : "Decline"}
                         </Badge>
@@ -684,11 +673,11 @@ const DepartmentDashboard = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                    <div className="h-2 w-2 rounded-full bg-chart-2"></div>
                     <span className="text-xs">Ingoing</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                    <div className="h-2 w-2 rounded-full bg-chart-1"></div>
                     <span className="text-xs">Outgoing</span>
                   </div>
                 </div>
@@ -730,14 +719,14 @@ const DepartmentDashboard = () => {
                     />
                     <Bar
                       dataKey="ingoing"
-                      fill="hsl(var(--success))"
+                      fill="var(--color-chart-2)"
                       name="Ingoing Employees"
                       radius={[6, 6, 0, 0]}
                       barSize={30}
                     />
                     <Bar
                       dataKey="outgoing"
-                      fill="hsl(var(--destructive))"
+                      fill="var(--color-chart-1)"
                       name="Outgoing Employees"
                       radius={[6, 6, 0, 0]}
                       barSize={30}
@@ -802,8 +791,8 @@ const DepartmentDashboard = () => {
                         department.ingoing > department.outgoing
                           ? "linear-gradient(to right, hsl(var(--success)), hsl(var(--success))/0.5)"
                           : department.outgoing > department.ingoing
-                          ? "linear-gradient(to right, hsl(var(--destructive)), hsl(var(--destructive))/0.5)"
-                          : "linear-gradient(to right, hsl(var(--muted-foreground)), hsl(var(--muted-foreground))/0.5)",
+                            ? "linear-gradient(to right, hsl(var(--destructive)), hsl(var(--destructive))/0.5)"
+                            : "linear-gradient(to right, hsl(var(--muted-foreground)), hsl(var(--muted-foreground))/0.5)",
                     }}
                   />
 

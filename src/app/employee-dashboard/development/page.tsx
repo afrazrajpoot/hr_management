@@ -32,7 +32,6 @@ export default function Development() {
   const router = useRouter();
   const userId = session?.user?.id;
 
-  // Use query with skip option - it won't run until userId is available
   const {
     data: employeeData,
     error,
@@ -40,12 +39,11 @@ export default function Development() {
     isError,
     refetch,
   } = useGetEmployeeLearningDashboardQuery(userId || "", {
-    skip: !userId, // Skip the query if userId is not available
+    skip: !userId,
   });
 
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Check if the error is specifically a "User or employee not found" error
   const isUserNotFoundError =
     isError &&
     error &&
@@ -65,7 +63,6 @@ export default function Development() {
     );
   }
 
-  // Handle user not found error with a specific UI
   if (isUserNotFoundError) {
     return (
       <AppLayout>
@@ -114,10 +111,7 @@ export default function Development() {
               <p className="text-on-matte-subtle mb-6">
                 Failed to load employee data
               </p>
-              <Button
-                onClick={() => refetch()}
-                className="btn-purple"
-              >
+              <Button onClick={() => refetch()} className="btn-purple">
                 Retry
               </Button>
             </CardContent>
@@ -142,7 +136,6 @@ export default function Development() {
     employee_name,
   } = employeeData;
 
-  // Calculate average skill proficiency
   const averageProficiency =
     current_skills.length > 0
       ? Math.round(
@@ -150,6 +143,34 @@ export default function Development() {
         current_skills.length
       )
       : 0;
+
+  // Color schemes that match bubbles and progress bars
+  const colorSchemes = [
+    {
+      bubble1: "bg-purple-500",
+      bubble2: "bg-purple-400",
+      progress: "bg-purple-600 dark:bg-purple-500",
+      text: "text-purple-accent",
+    },
+    {
+      bubble1: "bg-blue-500",
+      bubble2: "bg-blue-400",
+      progress: "bg-blue-600 dark:bg-blue-500",
+      text: "text-blue-600 dark:text-blue-400",
+    },
+    {
+      bubble1: "bg-emerald-500",
+      bubble2: "bg-emerald-400",
+      progress: "bg-emerald-600 dark:bg-emerald-500",
+      text: "text-emerald-600 dark:text-emerald-400",
+    },
+    {
+      bubble1: "bg-indigo-500",
+      bubble2: "bg-indigo-400",
+      progress: "bg-indigo-600 dark:bg-indigo-500",
+      text: "text-indigo-600 dark:text-indigo-400",
+    },
+  ];
 
   return (
     <AppLayout>
@@ -168,10 +189,7 @@ export default function Development() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="btn-purple-outline"
-            >
+            <Button variant="outline" className="btn-purple-outline">
               <Calendar className="w-4 h-4 mr-2" />
               Schedule Review
             </Button>
@@ -184,7 +202,7 @@ export default function Development() {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Profile & Quick Stats */}
+          {/* Left Column */}
           <div className="space-y-6">
             {/* Profile Card */}
             <Card className="card-purple hover:shadow-lg transition-all duration-200">
@@ -203,7 +221,6 @@ export default function Development() {
                   </div>
                 </div>
 
-                {/* Quick Stats */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -244,7 +261,7 @@ export default function Development() {
               </CardContent>
             </Card>
 
-            {/* Action Card */}
+            {/* Quick Actions */}
             <Card className="card-purple hover:shadow-lg transition-all duration-200">
               <CardContent className="p-6">
                 <h4 className="font-semibold text-on-matte mb-4">
@@ -274,15 +291,13 @@ export default function Development() {
             </Card>
           </div>
 
-          {/* Middle Column - Main Content */}
+          {/* Middle Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="card-purple relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                {/* Bubble Effect */}
                 <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-purple-600" />
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-10 bg-purple-600" />
-
                 <CardContent className="p-4 relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20">
@@ -305,10 +320,8 @@ export default function Development() {
               </Card>
 
               <Card className="card-purple relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                {/* Bubble Effect */}
                 <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-emerald-500" />
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-10 bg-emerald-500" />
-
                 <CardContent className="p-4 relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20">
@@ -340,10 +353,8 @@ export default function Development() {
               </Card>
 
               <Card className="card-purple relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                {/* Bubble Effect */}
                 <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-blue-500" />
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-10 bg-blue-500" />
-
                 <CardContent className="p-4 relative z-10">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20">
@@ -366,13 +377,12 @@ export default function Development() {
               </Card>
             </div>
 
-            {/* Tabs Section - LARGER buttons with more padding */}
+            {/* Tabs */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full space-y-6"
             >
-              {/* Tabs Container - Same style as profile page */}
               <div className="bg-white dark:bg-matte-gray-dark rounded-2xl p-2 shadow-subtle">
                 <TabsList className="grid w-full grid-cols-3 bg-transparent border-none h-14">
                   <TabsTrigger
@@ -401,6 +411,7 @@ export default function Development() {
                 </TabsList>
               </div>
 
+              {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-6 mt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Skills Preview */}
@@ -499,7 +510,7 @@ export default function Development() {
                 </div>
               </TabsContent>
 
-              {/* Skills Tab */}
+              {/* Skills Tab - Progress color matches bubble */}
               <TabsContent value="skills" className="space-y-6 mt-6">
                 <Card className="card-purple">
                   <CardHeader>
@@ -511,44 +522,20 @@ export default function Development() {
                   <CardContent>
                     <div className="space-y-4">
                       {current_skills.map((skill, index) => {
-                        // Define color variations for progress bars and bubbles
-                        const progressColors = [
-                          {
-                            bg: 'bg-purple-600 dark:bg-purple-500',
-                            text: 'text-purple-accent',
-                            bubble1: 'bg-purple-500',
-                            bubble2: 'bg-purple-400'
-                          },
-                          {
-                            bg: 'bg-blue-600 dark:bg-blue-500',
-                            text: 'text-blue-600 dark:text-blue-400',
-                            bubble1: 'bg-blue-500',
-                            bubble2: 'bg-blue-400'
-                          },
-                          {
-                            bg: 'bg-emerald-600 dark:bg-emerald-500',
-                            text: 'text-emerald-600 dark:text-emerald-400',
-                            bubble1: 'bg-emerald-500',
-                            bubble2: 'bg-emerald-400'
-                          },
-                          {
-                            bg: 'bg-indigo-600 dark:bg-indigo-500',
-                            text: 'text-indigo-600 dark:text-indigo-400',
-                            bubble1: 'bg-indigo-500',
-                            bubble2: 'bg-indigo-400'
-                          },
-                        ];
-                        const colorIndex = index % progressColors.length;
-                        const colors = progressColors[colorIndex];
+                        const scheme = colorSchemes[index % colorSchemes.length];
 
                         return (
                           <div
                             key={index}
                             className="relative p-4 rounded-lg border border-matte surface-matte overflow-hidden"
                           >
-                            {/* Bubble Effects */}
-                            <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-20 ${colors.bubble1}`} />
-                            <div className={`absolute -bottom-6 -left-6 w-20 h-20 rounded-full blur-xl opacity-15 ${colors.bubble2}`} />
+                            {/* Bubble effects */}
+                            <div
+                              className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-20 ${scheme.bubble1}`}
+                            />
+                            <div
+                              className={`absolute -bottom-6 -left-6 w-20 h-20 rounded-full blur-xl opacity-15 ${scheme.bubble2}`}
+                            />
 
                             <div className="relative z-10">
                               <div className="flex items-center justify-between mb-3">
@@ -564,25 +551,27 @@ export default function Development() {
                                   {skill.proficiency}%
                                 </Badge>
                               </div>
+
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-on-matte-subtle">
                                     Proficiency
                                   </span>
-                                  <span className={`font-medium ${colors.text}`}>
+                                  <span className={`font-medium ${scheme.text}`}>
                                     Level {Math.ceil(skill.proficiency / 25)}
                                   </span>
                                 </div>
                                 <Progress
                                   value={skill.proficiency}
                                   className="h-2 bg-gray-100 dark:bg-gray-800"
-                                  indicatorClassName={colors.bg}
+                                  indicatorClassName={scheme.progress}
                                 />
                               </div>
                             </div>
                           </div>
-                        )
+                        );
                       })}
+
                       {current_skills.length === 0 && (
                         <div className="text-center py-12">
                           <div className="icon-brand mx-auto p-4 rounded-2xl w-fit mb-4">
@@ -613,7 +602,7 @@ export default function Development() {
               {/* Learning Tab */}
               <TabsContent value="learning" className="space-y-6 mt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Courses */}
+                  {/* Recommended Courses */}
                   <Card className="card-purple">
                     <CardHeader>
                       <CardTitle className="flex items-center text-lg text-on-matte">

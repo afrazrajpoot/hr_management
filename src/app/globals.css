@@ -85,6 +85,9 @@
     --purple-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
     --gradient-layout: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
 
+    /* Text gradient variables (different for light & dark) */
+    --text-gradient-purple: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+
     /* Purple Theme Colors - Using #6366F1 and #8B5CF6 as base */
     --purple-50: #f5f3ff;
     --purple-100: #ede9fe;
@@ -157,6 +160,9 @@
 
     /* Dark Theme Gradient - Same as light mode */
     --purple-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+
+    /* Brighter gradient for text in dark mode */
+    --text-gradient-purple: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
 
     /* Matte Black/Gray Gradient for Dark Mode */
     --gradient-layout: linear-gradient(135deg, #000000 0%, #121212 25%, #1a1a1a 50%, #121212 75%, #000000 100%);
@@ -232,9 +238,7 @@
         position: absolute;
         inset: 0;
         border-radius: 0.5rem;
-        /* Matches rounded-lg (0.5rem is typical, typically 0.5rem = 8px) */
         padding: 2px;
-        /* Border width */
         background: var(--purple-gradient);
         -webkit-mask:
             linear-gradient(#fff 0 0) content-box,
@@ -257,7 +261,7 @@
         opacity: 0;
     }
 
-    /* Card Styles - FIXED: Removed dark:bg-matte-gray-medium from @apply */
+    /* Card Styles */
     .card-purple {
         @apply bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden;
     }
@@ -272,7 +276,7 @@
         background: var(--purple-gradient);
     }
 
-    /* Form Elements - FIXED: Removed dark:border-matte-gray-light and dark:bg-matte-gray-dark from @apply */
+    /* Form Elements */
     .input-purple {
         @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-all duration-200;
     }
@@ -287,9 +291,9 @@
         @apply ring-purple-400 border-purple-400;
     }
 
-    /* Text Gradient */
+    /* Text Gradient - Now using CSS variable that changes per theme */
     .text-gradient-purple {
-        background: var(--purple-gradient);
+        background: var(--text-gradient-purple);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -673,66 +677,62 @@
     /* Global Badge Colors */
     .badge-brand {
         background-color: #f5f3ff;
-        /* purple-50 */
         color: #6d28d9;
-        /* purple-700 */
         border: 1px solid #ddd6fe;
-        /* purple-200 */
     }
 
     .dark .badge-brand {
         background-color: rgba(139, 92, 246, 0.1);
         color: #a78bfa;
-        /* purple-400 */
         border-color: rgba(139, 92, 246, 0.2);
     }
 
     .badge-info {
         background-color: #eff6ff;
-        /* blue-50 */
         color: #1d4ed8;
-        /* blue-700 */
         border: 1px solid #dbeafe;
-        /* blue-200 */
     }
 
     .dark .badge-info {
         background-color: rgba(59, 130, 246, 0.1);
         color: #60a5fa;
-        /* blue-400 */
         border-color: rgba(59, 130, 246, 0.2);
     }
 
     .badge-success {
         background-color: #f0fdf4;
-        /* green-50 */
         color: #15803d;
-        /* green-700 */
         border: 1px solid #dcfce7;
-        /* green-200 */
     }
 
     .dark .badge-success {
         background-color: rgba(34, 197, 94, 0.1);
         color: #4ade80;
-        /* green-400 */
         border-color: rgba(34, 197, 94, 0.2);
     }
 
     .badge-warning {
         background-color: #fffbeb;
-        /* amber-50 */
         color: #b45309;
-        /* amber-700 */
         border: 1px solid #fef3c7;
-        /* amber-200 */
     }
 
     .dark .badge-warning {
         background-color: rgba(245, 158, 11, 0.1);
         color: #fbbf24;
-        /* amber-400 */
         border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-error {
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .dark .badge-error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.2);
     }
 
     /* Icon wrappers using same tokens */

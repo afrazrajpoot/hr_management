@@ -347,7 +347,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   </div>
                 </div>
                 {getFieldValue(bioField.field) && (
-                  <Badge className="badge-purple">
+                  <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors">
                     <Sparkles className="w-3 h-3 mr-1" />
                     Bio Added
                   </Badge>
