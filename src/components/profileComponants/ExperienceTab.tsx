@@ -62,14 +62,14 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card-primary card-hover">
+      <Card className="card-purple card-hover">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex items-center gap-4">
             <div className="icon-wrapper-blue p-3">
               <Briefcase className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold gradient-text-primary">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Work Experience
               </CardTitle>
               <CardDescription className="text-muted-foreground text-base">
@@ -81,7 +81,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 <>
                   <Button
                     onClick={onSave}
-                    className="btn-gradient-primary"
+                    className="btn-purple"
                     size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
@@ -100,7 +100,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
               ) : (
                 <Button
                   onClick={onEdit}
-                  className="btn-gradient-primary"
+                  className="btn-purple"
                   size="sm"
                 >
                   <Edit className="w-4 h-4 mr-2" />
@@ -156,9 +156,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 className="group relative"
               >
                 <Card className="border border-input bg-card hover:bg-muted/10 backdrop-blur-sm hover:shadow-md transition-all duration-300 hover:border-primary/30 overflow-hidden">
-                  {!isEditing && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  )}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to right, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05))' }} />
 
                   <CardContent className="p-6 relative">
                     <div className="flex justify-between items-start gap-4">
@@ -174,7 +172,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
                                 control={control}
                                 defaultValue={
                                   (exp as Experience)[
-                                    field.field as keyof Experience
+                                  field.field as keyof Experience
                                   ]
                                 }
                               />
@@ -270,7 +268,8 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8 p-6 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-dashed border-primary/20"
+              className="text-center py-8 p-6 rounded-xl border border-dashed border-primary/20"
+              style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.1))' }}
             >
               <div className="icon-wrapper-blue mx-auto mb-4 p-3">
                 <Plus className="h-8 w-8 text-primary" />

@@ -215,11 +215,11 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-8 gradient-bg-primary min-h-screen">
+      <div className="min-h-screen bg-layout-purple p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold gradient-text-primary">
+            <h1 className="text-3xl font-bold text-gradient-purple">
               Welcome back, {apiData?.data?.name || "User"}
             </h1>
             <p className="text-muted-foreground mt-2 flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-3 mt-4 sm:mt-0">
             <Button
-              className="btn-gradient-primary text-primary-foreground px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+              className="btn-purple px-6 py-2 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200"
               asChild
             >
               <Link href="/employee-dashboard/assessment">
@@ -243,132 +243,148 @@ export default function Dashboard() {
         {/* Key Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Progress Card */}
-          <div className="card-primary card-hover min-w-0 overflow-hidden">
-  <div className="flex items-center justify-between mb-4">
-    <div className="icon-wrapper-blue">
-      <Target className="w-5 h-5 text-primary" />
-    </div>
-    <Badge className="badge-blue">Progress</Badge>
-  </div>
-  
-  <h3 className="text-2xl font-bold text-card-foreground mb-2">
-    {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
-  </h3>
-  
-  <p className="text-sm text-muted-foreground mb-4 truncate">
-    {dashboardData.assessmentProgress.current} of {dashboardData.assessmentProgress.total} questions
-  </p>
-  
-  {/* Progress Bar Container */}
-  <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 overflow-hidden">
-    {/* Animated Gradient Progress Bar */}
-    <div 
-      className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-      style={{ 
-        width: `${Math.min(dashboardData.assessmentProgress.percentage, 100)}%`,
-        background: "linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)",
-        backgroundSize: "200% 100%",
-        animation: "gradient-shift 2s ease infinite"
-      }}
-    >
-      {/* Progress Bar Glow Effect */}
-      <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
-      
-      {/* Progress Percentage Indicator */}
-      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-white">
-        {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
-      </div>
-    </div>
-  </div>
-  
-  {/* Progress Labels */}
-  <div className="flex justify-between text-xs text-gray-500 mt-2 px-1">
-    <span>0%</span>
-    <span>100%</span>
-  </div>
-</div>
+          <div className="card-purple hover-lift min-w-0 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
+                  <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
+                  Progress
+                </span>
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+              </h3>
+
+              <p className="text-sm text-muted-foreground mb-4 truncate">
+                {dashboardData.assessmentProgress.current} of {dashboardData.assessmentProgress.total} questions
+              </p>
+
+              {/* Progress Bar Container */}
+              <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-3 overflow-hidden">
+                {/* Animated Gradient Progress Bar */}
+                <div
+                  className="h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                  style={{
+                    width: `${Math.min(dashboardData.assessmentProgress.percentage, 100)}%`,
+                    background: "var(--purple-gradient)",
+                    backgroundSize: "200% 100%",
+                    animation: "gradient-shift 2s ease infinite"
+                  }}
+                >
+                  {/* Progress Bar Glow Effect */}
+                  <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+
+                  {/* Progress Percentage Indicator */}
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-white">
+                    {Math.min(dashboardData.assessmentProgress.percentage, 100).toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Labels */}
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
+                <span>0%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
 
           {/* Completed Assessments */}
-          <div className="card-primary card-hover min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <div className="icon-wrapper-green">
-                <Trophy className="w-5 h-5 text-accent" />
+          <div className="card-purple hover-lift min-w-0 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl">
+                  <Trophy className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">
+                  Achieved
+                </span>
               </div>
-              <Badge className="badge-green">Achieved</Badge>
-            </div>
-            <h3 className="text-2xl font-bold text-card-foreground mb-2">
-              {dashboardData.completedAssessments}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              Completed Assessments
-            </p>
-            <div className="flex items-center text-sm text-success truncate">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              <span>+3 from last month</span>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {dashboardData.completedAssessments}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Completed Assessments
+              </p>
+              <div className="flex items-center text-sm text-green-600 dark:text-green-400 truncate">
+                <TrendingUp className="w-4 h-4 mr-1" />
+                <span>+3 from last month</span>
+              </div>
             </div>
           </div>
 
           {/* Average Score */}
-          <div className="card-primary card-hover min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <div className="icon-wrapper-amber">
-                <Star className="w-5 h-5 text-warning" />
+          <div className="card-purple hover-lift min-w-0 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl">
+                  <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-xs px-3 py-1 rounded-full">
+                  Performance
+                </span>
               </div>
-              <Badge className="badge-amber">Performance</Badge>
-            </div>
-            <h3 className="text-2xl font-bold text-card-foreground mb-2">
-              {typeof dashboardData.averageScore === 'number' ? dashboardData.averageScore.toFixed(2) : '0.00'}%
-            </h3>
-            <p className="text-sm text-muted-foreground mb-2">Average Score</p>
-            <div className="flex items-center text-sm text-warning truncate">
-              {dashboardData.averageScore > 70 ? (
-                <>
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  <span>Excellent performance</span>
-                </>
-              ) : dashboardData.averageScore > 0 ? (
-                <>
-                  <TrendingDown className="w-4 h-4 mr-1" />
-                  <span>Room for improvement</span>
-                </>
-              ) : (
-                <span>No scores yet</span>
-              )}
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {typeof dashboardData.averageScore === 'number' ? dashboardData.averageScore.toFixed(2) : '0.00'}%
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">Average Score</p>
+              <div className="flex items-center text-sm text-yellow-600 dark:text-yellow-400 truncate">
+                {dashboardData.averageScore > 70 ? (
+                  <>
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span>Excellent performance</span>
+                  </>
+                ) : dashboardData.averageScore > 0 ? (
+                  <>
+                    <TrendingDown className="w-4 h-4 mr-1" />
+                    <span>Room for improvement</span>
+                  </>
+                ) : (
+                  <span>No scores yet</span>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Career Matches */}
-          <div className="card-primary card-hover min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <div className="icon-wrapper-purple">
-                <Users className="w-5 h-5 text-accent" />
+          <div className="card-purple hover-lift min-w-0 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                  <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
+                  Opportunities
+                </span>
               </div>
-              <Badge className="badge-purple">Opportunities</Badge>
-            </div>
-            <h3 className="text-2xl font-bold text-card-foreground mb-2">
-              {dashboardData.careerMatches}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
-            <div className="flex items-center text-sm text-accent truncate">
-              <Sparkles className="w-4 h-4 mr-1" />
-              <span>New recommendations available</span>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {dashboardData.careerMatches}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">Career Matches</p>
+              <div className="flex items-center text-sm text-purple-600 dark:text-purple-400 truncate">
+                <Sparkles className="w-4 h-4 mr-1" />
+                <span>New recommendations available</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* AI Career Recommendation */}
-        <div className="ai-recommendation-card">
+        <div className="card-purple relative overflow-hidden">
           {/* Decorative elements */}
-          <div className="decorative-gradient-blur-blue top-0 right-0 -translate-y-32 translate-x-32"></div>
-          <div className="decorative-gradient-blur-purple bottom-0 left-0 translate-y-24 -translate-x-24"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-24 -translate-x-24"></div>
 
-          <div className="relative z-10">
+          <div className="relative z-10 p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="ai-recommendation-icon-wrapper">
-                <BookOpen className="w-6 h-6 text-primary-foreground" />
+              <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                <BookOpen className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-card-foreground">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   AI Career Recommendation
                 </h2>
                 <p className="text-muted-foreground">
@@ -377,24 +393,24 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="prose prose-lg dark:prose-invert max-w-none bg-card/50 backdrop-blur-sm rounded-xl p-6 border border-input">
+            <div className="bg-white dark:bg-matte-gray-dark/50 backdrop-blur-sm rounded-xl p-6 border border-gray-200 dark:border-matte-gray-subtle">
               <ReactMarkdown
                 components={{
                   h1: ({ node, ...props }) => (
                     <h1
-                      className="text-2xl font-bold text-card-foreground mb-4"
+                      className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"
                       {...props}
                     />
                   ),
                   h2: ({ node, ...props }) => (
                     <h2
-                      className="text-xl font-semibold text-card-foreground mt-6 mb-3"
+                      className="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3"
                       {...props}
                     />
                   ),
                   h3: ({ node, ...props }) => (
                     <h3
-                      className="text-lg font-medium text-card-foreground mt-4 mb-2"
+                      className="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4 mb-2"
                       {...props}
                     />
                   ),
@@ -414,7 +430,7 @@ export default function Dashboard() {
                     <li className="text-base" {...props} />
                   ),
                   strong: ({ node, ...props }) => (
-                    <strong className="font-semibold text-primary" {...props} />
+                    <strong className="font-semibold text-purple-600 dark:text-purple-400" {...props} />
                   ),
                 }}
               >
@@ -426,191 +442,183 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
           {/* Recent Assessments */}
-          <div id="recent-assessments" className="card-primary card-hover">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="icon-wrapper-blue">
-                  <Calendar className="w-5 h-5 text-primary" />
+          <div id="recent-assessments" className="card-purple hover-lift">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
+                    <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Recent Assessments
+                  </h2>
                 </div>
-                <h2 className="text-xl font-bold text-card-foreground">
-                  Recent Assessments
-                </h2>
+                <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
+                  {dashboardData.recentAssessments.length} total
+                </span>
               </div>
-              <Badge className="badge-blue">
-                {dashboardData.recentAssessments.length} total
-              </Badge>
-            </div>
 
-            <div className="space-y-3">
-              {paginatedAssessments.length > 0 ? (
-                paginatedAssessments.map((assessment) => (
-                  <Link
-                    key={assessment.id}
-                    href={`/employee-dashboard/results?id=${assessment.id}`}
-                    className="assessment-item group block cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`p-1.5 rounded-full ${
-                            assessment.status === "Completed"
-                              ? "bg-success/10"
-                              : "bg-warning/10"
-                          }`}
-                        >
-                          {assessment.status === "Completed" ? (
-                            <CheckCircle className="w-4 h-4 text-success" />
-                          ) : (
-                            <Clock className="w-4 h-4 text-warning animate-pulse" />
+              <div className="space-y-3">
+                {paginatedAssessments.length > 0 ? (
+                  paginatedAssessments.map((assessment) => (
+                    <Link
+                      key={assessment.id}
+                      href={`/employee-dashboard/results?id=${assessment.id}`}
+                      className="group block p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-matte-gray-light transition-all duration-200 cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-matte-gray-subtle"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`p-1.5 rounded-full ${assessment.status === "Completed"
+                                ? "bg-green-100 dark:bg-green-900/20"
+                                : "bg-yellow-100 dark:bg-yellow-900/20"
+                              }`}
+                          >
+                            {assessment.status === "Completed" ? (
+                              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400 animate-pulse" />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                              {assessment.name}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(assessment.date).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {assessment.score && (
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-gradient-purple">
+                                {assessment.score}%
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded-full ${assessment.score > 70
+                                  ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                                  : "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
+                                }`}>
+                                Score
+                              </span>
+                            </div>
+                          )}
+                          {assessment.status === "In Progress" && (
+                            <Button
+                              size="sm"
+                              className="btn-purple text-white border-0"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                window.location.href = "/employee-dashboard/assessment";
+                              }}
+                            >
+                              Continue
+                            </Button>
                           )}
                         </div>
-                        <div>
-                          <h4 className="font-medium text-card-foreground group-hover:text-primary transition-colors">
-                            {assessment.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(assessment.date).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )}
-                          </p>
-                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        {assessment.score && (
-                          <div className="text-right">
-                            <div className="text-lg font-bold gradient-text-primary">
-                              {assessment.score}%
-                            </div>
-                            <Badge
-                              className={`text-xs ${
-                                assessment.score > 70
-                                  ? "badge-green"
-                                  : "badge-amber"
-                              }`}
-                            >
-                              Score
-                            </Badge>
-                          </div>
-                        )}
-                        {assessment.status === "In Progress" && (
-                          <Button
-                            size="sm"
-                            className="btn-gradient-primary text-primary-foreground border-0"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              // Navigate to assessment instead of results
-                              window.location.href = "/employee-dashboard/assessment";
-                            }}
-                          >
-                            Continue
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    No assessments completed yet.
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4 border-input text-secondary-foreground hover:bg-secondary"
-                    asChild
-                  >
-                    <Link href="/employee-dashboard/assessment">
-                      Start Assessment
                     </Link>
-                  </Button>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      No assessments completed yet.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="mt-4 border-gray-300 dark:border-matte-gray-subtle text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-matte-gray-light"
+                      asChild
+                    >
+                      <Link href="/employee-dashboard/assessment">
+                        Start Assessment
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() =>
+                            handlePageChange(Math.max(1, currentPage - 1))
+                          }
+                          className={`${currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
+                            } text-gray-700 dark:text-gray-300`}
+                        />
+                      </PaginationItem>
+                      {Array.from(
+                        { length: totalPages },
+                        (_, index) => index + 1
+                      ).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                            className={`${currentPage === page
+                                ? "btn-purple text-white"
+                                : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light text-gray-700 dark:text-gray-300"
+                              }`}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            handlePageChange(
+                              Math.min(totalPages, currentPage + 1)
+                            )
+                          }
+                          className={`${currentPage === totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer hover:bg-gray-100 dark:hover:bg-matte-gray-light"
+                            } text-gray-700 dark:text-gray-300`}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               )}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="mt-6">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() =>
-                          handlePageChange(Math.max(1, currentPage - 1))
-                        }
-                        className={`${
-                          currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-secondary"
-                        }`}
-                      />
-                    </PaginationItem>
-                    {Array.from(
-                      { length: totalPages },
-                      (_, index) => index + 1
-                    ).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(page)}
-                          isActive={currentPage === page}
-                          className={`${
-                            currentPage === page
-                              ? "btn-gradient-primary text-primary-foreground"
-                              : "cursor-pointer hover:bg-secondary"
-                          }`}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() =>
-                          handlePageChange(
-                            Math.min(totalPages, currentPage + 1)
-                          )
-                        }
-                        className={`${
-                          currentPage === totalPages
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer hover:bg-secondary"
-                        }`}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  className="group w-52 mx-auto mt-6 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200"
+                  asChild
+                >
+                  <Link href="/employee-dashboard/results" className="flex items-center justify-center">
+                    <span className="font-medium">View All Results</span>
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                  </Link>
+                </Button>
               </div>
-            )}
-<div className="flex justify-center">
-<Button
-  variant="outline"
-  className="group w-52 mx-auto mt-6 px-5 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200"
-  asChild
->
-  <Link href="/employee-dashboard/results" className="flex items-center justify-center">
-    <span className="font-medium">View All Results</span>
-    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-  </Link>
-</Button>
-</div>
+            </div>
           </div>
-
-         
         </div>
 
         {/* Quick Actions - Card version */}
-        <Card className="card-primary card-hover border-dashed border-2 border-primary/20 dark:border-primary/30 overflow-hidden">
-          <CardContent className="p-6">
+        <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700 overflow-hidden hover-lift">
+          <div className="p-6">
             <div className="flex items-center gap-2 mb-6">
-              <div className="icon-wrapper-blue">
-                <Zap className="w-6 h-6 text-primary" />
+              <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-card-foreground">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   Quick Actions
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -623,13 +631,13 @@ export default function Dashboard() {
               {/* Take Assessment */}
               <Link
                 href="/employee-dashboard/assessment"
-                className="group p-4 rounded-xl border border-input bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="icon-wrapper-blue group-hover:scale-110 transition-transform duration-300">
-                    <ClipboardList className="w-6 h-6 text-primary" />
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <ClipboardList className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="font-medium text-card-foreground group-hover:text-primary transition-colors">
+                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                     Take Assessment
                   </span>
                   <p className="text-sm text-muted-foreground">
@@ -641,13 +649,13 @@ export default function Dashboard() {
               {/* View Results */}
               <Link
                 href="/employee-dashboard/results"
-                className="group p-4 rounded-xl border border-input bg-card hover:border-accent/50 hover:shadow-lg transition-all duration-300"
+                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-green-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="icon-wrapper-green group-hover:scale-110 transition-transform duration-300">
-                    <LineChart className="w-6 h-6 text-accent" />
+                  <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <LineChart className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="font-medium text-card-foreground group-hover:text-accent transition-colors">
+                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                     View Results
                   </span>
                   <p className="text-sm text-muted-foreground">
@@ -659,13 +667,13 @@ export default function Dashboard() {
               {/* Career Paths */}
               <Link
                 href="/employee-dashboard/career-pathways"
-                className="group p-4 rounded-xl border border-input bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-purple-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="icon-wrapper-purple group-hover:scale-110 transition-transform duration-300">
-                    <Users className="w-6 h-6 text-accent" />
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="font-medium text-card-foreground group-hover:text-primary transition-colors">
+                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                     Career Paths
                   </span>
                   <p className="text-sm text-muted-foreground">
@@ -677,13 +685,13 @@ export default function Dashboard() {
               {/* Development */}
               <Link
                 href="/employee-dashboard/development"
-                className="group p-4 rounded-xl border border-input bg-card hover:border-warning/50 hover:shadow-lg transition-all duration-300"
+                className="group p-4 rounded-xl border border-gray-200 dark:border-matte-gray-subtle bg-white dark:bg-matte-gray-dark hover:border-yellow-600/50 hover:shadow-lg transition-all duration-300 hover-lift"
               >
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="icon-wrapper-amber group-hover:scale-110 transition-transform duration-300">
-                    <Award className="w-6 h-6 text-warning" />
+                  <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Award className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                   </div>
-                  <span className="font-medium text-card-foreground group-hover:text-warning transition-colors">
+                  <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
                     Development
                   </span>
                   <p className="text-sm text-muted-foreground">
@@ -692,8 +700,8 @@ export default function Dashboard() {
                 </div>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

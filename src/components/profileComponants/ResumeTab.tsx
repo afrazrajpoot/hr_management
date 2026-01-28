@@ -37,11 +37,11 @@ const ResumeTab: React.FC<ResumeTabProps> = ({
     initial="hidden"
     animate="visible"
   >
-    <Card>
+    <Card className="card-purple">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Resume Management</CardTitle>
+            <CardTitle className="text-foreground">Resume Management</CardTitle>
             <CardDescription>Upload and manage your resume</CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ const ResumeTab: React.FC<ResumeTabProps> = ({
               <>
                 <Button
                   onClick={onSave}
-                  className="btn-gradient-primary"
+                  className="btn-purple"
                   size="sm"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -68,7 +68,7 @@ const ResumeTab: React.FC<ResumeTabProps> = ({
             ) : (
               <Button
                 onClick={onEdit}
-                className="btn-gradient-primary"
+                className="btn-purple"
                 size="sm"
               >
                 <Edit className="w-4 h-4 mr-2" />

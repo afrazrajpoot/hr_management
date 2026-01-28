@@ -137,28 +137,28 @@ export default function Assessment() {
             setGuidelineType("subscription");
             setGuidelineMessage(
               response.message ||
-                "Subscribe to attempt the assessment multiple times."
+              "Subscribe to attempt the assessment multiple times."
             );
             setHasExistingReport(response.hasExistingReport || false);
           } else if (response.isProfileComplete === false) {
             setGuidelineType("profileIncomplete");
             setGuidelineMessage(
               response.message ||
-                "Complete your profile before taking the assessment."
+              "Complete your profile before taking the assessment."
             );
             setMissingFields(response.missingFields || []);
           } else if (response.hasEmployeeProfile === false) {
             setGuidelineType("noProfile");
             setGuidelineMessage(
               response.message ||
-                "Employee profile not found. Please complete your profile setup."
+              "Employee profile not found. Please complete your profile setup."
             );
           } else {
             // Fallback to generic error
             throw new Error(
               response.error ||
-                response.message ||
-                "Failed to load assessment questions."
+              response.message ||
+              "Failed to load assessment questions."
             );
           }
           return;
@@ -569,17 +569,17 @@ export default function Assessment() {
   const getGuidelineIcon = (type: typeof guidelineType) => {
     switch (type) {
       case "unauthorized":
-        return <User className="w-10 h-10 text-destructive" />;
+        return <User className="w-10 h-10 text-red-600" />;
       case "subscription":
-        return <CreditCard className="w-10 h-10 text-warning" />;
+        return <CreditCard className="w-10 h-10 text-yellow-600" />;
       case "profileIncomplete":
-        return <UserCheck className="w-10 h-10 text-primary" />;
+        return <UserCheck className="w-10 h-10 text-blue-600" />;
       case "noProfile":
-        return <Building className="w-10 h-10 text-secondary" />;
+        return <Building className="w-10 h-10 text-gray-600" />;
       case "notFound":
-        return <AlertCircle className="w-10 h-10 text-destructive" />;
+        return <AlertCircle className="w-10 h-10 text-red-600" />;
       default:
-        return <AlertCircle className="w-10 h-10 text-destructive" />;
+        return <AlertCircle className="w-10 h-10 text-red-600" />;
     }
   };
 
@@ -590,7 +590,7 @@ export default function Assessment() {
         return (
           <Button
             onClick={() => navigate.push("/api/auth/signin")}
-            className="mt-4 btn-gradient-primary"
+            className="mt-4 btn-purple"
           >
             Sign In
           </Button>
@@ -601,7 +601,7 @@ export default function Assessment() {
         return (
           <Button
             onClick={() => navigate.push("/employee-dashboard/profile")}
-            className="mt-4 btn-gradient-primary"
+            className="mt-4 btn-purple"
           >
             Complete Profile
           </Button>
@@ -611,7 +611,7 @@ export default function Assessment() {
           <Button
             onClick={() => (window.location.href = "/support")}
             variant="outline"
-            className="mt-4"
+            className="mt-4 border-gray-300 dark:border-gray-600"
           >
             Contact Support
           </Button>
@@ -622,7 +622,7 @@ export default function Assessment() {
             href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
             className=""
           >
-            <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+            <Button className="btn-purple text-white shadow-lg hover:shadow-xl transition-all duration-300">
               <Sparkles className="h-4 w-4 mr-2" />
               Upgrade to Pro
             </Button>
@@ -642,29 +642,29 @@ export default function Assessment() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen gradient-bg-primary p-6">
+      <div className="min-h-screen bg-layout-purple p-6">
         <div className="max-w-6xl mx-auto">
           {/* Decorative Background Elements */}
           <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-            <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-20" />
-            <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-20" />
+            <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl opacity-20" />
+            <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl opacity-20" />
           </div>
 
           {error && !analysisResults && !guidelineType ? (
             <div className="max-w-2xl mx-auto">
-              <Card className="border-destructive/20 bg-destructive/5 dark:bg-destructive/10 card-primary">
-                <CardContent className="pt-8 pb-6 text-center space-y-6">
-                  <div className="icon-wrapper-blue mx-auto">
-                    <AlertCircle className="w-12 h-12 text-destructive" />
+              <div className="card-purple border-red-300 dark:border-red-700">
+                <div className="p-8 pb-6 text-center space-y-6">
+                  <div className="bg-red-100 dark:bg-red-900/20 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto">
+                    <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
                   </div>
                   <div className="space-y-3">
-                    <h2 className="text-2xl font-bold text-foreground">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       Submission Failed
                     </h2>
                     <p className="text-muted-foreground text-lg">{error}</p>
                     {error.includes("API") ||
-                    error.includes("connection") ||
-                    error.includes("server") ? (
+                      error.includes("connection") ||
+                      error.includes("server") ? (
                       <p className="text-sm text-muted-foreground mt-2">
                         Please check your internet connection and try again. If
                         the problem persists, contact support.
@@ -675,14 +675,14 @@ export default function Assessment() {
                     <Button
                       onClick={() => window.location.reload()}
                       variant="outline"
-                      className="border-input"
+                      className="border-gray-300 dark:border-gray-600"
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Refresh Page
                     </Button>
                     <Button
                       onClick={retrySubmission}
-                      className="btn-gradient-primary"
+                      className="btn-purple"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
@@ -698,27 +698,27 @@ export default function Assessment() {
                       )}
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           ) : guidelineType ? (
             // Guideline message UI - styled as a helpful box, not an error
             <div className="max-w-2xl mx-auto">
-              <Card className="card-primary">
-                <CardContent className="pt-8 pb-6 text-center space-y-6">
-                  <div className="icon-wrapper-blue mx-auto">
+              <div className="card-purple">
+                <div className="p-8 pb-6 text-center space-y-6">
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto">
                     {getGuidelineIcon(guidelineType)}
                   </div>
                   <div className="space-y-3">
-                    <h2 className="text-2xl font-bold gradient-text-primary">
+                    <h2 className="text-2xl font-bold text-gradient-purple">
                       {guidelineType === "subscription"
                         ? "Upgrade Required"
                         : guidelineType === "profileIncomplete" ||
                           guidelineType === "noProfile"
-                        ? "Profile Setup Needed"
-                        : guidelineType === "unauthorized"
-                        ? "Sign In Required"
-                        : "Account Issue"}
+                          ? "Profile Setup Needed"
+                          : guidelineType === "unauthorized"
+                            ? "Sign In Required"
+                            : "Account Issue"}
                     </h2>
                     <p className="text-muted-foreground text-lg">
                       {guidelineMessage}
@@ -728,14 +728,14 @@ export default function Assessment() {
                   {/* Show missing fields if applicable */}
                   {guidelineType === "profileIncomplete" &&
                     missingFields.length > 0 && (
-                      <Card className="w-full border-input">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <div className="w-full border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div className="pb-3">
+                          <h3 className="text-sm font-medium flex items-center gap-2 text-gray-900 dark:text-gray-100">
                             <UserCheck className="w-4 h-4" />
                             Missing Profile Information
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
+                          </h3>
+                        </div>
+                        <div className="pt-0">
                           <ul className="space-y-2 text-sm text-muted-foreground">
                             {missingFields.map((field) => (
                               <li
@@ -743,21 +743,21 @@ export default function Assessment() {
                                 className="flex items-center gap-2"
                               >
                                 {field === "firstName" && (
-                                  <User className="w-4 h-4 flex-shrink-0" />
+                                  <User className="w-4 h-4 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 )}
                                 {field === "lastName" && (
-                                  <User className="w-4 h-4 flex-shrink-0" />
+                                  <User className="w-4 h-4 flex-shrink-0 text-blue-600 dark:text-blue-400" />
                                 )}
                                 {field === "dateOfBirth" && (
-                                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                                  <Calendar className="w-4 h-4 flex-shrink-0 text-green-600 dark:text-green-400" />
                                 )}
                                 {field === "hireDate" && (
-                                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                                  <Calendar className="w-4 h-4 flex-shrink-0 text-green-600 dark:text-green-400" />
                                 )}
                                 {field === "address" && (
-                                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                                  <MapPin className="w-4 h-4 flex-shrink-0 text-purple-600 dark:text-purple-400" />
                                 )}
-                                <span>
+                                <span className="text-gray-700 dark:text-gray-300">
                                   {field
                                     .replace(/([A-Z])/g, " $1")
                                     .trim()
@@ -767,14 +767,14 @@ export default function Assessment() {
                               </li>
                             ))}
                           </ul>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     )}
 
                   {/* Additional info for subscription */}
                   {guidelineType === "subscription" && hasExistingReport && (
-                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-                      <p className="text-sm text-warning-foreground">
+                    <div className="bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800 dark:text-yellow-300">
                         You've already completed this assessment once. Subscribe
                         to unlock unlimited attempts and advanced insights.
                       </p>
@@ -782,24 +782,24 @@ export default function Assessment() {
                   )}
 
                   {getGuidelineAction()}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           ) : (
             <>
               {isSubmitting && <Loader />}
               {analysisResults ? (
                 <div className="max-w-3xl mx-auto">
-                  <Card className="ai-recommendation-card">
-                    <CardContent className="pt-8 pb-6 text-center space-y-8">
+                  <div className="card-purple relative overflow-hidden">
+                    <div className="p-8 pb-6 text-center space-y-8">
                       <div className="flex justify-center">
-                        <div className="ai-recommendation-icon-wrapper">
+                        <div className="bg-gradient-purple p-5 rounded-full">
                           <CheckCircle className="w-14 h-14 text-white" />
                         </div>
                       </div>
 
                       <div className="space-y-4">
-                        <h2 className="text-3xl font-bold gradient-text-primary">
+                        <h2 className="text-3xl font-bold text-gradient-purple">
                           Assessment Complete! 🎉
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -809,27 +809,27 @@ export default function Assessment() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                        <div className="quick-action-item text-center p-4">
-                          <Brain className="w-8 h-8 text-primary mx-auto mb-3" />
-                          <h4 className="font-semibold mb-1">
+                        <div className="card-purple text-center p-4 hover-lift">
+                          <Brain className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1 text-gray-900 dark:text-gray-100">
                             AI Analysis Complete
                           </h4>
                           <p className="text-sm text-muted-foreground">
                             Your unique Genius Factor calculated
                           </p>
                         </div>
-                        <div className="quick-action-item text-center p-4">
-                          <TrendingUp className="w-8 h-8 text-success mx-auto mb-3" />
-                          <h4 className="font-semibold mb-1">
+                        <div className="card-purple text-center p-4 hover-lift">
+                          <TrendingUp className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1 text-gray-900 dark:text-gray-100">
                             Career Paths Generated
                           </h4>
                           <p className="text-sm text-muted-foreground">
                             Personalized recommendations ready
                           </p>
                         </div>
-                        <div className="quick-action-item text-center p-4">
-                          <Award className="w-8 h-8 text-warning mx-auto mb-3" />
-                          <h4 className="font-semibold mb-1">
+                        <div className="card-purple text-center p-4 hover-lift">
+                          <Award className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mx-auto mb-3" />
+                          <h4 className="font-semibold mb-1 text-gray-900 dark:text-gray-100">
                             Strengths Identified
                           </h4>
                           <p className="text-sm text-muted-foreground">
@@ -843,7 +843,7 @@ export default function Assessment() {
                           onClick={() =>
                             navigate.push("/employee-dashboard/results")
                           }
-                          className="btn-gradient-primary min-w-[240px] h-12 text-lg"
+                          className="btn-purple min-w-[240px] h-12 text-lg"
                         >
                           <Rocket className="w-5 h-5 mr-2" />
                           View Detailed Results
@@ -853,8 +853,8 @@ export default function Assessment() {
                           You will be redirected in 2 seconds...
                         </p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <>
@@ -862,7 +862,7 @@ export default function Assessment() {
                   <div className="mb-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                       <div>
-                        <h1 className="text-4xl font-bold gradient-text-primary mb-2">
+                        <h1 className="text-4xl font-bold text-gradient-purple mb-2">
                           Career Assessment
                         </h1>
                         <p className="text-lg text-muted-foreground">
@@ -871,9 +871,9 @@ export default function Assessment() {
                         </p>
                       </div>
                       <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                        <div className="flex items-center text-sm bg-card px-4 py-2 rounded-lg border">
-                          <Clock className="w-4 h-4 mr-2 text-primary" />
-                          <span className="font-semibold">
+                        <div className="flex items-center text-sm bg-white dark:bg-matte-gray-dark px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <Clock className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">
                             {Math.floor(timeSpent / 60)}:
                             {(timeSpent % 60).toString().padStart(2, "0")}
                           </span>
@@ -883,7 +883,7 @@ export default function Assessment() {
                             variant="outline"
                             size="sm"
                             onClick={resetProgress}
-                            className="border-input"
+                            className="border-gray-300 dark:border-gray-600"
                           >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Restart
@@ -893,11 +893,11 @@ export default function Assessment() {
                     </div>
 
                     {/* Progress Section */}
-                    <Card className="card-primary mb-6">
-                      <CardContent className="p-6">
+                    <div className="card-purple hover-lift mb-6">
+                      <div className="p-6">
                         <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                           <div>
-                            <h3 className="text-xl font-semibold mb-1">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
                               {currentPart?.part}
                             </h3>
                             <p className="text-muted-foreground">
@@ -906,7 +906,7 @@ export default function Assessment() {
                             </p>
                           </div>
                           <div className="mt-2 md:mt-0">
-                            <span className="badge-blue">
+                            <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
                               Part {currentPartIndex + 1} of{" "}
                               {visibleQuestions.length}
                             </span>
@@ -918,19 +918,19 @@ export default function Assessment() {
                             <span className="text-muted-foreground">
                               Progress
                             </span>
-                            <span className="font-semibold">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                               {Math.round(progress)}%
                             </span>
                           </div>
-                          <div className="w-full bg-muted rounded-full h-3">
+                          <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-3">
                             <div
-                              className="progress-bar-primary rounded-full h-3 transition-all duration-300"
+                              className="rounded-full h-3 transition-all duration-300 bg-gradient-purple"
                               style={{ width: `${progress}%` }}
                             />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Main Content Grid */}
@@ -938,34 +938,34 @@ export default function Assessment() {
                     {/* Question Card - Takes 2/3 width on large screens */}
                     <div className="lg:col-span-2">
                       {currentQ && visibleQuestions.length > 0 ? (
-                        <Card className="card-primary card-hover h-full">
-                          <CardHeader className="pb-3">
+                        <div className="card-purple hover-lift h-full">
+                          <div className="pb-3 px-6 pt-6">
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-2xl flex items-center gap-2">
-                                <div className="icon-wrapper-blue p-2">
-                                  <Target className="w-5 h-5 text-primary" />
+                              <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-xl">
+                                  <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <span>Your Question</span>
-                              </CardTitle>
-                              <span className="badge-purple text-xs">
+                              </h3>
+                              <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
                                 Multiple Choice
                               </span>
                             </div>
-                          </CardHeader>
-                          <CardContent className="space-y-8">
+                          </div>
+                          <div className="px-6 pb-6 space-y-8">
                             {/* Category and Section */}
                             <div className="space-y-4">
                               <div>
-                                <div className="text-lg font-semibold text-primary mb-1">
+                                <div className="text-lg font-semibold text-purple-600 dark:text-purple-400 mb-1">
                                   {currentQ.category}
                                 </div>
-                                <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                                <div className="text-sm text-muted-foreground bg-gray-100 dark:bg-matte-gray-light p-3 rounded-lg">
                                   {currentQ.section}
                                 </div>
                               </div>
 
                               {/* Question Text */}
-                              <div className="text-xl leading-relaxed font-medium bg-gradient-to-r from-foreground to-foreground/90 bg-clip-text text-transparent">
+                              <div className="text-xl leading-relaxed font-medium text-gray-900 dark:text-gray-100">
                                 {currentQ.question}
                               </div>
                             </div>
@@ -986,11 +986,10 @@ export default function Assessment() {
                                 return (
                                   <div
                                     key={index}
-                                    className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-                                      isSelected
-                                        ? "border-primary bg-primary/5"
-                                        : "border-input hover:border-primary/50 hover:bg-primary/3"
-                                    }`}
+                                    className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${isSelected
+                                        ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20"
+                                        : "border-gray-200 dark:border-gray-700 hover:border-purple-600/50 hover:bg-purple-50/50 dark:hover:bg-purple-900/10"
+                                      }`}
                                   >
                                     <RadioGroupItem
                                       value={apiOption}
@@ -1002,15 +1001,14 @@ export default function Assessment() {
                                       className="flex-1 cursor-pointer flex items-start"
                                     >
                                       <span
-                                        className={`font-bold mr-3 text-lg flex-shrink-0 ${
-                                          isSelected
-                                            ? "text-primary"
-                                            : "text-muted-foreground"
-                                        }`}
+                                        className={`font-bold mr-3 text-lg flex-shrink-0 ${isSelected
+                                            ? "text-purple-600 dark:text-purple-400"
+                                            : "text-gray-500 dark:text-gray-400"
+                                          }`}
                                       >
                                         {staticLetter}.
                                       </span>
-                                      <span className="leading-relaxed">
+                                      <span className="leading-relaxed text-gray-900 dark:text-gray-100">
                                         {apiOption.replace(/^[A-Z]\)\s*/, "")}
                                       </span>
                                     </Label>
@@ -1018,15 +1016,15 @@ export default function Assessment() {
                                 );
                               })}
                             </RadioGroup>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       ) : (
-                        <Card className="card-primary">
-                          <CardContent className="p-12 text-center">
-                            <div className="icon-wrapper-amber mx-auto mb-6">
-                              <AlertCircle className="w-12 h-12 text-warning" />
+                        <div className="card-purple">
+                          <div className="p-12 text-center">
+                            <div className="bg-yellow-100 dark:bg-yellow-900/20 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                              <AlertCircle className="w-12 h-12 text-yellow-600 dark:text-yellow-400" />
                             </div>
-                            <h3 className="text-2xl font-semibold mb-3">
+                            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
                               No Questions Available
                             </h3>
                             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
@@ -1036,37 +1034,36 @@ export default function Assessment() {
                             </p>
                             <Button
                               onClick={reloadQuestions}
-                              className="btn-gradient-primary"
+                              className="btn-purple"
                               disabled={isFetchingQuestions}
                             >
                               <RefreshCw
-                                className={`w-4 h-4 mr-2 ${
-                                  isFetchingQuestions ? "animate-spin" : ""
-                                }`}
+                                className={`w-4 h-4 mr-2 ${isFetchingQuestions ? "animate-spin" : ""
+                                  }`}
                               />
                               Try Loading Questions Again
                             </Button>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </div>
                       )}
                     </div>
 
                     {/* Sidebar - Takes 1/3 width on large screens */}
                     <div className="space-y-6">
                       {/* Quick Stats Card */}
-                      <Card className="card-primary">
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-primary" />
+                      <div className="card-purple">
+                        <div className="px-6 pt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             Assessment Stats
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                          </h3>
+                        </div>
+                        <div className="px-6 pb-6 space-y-4">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">
                               Current Part
                             </span>
-                            <span className="font-semibold">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                               {currentPartIndex + 1}/{visibleQuestions.length}
                             </span>
                           </div>
@@ -1074,7 +1071,7 @@ export default function Assessment() {
                             <span className="text-sm text-muted-foreground">
                               Questions Answered
                             </span>
-                            <span className="font-semibold">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                               {
                                 currentPartQuestions.filter(
                                   (q) => answers[q.id]
@@ -1087,19 +1084,19 @@ export default function Assessment() {
                             <span className="text-sm text-muted-foreground">
                               Total Progress
                             </span>
-                            <span className="font-semibold">
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                               {Math.round(
                                 (visibleQuestions
                                   .flatMap((p) => p.questions)
                                   .filter((q) => answers[q.id]).length /
                                   visibleQuestions.flatMap((p) => p.questions)
                                     .length) *
-                                  100
+                                100
                               )}
                               %
                             </span>
                           </div>
-                          <div className="pt-4 border-t">
+                          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                             <div className="text-sm text-muted-foreground mb-2">
                               This Part Progress
                             </div>
@@ -1107,48 +1104,47 @@ export default function Assessment() {
                               {currentPartQuestions.map((_, index) => (
                                 <div
                                   key={index}
-                                  className={`flex-1 h-2 rounded-full transition-all ${
-                                    index === currentQuestionIndex
-                                      ? "bg-primary"
+                                  className={`flex-1 h-2 rounded-full transition-all ${index === currentQuestionIndex
+                                      ? "bg-purple-600"
                                       : index < currentQuestionIndex
-                                      ? "bg-success"
-                                      : answers[currentPartQuestions[index].id]
-                                      ? "bg-warning"
-                                      : "bg-muted"
-                                  }`}
+                                        ? "bg-green-600"
+                                        : answers[currentPartQuestions[index].id]
+                                          ? "bg-yellow-600"
+                                          : "bg-gray-200 dark:bg-gray-700"
+                                    }`}
                                 />
                               ))}
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
 
                       {/* Tips Card */}
-                      <Card className="card-primary">
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-warning" />
+                      <div className="card-purple">
+                        <div className="px-6 pt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                             Quick Tips
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
+                          </h3>
+                        </div>
+                        <div className="px-6 pb-6 space-y-3">
                           <div className="flex items-start gap-3">
-                            <div className="icon-wrapper-green p-2 mt-0.5">
-                              <CheckCircle className="w-4 h-4 text-success" />
+                            <div className="bg-green-100 dark:bg-green-900/20 p-2 rounded-xl mt-0.5">
+                              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium">Be Honest</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Be Honest</p>
                               <p className="text-xs text-muted-foreground">
                                 Answer truthfully for accurate results
                               </p>
                             </div>
                           </div>
                           <div className="flex items-start gap-3">
-                            <div className="icon-wrapper-blue p-2 mt-0.5">
-                              <Clock className="w-4 h-4 text-primary" />
+                            <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-xl mt-0.5">
+                              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 Take Your Time
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -1157,11 +1153,11 @@ export default function Assessment() {
                             </div>
                           </div>
                           <div className="flex items-start gap-3">
-                            <div className="icon-wrapper-purple p-2 mt-0.5">
-                              <Shield className="w-4 h-4 text-accent" />
+                            <div className="bg-purple-100 dark:bg-purple-900/20 p-2 rounded-xl mt-0.5">
+                              <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
-                              <p className="text-sm font-medium">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 All Data Secure
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -1169,12 +1165,12 @@ export default function Assessment() {
                               </p>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
 
                       {/* Navigation Card */}
-                      <Card className="card-primary">
-                        <CardContent className="p-4 space-y-4">
+                      <div className="card-purple">
+                        <div className="p-4 space-y-4">
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
@@ -1183,7 +1179,7 @@ export default function Assessment() {
                                 currentPartIndex === 0 &&
                                 currentQuestionIndex === 0
                               }
-                              className="flex-1 border-input"
+                              className="flex-1 border-gray-300 dark:border-gray-600"
                             >
                               <ChevronLeft className="w-4 h-4 mr-2" />
                               Previous
@@ -1191,7 +1187,7 @@ export default function Assessment() {
                             <Button
                               variant="outline"
                               asChild
-                              className="flex-1 border-input"
+                              className="flex-1 border-gray-300 dark:border-gray-600"
                             >
                               <Link href="/employee-dashboard">Exit</Link>
                             </Button>
@@ -1205,7 +1201,7 @@ export default function Assessment() {
                                 isSubmitting ||
                                 visibleQuestions.length === 0
                               }
-                              className="w-full btn-gradient-primary"
+                              className="w-full btn-purple"
                             >
                               {isSubmitting ? (
                                 <>
@@ -1227,7 +1223,7 @@ export default function Assessment() {
                                 (isLastQuestionInPart && !isPartComplete) ||
                                 visibleQuestions.length === 0
                               }
-                              className="w-full btn-gradient-primary"
+                              className="w-full btn-purple"
                             >
                               {isLastQuestionInPart
                                 ? "Next Part"
@@ -1241,15 +1237,15 @@ export default function Assessment() {
                               Select an option to continue
                             </p>
                           )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Bottom Navigation - Mobile Only */}
                   <div className="lg:hidden mt-6">
-                    <Card className="card-primary">
-                      <CardContent className="p-4">
+                    <div className="card-purple">
+                      <div className="p-4">
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -1258,7 +1254,7 @@ export default function Assessment() {
                               currentPartIndex === 0 &&
                               currentQuestionIndex === 0
                             }
-                            className="flex-1 border-input"
+                            className="flex-1 border-gray-300 dark:border-gray-600"
                           >
                             <ChevronLeft className="w-4 h-4 mr-2" />
                             Previous
@@ -1272,7 +1268,7 @@ export default function Assessment() {
                                 isSubmitting ||
                                 visibleQuestions.length === 0
                               }
-                              className="flex-1 btn-gradient-primary"
+                              className="flex-1 btn-purple"
                             >
                               {isSubmitting ? (
                                 <>
@@ -1291,15 +1287,15 @@ export default function Assessment() {
                                 (isLastQuestionInPart && !isPartComplete) ||
                                 visibleQuestions.length === 0
                               }
-                              className="flex-1 btn-gradient-primary"
+                              className="flex-1 btn-purple"
                             >
                               Next
                               <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}

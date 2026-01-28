@@ -121,22 +121,20 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
 
   return (
     <Dialog open={!!job} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto surface-matte-elevated">
         <DialogHeader className="space-y-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-2xl font-bold leading-tight">
+              <DialogTitle className="text-2xl font-bold leading-tight text-on-matte">
                 {job.title}
               </DialogTitle>
-              <DialogDescription className="text-base mt-2">
+              <DialogDescription className="text-base mt-2 text-on-matte-subtle">
                 Complete job information and requirements
               </DialogDescription>
             </div>
             {job.matchScore && (
               <div
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${getMatchScoreColor(
-                  job.matchScore
-                )}`}
+                className={`px-3 py-1 rounded-full text-sm font-semibold badge-success border-0`}
               >
                 <Star className="w-4 h-4 inline mr-1" />
                 {job.matchScore}% Match
@@ -148,12 +146,12 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
         <div className="space-y-6 mt-6">
           {/* Job Description - Featured prominently */}
           {job.description && (
-            <div className="bg-card rounded-lg p-6 border border-border">
-              <h4 className="text-lg font-semibold mb-3 flex items-center">
-                <Briefcase className="w-5 h-5 mr-2 text-primary" />
+            <div className="bg-status-info dark:bg-purple-900/10 rounded-lg p-6 border border-purple-100 dark:border-purple-900/20">
+              <h4 className="text-lg font-semibold mb-3 flex items-center text-purple-700 dark:text-purple-300">
+                <Briefcase className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
                 Description
               </h4>
-              <div className="text-muted-foreground leading-relaxed space-y-3">
+              <div className="text-on-matte-subtle leading-relaxed space-y-3">
                 {job.description
                   .split("\n")
                   .map((paragraph: string, idx: number) => {
@@ -167,7 +165,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                           key={idx}
                           className="flex items-start space-x-2 ml-4"
                         >
-                          <span className="text-primary mt-1.5">•</span>
+                          <span className="text-purple-500 mt-1.5">•</span>
                           <span>{trimmed.replace(/^[\-\*\•]\s*/, "")}</span>
                         </div>
                       );
@@ -181,7 +179,7 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                       return (
                         <h5
                           key={idx}
-                          className="font-bold text-foreground mt-4 first:mt-0"
+                          className="font-bold text-on-matte mt-4 first:mt-0"
                         >
                           {trimmed}
                         </h5>
@@ -214,34 +212,32 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
                 return (
                   <div
                     key={field}
-                    className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors group"
+                    className="surface-matte border border-matte rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
-                        <IconComponent className="w-5 h-5 text-primary group-hover:text-primary/80 transition-colors" />
+                        <IconComponent className="w-5 h-5 text-purple-accent group-hover:text-purple-600 transition-colors" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                        <h4 className="text-sm font-medium text-on-matte-subtle uppercase tracking-wide">
                           {config.label}
                         </h4>
                         <div className="mt-1">
                           {field === "status" ? (
                             <Badge
                               variant={getStatusBadgeVariant(value)}
-                              className="text-sm"
+                              className="text-sm border-0 badge-info"
                             >
                               {value}
                             </Badge>
                           ) : field === "matchScore" ? (
                             <div
-                              className={`inline-flex items-center px-2 py-1 rounded-md text-sm font-medium ${getMatchScoreColor(
-                                parseInt(value)
-                              )}`}
+                              className={`inline-flex items-center px-2 py-1 rounded-md text-sm font-medium badge-success`}
                             >
                               {value}
                             </div>
                           ) : (
-                            <p className="text-base font-semibold">{value}</p>
+                            <p className="text-base font-semibold text-on-matte">{value}</p>
                           )}
                         </div>
                       </div>
@@ -257,16 +253,16 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-6 border-t border-border">
+        <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-6 border-t border-matte">
           <Button
             variant="outline"
             onClick={onClose}
-            className="flex-1 sm:flex-none"
+            className="flex-1 sm:flex-none btn-purple-outline"
           >
             Close
           </Button>
           <Button
-            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold px-8 flex-1 sm:flex-none transition-all duration-200"
+            className="btn-purple flex-1 sm:flex-none"
             onClick={handleApplyClick}
             disabled={isApplied || isApplying}
           >

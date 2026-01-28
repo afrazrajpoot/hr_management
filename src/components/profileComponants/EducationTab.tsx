@@ -54,14 +54,14 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card">
+      <Card className="card-purple card-hover">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
               <GraduationCap className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Education
               </CardTitle>
               <CardDescription className="text-base mt-1">
@@ -74,7 +74,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
               <>
                 <Button
                   onClick={onSave}
-                  className="btn-gradient-primary"
+                  className="btn-purple"
                   size="sm"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -93,7 +93,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
             ) : (
               <Button
                 onClick={onEdit}
-                className="btn-gradient-primary"
+                className="btn-purple"
                 size="sm"
               >
                 <Edit className="w-4 h-4 mr-2" />
@@ -148,9 +148,7 @@ const EducationTab: React.FC<EducationTabProps> = ({ isEditing, control, onEdit,
                 className="group relative"
               >
                 <Card className="border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md dark:hover:shadow-xl transition-all duration-300 hover:border-border overflow-hidden">
-                  {!isEditing && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <CardContent className="p-6 relative">
                     <div className="flex justify-between items-start gap-4">

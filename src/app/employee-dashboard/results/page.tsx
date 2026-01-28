@@ -214,14 +214,14 @@ const ExecutiveSummaryDisplay = ({ summary }: { summary: string }) => {
 
     return (
       <div>
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+        <p className="text-sm text-subtle leading-relaxed whitespace-pre-line">
           {displayText}
           {!isExpanded && needsExpansion && "..."}
         </p>
         {needsExpansion && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-3 text-sm text-primary hover:underline font-medium"
+            className="mt-3 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors"
           >
             {isExpanded ? "Show Less" : "Read More"}
           </button>
@@ -230,7 +230,7 @@ const ExecutiveSummaryDisplay = ({ summary }: { summary: string }) => {
     );
   } catch {
     return (
-      <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
+      <p className="text-sm text-subtle leading-relaxed">{summary}</p>
     );
   }
 };
@@ -248,48 +248,68 @@ const ScoreDisplay = ({
   color?: string;
 }) => {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "success";
-    if (score >= 60) return "primary";
-    if (score >= 40) return "warning";
-    return "destructive";
+    if (score >= 80) return "text-emerald-600 dark:text-emerald-400";
+    if (score >= 60) return "text-purple-600 dark:text-purple-400";
+    if (score >= 40) return "text-amber-600 dark:text-amber-400";
+    return "text-red-600 dark:text-red-400";
   };
 
-  const scoreColor = getScoreColor(score);
+  const getScoreBg = (score: number) => {
+    if (score >= 80) return "bg-emerald-50 dark:bg-emerald-900/20";
+    if (score >= 60) return "bg-purple-50 dark:bg-purple-900/20";
+    if (score >= 40) return "bg-amber-50 dark:bg-amber-900/20";
+    return "bg-red-50 dark:bg-red-900/20";
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-emerald-500 dark:bg-emerald-400";
+    if (score >= 60) return "bg-purple-600 dark:bg-purple-500";
+    if (score >= 40) return "bg-amber-500 dark:bg-amber-400";
+    return "bg-red-500 dark:bg-red-400";
+  };
+
+  const scoreTextColor = getScoreColor(score);
+  const scoreBgColor = getScoreBg(score);
+  const progressColor = getProgressColor(score);
 
   return (
-    <Card className={`card-${scoreColor} card-hover`}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className={`icon-wrapper-${scoreColor} p-2`}>{icon}</div>
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">
-                  {label}
-                </div>
-                <div className="text-3xl font-bold">
-                  {score}
-                  <span className="text-lg text-muted-foreground">/100</span>
-                </div>
-              </div>
-            </div>
-            <div className="pt-2">
-              <Progress
-                value={score}
-                className={`h-2 bg-${scoreColor}/20`}
-                indicatorClassName={`bg-${scoreColor}`}
-              />
-            </div>
+    <Card className="card-purple relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      {/* Light Bubble Effect in Corner */}
+      <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 ${progressColor}`} />
+      <div className={`absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-10 ${progressColor}`} />
+
+      <CardContent className="p-6 relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className={`p-3 rounded-xl ${scoreBgColor}`}>
+            {icon}
           </div>
-          <Badge className={`bg-${scoreColor}`}>
+          <Badge variant="outline" className={`${scoreBgColor} ${scoreTextColor} border-0`}>
             {score >= 80
               ? "Excellent"
               : score >= 60
-              ? "Good"
-              : score >= 40
-              ? "Fair"
-              : "Poor"}
+                ? "Good"
+                : score >= 40
+                  ? "Fair"
+                  : "Poor"}
           </Badge>
+        </div>
+
+        <div className="space-y-1">
+          <div className="text-3xl font-bold flex items-baseline gap-1">
+            {score}
+            <span className="text-sm font-normal text-muted-foreground">/100</span>
+          </div>
+          <div className="text-sm text-muted-foreground font-medium">
+            {label}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <Progress
+            value={score}
+            className="h-2 bg-gray-100"
+            indicatorClassName={progressColor}
+          />
         </div>
       </CardContent>
     </Card>
@@ -317,19 +337,18 @@ const PremiumSection = ({
   const shouldBlur = !isPaid && !showAllContent;
 
   return (
-    <Card className="card-primary card-hover relative overflow-hidden">
+    <Card className="card-purple relative overflow-hidden transition-all duration-200 hover:shadow-lg">
       {shouldBlur && (
-        <div className="absolute inset-0 z-10 backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-br from-background/80 to-background/40" />
+        <div className="absolute inset-0 z-10 backdrop-blur-md bg-white/50 dark:bg-black/50">
           <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-            <div className="bg-primary/10 p-4 rounded-full mb-4">
-              <Lock className="w-12 h-12 text-primary" />
+            <div className="bg-purple-100 dark:bg-purple-900/30 p-4 rounded-full mb-4 shadow-sm">
+              <Lock className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
-            <h3 className="text-xl font-bold mb-2">Premium Content</h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
+            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Premium Content</h3>
+            <p className="text-subtle mb-6 max-w-md">
               Upgrade to unlock full Genius Factor analysis
             </p>
-            <Button onClick={onTogglePreview} className="btn-gradient-primary">
+            <Button onClick={onTogglePreview} className="btn-purple shadow-lg">
               <Eye className="w-4 h-4 mr-2" />
               Preview Content
             </Button>
@@ -341,7 +360,7 @@ const PremiumSection = ({
         <CardTitle className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className={`icon-wrapper-${shouldBlur ? "amber" : "blue"} p-2`}
+              className={`p-2 rounded-lg ${shouldBlur ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"}`}
             >
               {icon}
             </div>
@@ -441,7 +460,7 @@ const MarketingBlurBoxes = ({
             <Button
               onClick={onUpgradeClick}
               size="sm"
-              className="w-full btn-gradient-primary"
+              className="w-full btn-purple"
             >
               Unlock Feature
             </Button>
@@ -577,9 +596,9 @@ function ResultsContent() {
   if (error) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary p-6">
+        <div className="min-h-screen bg-layout-purple p-6">
           <div className="max-w-2xl mx-auto">
-            <Card className="card-primary border-destructive/20 bg-destructive/5">
+            <Card className="card-purple border-destructive/20 bg-destructive/5">
               <CardContent className="pt-8 pb-6 text-center space-y-6">
                 <div className="mx-auto">
                   <AlertCircle className="w-12 h-12 text-destructive" />
@@ -608,7 +627,7 @@ function ResultsContent() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-6">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-6">
         {/* Payment Status Banner */}
         {!isPaid && (
           <motion.div
@@ -637,7 +656,7 @@ function ResultsContent() {
                     href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
                     className=""
                   >
-                    <Button className="btn-gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Button className="btn-purple shadow-lg hover:shadow-xl transition-all duration-300">
                       <Sparkles className="h-4 w-4 mr-2" />
                       Upgrade to Pro
                     </Button>
@@ -661,8 +680,8 @@ function ResultsContent() {
               <p className="text-muted-foreground mt-2">
                 {selectedAssessment
                   ? `Assessment completed on ${new Date(
-                      selectedAssessment.createdAt
-                    ).toLocaleDateString()}`
+                    selectedAssessment.createdAt
+                  ).toLocaleDateString()}`
                   : "No assessments completed yet"}
               </p>
             </div>
@@ -693,13 +712,13 @@ function ResultsContent() {
           {selectedAssessment ? (
             <>
               {/* Genius Score Hero Card */}
-              <Card className="card-primary border-0 gradient-bg-primary">
+              <Card className="card-purple-gradient border-0">
                 <CardContent className="p-8">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 text-white">
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <div>
-                          <Brain className="w-8 h-8 text-primary" />
+                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                          <Brain className="w-8 h-8 text-white" />
                         </div>
                         <h2 className="text-2xl font-bold">
                           Overall Genius Score
@@ -708,37 +727,36 @@ function ResultsContent() {
                       <div className="flex items-baseline gap-3">
                         <div className="text-5xl lg:text-6xl font-bold">
                           {selectedAssessment.genius_factor_score}
-                          <span className="text-2xl lg:text-3xl text-muted-foreground">
+                          <span className="text-2xl lg:text-3xl text-white/70">
                             /100
                           </span>
                         </div>
                         <Badge
-                          className={`text-lg ${
-                            selectedAssessment.genius_factor_score >= 80
-                              ? "bg-success"
-                              : selectedAssessment.genius_factor_score >= 60
-                              ? "bg-primary"
+                          className={`text-lg border-0 ${selectedAssessment.genius_factor_score >= 80
+                            ? "bg-emerald-500 text-white"
+                            : selectedAssessment.genius_factor_score >= 60
+                              ? "bg-purple-500 text-white"
                               : selectedAssessment.genius_factor_score >= 40
-                              ? "bg-warning"
-                              : "bg-destructive"
-                          }`}
+                                ? "bg-amber-500 text-white"
+                                : "bg-red-500 text-white"
+                            }`}
                         >
                           <Star className="w-4 h-4 mr-1" />
                           {selectedAssessment.genius_factor_score >= 80
                             ? "Exceptional"
                             : selectedAssessment.genius_factor_score >= 60
-                            ? "Strong"
-                            : selectedAssessment.genius_factor_score >= 40
-                            ? "Developing"
-                            : "Emerging"}
+                              ? "Strong"
+                              : selectedAssessment.genius_factor_score >= 40
+                                ? "Developing"
+                                : "Emerging"}
                         </Badge>
                       </div>
-                      <p className="text-muted-foreground max-w-2xl">
+                      <p className="text-white/80 max-w-2xl">
                         {selectedAssessment.genius_factor_profile
                           ?.primary_genius_factor ? (
                           <>
                             Your strongest area is{" "}
-                            <strong className="text-primary">
+                            <strong className="text-white">
                               {
                                 selectedAssessment.genius_factor_profile
                                   .primary_genius_factor
@@ -758,10 +776,10 @@ function ResultsContent() {
                       <div className="relative w-40 h-40">
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="text-center">
-                            <div className="text-4xl font-bold">
+                            <div className="text-4xl font-bold text-white">
                               {selectedAssessment.genius_factor_score}
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-sm text-white/70">
                               Score
                             </div>
                           </div>
@@ -772,7 +790,7 @@ function ResultsContent() {
                             cy="50"
                             r="45"
                             fill="none"
-                            stroke="hsl(var(--muted))"
+                            stroke="rgba(255,255,255,0.2)"
                             strokeWidth="10"
                           />
                           <circle
@@ -780,13 +798,12 @@ function ResultsContent() {
                             cy="50"
                             r="45"
                             fill="none"
-                            stroke="hsl(var(--primary))"
+                            stroke="white"
                             strokeWidth="10"
                             strokeLinecap="round"
-                            strokeDasharray={`${
-                              (selectedAssessment.genius_factor_score / 100) *
+                            strokeDasharray={`${(selectedAssessment.genius_factor_score / 100) *
                               283
-                            } 283`}
+                              } 283`}
                             transform="rotate(-90 50 50)"
                           />
                         </svg>
@@ -826,11 +843,11 @@ function ResultsContent() {
               {selectedAssessment.genius_factor_profile && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Primary Genius Factor */}
-                  <Card className="card-primary card-hover">
+                  <Card className="card-purple hover:shadow-lg transition-all duration-200">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-3">
-                        <div className="p-2">
-                          <Target className="w-5 h-5 text-primary" />
+                        <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                          <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
                           <div className="text-lg font-semibold">
@@ -844,11 +861,11 @@ function ResultsContent() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-primary">
+                        <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
                           {selectedAssessment.genius_factor_profile
                             .primary_genius_factor || "Not identified"}
                         </span>
-                        <Badge className="bg-primary">
+                        <Badge className="bg-purple-600 hover:bg-purple-700">
                           <Zap className="w-3 h-3 mr-1" />
                           Primary
                         </Badge>
@@ -916,75 +933,75 @@ function ResultsContent() {
                   {/* Secondary Genius Factor */}
                   {selectedAssessment.genius_factor_profile
                     .secondary_genius_factor && (
-                    <Card className="card-primary card-hover">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          <div className="p-2">
-                            <TargetIcon className="w-5 h-5 text-accent" />
-                          </div>
-                          <div>
-                            <div className="text-lg font-semibold">
-                              Secondary Genius Factor
+                      <Card className="card-purple hover:shadow-lg transition-all duration-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                              <TargetIcon className="w-5 h-5 text-purple-400" />
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              Supporting talents
+                            <div>
+                              <div className="text-lg font-semibold">
+                                Secondary Genius Factor
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Supporting talents
+                              </div>
                             </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xl font-bold text-accent">
+                              {
+                                selectedAssessment.genius_factor_profile
+                                  .secondary_genius_factor
+                              }
+                            </span>
+                            <Badge className="bg-accent">
+                              <Star className="w-3 h-3 mr-1" />
+                              Secondary
+                            </Badge>
                           </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl font-bold text-accent">
-                            {
-                              selectedAssessment.genius_factor_profile
-                                .secondary_genius_factor
-                            }
-                          </span>
-                          <Badge className="bg-accent">
-                            <Star className="w-3 h-3 mr-1" />
-                            Secondary
-                          </Badge>
-                        </div>
 
-                        {selectedAssessment.genius_factor_profile
-                          .development_areas &&
-                          selectedAssessment.genius_factor_profile
-                            .development_areas.length > 0 && (
-                            <div className="mt-4">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Lightbulb className="w-4 h-4 text-warning" />
-                                <span className="text-sm font-medium">
-                                  Development Areas
-                                </span>
+                          {selectedAssessment.genius_factor_profile
+                            .development_areas &&
+                            selectedAssessment.genius_factor_profile
+                              .development_areas.length > 0 && (
+                              <div className="mt-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Lightbulb className="w-4 h-4 text-warning" />
+                                  <span className="text-sm font-medium">
+                                    Development Areas
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                  {safeArray(
+                                    selectedAssessment.genius_factor_profile
+                                      .development_areas
+                                  ).map((area, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
+                                    >
+                                      <TrendingUp className="w-4 h-4 text-warning" />
+                                      <span className="text-sm">{area}</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="grid grid-cols-1 gap-2">
-                                {safeArray(
-                                  selectedAssessment.genius_factor_profile
-                                    .development_areas
-                                ).map((area, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
-                                  >
-                                    <TrendingUp className="w-4 h-4 text-warning" />
-                                    <span className="text-sm">{area}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                      </CardContent>
-                    </Card>
-                  )}
+                            )}
+                        </CardContent>
+                      </Card>
+                    )}
                 </div>
               )}
 
               {/* Executive Summary */}
-              <Card className="card-primary card-hover">
+              <Card className="card-purple hover:shadow-lg transition-all duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2">
-                      <BookOpen className="w-5 h-5 text-success" />
+                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                      <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
                       <div className="text-lg font-semibold">
@@ -1114,7 +1131,7 @@ function ResultsContent() {
               {selectedAssessment.internal_career_opportunities && (
                 <PremiumSection
                   title="Career Opportunities"
-                  icon={<Globe className="w-5 h-5 text-accent" />}
+                  icon={<Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />}
                   description="Internal pathways and suggestions"
                   isPaid={isPaid}
                   showAllContent={showAllContent}
@@ -1124,7 +1141,9 @@ function ResultsContent() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                           <h4 className="font-semibold flex items-center gap-2">
-                            <Building className="w-4 h-4 text-primary" />
+                            <div className="icon-brand w-8 h-8 flex items-center justify-center p-0">
+                              <Building className="w-4 h-4" />
+                            </div>
                             Primary Industries
                           </h4>
                           <div className="flex flex-wrap gap-2">
@@ -1135,7 +1154,7 @@ function ResultsContent() {
                               <Badge
                                 key={index}
                                 variant="outline"
-                                className="border-primary/20 text-primary bg-primary/5"
+                                className="badge-brand"
                               >
                                 {industry}
                               </Badge>
@@ -1145,7 +1164,9 @@ function ResultsContent() {
 
                         <div className="space-y-4">
                           <h4 className="font-semibold flex items-center gap-2">
-                            <BriefcaseBusiness className="w-4 h-4 text-success" />
+                            <div className="icon-info w-8 h-8 flex items-center justify-center p-0">
+                              <BriefcaseBusiness className="w-4 h-4" />
+                            </div>
                             Secondary Industries
                           </h4>
                           <div className="flex flex-wrap gap-2">
@@ -1156,7 +1177,7 @@ function ResultsContent() {
                               <Badge
                                 key={index}
                                 variant="outline"
-                                className="border-success/20 text-success bg-success/5"
+                                className="badge-info"
                               >
                                 {industry}
                               </Badge>
@@ -1171,7 +1192,9 @@ function ResultsContent() {
                           .role_suggestions.length > 0 && (
                           <div className="space-y-4">
                             <h4 className="font-semibold flex items-center gap-2">
-                              <TargetIcon2 className="w-4 h-4 text-accent" />
+                              <div className="icon-success w-8 h-8 flex items-center justify-center p-0">
+                                <TargetIcon2 className="w-4 h-4" />
+                              </div>
                               Role Suggestions
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1179,14 +1202,14 @@ function ResultsContent() {
                                 selectedAssessment.internal_career_opportunities
                                   .role_suggestions
                               ).map((role, index) => (
-                                <Card key={index} className="border-accent/20">
+                                <Card key={index} className="border-gray-100 dark:border-gray-800 hover:border-green-200 dark:hover:border-green-800 transition-colors">
                                   <CardContent className="p-4">
                                     <div className="space-y-3">
                                       <div className="flex items-center justify-between">
-                                        <h5 className="font-bold text-lg text-accent">
+                                        <h5 className="font-bold text-lg text-gray-900 dark:text-gray-100">
                                           {role.role_title}
                                         </h5>
-                                        <Badge className="bg-accent">
+                                        <Badge className="badge-success border-0">
                                           {role.match_score}% Match
                                         </Badge>
                                       </div>
@@ -1234,24 +1257,26 @@ function ResultsContent() {
 
                       {selectedAssessment.internal_career_opportunities
                         .transition_strategy && (
-                        <div className="space-y-4">
-                          <h4 className="font-semibold flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-warning" />
-                            Transition Strategy
-                          </h4>
-                          <Card className="bg-warning/5 border-warning/20">
-                            <CardContent className="p-4">
-                              <p className="text-sm leading-relaxed">
-                                {
-                                  selectedAssessment
-                                    .internal_career_opportunities
-                                    .transition_strategy
-                                }
-                              </p>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold flex items-center gap-2">
+                              <div className="icon-warning w-8 h-8 flex items-center justify-center p-0">
+                                <MapPin className="w-4 h-4" />
+                              </div>
+                              Transition Strategy
+                            </h4>
+                            <Card className="bg-status-warning dark:bg-yellow-900/10 border-yellow-100 dark:border-yellow-900/30">
+                              <CardContent className="p-4">
+                                <p className="text-sm leading-relaxed text-yellow-800 dark:text-yellow-200">
+                                  {
+                                    selectedAssessment
+                                      .internal_career_opportunities
+                                      .transition_strategy
+                                  }
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
                     </div>
                   }
                 />
@@ -1260,218 +1285,218 @@ function ResultsContent() {
               {/* Action Plan & Resources Grid - Only for paid users */}
               {(selectedAssessment.development_action_plan ||
                 selectedAssessment.personalized_resources) && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Development Action Plan */}
-                  {selectedAssessment.development_action_plan && (
-                    <PremiumSection
-                      title="Development Plan"
-                      icon={<Target className="w-5 h-5 text-success" />}
-                      description="Short-term to long-term goals"
-                      isPaid={isPaid}
-                      showAllContent={showAllContent}
-                      onTogglePreview={() => setShowAllContent(!showAllContent)}
-                      content={
-                        <div className="space-y-6">
-                          {selectedAssessment.development_action_plan
-                            .thirty_day_goals &&
-                            selectedAssessment.development_action_plan
-                              .thirty_day_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-primary" />
-                                  30-Day Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .thirty_day_goals
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <CheckCircle className="w-3 h-3 text-primary" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Development Action Plan */}
+                    {selectedAssessment.development_action_plan && (
+                      <PremiumSection
+                        title="Development Plan"
+                        icon={<Target className="w-5 h-5 text-success" />}
+                        description="Short-term to long-term goals"
+                        isPaid={isPaid}
+                        showAllContent={showAllContent}
+                        onTogglePreview={() => setShowAllContent(!showAllContent)}
+                        content={
+                          <div className="space-y-6">
+                            {selectedAssessment.development_action_plan
+                              .thirty_day_goals &&
+                              selectedAssessment.development_action_plan
+                                .thirty_day_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                    30-Day Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .thirty_day_goals
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <CheckCircle className="w-3 h-3 text-primary" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
-                          {selectedAssessment.development_action_plan
-                            .ninety_day_goals &&
-                            selectedAssessment.development_action_plan
-                              .ninety_day_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-warning" />
-                                  90-Day Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .ninety_day_goals
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <Target className="w-3 h-3 text-warning" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                            {selectedAssessment.development_action_plan
+                              .ninety_day_goals &&
+                              selectedAssessment.development_action_plan
+                                .ninety_day_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-warning" />
+                                    90-Day Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .ninety_day_goals
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <Target className="w-3 h-3 text-warning" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
-                          {selectedAssessment.development_action_plan
-                            .six_month_goals &&
-                            selectedAssessment.development_action_plan
-                              .six_month_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-success" />
-                                  6-Month Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .six_month_goals
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <Rocket className="w-3 h-3 text-success" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                        </div>
-                      }
-                    />
-                  )}
+                            {selectedAssessment.development_action_plan
+                              .six_month_goals &&
+                              selectedAssessment.development_action_plan
+                                .six_month_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-success" />
+                                    6-Month Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .six_month_goals
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <Rocket className="w-3 h-3 text-success" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        }
+                      />
+                    )}
 
-                  {/* Personalized Resources */}
-                  {selectedAssessment.personalized_resources && (
-                    <PremiumSection
-                      title="Personalized Resources"
-                      icon={<BookMarked className="w-5 h-5 text-accent" />}
-                      description="Tools for your growth journey"
-                      isPaid={isPaid}
-                      showAllContent={showAllContent}
-                      onTogglePreview={() => setShowAllContent(!showAllContent)}
-                      content={
-                        <div className="space-y-6">
-                          {selectedAssessment.personalized_resources
-                            .learning_resources &&
-                            selectedAssessment.personalized_resources
-                              .learning_resources.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Book className="w-4 h-4 text-success" />
-                                  Learning Resources
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .learning_resources
-                                  ).map((resource, index) => (
-                                    <Card
-                                      key={index}
-                                      className="border-success/20"
-                                    >
-                                      <CardContent className="p-3">
-                                        <div className="flex items-start gap-3">
-                                          <BookOpen className="w-5 h-5 text-success mt-0.5" />
-                                          <div className="flex-1">
-                                            <div className="font-medium">
-                                              {resource.title}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              {resource.type} •{" "}
-                                              {resource.provider ||
-                                                resource.author ||
-                                                "Various"}
+                    {/* Personalized Resources */}
+                    {selectedAssessment.personalized_resources && (
+                      <PremiumSection
+                        title="Personalized Resources"
+                        icon={<BookMarked className="w-5 h-5 text-accent" />}
+                        description="Tools for your growth journey"
+                        isPaid={isPaid}
+                        showAllContent={showAllContent}
+                        onTogglePreview={() => setShowAllContent(!showAllContent)}
+                        content={
+                          <div className="space-y-6">
+                            {selectedAssessment.personalized_resources
+                              .learning_resources &&
+                              selectedAssessment.personalized_resources
+                                .learning_resources.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Book className="w-4 h-4 text-success" />
+                                    Learning Resources
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .learning_resources
+                                    ).map((resource, index) => (
+                                      <Card
+                                        key={index}
+                                        className="border-success/20"
+                                      >
+                                        <CardContent className="p-3">
+                                          <div className="flex items-start gap-3">
+                                            <BookOpen className="w-5 h-5 text-success mt-0.5" />
+                                            <div className="flex-1">
+                                              <div className="font-medium">
+                                                {resource.title}
+                                              </div>
+                                              <div className="text-xs text-muted-foreground">
+                                                {resource.type} •{" "}
+                                                {resource.provider ||
+                                                  resource.author ||
+                                                  "Various"}
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  ))}
+                                        </CardContent>
+                                      </Card>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                          {selectedAssessment.personalized_resources
-                            .affirmations &&
-                            selectedAssessment.personalized_resources
-                              .affirmations.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Sparkles className="w-4 h-4 text-primary" />
-                                  Affirmations
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .affirmations
-                                  ).map((affirmation, index) => (
-                                    <div
-                                      key={index}
-                                      className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
-                                    >
-                                      "{affirmation}"
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          {selectedAssessment.personalized_resources
-                            .mindfulness_practices &&
-                            selectedAssessment.personalized_resources
-                              .mindfulness_practices.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Heart className="w-4 h-4 text-warning" />
-                                  Mindfulness Practices
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .mindfulness_practices
-                                  ).map((practice, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-start gap-2 p-2 text-sm"
-                                    >
-                                      <div className="icon-wrapper-amber p-1 mt-0.5">
-                                        <Sparkles className="w-3 h-3 text-warning" />
+                            {selectedAssessment.personalized_resources
+                              .affirmations &&
+                              selectedAssessment.personalized_resources
+                                .affirmations.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                    Affirmations
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .affirmations
+                                    ).map((affirmation, index) => (
+                                      <div
+                                        key={index}
+                                        className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
+                                      >
+                                        "{affirmation}"
                                       </div>
-                                      <span>{practice}</span>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                        </div>
-                      }
-                    />
-                  )}
-                </div>
-              )}
+                              )}
+
+                            {selectedAssessment.personalized_resources
+                              .mindfulness_practices &&
+                              selectedAssessment.personalized_resources
+                                .mindfulness_practices.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Heart className="w-4 h-4 text-warning" />
+                                    Mindfulness Practices
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .mindfulness_practices
+                                    ).map((practice, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start gap-2 p-2 text-sm"
+                                      >
+                                        <div className="icon-wrapper-amber p-1 mt-0.5">
+                                          <Sparkles className="w-3 h-3 text-warning" />
+                                        </div>
+                                        <span>{practice}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                )}
             </>
           ) : (
-            <Card className="card-primary">
+            <Card className="card-purple">
               <CardContent className="pt-12 pb-12 text-center">
                 <div className="mx-auto mb-6 p-4">
                   <Brain className="h-12 w-12 text-accent" />
@@ -1482,7 +1507,7 @@ function ResultsContent() {
                 <p className="text-muted-foreground mb-6">
                   Complete an assessment to unlock your Genius Factor profile
                 </p>
-                <Button className="btn-gradient-primary" asChild>
+                <Button className="btn-purple" asChild>
                   <Link href="/employee-dashboard/assessment">
                     <Target className="w-4 h-4 mr-2" />
                     Take Assessment
@@ -1494,11 +1519,11 @@ function ResultsContent() {
 
           {/* Assessment History */}
           {assessments.length > 0 && (
-            <Card className="card-primary" id="assessment-history">
+            <Card className="card-purple" id="assessment-history">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
-                  <div className="p-2">
-                    <FileText className="w-5 h-5 text-primary" />
+                  <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                    <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <div className="text-lg font-semibold">
@@ -1515,24 +1540,22 @@ function ResultsContent() {
                   {paginatedAssessments.map((assessment) => (
                     <div
                       key={assessment.id}
-                      className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                        selectedAssessment?.id === assessment.id
-                          ? "border-primary bg-primary/5"
-                          : "border-input hover:border-primary/50 hover:bg-primary/3"
-                      }`}
+                      className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${selectedAssessment?.id === assessment.id
+                        ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30"
+                        : "border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-900/20"
+                        }`}
                       onClick={() => handleAssessmentClick(assessment)}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-2 rounded-lg ${
-                                selectedAssessment?.id === assessment.id
-                                  ? "bg-primary/20"
-                                  : "bg-muted"
-                              }`}
+                              className={`p-2 rounded-lg ${selectedAssessment?.id === assessment.id
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300"
+                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                }`}
                             >
-                              <Brain className="w-5 h-5 text-primary" />
+                              <Brain className="w-5 h-5" />
                             </div>
                             <div>
                               <div className="font-semibold">
@@ -1562,10 +1585,10 @@ function ResultsContent() {
                             {assessment.genius_factor_score >= 80
                               ? "Exceptional"
                               : assessment.genius_factor_score >= 60
-                              ? "Strong"
-                              : assessment.genius_factor_score >= 40
-                              ? "Developing"
-                              : "Emerging"}
+                                ? "Strong"
+                                : assessment.genius_factor_score >= 40
+                                  ? "Developing"
+                                  : "Emerging"}
                           </Badge>
                         </div>
                       </div>

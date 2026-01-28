@@ -13,15 +13,11 @@ import {
   LogOut,
   User,
   Bot,
-  Home,
-  Target,
   Users,
   Sparkles,
   ChevronRight,
   Bell,
   CheckCircle,
-  Zap,
-  Brain,
   ChevronDown,
   ChevronUp,
   Lock,
@@ -39,7 +35,6 @@ const navigation = [
     name: "Dashboard",
     href: "/employee-dashboard",
     icon: LayoutDashboard,
-    color: "from-blue-500 to-blue-600",
   },
   {
     name: "Profile",
@@ -51,55 +46,53 @@ const navigation = [
     name: "Assessment",
     href: "/employee-dashboard/assessment",
     icon: ClipboardList,
-    color: "from-emerald-500 to-emerald-600",
   },
   {
     name: "Results",
     href: "/employee-dashboard/results",
     icon: BarChart3,
-    color: "from-violet-500 to-violet-600",
   },
   {
     name: "Career Pathways",
     href: "/employee-dashboard/career-Pathways",
     icon: TrendingUp,
-    color: "from-amber-500 to-amber-600",
   },
   {
     name: "Development",
     href: "/employee-dashboard/development",
     icon: BookOpen,
-    color: "from-rose-500 to-rose-600",
+  },
+  {
+    name: "Profile",
+    href: "/employee-dashboard/profile",
+    icon: User,
+    color: "from-indigo-500 to-indigo-600",
   },
   {
     name: "Security",
     href: "/employee-dashboard/change-password",
     icon: Lock,
-    color: "from-slate-500 to-slate-600",
   },
   {
     name: "Genius AI",
     href: "/employee-dashboard/ai-chat",
     icon: Bot,
-    color: "from-purple-500 to-purple-600",
   },
   {
     name: "Community",
     href: "/employee-dashboard/community",
     icon: Users,
-    color: "from-cyan-500 to-cyan-600",
   },
   {
     name: "Pricing",
     href: "/pricing",
     icon: Sparkles,
-    color: "from-yellow-500 to-yellow-600",
   },
 ];
 
 export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false); // ADD THIS STATE
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const location = usePathname();
   const { theme, setTheme } = useTheme();
   const { isConnected, notifications, clearNotifications } = useSocket();
@@ -115,49 +108,47 @@ export function AppSidebar() {
     <div
       className={cn(
         "flex flex-col h-screen transition-all duration-300 sidebar-container relative",
-        isCollapsed ? "w-20" : "w-64",
+        isCollapsed ? "w-20" : "w-64"
       )}
     >
       {/* Sidebar background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djJIMjR2LTJoMTJ6bTAtNHYyaC0xMnYtMmgxMnpNMjQgMjJ2MmgxMnYtMkgyNHptMCAxNnYyaDEydi0ySDI0eiIvPjwvZz48L2c+PC9zdmc+')]"></div>
-      </div>
+      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.01] bg-gradient-to-br from-primary/5 via-transparent to-transparent"></div>
 
       {/* Header */}
-      <div className="sidebar-header flex items-center justify-between p-4">
+      <div className="sidebar-header flex items-center justify-between p-4 border-b border-border relative z-10">
         {!isCollapsed ? (
           <div className="flex items-center space-x-3">
-            <div className="sidebar-logo-wrapper">
-              <Brain className="w-6 h-6 text-white" />
+            <div className="sidebar-logo-wrapper bg-[image:var(--purple-gradient)] p-2 rounded-lg border border-white/10 shadow-lg">
+              <LayoutDashboard className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-xl gradient-text-primary">
+              <h1 className="font-bold text-xl text-gradient-purple">
                 GeniusFactor
               </h1>
-              <p className="text-xs text-gray-400">Career Intelligence</p>
+              <p className="text-xs text-muted-foreground">Career Intelligence</p>
             </div>
           </div>
         ) : (
-          <div className="sidebar-logo-wrapper mx-auto">
-            <Brain className="w-6 h-6 text-white" />
+          <div className="sidebar-logo-wrapper mx-auto bg-[image:var(--purple-gradient)] p-2 rounded-lg border border-white/10 shadow-lg">
+            <LayoutDashboard className="w-5 h-5 text-white" />
           </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="ml-auto hover:bg-gray-700/50 border border-gray-600/50"
+          className="ml-auto hover:bg-secondary border border-border"
         >
           {isCollapsed ? (
-            <Menu className="w-5 h-5 text-gray-300" />
+            <Menu className="w-5 h-5 text-secondary-foreground" />
           ) : (
-            <X className="w-5 h-5 text-gray-300" />
+            <X className="w-5 h-5 text-secondary-foreground" />
           )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="relative z-10 flex-1 p-4 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = location === item.href;
           return (
@@ -167,32 +158,23 @@ export function AppSidebar() {
               className={cn(
                 "sidebar-nav-item group flex items-center",
                 isActive ? "sidebar-nav-item-active" : "",
-                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3",
+                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
               )}
-              style={
-                isActive
-                  ? ({
-                      background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                      "--tw-gradient-from": item.color.split(" ")[1],
-                      "--tw-gradient-to": item.color.split(" ")[3],
-                    } as any)
-                  : {}
-              }
             >
               <div
                 className={cn(
-                  "sidebar-nav-icon-wrapper",
+                  "sidebar-nav-icon-wrapper p-2 rounded-md transition-colors duration-300",
                   isActive
                     ? "sidebar-nav-icon-wrapper-active"
-                    : "sidebar-nav-icon-wrapper-inactive",
+                    : "sidebar-nav-icon-wrapper-inactive"
                 )}
               >
                 <item.icon
                   className={cn(
-                    "w-5 h-5 transition-colors duration-300",
+                    "w-4 h-4 transition-colors duration-300",
                     isActive
                       ? "text-white"
-                      : "text-gray-400 group-hover:text-gray-300",
+                      : "text-gray-400 group-hover:text-gray-300"
                   )}
                 />
               </div>
@@ -200,10 +182,10 @@ export function AppSidebar() {
                 <div className="flex-1 min-w-0">
                   <div
                     className={cn(
-                      "font-medium transition-colors duration-300",
+                      "font-medium text-sm transition-colors duration-300",
                       isActive
                         ? "text-white"
-                        : "text-gray-300 group-hover:text-white",
+                        : "text-gray-300 group-hover:text-white"
                     )}
                   >
                     {item.name}
@@ -211,36 +193,36 @@ export function AppSidebar() {
                 </div>
               )}
               {!isCollapsed && isActive && (
-                <ChevronRight className="w-4 h-4 text-white/50" />
+                <ChevronRight className="w-3 h-3 text-primary-foreground/70" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Notifications - FIXED */}
-      <div className="relative z-10 p-4 border-t border-gray-700/50">
+      {/* Notifications */}
+      <div className="relative z-10 p-4 border-t border-border">
         <div className={cn("space-y-2", isCollapsed ? "text-center" : "")}>
           {/* Notifications Trigger Button */}
           <div className="relative">
             <div
               className={cn(
                 "sidebar-notification-wrapper flex items-center gap-2 p-3 cursor-pointer",
-                isCollapsed ? "justify-center" : "justify-between",
+                isCollapsed ? "justify-center" : "justify-between"
               )}
               onClick={() => setShowNotifications(!showNotifications)}
             >
               <div className="flex items-center gap-2">
                 <div className="relative">
-                  <Bell className="w-5 h-5 text-gray-400" />
+                  <Bell className="w-4 h-4 text-secondary-foreground" />
                   {unreadNotifications > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[image:var(--purple-gradient)] rounded-full text-[10px] flex items-center justify-center text-white">
                       {unreadNotifications}
                     </span>
                   )}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-sm text-gray-300">Notifications</span>
+                  <span className="text-sm text-secondary-foreground">Notifications</span>
                 )}
               </div>
               {!isCollapsed && (
@@ -250,21 +232,21 @@ export function AppSidebar() {
                       "flex items-center gap-1 text-xs",
                       isConnected
                         ? "sidebar-status-online"
-                        : "sidebar-status-connecting",
+                        : "sidebar-status-connecting"
                     )}
                   >
                     <div
                       className={cn(
                         "w-2 h-2 rounded-full animate-pulse",
-                        isConnected ? "bg-emerald-400" : "bg-amber-400",
+                        isConnected ? "bg-emerald-400" : "bg-amber-400"
                       )}
                     />
                     {isConnected ? "Live" : "Connecting..."}
                   </div>
                   {showNotifications ? (
-                    <ChevronUp className="w-4 h-4 text-gray-400" />
+                    <ChevronUp className="w-3 h-3 text-secondary-foreground" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className="w-3 h-3 text-secondary-foreground" />
                   )}
                 </div>
               )}
@@ -274,24 +256,24 @@ export function AppSidebar() {
             {showNotifications && (
               <div
                 className={cn(
-                  "absolute z-50 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden transition-all duration-200",
+                  "absolute z-50 bg-card border border-border rounded-lg shadow-lg overflow-hidden transition-all duration-200",
                   isCollapsed
                     ? "left-full bottom-0 ml-4 w-80" // Collapsed: Pop out to right
-                    : "bottom-full left-0 right-0 mb-4", // Expanded: Pop up above
+                    : "bottom-full left-0 right-0 mb-4" // Expanded: Pop up above
                 )}
               >
                 {/* Popup Header */}
-                <div className="p-4 bg-gray-950/50 border-b border-gray-800 backdrop-blur-sm">
+                <div className="p-3 bg-gradient-to-r from-primary/5 to-transparent border-b border-border">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-blue-500/10">
-                        <Bell className="w-4 h-4 text-blue-400" />
+                      <div className="p-1 rounded-md bg-primary/10">
+                        <Bell className="w-3 h-3 text-primary" />
                       </div>
-                      <span className="text-sm font-semibold text-gray-100">
+                      <span className="text-sm font-medium text-foreground">
                         Notifications
                       </span>
                       {unreadNotifications > 0 && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">
+                        <span className="px-1.5 py-0.5 text-[10px] font-medium btn-purple text-primary-foreground rounded">
                           {unreadNotifications} New
                         </span>
                       )}
@@ -304,7 +286,7 @@ export function AppSidebar() {
                           e.stopPropagation();
                           clearNotifications();
                         }}
-                        className="text-xs h-7 px-2 text-gray-400 hover:text-white hover:bg-gray-800"
+                        className="text-xs h-6 px-2 text-secondary-foreground hover:text-foreground hover:bg-secondary"
                       >
                         Clear All
                       </Button>
@@ -313,44 +295,44 @@ export function AppSidebar() {
                 </div>
 
                 {/* Notifications List */}
-                <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                <div className="max-h-[280px] overflow-y-auto">
                   {notifications.length > 0 ? (
-                    <div className="p-2 space-y-1">
+                    <div className="p-1 space-y-1">
                       {notifications.map((notification) => (
                         <div
                           key={notification.id}
                           className={cn(
-                            "group p-3 rounded-lg transition-colors duration-200 border border-transparent",
+                            "group p-2 rounded-md transition-colors duration-200 border",
                             !notification.read
                               ? "bg-blue-500/5 border-blue-500/10 hover:bg-blue-500/10"
-                              : "hover:bg-gray-800/50",
+                              : "hover:bg-gray-800/50"
                           )}
                         >
-                          <div className="flex items-start gap-3">
+                          <div className="flex items-start gap-2">
                             <div
                               className={cn(
-                                "mt-0.5 p-1.5 rounded-full shrink-0",
+                                "mt-0.5 p-1 rounded-full",
                                 !notification.read
                                   ? "bg-blue-500/20"
-                                  : "bg-gray-800",
+                                  : "bg-gray-800"
                               )}
                             >
                               {notification.type === "success" ? (
                                 <CheckCircle
                                   className={cn(
-                                    "w-3.5 h-3.5",
+                                    "w-3 h-3",
                                     !notification.read
                                       ? "text-blue-400"
-                                      : "text-gray-400",
+                                      : "text-gray-400"
                                   )}
                                 />
                               ) : (
                                 <Bell
                                   className={cn(
-                                    "w-3.5 h-3.5",
+                                    "w-3 h-3",
                                     !notification.read
                                       ? "text-blue-400"
-                                      : "text-gray-400",
+                                      : "text-gray-400"
                                   )}
                                 />
                               )}
@@ -358,15 +340,15 @@ export function AppSidebar() {
                             <div className="flex-1 min-w-0">
                               <p
                                 className={cn(
-                                  "text-sm leading-snug",
+                                  "text-xs leading-snug",
                                   !notification.read
                                     ? "text-gray-100 font-medium"
-                                    : "text-gray-400",
+                                    : "text-gray-400"
                                 )}
                               >
-                                {notification.data.message}
+                                {notification.data?.message || notification.message}
                               </p>
-                              <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-1">
+                              <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                                 <span>
                                   {new Date(
                                     notification.timestamp,
@@ -384,21 +366,21 @@ export function AppSidebar() {
                               </p>
                             </div>
                             {!notification.read && (
-                              <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 shrink-0" />
+                              <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] mt-1.5 shrink-0" />
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-gray-800/50 flex items-center justify-center mb-3">
-                        <Bell className="w-6 h-6 text-gray-600" />
+                    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mb-2">
+                        <Bell className="w-4 h-4 text-secondary-foreground" />
                       </div>
-                      <p className="text-sm font-medium text-gray-300">
+                      <p className="text-sm font-medium text-secondary-foreground">
                         No notifications
                       </p>
-                      <p className="text-xs text-gray-500 mt-1 max-w-[150px]">
+                      <p className="text-xs text-muted-foreground mt-1 max-w-[140px]">
                         We'll notify you when something important happens.
                       </p>
                     </div>
@@ -407,74 +389,38 @@ export function AppSidebar() {
               </div>
             )}
           </div>
-
-          {/* Existing inline notifications - Keep as fallback */}
-          {!showNotifications && notifications.length > 0 && !isCollapsed && (
-            <div className="mt-2 space-y-2">
-              {notifications.slice(0, 2).map((notification) => (
-                <div
-                  key={notification.id}
-                  className="p-3 rounded-lg bg-gray-800/30 border border-gray-700/50"
-                >
-                  <div className="flex items-start gap-2">
-                    <div className="p-1 rounded bg-blue-500/20">
-                      <CheckCircle className="w-3 h-3 text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-300 line-clamp-2">
-                        {notification.message}
-                      </p>
-                      <p className="text-[10px] text-gray-500 mt-1">
-                        {new Date(notification.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {notifications.length > 2 && !isCollapsed && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearNotifications}
-                  className="w-full text-xs text-gray-400 hover:text-gray-300"
-                >
-                  Clear all ({notifications.length})
-                </Button>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
       {/* Footer Actions */}
-      <div className="relative z-10 p-4 border-t border-gray-700/50 space-y-2">
+      <div className="relative z-10 p-4 border-t border-border space-y-2">
         {/* Theme Toggle */}
         <Button
           variant="ghost"
           size={isCollapsed ? "icon" : "default"}
           onClick={toggleTheme}
           className={cn(
-            "w-full transition-all duration-300",
+            "w-full transition-all duration-300 hover:bg-secondary",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-gray-700/50",
+              : "justify-start hover:bg-gray-700/50"
           )}
         >
           {theme === "dark" ? (
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-amber-500/20">
-                <Sun className="w-4 h-4 text-amber-400" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-[#6366F1]/10 to-[#8B5CF6]/10">
+                <Sun className="w-3.5 h-3.5 text-accent" />
               </div>
               {!isCollapsed && (
-                <span className="text-gray-300">Light Mode</span>
+                <span className="text-secondary-foreground">Light Mode</span>
               )}
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-500/20">
-                <Moon className="w-4 h-4 text-indigo-400" />
+              <div className="p-1.5 rounded-md bg-secondary">
+                <Moon className="w-3.5 h-3.5 text-secondary-foreground" />
               </div>
-              {!isCollapsed && <span className="text-gray-300">Dark Mode</span>}
+              {!isCollapsed && <span className="text-secondary-foreground">Dark Mode</span>}
             </div>
           )}
         </Button>
@@ -485,15 +431,15 @@ export function AppSidebar() {
           size={isCollapsed ? "icon" : "default"}
           onClick={() => signOut()}
           className={cn(
-            "w-full transition-all duration-300",
+            "w-full transition-all duration-300 hover:bg-destructive/10 text-destructive hover:text-destructive",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-red-500/10 text-red-400 hover:text-red-300",
+              : "justify-start hover:bg-red-500/10 text-red-400 hover:text-red-300"
           )}
         >
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-red-500/20">
-              <LogOut className="w-4 h-4" />
+            <div className="p-1.5 rounded-md bg-destructive/10">
+              <LogOut className="w-3.5 h-3.5" />
             </div>
             {!isCollapsed && <span>Sign Out</span>}
           </div>
@@ -501,19 +447,19 @@ export function AppSidebar() {
 
         {/* User Status */}
         {!isCollapsed && (
-          <div className="pt-4 mt-4 border-t border-gray-700/50">
+          <div className="pt-3 mt-3 border-t border-border">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="sidebar-user-avatar w-10 h-10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+                <div className="sidebar-user-avatar w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-900"></div>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-[image:var(--purple-gradient)] rounded-full border-2 border-background"></div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-200 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   Welcome back!
                 </p>
-                <p className="text-xs text-gray-500">Active now</p>
+                <p className="text-xs text-muted-foreground">Active now</p>
               </div>
             </div>
           </div>
@@ -521,7 +467,7 @@ export function AppSidebar() {
       </div>
 
       {/* Decorative element */}
-      <div className="sidebar-decorative-bottom"></div>
+      <div className="sidebar-decorative-bottom h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
     </div>
   );
 }

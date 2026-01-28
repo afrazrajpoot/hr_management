@@ -191,7 +191,7 @@ const EmployeeProfilePage: React.FC = () => {
         setIsEditing(false);
         toast.success("Profile updated successfully!", {
           id: toastId,
-          icon: <CheckCircle className="w-5 h-5 text-success" />,
+          icon: <CheckCircle className="w-5 h-5 text-green-600" />,
         });
       } catch (error) {
         console.error("Error saving employee:", error);
@@ -200,7 +200,7 @@ const EmployeeProfilePage: React.FC = () => {
         toast.error(errorMessage, {
           id: toastId,
           duration: 5000,
-          icon: <Shield className="w-5 h-5 text-destructive" />,
+          icon: <Shield className="w-5 h-5 text-red-600" />,
         });
       }
     },
@@ -212,7 +212,7 @@ const EmployeeProfilePage: React.FC = () => {
     reset(employee);
     setIsEditing(false);
     toast.info("Changes discarded", {
-      icon: <Upload className="w-5 h-5 text-warning" />,
+      icon: <Upload className="w-5 h-5 text-yellow-600" />,
     });
   }, [employee, reset]);
 
@@ -230,7 +230,7 @@ const EmployeeProfilePage: React.FC = () => {
             setValue("avatar", e.target.result as string);
             toast.success("Profile picture updated!", {
               duration: 3000,
-              icon: <Sparkles className="w-5 h-5 text-primary" />,
+              icon: <Sparkles className="w-5 h-5 text-purple-600" />,
             });
           }
         };
@@ -254,7 +254,7 @@ const EmployeeProfilePage: React.FC = () => {
         setValue("resume", resumeFile);
         toast.success("Resume uploaded successfully!", {
           duration: 3000,
-          icon: <FileText className="w-5 h-5 text-success" />,
+          icon: <FileText className="w-5 h-5 text-green-600" />,
         });
       }
     },
@@ -272,7 +272,7 @@ const EmployeeProfilePage: React.FC = () => {
         (fetchError as any)?.data?.error || "Failed to load employee data";
       toast.error(errorMessage, {
         duration: 5000,
-        icon: <Shield className="w-5 h-5 text-destructive" />,
+        icon: <Shield className="w-5 h-5 text-red-600" />,
       });
     }
   }, [employeeData, fetchError, reset]);
@@ -287,12 +287,12 @@ const EmployeeProfilePage: React.FC = () => {
 
   if (status !== "authenticated") {
     return (
-      <div className="min-h-screen gradient-bg-primary flex items-center justify-center p-6">
-        <div className="card-primary max-w-md text-center p-8">
-          <div className="icon-wrapper-blue mx-auto mb-6">
-            <Shield className="w-12 h-12 text-primary" />
+      <div className="min-h-screen bg-layout-purple flex items-center justify-center p-6">
+        <div className="card-purple max-w-md text-center p-8">
+          <div className="bg-purple-100 dark:bg-purple-900/20 rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-purple-600 dark:text-purple-400" />
           </div>
-          <h2 className="text-2xl font-bold gradient-text-primary mb-4">
+          <h2 className="text-2xl font-bold text-gradient-purple mb-4">
             Authentication Required
           </h2>
           <p className="text-muted-foreground mb-6">
@@ -300,7 +300,7 @@ const EmployeeProfilePage: React.FC = () => {
           </p>
           <button
             onClick={() => (window.location.href = "/api/auth/signin")}
-            className="btn-gradient-primary w-full"
+            className="btn-purple w-full"
           >
             <User className="w-4 h-4 mr-2" />
             Sign In
@@ -411,13 +411,13 @@ const EmployeeProfilePage: React.FC = () => {
               }}
               className="absolute w-full max-w-sm pointer-events-auto"
             >
-              <div className="relative bg-white dark:bg-card rounded-2xl shadow-2xl p-6 border border-black/5 dark:border-white/10 overflow-hidden">
+              <div className="relative card-purple rounded-2xl shadow-prominent p-6 overflow-hidden">
                 {/* Decorative background pulse */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl animate-pulse" />
 
                 {/* Close Button */}
                 <button
-                  className="absolute top-4 right-4 text-muted-foreground hover:text-primary transition-colors"
+                  className="absolute top-4 right-4 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                   onClick={handleCloseOnboarding}
                   aria-label="Close onboarding"
                 >
@@ -432,8 +432,8 @@ const EmployeeProfilePage: React.FC = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="flex h-2 w-2 rounded-full bg-primary animate-ping" />
-                    <h2 className="text-lg font-bold gradient-text-primary">
+                    <span className="flex h-2 w-2 rounded-full bg-purple-600 dark:bg-purple-400 animate-ping" />
+                    <h2 className="text-lg font-bold text-gradient-purple">
                       {onboardingSteps[onboardingStep].title}
                     </h2>
                   </div>
@@ -448,14 +448,14 @@ const EmployeeProfilePage: React.FC = () => {
                     {onboardingSteps.map((_, idx) => (
                       <div
                         key={idx}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === onboardingStep ? "w-6 bg-primary" : "w-1.5 bg-primary/20"
+                        className={`h-1.5 rounded-full transition-all duration-300 ${idx === onboardingStep ? "w-6 bg-purple-600 dark:bg-purple-400" : "w-1.5 bg-purple-600/20 dark:bg-purple-400/20"
                           }`}
                       />
                     ))}
                   </div>
 
                   <button
-                    className="btn-gradient-primary px-5 py-2 text-sm rounded-xl transition-all duration-200 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95"
+                    className="btn-purple px-5 py-2 text-sm rounded-xl transition-all duration-200"
                     onClick={handleNextOnboarding}
                   >
                     {onboardingStep === onboardingSteps.length - 1
@@ -466,7 +466,7 @@ const EmployeeProfilePage: React.FC = () => {
               </div>
 
               {/* Arrow pointing down */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-card rotate-45 border-b border-r border-black/5 dark:border-white/10" />
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card dark:bg-matte-gray-medium rotate-45 border-b border-r border-border" />
             </motion.div>
           </div>
         )}
@@ -481,11 +481,11 @@ const EmployeeProfilePage: React.FC = () => {
         }}
       />
 
-      <div className="min-h-screen gradient-bg-primary p-4 md:p-6">
+      <div className="min-h-screen bg-layout-purple p-4 md:p-6">
         {/* Decorative Background Elements */}
         <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute top-20 left-10 decorative-gradient-blur-blue opacity-15" />
-          <div className="absolute bottom-20 right-10 decorative-gradient-blur-purple opacity-15" />
+          <div className="absolute top-20 left-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl opacity-15" />
+          <div className="absolute bottom-20 right-10 w-48 h-48 bg-purple-600/5 rounded-full blur-3xl opacity-15" />
         </div>
 
         <div className="max-w-7xl mx-auto space-y-8">
@@ -505,13 +505,19 @@ const EmployeeProfilePage: React.FC = () => {
 
           {/* Profile Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="card-primary card-hover">
-              <div className="p-6">
+            <div className="card-purple hover-lift relative overflow-hidden">
+              {/* Bubble Effects */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-green-500" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-green-400" />
+
+              <div className="p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="icon-wrapper-green p-3">
-                    <TrendingUp className="w-6 h-6 text-success" />
+                  <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl">
+                    <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="badge-green text-sm">Profile Strength</span>
+                  <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">
+                    Profile Strength
+                  </span>
                 </div>
                 <h3 className="text-2xl font-bold mb-2">
                   {profileCompletion}%
@@ -519,13 +525,13 @@ const EmployeeProfilePage: React.FC = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Profile Completion
                 </p>
-                <div className="w-full bg-muted rounded-full h-2">
+                <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-2">
                   <div
-                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${profileCompletion >= 80
-                      ? "bg-success"
+                    className={`rounded-full h-2 transition-all duration-500 ${profileCompletion >= 80
+                      ? "bg-green-600"
                       : profileCompletion >= 50
-                        ? "bg-warning"
-                        : "bg-destructive"
+                        ? "bg-yellow-600"
+                        : "bg-red-600"
                       }`}
                     style={{ width: `${profileCompletion}%` }}
                   />
@@ -533,13 +539,19 @@ const EmployeeProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="card-primary card-hover">
-              <div className="p-6">
+            <div className="card-purple hover-lift relative overflow-hidden">
+              {/* Bubble Effects */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-blue-500" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-blue-400" />
+
+              <div className="p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="icon-wrapper-blue p-3">
-                    <Award className="w-6 h-6 text-primary" />
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
+                    <Award className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="badge-blue text-sm">Skills</span>
+                  <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
+                    Skills
+                  </span>
                 </div>
                 <h3 className="text-2xl font-bold mb-2">
                   {employee.skills?.length || 0}
@@ -550,13 +562,19 @@ const EmployeeProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="card-primary card-hover">
-              <div className="p-6">
+            <div className="card-purple hover-lift relative overflow-hidden">
+              {/* Bubble Effects */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 bg-purple-500" />
+              <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full blur-2xl opacity-15 bg-purple-400" />
+
+              <div className="p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="icon-wrapper-purple p-3">
-                    <Briefcase className="w-6 h-6 text-accent" />
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl">
+                    <Briefcase className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="badge-purple text-sm">Experience</span>
+                  <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
+                    Experience
+                  </span>
                 </div>
                 <h3 className="text-2xl font-bold mb-2">
                   {employee.experience?.length || 0}
@@ -580,39 +598,42 @@ const EmployeeProfilePage: React.FC = () => {
               value={activeTab}
               onValueChange={setActiveTab}
             >
-              <TabsList className="grid w-full grid-cols-4 bg-transparent border-none rounded-xl h-14">
-                <TabsTrigger
-                  value="personal"
-                  id="tab-trigger-personal"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
-                >
-                  <span className="text-sm font-medium">Personal</span>
-                </TabsTrigger>
+              {/* Tabs Container - Keep your existing styling */}
+              <div className="bg-white dark:bg-matte-gray-dark rounded-2xl p-2 shadow-subtle">
+                <TabsList className="grid w-full grid-cols-4 bg-transparent border-none h-14">
+                  <TabsTrigger
+                    value="personal"
+                    id="tab-trigger-personal"
+                    className="data-[state=active]:bg-[image:var(--purple-gradient)] data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <span className="text-sm font-medium">Personal</span>
+                  </TabsTrigger>
 
-                <TabsTrigger
-                  value="employment"
-                  id="tab-trigger-employment"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
-                >
-                  <span className="text-sm font-medium">Employment</span>
-                </TabsTrigger>
+                  <TabsTrigger
+                    value="employment"
+                    id="tab-trigger-employment"
+                    className="data-[state=active]:bg-[image:var(--purple-gradient)] data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <span className="text-sm font-medium">Employment</span>
+                  </TabsTrigger>
 
-                <TabsTrigger
-                  value="skills"
-                  id="tab-trigger-skills"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
-                >
-                  <span className="text-sm font-medium">Skills</span>
-                </TabsTrigger>
+                  <TabsTrigger
+                    value="skills"
+                    id="tab-trigger-skills"
+                    className="data-[state=active]:bg-[image:var(--purple-gradient)] data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <span className="text-sm font-medium">Skills</span>
+                  </TabsTrigger>
 
-                <TabsTrigger
-                  value="experience"
-                  id="tab-trigger-experience"
-                  className="data-[state=active]:btn-gradient-primary data-[state=active]:text-primary-foreground rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-gradient-to-r from-transparent to-transparent hover:from-white/5 hover:to-white/5"
-                >
-                  <span className="text-sm font-medium">Experience</span>
-                </TabsTrigger>
-              </TabsList>
+                  <TabsTrigger
+                    value="experience"
+                    id="tab-trigger-experience"
+                    className="data-[state=active]:bg-[image:var(--purple-gradient)] data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg transition-all duration-300 flex items-center justify-center py-3 bg-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <span className="text-sm font-medium">Experience</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <motion.div
                 key={activeTab}
@@ -622,13 +643,13 @@ const EmployeeProfilePage: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <TabsContent value="personal" className="mt-0">
-                  <div className="card-primary p-6">
+                  <div className="card-purple p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="icon-wrapper-blue p-3">
-                        <User className="w-6 h-6 text-primary" />
+                      <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-xl">
+                        <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-card-foreground">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                           Personal Information
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -648,7 +669,7 @@ const EmployeeProfilePage: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="employment" className="mt-0">
-                  <div className="card-primary p-6">
+                  <div className="card-purple p-6">
                     <EmploymentTab
                       employee={employee}
                       isEditing={isEditing}
@@ -661,13 +682,13 @@ const EmployeeProfilePage: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="skills" className="mt-0">
-                  <div className="card-primary p-6">
+                  <div className="card-purple p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="icon-wrapper-amber p-3">
-                        <Award className="w-6 h-6 text-warning" />
+                      <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-xl">
+                        <Award className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-card-foreground">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                           Skills & Expertise
                         </h3>
                         <p className="text-sm text-muted-foreground">
@@ -687,7 +708,7 @@ const EmployeeProfilePage: React.FC = () => {
 
                 <TabsContent value="experience" className="mt-0">
                   <div className="space-y-6">
-                    <div className="card-primary p-6">
+                    <div className="card-purple p-6">
                       <ExperienceTab
                         isEditing={isEditing}
                         control={control}
@@ -697,7 +718,7 @@ const EmployeeProfilePage: React.FC = () => {
                       />
                     </div>
 
-                    <div className="card-primary p-6">
+                    <div className="card-purple p-6">
                       <EducationTab
                         isEditing={isEditing}
                         control={control}
@@ -709,13 +730,13 @@ const EmployeeProfilePage: React.FC = () => {
 
                     {/* Resume Section (Optional) */}
                     {employee.resume && (
-                      <div className="card-primary p-6">
+                      <div className="card-purple p-6">
                         <div className="flex items-center gap-3 mb-6">
-                          <div className="icon-wrapper-green p-3">
-                            <FileText className="w-6 h-6 text-accent" />
+                          <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-xl">
+                            <FileText className="w-6 h-6 text-green-600 dark:text-green-400" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-card-foreground">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                               Resume
                             </h3>
                             <p className="text-sm text-muted-foreground">
@@ -739,19 +760,17 @@ const EmployeeProfilePage: React.FC = () => {
             </Tabs>
           </motion.div>
 
-          {/* Action Buttons (Mobile) - Removed as requested */}
-
           {/* Profile Tips */}
           {!isEditing && profileCompletion < 100 && (
-            <div className="card-primary border-dashed border-2 border-primary/20">
+            <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700">
               <div className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="icon-wrapper-purple p-3 flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-accent" />
+                  <div className="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-xl flex-shrink-0">
+                    <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-warning" />
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                      <Zap className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                       Boost Your Profile Visibility
                     </h4>
                     <p className="text-sm text-muted-foreground mb-3">
@@ -760,16 +779,24 @@ const EmployeeProfilePage: React.FC = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {!employee.bio && (
-                        <span className="badge-blue">Add Bio</span>
+                        <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-xs px-3 py-1 rounded-full">
+                          Add Bio
+                        </span>
                       )}
                       {!employee.skills?.length && (
-                        <span className="badge-amber">Add Skills</span>
+                        <span className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 text-xs px-3 py-1 rounded-full">
+                          Add Skills
+                        </span>
                       )}
                       {!employee.experience?.length && (
-                        <span className="badge-green">Add Experience</span>
+                        <span className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 text-xs px-3 py-1 rounded-full">
+                          Add Experience
+                        </span>
                       )}
                       {!employee.education?.length && (
-                        <span className="badge-purple">Add Education</span>
+                        <span className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 text-xs px-3 py-1 rounded-full">
+                          Add Education
+                        </span>
                       )}
                     </div>
                   </div>

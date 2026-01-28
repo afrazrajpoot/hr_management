@@ -1,4 +1,3 @@
-// app/pricing/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -121,13 +120,13 @@ const PricingPage: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen gradient-bg-primary py-20 px-6">
+      <div className="min-h-screen bg-layout-purple py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-on-matte">
               Choose Your Path to Mastery
             </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-on-matte-subtle text-lg max-w-2xl mx-auto">
               Select the plan that best aligns with your career goals and let AI
               accelerate your progress.
             </p>
@@ -137,28 +136,28 @@ const PricingPage: React.FC = () => {
             {products.map((product) => (
               <div
                 key={product.name}
-                className={`card-primary p-8 border-2 rounded-3xl shadow-lg flex flex-col transition-all hover:scale-[1.02] ${product.highlight
-                  ? "border-primary ring-4 ring-primary/10"
-                  : "border-transparent"
+                className={`card-purple p-8 border-2 rounded-3xl shadow-prominent flex flex-col transition-all hover-lift ${product.highlight
+                  ? "border-purple-accent ring-4 ring-purple-accent/10"
+                  : "border-matte"
                   }`}
               >
                 {product.highlight && (
-                  <div className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
+                  <div className="bg-gradient-purple text-primary-foreground text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
                     Most Popular
                   </div>
                 )}
-                <h2 className="text-xl font-bold mb-2 text-center">
+                <h2 className="text-xl font-bold mb-2 text-center text-on-matte">
                   {product.name}
                 </h2>
-                <p className="text-muted-foreground text-sm mb-6 text-center h-10">
+                <p className="text-on-matte-subtle text-sm mb-6 text-center h-10">
                   {product.description}
                 </p>
 
                 <div className="flex items-baseline justify-center gap-1 mb-8">
-                  <span className="text-3xl font-extrabold">
+                  <span className="text-3xl font-extrabold text-on-matte">
                     {product.price}
                   </span>
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-on-matte-subtle text-sm">
                     {product.period}
                   </span>
                 </div>
@@ -166,8 +165,10 @@ const PricingPage: React.FC = () => {
                 <div className="space-y-4 mb-8 flex-grow">
                   {product.features.map((f) => (
                     <div key={f} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                      <span className="text-sm">{f}</span>
+                      <div className="icon-success p-0.5 rounded-full">
+                        <Check className="w-4 h-4 text-success shrink-0" />
+                      </div>
+                      <span className="text-sm text-on-matte">{f}</span>
                     </div>
                   ))}
                 </div>
@@ -175,10 +176,10 @@ const PricingPage: React.FC = () => {
                 <button
                   onClick={() => handlePurchase(product)}
                   disabled={!!loadingId}
-                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all ${product.highlight
-                    ? "bg-primary text-white hover:opacity-90"
-                    : "bg-secondary text-foreground hover:bg-secondary/80"
-                    } disabled:opacity-50`}
+                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover-lift ${product.highlight
+                    ? "btn-purple text-white"
+                    : "btn-purple-outline"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {loadingId === product.name ? (
                     <>
@@ -190,8 +191,10 @@ const PricingPage: React.FC = () => {
                   )}
                 </button>
 
-                <div className="mt-4 text-[10px] text-muted-foreground flex items-center justify-center gap-2">
-                  <Shield className="w-3 h-3" />
+                <div className="mt-4 text-[10px] text-on-matte-subtle flex items-center justify-center gap-2">
+                  <div className="p-0.5 rounded-full bg-status-info">
+                    <Shield className="w-3 h-3 text-purple-600" />
+                  </div>
                   Secure checkout via SamCart
                 </div>
               </div>

@@ -85,7 +85,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     { name: "Next.js", category: "Frontend" },
     { name: "Vue.js", category: "Frontend" },
     { name: "Angular", category: "Frontend" },
-    
+
     // Backend
     { name: "Node.js", category: "Backend" },
     { name: "Python", category: "Backend" },
@@ -94,41 +94,41 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
     { name: "C#", category: "Backend" },
     { name: "Go", category: "Backend" },
     { name: "Rust", category: "Backend" },
-    
+
     // Databases
     { name: "SQL", category: "Database" },
     { name: "MongoDB", category: "Database" },
     { name: "PostgreSQL", category: "Database" },
     { name: "MySQL", category: "Database" },
     { name: "Redis", category: "Database" },
-    
+
     // Cloud & DevOps
     { name: "AWS", category: "Cloud" },
     { name: "Docker", category: "DevOps" },
     { name: "Kubernetes", category: "DevOps" },
     { name: "Git", category: "DevOps" },
     { name: "CI/CD", category: "DevOps" },
-    
+
     // Mobile
     { name: "React Native", category: "Mobile" },
     { name: "Flutter", category: "Mobile" },
     { name: "Swift", category: "Mobile" },
     { name: "Kotlin", category: "Mobile" },
-    
+
     // Web3 & Blockchain
     { name: "Solidity", category: "Web3" },
     { name: "Smart Contracts", category: "Web3" },
     { name: "Ethers.js", category: "Web3" },
     { name: "Web3.js", category: "Web3" },
     { name: "Hardhat", category: "Web3" },
-    
+
     // Soft Skills
     { name: "Communication", category: "Soft Skills" },
     { name: "Problem Solving", category: "Soft Skills" },
     { name: "Team Leadership", category: "Soft Skills" },
     { name: "Project Management", category: "Soft Skills" },
     { name: "Agile/Scrum", category: "Soft Skills" },
-    
+
     // Data & AI
     { name: "Data Analysis", category: "Data & AI" },
     { name: "Machine Learning", category: "Data & AI" },
@@ -236,7 +236,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
   // Handle selecting a skill from dropdown (updated to handle both standard and dynamic)
   const handleSelectStandardSkill = (skillName: string) => {
     if (!skillName) return;
-    
+
     // Check for duplicates
     const isDuplicate = fields.some(
       (field: any) => field.name.toLowerCase() === skillName.toLowerCase()
@@ -345,63 +345,49 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
       animate="visible"
       className="space-y-6"
     >
-      <Card className="card-primary card-hover border border-input">
-        <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center gap-4">
-            <div className="icon-wrapper-blue p-3">
-              <Zap className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl font-bold gradient-text-primary">
-                Skills & Expertise
-              </CardTitle>
-              <CardDescription className="text-muted-foreground text-base">
-                Showcase your technical and professional competencies with
-                proficiency levels
-              </CardDescription>
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              {isEditing ? (
-                <>
-                  <Button
-                    onClick={onSave}
-                    className="btn-gradient-primary"
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Changes
-                  </Button>
-                  <Button
-                    onClick={onCancel}
-                    variant="outline"
-                    className="border-input"
-                    size="sm"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={onEdit}
-                  className="btn-gradient-primary"
-                  size="sm"
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit Skills
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          {isEditing && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-6 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10"
+      {/* Action Buttons */}
+      <div className="flex items-center justify-end gap-2">
+        {isEditing ? (
+          <>
+            <Button
+              onClick={onSave}
+              className="btn-purple"
+              size="sm"
             >
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+            <Button
+              onClick={onCancel}
+              variant="outline"
+              className="border-input"
+              size="sm"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={onEdit}
+            className="btn-purple"
+            size="sm"
+          >
+            <Pencil className="w-4 h-4 mr-2" />
+            Edit Skills
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        {isEditing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 rounded-xl border border-primary/20 bg-muted/30 relative overflow-hidden"
+          >
+            <div className="absolute inset-0 opacity-10 bg-[image:var(--purple-gradient)]" />
+            <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-wrapper-blue p-2">
                   <Target className="h-5 w-5 text-primary" />
@@ -488,13 +474,12 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                             Object.entries(skillsByCategory).map(([category, skills]) => (
                               <div key={category} className="mb-4 last:mb-0">
                                 <div className="px-3 py-2 mb-3">
-                                  <Badge 
-                                    variant="secondary" 
-                                    className={`text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
-                                      category === "AI Suggested" 
-                                        ? "bg-gradient-to-r from-accent/20 to-primary/20 text-accent border-accent/30" 
-                                        : "bg-gradient-to-r from-primary/20 to-blue-100/20 text-primary border-primary/30"
-                                    }`}
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${category === "AI Suggested"
+                                      ? "text-purple-600 dark:text-purple-400 border border-purple-500/30 bg-purple-500/10"
+                                      : "text-blue-600 dark:text-blue-400 border border-blue-500/30 bg-blue-500/10"
+                                      }`}
                                   >
                                     {category} ({skills.length})
                                   </Badge>
@@ -505,7 +490,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                     const isAlreadyAdded = fields.some(
                                       (field: any) => field.name.toLowerCase() === skill.name.toLowerCase()
                                     );
-                                    
+
                                     return (
                                       <motion.button
                                         key={skill.name}
@@ -514,23 +499,20 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                                         disabled={isAlreadyAdded}
                                         whileHover={{ x: 4, scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className={`group w-full flex items-center justify-between p-4 rounded-lg text-left transition-all duration-150 ${
-                                          isSelected
-                                            ? 'bg-primary/10 border border-primary/30 shadow-md'
-                                            : isAlreadyAdded
+                                        className={`group w-full flex items-center justify-between p-4 rounded-lg text-left transition-all duration-150 ${isSelected
+                                          ? 'bg-primary/10 border border-primary/30 shadow-md'
+                                          : isAlreadyAdded
                                             ? 'bg-muted/50 text-muted-foreground cursor-not-allowed'
                                             : 'hover:bg-accent/10 border border-transparent hover:border-accent/20'
-                                        }`}
+                                          }`}
                                       >
                                         <div className="flex items-center gap-3 flex-1">
-                                          <div className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
-                                            isSelected ? 'bg-primary/20' : 'bg-muted/20 group-hover:bg-accent/20'
-                                          }`}>
+                                          <div className={`flex-shrink-0 p-2 rounded-lg transition-colors ${isSelected ? 'bg-primary/20' : 'bg-muted/20 group-hover:bg-accent/20'
+                                            }`}>
                                             <Code className="h-4 w-4 text-primary/80" />
                                           </div>
-                                          <span className={`font-medium transition-colors ${
-                                            isSelected ? 'text-primary' : 'text-foreground'
-                                          }`}>
+                                          <span className={`font-medium transition-colors ${isSelected ? 'text-primary' : 'text-foreground'
+                                            }`}>
                                             {skill.name}
                                           </span>
                                         </div>
@@ -593,13 +575,15 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/5 border border-accent/20"
+                  className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-500/5 to-blue-500/5 border border-purple-500/20"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="icon-wrapper-purple p-2 rounded-lg bg-accent/20">
                         <Download className="h-5 w-5 text-accent" />
                       </div>
+
+
                       <div>
                         <h4 className="font-semibold text-base text-foreground">
                           AI Suggestions for {profession}
@@ -609,6 +593,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                         </p>
                       </div>
                     </div>
+
                     <Button
                       onClick={fetchSuggestedSkills}
                       disabled={isLoadingSuggestions || !profession}
@@ -629,6 +614,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                       )}
                     </Button>
                   </div>
+
 
                   {isLoadingSuggestions ? (
                     <div className="text-center py-8">
@@ -651,11 +637,10 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                             onClick={() => handleSelectSuggestedSkill(skill)}
                             disabled={isAlreadyAdded}
                             whileHover={{ scale: 1.02 }}
-                            className={`group w-full flex items-center justify-between p-3 rounded-lg text-sm transition-all ${
-                              isAlreadyAdded
-                                ? 'bg-muted/30 text-muted-foreground cursor-not-allowed'
-                                : 'bg-transparent text-card-foreground hover:bg-accent/10 border border-transparent hover:border-accent/20'
-                            }`}
+                            className={`group w-full flex items-center justify-between p-3 rounded-lg text-sm transition-all ${isAlreadyAdded
+                              ? 'bg-muted/30 text-muted-foreground cursor-not-allowed'
+                              : 'bg-transparent text-card-foreground hover:bg-accent/10 border border-transparent hover:border-accent/20'
+                              }`}
                           >
                             <span className="font-medium">{skill}</span>
                             {isAlreadyAdded ? (
@@ -683,7 +668,8 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     </div>
                   )}
                 </motion.div>
-              )}
+              )
+              }
 
               {/* Skill Input and Proficiency (unchanged) */}
               <div className="space-y-6">
@@ -716,7 +702,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-lg font-bold text-primary">
+                      <span className="text-lg font-bold text-foreground">
                         {newProficiency}%
                       </span>
                       <p className="text-sm font-medium">
@@ -737,14 +723,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                         step="5"
                         value={newProficiency}
                         onChange={(e) => setNewProficiency(Number(e.target.value))}
-                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth"
-                        style={{
-                          background: `linear-gradient(to right, 
-                            var(--color-primary) 0%, 
-                            var(--color-primary) ${newProficiency}%, 
-                            var(--color-muted) ${newProficiency}%, 
-                            var(--color-muted) 100%)`,
-                        }}
+                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth bg-[image:var(--purple-gradient)]"
                       />
                       <span className="text-xs font-medium text-muted-foreground min-w-8">
                         100%
@@ -754,9 +733,8 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     <div className="flex justify-between px-2">
                       {["Beginner", "Intermediate", "Advanced", "Expert"].map((level, index) => (
                         <div key={level} className="flex flex-col items-center">
-                          <div className={`h-2 w-2 rounded-full mb-1 ${
-                            newProficiency > index * 25 ? 'bg-primary' : 'bg-muted'
-                          }`} />
+                          <div className={`h-2 w-2 rounded-full mb-1 ${newProficiency > index * 25 ? 'bg-primary' : 'bg-muted'
+                            }`} />
                           <span className="text-xs text-muted-foreground">{level}</span>
                         </div>
                       ))}
@@ -776,7 +754,7 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                     <Button
                       onClick={handleAddSkill}
                       disabled={!newSkill.trim()}
-                      className="btn-gradient-primary px-8 h-12 text-primary-foreground"
+                      className="btn-purple px-8 h-12 text-primary-foreground"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Skill
@@ -784,282 +762,275 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                   </motion.div>
                 </div>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div >
+        )
+        }
 
-          {/* Rest of the component (unchanged) */}
-          <div className="space-y-4">
-            {fields.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12"
-              >
-                <div className="icon-wrapper-purple mx-auto mb-4 p-4">
-                  <Sparkles className="h-8 w-8 text-accent" />
-                </div>
-                <h3 className="text-xl font-bold gradient-text-primary mb-2">
-                  No skills added yet
-                </h3>
-                <p className="text-muted-foreground">
-                  {isEditing
-                    ? "Start adding your skills above"
-                    : "Click 'Edit Skills' to add your expertise"}
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="icon-wrapper-blue p-2">
-                      <Code className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg text-foreground">
-                        {isEditing ? "Edit Your Skills" : "Your Skills"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {fields.length} skill{fields.length !== 1 ? "s" : ""}
-                        {isEditing && " - Click on any skill to edit"}
-                      </p>
-                    </div>
+        {/* Rest of the component (unchanged) */}
+        <div className="space-y-4">
+          {fields.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <div className="icon-wrapper-purple mx-auto mb-4 p-4">
+                <Sparkles className="h-8 w-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                No skills added yet
+              </h3>
+              <p className="text-muted-foreground">
+                {isEditing
+                  ? "Start adding your skills above"
+                  : "Click 'Edit Skills' to add your expertise"}
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="icon-wrapper-blue p-2">
+                    <Code className="h-5 w-5 text-primary" />
                   </div>
-                  {fields.length > 0 && (
-                    <div className="flex items-center gap-3">
-                      <div className="hidden sm:flex items-center gap-2">
-                        <div className="icon-wrapper-blue p-2">
-                          <BarChart3 className="w-4 h-4 text-primary" />
-                        </div>
-                        <Badge className="badge-blue">
-                          <TrendingUp className="w-3 h-3 mr-1" />
-                          {Math.round(
-                            fields.reduce(
-                              (acc: any, field: any) =>
-                                acc + (field.proficiency || 0),
-                              0
-                            ) / fields.length
-                          )}
-                          % avg
-                        </Badge>
+                  <div>
+                    <h3 className="font-semibold text-lg text-foreground">
+                      {isEditing ? "Edit Your Skills" : "Your Skills"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {fields.length} skill{fields.length !== 1 ? "s" : ""}
+                      {isEditing && " - Click on any skill to edit"}
+                    </p>
+                  </div>
+                </div>
+                {fields.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <div className="hidden sm:flex items-center gap-2">
+                      <div className="icon-wrapper-blue p-2">
+                        <BarChart3 className="w-4 h-4 text-primary" />
                       </div>
                       <Badge className="badge-blue">
-                        <Award className="w-3 h-3 mr-1" />
-                        {
-                          fields.filter(
-                            (field: any) => (field.proficiency || 0) >= 75
-                          ).length
-                        }{" "}
-                        expert
+                        <TrendingUp className="w-3 h-3 mr-1" />
+                        {Math.round(
+                          fields.reduce(
+                            (acc: any, field: any) =>
+                              acc + (field.proficiency || 0),
+                            0
+                          ) / fields.length
+                        )}
+                        % avg
                       </Badge>
                     </div>
-                  )}
-                </div>
+                    <Badge className="badge-blue">
+                      <Award className="w-3 h-3 mr-1" />
+                      {
+                        fields.filter(
+                          (field: any) => (field.proficiency || 0) >= 75
+                        ).length
+                      }{" "}
+                      expert
+                    </Badge>
+                  </div>
+                )}
+              </div>
 
-                <div className="grid gap-4">
-                  <AnimatePresence mode="popLayout">
-                    {fields.map((field: any, index: number) => {
-                      const proficiency = field.proficiency || 0;
-                      const proficiencyColor = getProficiencyColor(proficiency);
-                      const colorValue = getProficiencyColorValue(proficiency);
+              <div className="grid gap-4">
+                <AnimatePresence mode="popLayout">
+                  {fields.map((field: any, index: number) => {
+                    const proficiency = field.proficiency || 0;
+                    const proficiencyColor = getProficiencyColor(proficiency);
+                    const colorValue = getProficiencyColorValue(proficiency);
 
-                      return (
-                        <motion.div
-                          key={field.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                          animate={{
-                            opacity: 1,
-                            scale: 1,
-                            y: 0,
-                            transition: {
-                              duration: 0.2,
-                              delay: index * 0.02,
-                            },
-                          }}
-                          exit={{
-                            opacity: 0,
-                            scale: 0.8,
-                            y: -10,
-                            transition: { duration: 0.15 },
-                          }}
-                          className={`p-5 rounded-xl border ${
-                            isEditing
-                              ? "border-primary/30 bg-primary/5"
-                              : "border-input bg-card"
+                    return (
+                      <motion.div
+                        key={field.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.2,
+                            delay: index * 0.02,
+                          },
+                        }}
+                        exit={{
+                          opacity: 0,
+                          scale: 0.8,
+                          y: -10,
+                          transition: { duration: 0.15 },
+                        }}
+                        className={`p-5 rounded-xl border ${isEditing
+                          ? "border-primary/30 bg-primary/5"
+                          : "border-input bg-card"
                           }`}
-                        >
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex items-start gap-3 flex-1">
-                              <div
-                                className={`icon-wrapper-blue p-2 mt-1 ${
-                                  isEditing ? "bg-primary/20" : ""
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div
+                              className={`icon-wrapper-blue p-2 mt-1 ${isEditing ? "bg-primary/20" : ""
                                 }`}
-                              >
-                                <Brain className="w-5 h-5 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                {isEditing ? (
-                                  <div className="flex flex-col gap-2">
-                                    <div className="relative">
-                                      <div className="icon-wrapper-blue absolute left-3 top-1/2 transform -translate-y-1/2 p-1.5">
-                                        <Pencil className="h-3 w-3 text-primary" />
-                                      </div>
-                                      <Controller
-                                        name={`skills.${index}.name`}
-                                        control={control}
-                                        render={({ field: nameField }) => (
-                                          <Input
-                                            {...nameField}
-                                            className="pl-10 border-primary bg-background text-base font-semibold focus:border-primary focus:ring-1 focus:ring-primary"
-                                            placeholder="Skill name"
-                                          />
-                                        )}
-                                      />
-                                    </div>
-                                    <div className="mt-1">
-                                      <Badge
-                                        className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
-                                      >
-                                        {proficiency}% -{" "}
-                                        {getProficiencyText(proficiency)}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <h4 className="text-base font-semibold text-card-foreground">
-                                      {field.name}
-                                    </h4>
-                                    <div className="mt-2">
-                                      <Badge
-                                        className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
-                                      >
-                                        {proficiency}% -{" "}
-                                        {getProficiencyText(proficiency)}
-                                      </Badge>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
+                            >
+                              <Brain className="w-5 h-5 text-primary" />
                             </div>
-
-                            {isEditing && (
-                              <motion.button
-                                type="button"
-                                onClick={() => handleRemoveSkill(index)}
-                                className="icon-wrapper-blue"
-                                whileHover={{ scale: 1.2, rotate: 90 }}
-                                whileTap={{ scale: 0.9 }}
-                              >
-                                <X className="h-4 w-4" />
-                              </motion.button>
-                            )}
+                            <div className="flex-1">
+                              {isEditing ? (
+                                <div className="flex flex-col gap-2">
+                                  <div className="relative">
+                                    <div className="icon-wrapper-blue absolute left-3 top-1/2 transform -translate-y-1/2 p-1.5">
+                                      <Pencil className="h-3 w-3 text-primary" />
+                                    </div>
+                                    <Controller
+                                      name={`skills.${index}.name`}
+                                      control={control}
+                                      render={({ field: nameField }) => (
+                                        <Input
+                                          {...nameField}
+                                          className="pl-10 border-primary bg-background text-base font-semibold focus:border-primary focus:ring-1 focus:ring-primary"
+                                          placeholder="Skill name"
+                                        />
+                                      )}
+                                    />
+                                  </div>
+                                  <div className="mt-1">
+                                    <Badge
+                                      className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
+                                    >
+                                      {proficiency}% -{" "}
+                                      {getProficiencyText(proficiency)}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <h4 className="text-base font-semibold text-card-foreground">
+                                    {field.name}
+                                  </h4>
+                                  <div className="mt-2">
+                                    <Badge
+                                      className={`badge-${proficiencyColor} bg-${proficiencyColor}/10 text-${proficiencyColor} border-${proficiencyColor}/20`}
+                                    >
+                                      {proficiency}% -{" "}
+                                      {getProficiencyText(proficiency)}
+                                    </Badge>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-muted-foreground">
-                                Proficiency Level
-                              </span>
-                              <span
-                                className={`text-sm font-medium text-${proficiencyColor}`}
-                              >
-                                {getProficiencyText(proficiency)}
-                              </span>
-                            </div>
+                          {isEditing && (
+                            <motion.button
+                              type="button"
+                              onClick={() => handleRemoveSkill(index)}
+                              className="icon-wrapper-blue"
+                              whileHover={{ scale: 1.2, rotate: 90 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <X className="h-4 w-4" />
+                            </motion.button>
+                          )}
+                        </div>
 
-                            {isEditing ? (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-4">
-                                  <span className="text-xs text-muted-foreground">
-                                    0%
-                                  </span>
-                                  <Controller
-                                    name={`skills.${index}.proficiency`}
-                                    control={control}
-                                    render={({ field: proficiencyField }) => (
-                                      <input
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        value={proficiencyField.value || 0}
-                                        onChange={(e) => {
-                                          proficiencyField.onChange(
-                                            Number(e.target.value)
-                                          );
-                                        }}
-                                        className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth"
-                                        style={{
-                                          background: `linear-gradient(to right, ${colorValue} 0%, ${colorValue} ${
-                                            proficiencyField.value || 0
-                                          }%, var(--color-muted) ${
-                                            proficiencyField.value || 0
-                                          }%, var(--color-muted) 100%)`,
-                                        }}
-                                      />
-                                    )}
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    100%
-                                  </span>
-                                </div>
-                                <div className="flex justify-between text-xs text-muted-foreground px-1">
-                                  <span>Beginner</span>
-                                  <span>Intermediate</span>
-                                  <span>Advanced</span>
-                                  <span>Expert</span>
-                                </div>
-                                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
-                                  <Lightbulb className="h-3 w-3" />
-                                  <span>
-                                    Drag the slider to adjust proficiency
-                                  </span>
-                                </div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">
+                              Proficiency Level
+                            </span>
+                            <span
+                              className={`text-sm font-medium text-${proficiencyColor}`}
+                            >
+                              {getProficiencyText(proficiency)}
+                            </span>
+                          </div>
+
+                          {isEditing ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-4">
+                                <span className="text-xs text-muted-foreground">
+                                  0%
+                                </span>
+                                <Controller
+                                  name={`skills.${index}.proficiency`}
+                                  control={control}
+                                  render={({ field: proficiencyField }) => (
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      value={proficiencyField.value || 0}
+                                      onChange={(e) => {
+                                        proficiencyField.onChange(
+                                          Number(e.target.value)
+                                        );
+                                      }}
+                                      className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer slider-smooth bg-[image:var(--purple-gradient)]"
+                                    />
+                                  )}
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  100%
+                                </span>
                               </div>
-                            ) : (
-                              <div className="space-y-2">
-                                <div className="w-full bg-muted rounded-full h-2">
-                                  <div
-                                    className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${
-                                      proficiencyColor === "destructive"
-                                        ? "bg-destructive"
-                                        : proficiencyColor === "warning"
-                                        ? "bg-warning"
-                                        : proficiencyColor === "success"
+                              <div className="flex justify-between text-xs text-muted-foreground px-1">
+                                <span>Beginner</span>
+                                <span>Intermediate</span>
+                                <span>Advanced</span>
+                                <span>Expert</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+                                <Lightbulb className="h-3 w-3" />
+                                <span>
+                                  Drag the slider to adjust proficiency
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="w-full bg-muted rounded-full h-2">
+                                <div
+                                  className={`progress-bar-primary rounded-full h-2 transition-all duration-500 ${proficiencyColor === "destructive"
+                                    ? "bg-destructive"
+                                    : proficiencyColor === "warning"
+                                      ? "bg-warning"
+                                      : proficiencyColor === "success"
                                         ? "bg-success"
                                         : "bg-primary"
                                     }`}
-                                    style={{ width: `${proficiency}%` }}
-                                  />
-                                </div>
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Beginner</span>
-                                  <span>Intermediate</span>
-                                  <span>Advanced</span>
-                                  <span>Expert</span>
-                                </div>
+                                  style={{ width: `${proficiency}%` }}
+                                />
                               </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </div>
+                              <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>Beginner</span>
+                                <span>Intermediate</span>
+                                <span>Advanced</span>
+                                <span>Expert</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </div>
 
-          {!isEditing && fields.length > 0 && (
+        {
+          !isEditing && fields.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="p-6 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10"
+              className="p-6 rounded-xl bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 border border-primary/10"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="icon-wrapper-purple p-2">
@@ -1118,9 +1089,11 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                 </div>
               </div>
             </motion.div>
-          )}
+          )
+        }
 
-          {isEditing && fields.length > 0 && (
+        {
+          isEditing && fields.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1143,9 +1116,9 @@ const SkillsTab: React.FC<SkillsTabProps> = ({
                 </div>
               </div>
             </motion.div>
-          )}
-        </CardContent>
-      </Card>
+          )
+        }
+      </div>
     </motion.div>
   );
 };

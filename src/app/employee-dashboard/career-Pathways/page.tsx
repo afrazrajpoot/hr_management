@@ -144,7 +144,7 @@ export default function CareerPathways() {
   useEffect(() => {
     if (isSuccess && data) {
       const newRecs = mapApiToCareerData(data);
-      setRecommendations((prev) => 
+      setRecommendations((prev) =>
         page === 1 ? newRecs : [...prev, ...newRecs]
       );
       setHasMore(data.hasMore || false);
@@ -262,7 +262,7 @@ export default function CareerPathways() {
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 100 &&
+        document.documentElement.offsetHeight - 100 &&
         hasMore &&
         !isLoading
       ) {
@@ -368,7 +368,7 @@ export default function CareerPathways() {
   if (isError) {
     return (
       <AppLayout>
-        <div className="min-h-screen gradient-bg-primary p-6">
+        <div className="min-h-screen bg-layout-purple p-6">
           <div className="text-center text-destructive">
             Error loading recommendations: {JSON.stringify(error)}
           </div>
@@ -379,33 +379,32 @@ export default function CareerPathways() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen gradient-bg-primary p-6">
+      <div className="min-h-screen bg-layout-purple p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold gradient-text-primary">
+              <h1 className="text-3xl font-bold text-gradient-purple">
                 Career Pathways Assistant
               </h1>
-              <p className="text-muted-foreground mt-1">
-                AI-powered career recommendations based on your Genius Factor
-                profile
+              <p className="text-on-matte-subtle mt-1">
+                AI-powered career recommendations based on your Genius Factor profile
               </p>
             </div>
           </div>
 
-          <Card className="card-primary">
+          <Card className="surface-matte-elevated">
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-on-matte-subtle w-4 h-4" />
                     <Input
                       placeholder="Search career titles, industries, or locations..."
                       value={filters.search}
                       onChange={(e) =>
                         handleFilterChange("search", e.target.value)
                       }
-                      className="pl-10 border-input"
+                      className="pl-10 input-purple"
                     />
                   </div>
                 </div>
@@ -415,7 +414,7 @@ export default function CareerPathways() {
                     handleFilterChange("industry", value)
                   }
                 >
-                  <SelectTrigger className="w-full lg:w-48 border-input">
+                  <SelectTrigger className="w-full lg:w-48 input-purple">
                     <SelectValue placeholder="Industry" />
                   </SelectTrigger>
                   <SelectContent>
@@ -430,7 +429,7 @@ export default function CareerPathways() {
                   value={filters.type}
                   onValueChange={(value) => handleFilterChange("type", value)}
                 >
-                  <SelectTrigger className="w-full lg:w-48 border-input">
+                  <SelectTrigger className="w-full lg:w-48 input-purple">
                     <SelectValue placeholder="Job Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -446,17 +445,17 @@ export default function CareerPathways() {
           </Card>
 
           <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">
+            <p className="text-on-matte-subtle">
               Showing {filteredAndSortedRecommendations.length} career matches
               {total ? ` of ${total}` : ''}
             </p>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <span className="text-sm text-on-matte-subtle">Sort by:</span>
               <Select
                 value={`${filters.sortBy}-${filters.sortOrder}`}
                 onValueChange={handleSortChange}
               >
-                <SelectTrigger className="w-32 border-input">
+                <SelectTrigger className="w-32 input-purple">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -472,16 +471,16 @@ export default function CareerPathways() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredAndSortedRecommendations.map((career: any) => (
-              <Card key={career.id} className="card-primary card-hover group">
+              <Card key={career.id} className="surface-matte-elevated group hover-lift">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <CardTitle className="text-xl">
+                        <CardTitle className="text-xl text-on-matte">
                           {career.title}
                         </CardTitle>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex items-center space-x-4 text-sm text-on-matte-subtle">
                         <span>{career.industry}</span>
                         <span>•</span>
                         <span>{career.type.replace("_", " ")}</span>
@@ -489,10 +488,10 @@ export default function CareerPathways() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">
+                        <div className="text-2xl font-bold text-purple-accent">
                           {career.matchScore}%
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-on-matte-subtle">
                           Match
                         </div>
                       </div>
@@ -503,32 +502,31 @@ export default function CareerPathways() {
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Bookmark
-                          className={`w-4 h-4 ${
-                            savedJobs.includes(career.id)
-                              ? "fill-current text-primary"
-                              : "text-muted-foreground"
-                          }`}
+                          className={`w-4 h-4 ${savedJobs.includes(career.id)
+                            ? "fill-current text-purple-accent"
+                            : "text-on-matte-subtle"
+                            }`}
                         />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground line-clamp-3">
+                  <p className="text-sm text-on-matte-subtle line-clamp-3">
                     {truncateDescription(career.description)}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <span>{career.salaryRange}</span>
+                      <DollarSign className="w-4 h-4 mr-2 text-on-matte-subtle" />
+                      <span className="text-on-matte">{career.salaryRange}</span>
                     </div>
                     <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                      <span>{career.location}</span>
+                      <MapPin className="w-4 h-4 mr-2 text-on-matte-subtle" />
+                      <span className="text-on-matte">{career.location}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Recruiter:</div>
+                    <div className="text-sm font-medium text-on-matte">Recruiter:</div>
                     <div className="flex flex-wrap gap-2">
                       {career.companies
                         .slice(0, 3)
@@ -536,7 +534,7 @@ export default function CareerPathways() {
                           <Badge
                             key={index}
                             variant="outline"
-                            className="text-xs border-primary/20"
+                            className="badge-brand text-xs"
                           >
                             {company}
                           </Badge>
@@ -544,23 +542,23 @@ export default function CareerPathways() {
                       {career.companies.length > 3 && (
                         <Badge
                           variant="outline"
-                          className="text-xs border-muted text-muted-foreground"
+                          className="text-xs border-matte text-on-matte-subtle"
                         >
                           +{career.companies.length - 3} more
                         </Badge>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
+                  <div className="flex items-center justify-between pt-4 border-t border-matte space-x-2">
+                    <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => openJobDetails(career)}
-                      className="border-input"
+                      className="cursor-pointer group/link flex items-center text-sm font-medium text-purple-accent hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                     >
-                      View Details
-                      <ExternalLink className="w-3 h-3 ml-2" />
-                    </Button>
+                      <span className="group-hover/link:underline">View Details</span>
+                      <ExternalLink className="w-3 h-3 ml-1 group-hover/link:translate-x-0.5 transition-transform" />
+                    </div>
                     <Button
                       size="sm"
                       onClick={() =>
@@ -575,7 +573,7 @@ export default function CareerPathways() {
                         appliedJobs.includes(career.id) ||
                         applyingJobIds.has(career.id)
                       }
-                      className="btn-gradient-primary"
+                      className="btn-purple"
                     >
                       {applyingJobIds.has(career.id) ? (
                         <div className="flex items-center space-x-2">
@@ -604,19 +602,22 @@ export default function CareerPathways() {
 
           {/* Success Modal */}
           <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-            <DialogContent className="card-primary">
+            <DialogContent className="surface-matte-elevated">
               <DialogHeader>
                 <DialogTitle className="flex items-center justify-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-success" />
-                  <span>Application Submitted!</span>
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span className="text-on-matte">Application Submitted!</span>
                 </DialogTitle>
-                <DialogDescription className="text-center">
+                <DialogDescription className="text-center text-on-matte-subtle">
                   Your application for the position has been successfully
                   submitted. You'll hear back from the recruiter soon.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex justify-center">
-                <Button onClick={() => setShowSuccessModal(false)}>
+                <Button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="btn-purple"
+                >
                   Close
                 </Button>
               </div>
@@ -630,31 +631,31 @@ export default function CareerPathways() {
           )}
 
           {filteredAndSortedRecommendations.length === 0 && !isLoading && (
-            <Card className="card-primary">
+            <Card className="surface-matte-elevated">
               <CardContent className="pt-12 pb-12 text-center">
-                <div className="icon-wrapper-blue mx-auto mb-4 p-3">
-                  <Search className="w-8 h-8 text-primary" />
+                <div className="icon-brand mx-auto mb-4 p-3">
+                  <Search className="w-8 h-8 text-purple-accent" />
                 </div>
-                <h3 className="text-xl font-bold gradient-text-primary mb-2">
+                <h3 className="text-xl font-bold text-gradient-purple mb-2">
                   No recommendations found
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-on-matte-subtle">
                   Try adjusting your search or filters
                 </p>
               </CardContent>
             </Card>
           )}
 
-<div className="text-center">
-              <Button
-                onClick={loadMore}
-                variant="outline"
-                size="lg"
-                className="border-input"
-              >
-                Load More Recommendations
-              </Button>
-            </div>
+          <div className="text-center">
+            <Button
+              onClick={loadMore}
+              variant="outline"
+              size="lg"
+              className="btn-purple-outline"
+            >
+              Load More Recommendations
+            </Button>
+          </div>
         </div>
       </div>
     </AppLayout>
