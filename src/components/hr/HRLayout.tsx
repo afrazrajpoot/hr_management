@@ -83,7 +83,7 @@ export default function HRLayout({ children, segment }: any) {
   const currentPage = pageConfig[currentPath] || pageConfig["/hr-dashboard"];
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden  bg-layout-purple">
       {/* Sidebar */}
       <HRSidebar
         collapsed={sidebarCollapsed}
@@ -101,15 +101,11 @@ export default function HRLayout({ children, segment }: any) {
           icon={currentPage.icon}
         />
 
-        {/* Decorative Background Elements */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="decorative-gradient-blur-blue top-0 right-0 opacity-20 w-96 h-96"></div>
-          <div className="decorative-gradient-blur-purple bottom-0 left-0 opacity-20 w-80 h-80"></div>
-        </div>
+
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 gradient-bg-primary">
-          <div className="p-6 mx-auto">{children}</div>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 ">
+          <div className="p-6 mx-auto ">{children}</div>
         </main>
       </div>
     </div>

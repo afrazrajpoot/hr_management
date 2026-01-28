@@ -177,7 +177,7 @@ const SignInForm = () => {
       type: "email",
       placeholder: "Enter your email",
       icon: (
-        <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Email is required",
@@ -193,7 +193,7 @@ const SignInForm = () => {
       type: showPassword ? "text" : "password",
       placeholder: "Enter your password",
       icon: (
-        <Lock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Password is required",
@@ -206,17 +206,17 @@ const SignInForm = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-bg-primary py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-layout-purple py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 w-full max-w-md"
       >
-        <Card className="card-primary backdrop-blur-xl overflow-hidden">
+        <Card className="card-purple backdrop-blur-xl overflow-hidden">
           <CardHeader className="space-y-1 text-center pb-6">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-bold text-foreground">
+              <CardTitle className="text-2xl font-bold gradient-text-primary">
                 Welcome Back
               </CardTitle>
             </motion.div>
@@ -264,15 +264,14 @@ const SignInForm = () => {
                         field.registerOptions
                       )}
                       disabled={isLoading}
-                      className={`pl-10 ${
-                        field.id === "password" ? "pr-10" : ""
-                      } h-11 border-input text-foreground placeholder:text-muted-foreground focus:border-ring`}
+                      className={`!pl-12 ${field.id === "password" ? "!pr-12" : ""
+                        } h-12 input-purple`}
                     />
                     {field.id === "password" && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:hover:text-white hover:text-gray-700 transition-colors"
                         disabled={isLoading}
                       >
                         {showPassword ? (
@@ -327,7 +326,7 @@ const SignInForm = () => {
               >
                 <Button
                   type="submit"
-                  className="w-full h-11 btn-gradient-primary text-primary-foreground font-medium"
+                  className="w-full h-11 btn-purple font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (

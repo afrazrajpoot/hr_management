@@ -295,7 +295,7 @@
 
     .dark .input-purple {
         border-color: var(--matte-gray-light);
-        background: var(--matte-gray-dark);
+        background: var(--matte-black);
         color: #f3f4f6;
     }
 

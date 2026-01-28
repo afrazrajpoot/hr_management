@@ -724,8 +724,7 @@ export default function UploadJobsPage() {
                         name="title"
                         value={formData.title}
                         onChange={handleInputChange}
-                        placeholder="e.g., Senior Software Engineer"
-                        className="input-purple border-matte dark:border-matte"
+                        className="h-12 input-purple border-matte dark:border-matte"
                         required
                       />
                     </div>
@@ -740,7 +739,7 @@ export default function UploadJobsPage() {
                         value={formData.location}
                         onChange={handleInputChange}
                         placeholder="e.g., Remote or Lahore, PK"
-                        className="input-purple border-matte dark:border-matte"
+                        className="h-12 input-purple border-matte dark:border-matte"
                       />
                     </div>
 
@@ -755,7 +754,7 @@ export default function UploadJobsPage() {
                         value={formData.salary}
                         onChange={handleInputChange}
                         placeholder="e.g., 50000"
-                        className="input-purple border-matte dark:border-matte"
+                        className="h-12 input-purple border-matte dark:border-matte"
                       />
                     </div>
 
@@ -767,7 +766,7 @@ export default function UploadJobsPage() {
                         value={formData.type}
                         onValueChange={handleSelectChange}
                       >
-                        <SelectTrigger className="input-purple border-matte dark:border-matte">
+                        <SelectTrigger className="h-12 input-purple border-matte dark:border-matte">
                           <SelectValue placeholder="Select job type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -791,7 +790,7 @@ export default function UploadJobsPage() {
                         value={formData.companyName}
                         onChange={handleInputChange}
                         placeholder="e.g., Tech Innovators Inc."
-                        className="input-purple border-matte dark:border-matte"
+                        className="h-12 input-purple border-matte dark:border-matte"
                       />
                     </div>
 
@@ -806,7 +805,7 @@ export default function UploadJobsPage() {
                         onChange={handleInputChange}
                         placeholder="Brief description of the company..."
                         rows={3}
-                        className="input-purple border-matte dark:border-matte"
+                        className="min-h-[5rem] input-purple border-matte dark:border-matte"
                       />
                     </div>
 
@@ -820,7 +819,7 @@ export default function UploadJobsPage() {
                         value={formData.skills}
                         onChange={handleInputChange}
                         placeholder="e.g., JavaScript, React, Node.js"
-                        className="input-purple border-matte dark:border-matte"
+                        className="h-12 input-purple border-matte dark:border-matte"
                       />
                     </div>
                   </div>

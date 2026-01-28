@@ -322,7 +322,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 glass-effect border-b border-border/50">
+    <header className="sticky top-0 z-50  bg-layout-purple border-b border-border/50">
       {/* Unified gradient background */}
       {/* <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background"></div> */}
 
@@ -342,7 +342,7 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h1 className="text-2xl font-bold text-foreground">
+                      <h1 className="text-2xl font-bold gradient-text-primary">
                         {title}
                       </h1>
                       <Badge className="badge-brand">
@@ -511,8 +511,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                             <div
                               key={notification.id}
                               className={`p-4 border-b border-border last:border-b-0 transition-all hover:bg-secondary/50 ${notification.status === "unread"
-                                  ? "bg-primary/5 border-l-4 border-l-primary"
-                                  : "border-l-4 border-l-transparent"
+                                ? "bg-primary/5 border-l-4 border-l-primary"
+                                : "border-l-4 border-l-transparent"
                                 } ${notification.id.startsWith("socket-")
                                   ? "bg-warning/5"
                                   : ""
@@ -523,8 +523,8 @@ export default function HRTopBar({ title, subtitle }: HRTopBarProps) {
                                 <div className="flex-shrink-0 mt-1">
                                   <div
                                     className={`w-10 h-10 rounded-lg flex items-center justify-center ${notification.status === "unread"
-                                        ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800"
-                                        : "bg-secondary border border-border"
+                                      ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800"
+                                      : "bg-secondary border border-border"
                                       }`}
                                   >
                                     {getNotificationIcon(notification.type)}

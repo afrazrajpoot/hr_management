@@ -197,7 +197,7 @@ const SignUpForm = () => {
       type: "text",
       placeholder: "Enter your first name",
       icon: (
-        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "First name is required",
@@ -213,7 +213,7 @@ const SignUpForm = () => {
       type: "text",
       placeholder: "Enter your last name",
       icon: (
-        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Last name is required",
@@ -229,7 +229,7 @@ const SignUpForm = () => {
       type: "tel",
       placeholder: "Enter your phone number",
       icon: (
-        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Phone number is required",
@@ -241,7 +241,7 @@ const SignUpForm = () => {
       type: "email",
       placeholder: "Enter your email",
       icon: (
-        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Email is required",
@@ -257,7 +257,7 @@ const SignUpForm = () => {
       type: showPassword ? "text" : "password",
       placeholder: "Create a password",
       icon: (
-        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500 dark:text-white" />
       ),
       registerOptions: {
         required: "Password is required",
@@ -275,17 +275,17 @@ const SignUpForm = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-bg-primary py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-layout-purple py-12 px-4">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="relative z-10 w-full max-w-lg"
       >
-        <Card className="card-primary backdrop-blur-xl overflow-hidden">
+        <Card className="card-purple backdrop-blur-xl overflow-hidden">
           <CardHeader className="space-y-2 text-center">
             <motion.div variants={itemVariants}>
-              <CardTitle className="text-2xl font-semibold text-foreground">
+              <CardTitle className="text-2xl font-semibold gradient-text-primary">
                 Create Your Account
               </CardTitle>
             </motion.div>
@@ -349,15 +349,14 @@ const SignUpForm = () => {
                           );
                         }
                       }}
-                      className={`pl-10 ${
-                        field.id === "password" ? "pr-10" : ""
-                      } h-11 bg-card border-input text-foreground placeholder:text-muted-foreground focus:border-ring transition-colors`}
+                      className={`!pl-12 ${field.id === "password" ? "!pr-12" : ""
+                        } h-12 input-purple transition-colors`}
                     />
                     {field.id === "password" && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:hover:text-white hover:text-gray-700 transition-colors"
                         disabled={isLoading}
                       >
                         {showPassword ? (
@@ -391,13 +390,12 @@ const SignUpForm = () => {
                       Password strength:
                     </span>
                     <span
-                      className={`font-medium ${
-                        passwordStrength <= 2
+                      className={`font-medium ${passwordStrength <= 2
                           ? "text-red-600"
                           : passwordStrength === 3
-                          ? "text-yellow-600"
-                          : "text-blue-500"
-                      }`}
+                            ? "text-yellow-600"
+                            : "text-blue-500"
+                        }`}
                     >
                       {getPasswordStrengthText()}
                     </span>
@@ -484,7 +482,7 @@ const SignUpForm = () => {
               >
                 <Button
                   type="submit"
-                  className="w-full h-11 btn-gradient-primary text-primary-foreground font-medium shadow-md hover:shadow-lg transition-all duration-300"
+                  className="w-full h-11 btn-purple font-medium shadow-md hover:shadow-lg transition-all duration-300"
                   disabled={isLoading || !acceptTerms}
                 >
                   {isLoading ? (
