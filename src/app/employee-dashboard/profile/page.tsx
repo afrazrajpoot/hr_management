@@ -35,9 +35,16 @@ import {
   ChevronRight,
   X,
   Play,
+  AlertTriangle,
 } from "lucide-react";
 
 const onboardingSteps = [
+  {
+    tab: "personal",
+    title: "Profile Status",
+    description: "Let's check your specific profile completion status.",
+    icon: TrendingUp,
+  },
   {
     tab: "personal",
     title: "Personal Information",
@@ -119,11 +126,12 @@ const EmployeeProfilePage: React.FC = () => {
   }, []);
 
   // Update active tab when onboarding step changes
-  useEffect(() => {
-    if (showOnboarding) {
-      setActiveTab(onboardingSteps[onboardingStep].tab);
-    }
-  }, [onboardingStep, showOnboarding]);
+  // Update active tab when onboarding step changes - DISABLED per user request
+  // useEffect(() => {
+  //   if (showOnboarding) {
+  //     setActiveTab(onboardingSteps[onboardingStep].tab);
+  //   }
+  // }, [onboardingStep, showOnboarding]);
 
   // Function to mark onboarding as completed (set to false in localStorage)
   const markOnboardingAsCompleted = useCallback(() => {
@@ -432,10 +440,18 @@ const EmployeeProfilePage: React.FC = () => {
     if (isSkillsComplete) percentage += 25;
     if (isExperienceComplete) percentage += 25;
 
-    return percentage;
+    return {
+      percentage,
+      breakdown: {
+        "Personal Info": isPersonalComplete,
+        Employment: isEmploymentComplete,
+        Skills: isSkillsComplete,
+        Experience: isExperienceComplete,
+      },
+    };
   };
 
-  const profileCompletion = calculateProfileCompletion();
+  const { percentage: profileCompletion, breakdown } = calculateProfileCompletion();
   const CurrentIcon = onboardingSteps[onboardingStep]?.icon || User;
 
   return (
@@ -463,7 +479,7 @@ const EmployeeProfilePage: React.FC = () => {
                 stiffness: 400,
                 damping: 30,
               }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
             >
               <div className="relative card-purple rounded-2xl shadow-prominent p-6 overflow-hidden border border-purple-200 dark:border-purple-800 mx-4">
                 {/* Animated background */}
@@ -494,9 +510,106 @@ const EmployeeProfilePage: React.FC = () => {
                           Step {onboardingStep + 1} of {onboardingSteps.length}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {onboardingSteps[onboardingStep].description}
-                      </p>
+                      {onboardingStep === 0 ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              Profile Status Check
+                            </p>
+                            <span className="text-xs font-bold text-gradient-purple">
+                              {profileCompletion}% Ready
+                            </span>
+                          </div>
+
+                          <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-lg p-3 flex gap-3">
+                            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+                              Inorder to access full platform please complete <span className="font-bold">90%</span> of the profile. add personal information, employment, skills
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 mt-1">
+                            {Object.entries(breakdown).map(
+                              ([label, isComplete]) => (
+                                <div
+                                  key={label}
+                                  className={`flex items-center gap-2 p-2 rounded-lg text-xs border ${isComplete
+                                    ? "bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-700 dark:text-green-300"
+                                    : "bg-gray-50 border-gray-100 dark:bg-white/5 dark:border-white/10 text-muted-foreground opacity-70"
+                                    }`}
+                                >
+                                  {isComplete ? (
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <div className="w-3.5 h-3.5 rounded-full border border-current opacity-40" />
+                                  )}
+                                  <span className="font-medium">{label}</span>
+                                </div>
+                              )
+                            )}
+                          </div>
+
+                          <div className="bg-purple-50 dark:bg-purple-900/10 p-3 rounded-lg border border-purple-100 dark:border-purple-800/30 mt-2">
+                            <p className="text-xs font-semibold text-purple-800 dark:text-purple-300 mb-1.5 flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5" />
+                              Action Plan
+                            </p>
+                            <ul className="space-y-1.5">
+                              {profileCompletion === 100 ? (
+                                <li className="text-xs text-muted-foreground flex items-start gap-2">
+                                  <div className="mt-1 w-1 h-1 rounded-full bg-green-500 shrink-0" />
+                                  <span>
+                                    Great job! Your profile is fully optimized.
+                                    Review to keep it current.
+                                  </span>
+                                </li>
+                              ) : (
+                                <>
+                                  {!breakdown["Personal Info"] && (
+                                    <li className="text-xs text-muted-foreground flex items-start gap-2">
+                                      <div className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 shrink-0" />
+                                      <span>
+                                        Start with <b>Personal Info</b> to add
+                                        contact details.
+                                      </span>
+                                    </li>
+                                  )}
+                                  {!breakdown["Employment"] && (
+                                    <li className="text-xs text-muted-foreground flex items-start gap-2">
+                                      <div className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 shrink-0" />
+                                      <span>
+                                        Update <b>Employment</b> with your
+                                        current role.
+                                      </span>
+                                    </li>
+                                  )}
+                                  {!breakdown["Skills"] && (
+                                    <li className="text-xs text-muted-foreground flex items-start gap-2">
+                                      <div className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 shrink-0" />
+                                      <span>
+                                        Add <b>Skills</b> to highlight your
+                                        expertise.
+                                      </span>
+                                    </li>
+                                  )}
+                                  {!breakdown["Experience"] && (
+                                    <li className="text-xs text-muted-foreground flex items-start gap-2">
+                                      <div className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 shrink-0" />
+                                      <span>
+                                        List <b>Experience</b> & Education history.
+                                      </span>
+                                    </li>
+                                  )}
+                                </>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {onboardingSteps[onboardingStep].description}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -516,10 +629,11 @@ const EmployeeProfilePage: React.FC = () => {
                       ))}
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Personal Info</span>
-                      <span>Employment</span>
+                      <span>Status</span>
+                      <span>Personal</span>
+                      <span>Work</span>
                       <span>Skills</span>
-                      <span>Experience</span>
+                      <span>Exp</span>
                     </div>
                   </div>
 
