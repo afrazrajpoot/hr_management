@@ -37,12 +37,6 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Profile",
-    href: "/employee-dashboard/profile",
-    icon: User,
-    color: "from-indigo-500 to-indigo-600",
-  },
-  {
     name: "Assessment",
     href: "/employee-dashboard/assessment",
     icon: ClipboardList,
@@ -66,7 +60,6 @@ const navigation = [
     name: "Profile",
     href: "/employee-dashboard/profile",
     icon: User,
-    color: "from-indigo-500 to-indigo-600",
   },
   {
     name: "Security",
@@ -107,7 +100,7 @@ export function AppSidebar() {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen transition-all duration-300 sidebar-container relative",
+        "flex flex-col h-screen transition-all duration-300 sidebar-container relative border-r border-border",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -156,8 +149,10 @@ export function AppSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "sidebar-nav-item group flex items-center",
-                isActive ? "sidebar-nav-item-active" : "",
+                "sidebar-nav-item group flex items-center transition-all duration-200 rounded-lg",
+                isActive
+                  ? "btn-purple shadow-md"
+                  : "hover:bg-secondary text-secondary-foreground hover:text-foreground",
                 isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
               )}
             >
@@ -165,16 +160,16 @@ export function AppSidebar() {
                 className={cn(
                   "sidebar-nav-icon-wrapper p-2 rounded-md transition-colors duration-300",
                   isActive
-                    ? "sidebar-nav-icon-wrapper-active"
-                    : "sidebar-nav-icon-wrapper-inactive"
+                    ? "bg-primary-foreground/20"
+                    : "bg-secondary group-hover:bg-secondary-foreground/10"
                 )}
               >
                 <item.icon
                   className={cn(
                     "w-4 h-4 transition-colors duration-300",
                     isActive
-                      ? "text-white"
-                      : "text-gray-400 group-hover:text-gray-300"
+                      ? "text-primary-foreground"
+                      : "text-secondary-foreground group-hover:text-foreground"
                   )}
                 />
               </div>
@@ -184,8 +179,8 @@ export function AppSidebar() {
                     className={cn(
                       "font-medium text-sm transition-colors duration-300",
                       isActive
-                        ? "text-white"
-                        : "text-gray-300 group-hover:text-white"
+                        ? "text-primary-foreground"
+                        : "text-secondary-foreground group-hover:text-foreground"
                     )}
                   >
                     {item.name}
@@ -207,7 +202,7 @@ export function AppSidebar() {
           <div className="relative">
             <div
               className={cn(
-                "sidebar-notification-wrapper flex items-center gap-2 p-3 cursor-pointer",
+                "sidebar-notification-wrapper flex items-center gap-2 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors duration-200",
                 isCollapsed ? "justify-center" : "justify-between"
               )}
               onClick={() => setShowNotifications(!showNotifications)}
@@ -231,14 +226,16 @@ export function AppSidebar() {
                     className={cn(
                       "flex items-center gap-1 text-xs",
                       isConnected
-                        ? "sidebar-status-online"
-                        : "sidebar-status-connecting"
+                        ? "text-accent"
+                        : "text-warning"
                     )}
                   >
                     <div
                       className={cn(
                         "w-2 h-2 rounded-full animate-pulse",
-                        isConnected ? "bg-emerald-400" : "bg-amber-400"
+                        isConnected
+                          ? "bg-[image:var(--purple-gradient)]"
+                          : "bg-warning"
                       )}
                     />
                     {isConnected ? "Live" : "Connecting..."}
@@ -258,8 +255,8 @@ export function AppSidebar() {
                 className={cn(
                   "absolute z-50 bg-card border border-border rounded-lg shadow-lg overflow-hidden transition-all duration-200",
                   isCollapsed
-                    ? "left-full bottom-0 ml-4 w-80" // Collapsed: Pop out to right
-                    : "bottom-full left-0 right-0 mb-4" // Expanded: Pop up above
+                    ? "left-full bottom-0 ml-2 w-64"
+                    : "bottom-full left-0 right-0 mb-2"
                 )}
               >
                 {/* Popup Header */}
@@ -304,8 +301,8 @@ export function AppSidebar() {
                           className={cn(
                             "group p-2 rounded-md transition-colors duration-200 border",
                             !notification.read
-                              ? "bg-blue-500/5 border-blue-500/10 hover:bg-blue-500/10"
-                              : "hover:bg-gray-800/50"
+                              ? "bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:from-primary/10 hover:to-primary/20"
+                              : "border-transparent hover:bg-secondary"
                           )}
                         >
                           <div className="flex items-start gap-2">
@@ -313,8 +310,8 @@ export function AppSidebar() {
                               className={cn(
                                 "mt-0.5 p-1 rounded-full",
                                 !notification.read
-                                  ? "bg-blue-500/20"
-                                  : "bg-gray-800"
+                                  ? "bg-gradient-to-br from-primary/20 to-primary/30"
+                                  : "bg-secondary"
                               )}
                             >
                               {notification.type === "success" ? (
@@ -322,8 +319,8 @@ export function AppSidebar() {
                                   className={cn(
                                     "w-3 h-3",
                                     !notification.read
-                                      ? "text-blue-400"
-                                      : "text-gray-400"
+                                      ? "text-primary"
+                                      : "text-secondary-foreground"
                                   )}
                                 />
                               ) : (
@@ -331,8 +328,8 @@ export function AppSidebar() {
                                   className={cn(
                                     "w-3 h-3",
                                     !notification.read
-                                      ? "text-blue-400"
-                                      : "text-gray-400"
+                                      ? "text-primary"
+                                      : "text-secondary-foreground"
                                   )}
                                 />
                               )}
@@ -342,8 +339,8 @@ export function AppSidebar() {
                                 className={cn(
                                   "text-xs leading-snug",
                                   !notification.read
-                                    ? "text-gray-100 font-medium"
-                                    : "text-gray-400"
+                                    ? "text-foreground font-medium"
+                                    : "text-secondary-foreground"
                                 )}
                               >
                                 {notification.data?.message || notification.message}
@@ -351,7 +348,7 @@ export function AppSidebar() {
                               <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                                 <span>
                                   {new Date(
-                                    notification.timestamp,
+                                    notification.timestamp
                                   ).toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -360,7 +357,7 @@ export function AppSidebar() {
                                 <span>•</span>
                                 <span>
                                   {new Date(
-                                    notification.timestamp,
+                                    notification.timestamp
                                   ).toLocaleDateString()}
                                 </span>
                               </p>
@@ -403,7 +400,7 @@ export function AppSidebar() {
             "w-full transition-all duration-300 hover:bg-secondary",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-gray-700/50"
+              : "justify-start"
           )}
         >
           {theme === "dark" ? (
@@ -434,7 +431,7 @@ export function AppSidebar() {
             "w-full transition-all duration-300 hover:bg-destructive/10 text-destructive hover:text-destructive",
             isCollapsed
               ? "justify-center"
-              : "justify-start hover:bg-red-500/10 text-red-400 hover:text-red-300"
+              : "justify-start"
           )}
         >
           <div className="flex items-center gap-2">
@@ -470,4 +467,4 @@ export function AppSidebar() {
       <div className="sidebar-decorative-bottom h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
     </div>
   );
-}
+}  
