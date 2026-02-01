@@ -33,7 +33,7 @@ const products = [
     checkoutUrl:
       "https://mystoregfa.samcart.com/products/genius-factor-academy-elite-membership",
     features: [
-      "All Essential Benefits Plus",
+      "All Essential Benefits",
       "Career Alignment Accelerator Course - 4 Weeks & 20 Lessons",
       "Live Group Q&A Career Coaching Calls",
       "Genius Factor: Make Your Passion Your Paycheck (E-Book)",
@@ -92,9 +92,13 @@ const PricingPage: React.FC = () => {
       }
 
       try {
-        const response = await axios.get("/api/payment/subscription");
+        const response = await axios.get("/api/subscription");
+        console.log("Subscription response:", response.data);
         if (response.data.success && response.data.subscription) {
-          setCurrentPlan(response.data.subscription.planName);
+          // Normalize plan name to uppercase for comparison
+          const planName = response.data.subscription.planName?.toUpperCase();
+          console.log("Setting current plan:", planName);
+          setCurrentPlan(planName);
         }
       } catch (error) {
         console.error("Failed to fetch subscription:", error);

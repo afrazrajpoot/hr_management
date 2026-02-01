@@ -3,7 +3,13 @@
 import { useSession } from "next-auth/react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Users, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Loader from "@/components/Loader";
@@ -28,7 +34,8 @@ export default function CommunityPage() {
               Join Our Exclusive Community
             </h1>
             <p className="text-on-matte-subtle text-lg max-w-2xl mx-auto">
-              Connect with like-minded professionals, access exclusive resources, and accelerate your career growth.
+              Connect with like-minded professionals, access exclusive
+              resources, and accelerate your career growth.
             </p>
           </div>
 
@@ -57,8 +64,12 @@ export default function CommunityPage() {
                       <CheckCircle className="w-4 h-4 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-on-matte">Network with Experts</h3>
-                      <p className="text-sm text-on-matte-subtle">Connect with industry leaders and mentors.</p>
+                      <h3 className="font-semibold text-on-matte">
+                        Network with Experts
+                      </h3>
+                      <p className="text-sm text-on-matte-subtle">
+                        Connect with industry leaders and mentors.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -66,8 +77,12 @@ export default function CommunityPage() {
                       <CheckCircle className="w-4 h-4 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-on-matte">Exclusive Content</h3>
-                      <p className="text-sm text-on-matte-subtle">Access premium workshops and resources.</p>
+                      <h3 className="font-semibold text-on-matte">
+                        Exclusive Content
+                      </h3>
+                      <p className="text-sm text-on-matte-subtle">
+                        Access premium workshops and resources.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -77,8 +92,12 @@ export default function CommunityPage() {
                       <CheckCircle className="w-4 h-4 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-on-matte">Peer Support</h3>
-                      <p className="text-sm text-on-matte-subtle">Get feedback and support from peers.</p>
+                      <h3 className="font-semibold text-on-matte">
+                        Peer Support
+                      </h3>
+                      <p className="text-sm text-on-matte-subtle">
+                        Get feedback and support from peers.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -86,8 +105,12 @@ export default function CommunityPage() {
                       <CheckCircle className="w-4 h-4 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-on-matte">Career Opportunities</h3>
-                      <p className="text-sm text-on-matte-subtle">First access to job postings and gigs.</p>
+                      <h3 className="font-semibold text-on-matte">
+                        Career Opportunities
+                      </h3>
+                      <p className="text-sm text-on-matte-subtle">
+                        First access to job postings and gigs.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -99,9 +122,13 @@ export default function CommunityPage() {
                   className="btn-purple px-8 py-6 text-lg rounded-xl shadow-prominent hover:scale-105 transition-all duration-300 group hover-lift"
                   asChild
                 >
-                  <Link href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce" target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                    Join Our Paid Community
+                    Join Our Free Community
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>

@@ -8,6 +8,8 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
+    console.log("[Subscription API] Session:", session?.user?.id, session?.user?.email);
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,6 +34,8 @@ export async function GET() {
       },
     });
 
+    console.log("[Subscription API] Subscription attempt found:", subscription);
+
     // If no subscription attempt found, check orders table as fallback
     if (!subscription) {
       const order = await prisma.order.findFirst({
@@ -51,6 +55,8 @@ export async function GET() {
         },
       });
 
+      console.log("[Subscription API] Order found:", order);
+
       if (order) {
         subscription = {
           id: order.id,
@@ -61,6 +67,8 @@ export async function GET() {
         };
       }
     }
+
+    console.log("[Subscription API] Final subscription:", subscription);
 
     return NextResponse.json({
       success: true,

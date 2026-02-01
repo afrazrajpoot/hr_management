@@ -298,13 +298,13 @@ export const getVerificationEmailHtml = (otp: string, recipientName?: string, de
                                         <table border="0" cellpadding="0" cellspacing="0">
                                             <tr>
                                                 <td style="padding-right: 20px;">
-                                                    <a href="mailto:support@geniusfactorai.com" style="
+                                                    <a href="mailto:info@geniusfactoracademy.com" style="
                                                         color: #6366f1;
                                                         text-decoration: none;
                                                         font-size: 14px;
                                                         font-weight: 500;
                                                     ">
-                                                        ✉️ support@geniusfactorai.com
+                                                        ✉️ info@geniusfactoracademy.com
                                                     </a>
                                                 </td>
                                                 <td>

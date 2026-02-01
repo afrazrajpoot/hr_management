@@ -129,7 +129,7 @@ export default function CommunityPage() {
                     rel="noopener noreferrer"
                   >
                     <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                    Join Our Paid Community
+                    Join Our Free Community
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>

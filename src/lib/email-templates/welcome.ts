@@ -392,7 +392,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string, default
                                         border: 1px solid #bae6fd;
                                     ">
                                         <p style="font-size: 16px; font-style: italic; color: #0369a1; margin: 0 0 15px; line-height: 1.6;">
-                                            "Greatness grows when insight meets consistent action. Your journey to unlocking full potential starts with a single step."
+                                            Our community is all about self-mastery and career alignment—built for students, entrepreneurs and professionals who are ready to start designing a life where work and play are one!
                                         </p>
                                         <p style="font-size: 14px; font-weight: 600; color: #0f172a; margin: 0;">
                                             — The Genius Factor AI Team

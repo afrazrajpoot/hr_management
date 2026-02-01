@@ -305,3 +305,4 @@ model Order {
 
   @@map("orders")
 }
+
