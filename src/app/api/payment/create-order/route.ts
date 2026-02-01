@@ -33,6 +33,9 @@ export async function POST(req: Request) {
       url.searchParams.append("last_name", lastName);
     }
 
+    // Add redirect URL for post-purchase redirect
+    url.searchParams.append("redirect_url", "https://geniusfactor.ai/pricing");
+
     // Save to database for tracking
     const attempt = await prisma.subscriptionAttempt.create({
       data: {

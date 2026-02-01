@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
-import { Check, Shield, Loader2 } from "lucide-react";
+import { Check, Shield, Loader2, CheckCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -12,57 +12,65 @@ const products = [
   {
     name: "ESSENTIAL MEMBERSHIP",
     price: "$79.99",
-    period: "/month",
-    description: "Core Career Assessment & AI Insights",
+    period: "/monthly",
+    description: "Core AI Powered Career Alignment Assessment",
     checkoutUrl:
       "https://mystoregfa.samcart.com/products/genius-factor-academy-essential-membership",
     features: [
-      "AI Career Intelligence",
-      "Standard Assessment Tools",
-      "Digital Learning Library",
+      "AI Powered Personalized Genius Factor Career Blueprint: Genius & Alignment Scores, Key Strengths, Energy Sources, Underutilized Talents, Goals & Career Mobility Recommendations",
+      "Genius Factor AI Chatbot - Career Alignment Coach",
+      "AI Powered Job Match Recommendations",
+      "AI Powered Job Skills Recommendations",
+      "Affirmations & Mindfulness Recommendation",
     ],
     highlight: false,
   },
   {
     name: "ELITE MEMBERSHIP",
-    price: "$117.99",
-    period: "/month",
-    description: "Genius Factor AI Career Intelligence Platform Access",
+    price: "$119.99",
+    period: "/monthly",
+    description: "Premium AI Powered Career Alignment Assessment & Coaching",
     checkoutUrl:
       "https://mystoregfa.samcart.com/products/genius-factor-academy-elite-membership",
     features: [
-      "Unlimited AI Learning Platform",
-      "Career Intelligence Tools",
-      "Exclusive Resources & Webinars",
-      "Priority Support",
+      "All Essential Benefits Plus",
+      "Career Alignment Accelerator Course - 4 Weeks & 20 Lessons",
+      "Live Group Q&A Career Coaching Calls",
+      "Genius Factor: Make Your Passion Your Paycheck (E-Book)",
+      "VIP Access To Select Genius Factor Academy Live Events",
     ],
     highlight: true,
   },
   {
     name: "CAREER ACCELERATOR",
     price: "$2,499.99",
-    period: " once",
-    description: "Intensive Career Transformation Program",
+    period: "/Flat Fee",
+    description: "Career Alignment Accelerator Course",
     checkoutUrl:
       "https://mystoregfa.samcart.com/products/genius-factor-career-alignment-accelerator-course",
     features: [
-      "4-Week Virtual Course",
-      "Live Group coaching Calls",
-      "Career Alignment Blueprint",
+      "Premium Future-Ready Career Pathways Course",
+      "3 Phases: Discovery, Mapping & Activation",
+      "4 Weeks & 20 Lessons (Virtual Course)",
+      "Live Group Q&A Career Coaching Calls",
+      "Genius Factor: Make Your Passion Your Paycheck (E-Book)",
     ],
     highlight: false,
   },
   {
-    name: "MASTERMIND PROGRAM",
+    name: "MASTERMIND COACHING",
     price: "$17,999.99",
-    period: " once",
-    description: "Exclusive High-Level Executive Coaching",
+    period: "/Flat Fee",
+    description: "Elite Executive & Leadership Coaching Program",
     checkoutUrl:
       "https://mystoregfa.samcart.com/products/mastermind-coaching-program",
     features: [
-      "1-on-1 Strategy Sessions",
-      "VIP Event Access",
-      "Lifetime Community Membership",
+      "Elite Membership Benefits",
+      "Genius Factor AI Career Alignment Assessment Lifetime Membership",
+      "Career Alignment Accelerator Course Free Access",
+      "Bi-Weekly Live Group Q&A Coaching Calls",
+      "Quarterly 1-on-1 Strategy Sessions",
+      "VIP Access To Select Genius Factor Academy Mastermind Retreats",
     ],
     highlight: false,
   },
@@ -72,6 +80,31 @@ const PricingPage: React.FC = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
+
+  // Fetch current subscription on mount
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!session) {
+        setIsLoadingSubscription(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get("/api/payment/subscription");
+        if (response.data.success && response.data.subscription) {
+          setCurrentPlan(response.data.subscription.planName);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription:", error);
+      } finally {
+        setIsLoadingSubscription(false);
+      }
+    };
+
+    fetchSubscription();
+  }, [session]);
 
   const handlePurchase = async (product: (typeof products)[0]) => {
     if (!session) {
@@ -101,7 +134,7 @@ const PricingPage: React.FC = () => {
       if (response.data.success && response.data.checkoutUrl) {
         toast.success(`Opening ${product.name} checkout in a new tab...`);
         setTimeout(() => {
-          window.open(response.data.checkoutUrl, '_blank');
+          window.open(response.data.checkoutUrl, "_blank");
         }, 500);
       } else {
         throw new Error("Failed to get checkout URL");
@@ -110,8 +143,8 @@ const PricingPage: React.FC = () => {
       console.error("Payment error:", error);
       toast.error(
         error.response?.data?.error ||
-        error.message ||
-        "Payment initialization failed"
+          error.message ||
+          "Payment initialization failed",
       );
     } finally {
       setLoadingId(null);
@@ -136,10 +169,11 @@ const PricingPage: React.FC = () => {
             {products.map((product) => (
               <div
                 key={product.name}
-                className={`card-purple p-8 border-2 rounded-3xl shadow-prominent flex flex-col transition-all hover-lift ${product.highlight
-                  ? "border-purple-accent ring-4 ring-purple-accent/10"
-                  : "border-matte"
-                  }`}
+                className={`card-purple p-8 border-2 rounded-3xl shadow-prominent flex flex-col transition-all hover-lift ${
+                  product.highlight
+                    ? "border-purple-accent ring-4 ring-purple-accent/10"
+                    : "border-matte"
+                }`}
               >
                 {product.highlight && (
                   <div className="bg-gradient-purple text-primary-foreground text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
@@ -173,23 +207,39 @@ const PricingPage: React.FC = () => {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => handlePurchase(product)}
-                  disabled={!!loadingId}
-                  className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover-lift ${product.highlight
-                    ? "btn-purple text-white"
-                    : "btn-purple-outline"
+                {currentPlan === product.name ? (
+                  <button
+                    disabled
+                    className="w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 bg-green-600 text-white cursor-default"
+                  >
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Current Plan</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handlePurchase(product)}
+                    disabled={!!loadingId || isLoadingSubscription}
+                    className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover-lift ${
+                      product.highlight
+                        ? "btn-purple text-white"
+                        : "btn-purple-outline"
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {loadingId === product.name ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Processing...</span>
-                    </>
-                  ) : (
-                    "Get Started"
-                  )}
-                </button>
+                  >
+                    {loadingId === product.name ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Processing...</span>
+                      </>
+                    ) : isLoadingSubscription ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      "Get Started"
+                    )}
+                  </button>
+                )}
 
                 <div className="mt-4 text-[10px] text-on-matte-subtle flex items-center justify-center gap-2">
                   <div className="p-0.5 rounded-full bg-status-info">
