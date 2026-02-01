@@ -53,6 +53,19 @@ export async function POST(req: Request) {
           },
         });
 
+        // Update the most recent subscription attempt for this user and plan to COMPLETED
+        await prisma.subscriptionAttempt.updateMany({
+          where: {
+            userId: user.id,
+            planName: planName,
+            status: "INITIATED",
+          },
+          data: {
+            status: "COMPLETED",
+            samcartOrderId: String(orderData.id),
+          },
+        });
+
         console.log(`[SamCart Webhook] Successfully processed order ${orderData.id} for ${customerEmail}`);
       } else {
         console.warn(`[SamCart Webhook] User not found for email: ${customerEmail}`);

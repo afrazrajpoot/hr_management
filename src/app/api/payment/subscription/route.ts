@@ -13,7 +13,7 @@ export async function GET() {
     }
 
     // Get the user's most recent successful subscription attempt
-    const subscription = await prisma.subscriptionAttempt.findFirst({
+    let subscription = await prisma.subscriptionAttempt.findFirst({
       where: {
         userId: session.user.id,
         status: {
@@ -31,6 +31,36 @@ export async function GET() {
         createdAt: true,
       },
     });
+
+    // If no subscription attempt found, check orders table as fallback
+    if (!subscription) {
+      const order = await prisma.order.findFirst({
+        where: {
+          userId: session.user.id,
+          status: "Completed",
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          planName: true,
+          total: true,
+          status: true,
+          createdAt: true,
+        },
+      });
+
+      if (order) {
+        subscription = {
+          id: order.id,
+          planName: order.planName || "Unknown Plan",
+          price: `$${order.total}`,
+          status: order.status,
+          createdAt: order.createdAt,
+        };
+      }
+    }
 
     return NextResponse.json({
       success: true,
