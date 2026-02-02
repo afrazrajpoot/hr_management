@@ -84,13 +84,13 @@ export const retentionApi = createApi({
       }
     ),
     createCareerPathwayRecommendations: builder.mutation<
-      { recruiter_id: string },
-      { recruiter_id: string } & { employee_id: string }
+      any,
+      { recruiter_id: string; employee_id: string; exclude_ids?: string[]; page?: number; limit?: number }
     >({
-      query: ({ recruiter_id, employee_id }) => ({
+      query: ({ recruiter_id, employee_id, exclude_ids }) => ({
         url: "/employee_dashboard/recommend-companies",
         method: "POST",
-        body: { recruiter_id, employee_id },
+        body: { recruiter_id, employee_id, exclude_ids },
       }),
     }),
   }),

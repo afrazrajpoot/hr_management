@@ -145,13 +145,16 @@ export default function CareerPathways() {
 
   const fetchRecommendations = useCallback((pageNum: number) => {
     const hrId = session?.user?.hrId || `hr-${Math.random().toString(36).substring(7)}`;
+    const excludeIds = recommendations.map((rec: any) => rec.id);
+
     getRecommendations({
       recruiter_id: hrId,
       employee_id: session.user.id,
       page: pageNum,
       limit,
+      exclude_ids: excludeIds,
     });
-  }, [getRecommendations, session?.user?.hrId, session?.user?.id, limit]);
+  }, [getRecommendations, session?.user?.hrId, session?.user?.id, limit, recommendations]);
 
   // Truncate description for card preview
   const truncateDescription = (
