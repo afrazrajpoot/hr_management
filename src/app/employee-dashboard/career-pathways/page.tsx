@@ -33,6 +33,17 @@ import Loader from "@/components/Loader";
 import { useCreateCareerPathwayRecommendationsMutation } from "@/redux/hr-python-api/intervation";
 import { useSession } from "next-auth/react";
 
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import {
+  setRecommendations,
+  appendRecommendations,
+  setPage,
+  setHasMore,
+  setTotal,
+  setFilters as setFiltersAction
+} from "@/redux/features/careerSlice";
+
 // Map API data to career recommendation structure
 const mapApiToCareerData = (apiData: any) => {
   if (!apiData?.recommendations) return [];
@@ -89,27 +100,25 @@ const sortOptions = [
 ];
 
 export default function CareerPathways() {
-  const [filters, setFilters] = useState({
-    search: "",
-    industry: "All",
-    type: "All",
-    time: "All Time",
-    minScore: 0,
-    maxScore: 100,
-    sortBy: "score",
-    sortOrder: "desc",
-  });
+  const dispatch = useDispatch();
+  const careerState = useSelector((state: RootState) => state.career);
 
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [total, setTotal] = useState(0);
+  const { recommendations, page, hasMore, total, filters } = careerState;
+
+  const setFilters = (newFilters: any) => {
+    // If it's a function (from setState pattern), resolve it
+    const resolvedFilters = typeof newFilters === 'function'
+      ? newFilters(filters)
+      : newFilters;
+
+    dispatch(setFiltersAction(resolvedFilters));
+  };
 
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
   const [applyingJobIds, setApplyingJobIds] = useState(new Set<string>());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
-  const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const limit = 6;
   const { data: session, status } = useSession<any>();
@@ -126,7 +135,9 @@ export default function CareerPathways() {
 
   // Update global filters when debounced search changes
   useEffect(() => {
-    setFilters(prev => ({ ...prev, search: debouncedSearch }));
+    if (debouncedSearch !== filters.search) {
+      setFilters((prev: any) => ({ ...prev, search: debouncedSearch }));
+    }
   }, [debouncedSearch]);
 
   const [getRecommendations, { data, isLoading, isError, error, isSuccess }] =
@@ -155,13 +166,17 @@ export default function CareerPathways() {
   useEffect(() => {
     if (isSuccess && data) {
       const newRecs = mapApiToCareerData(data);
-      setRecommendations((prev) =>
-        page === 1 ? newRecs : [...prev, ...newRecs]
-      );
-      setHasMore(data.hasMore || false);
-      setTotal(data.total || 0);
+
+      if (page === 1) {
+        dispatch(setRecommendations(newRecs));
+      } else {
+        dispatch(appendRecommendations(newRecs));
+      }
+
+      dispatch(setHasMore(data.hasMore || false));
+      dispatch(setTotal(data.total || 0));
     }
-  }, [isSuccess, data, page]);
+  }, [isSuccess, data, page, dispatch]);
 
   // Fetch applied jobs on component mount
   useEffect(() => {
@@ -188,15 +203,22 @@ export default function CareerPathways() {
     fetchAppliedJobs();
   }, [status, session?.user?.id]);
 
-  // Initial fetch
+  // Initial fetch decision
   useEffect(() => {
     if (
       status === "authenticated" &&
-      session?.user?.id &&
-      !hasFetchedRef.current
+      session?.user?.id
     ) {
-      hasFetchedRef.current = true;
-      fetchRecommendations(1);
+      // If we have cached recommendations, use them.
+      if (recommendations.length > 0) {
+        hasFetchedRef.current = true;
+        return;
+      }
+
+      if (!hasFetchedRef.current) {
+        hasFetchedRef.current = true;
+        fetchRecommendations(1);
+      }
     } else if (
       status !== "authenticated" ||
       !session?.user?.id
@@ -206,7 +228,7 @@ export default function CareerPathways() {
       );
       hasFetchedRef.current = false;
     }
-  }, [fetchRecommendations, status, session?.user?.id]);
+  }, [fetchRecommendations, status, session?.user?.id, recommendations.length]);
 
   // Dynamically compute industry and job type filters from available data
   const dynamicIndustries = useMemo(() => {
@@ -313,9 +335,9 @@ export default function CareerPathways() {
 
   const loadMore = useCallback(() => {
     const nextPage = page + 1;
-    setPage(nextPage);
+    dispatch(setPage(nextPage));
     fetchRecommendations(nextPage);
-  }, [fetchRecommendations, page]);
+  }, [fetchRecommendations, page, dispatch]);
 
   useEffect(() => {
     const handleScroll = () => {

@@ -4,12 +4,14 @@ import { employeeApi } from './employe-api';
 import { employeePythonApi } from './employee-python-api/employee-python-api';
 
 import counterReducer from './features/counterSlice';
+import careerReducer from './features/careerSlice';
 import { hrApi } from './hr-api';
 import { retentionApi } from './hr-python-api/intervation';
 import { adminApi } from './admin-api';
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
+    career: careerReducer,
     [employeeApi.reducerPath]: employeeApi.reducer,
     [hrApi.reducerPath]: hrApi.reducer,
     [employeePythonApi.reducerPath]: employeePythonApi.reducer,
