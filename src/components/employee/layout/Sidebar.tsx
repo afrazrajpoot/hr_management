@@ -47,6 +47,11 @@ const navigation = [
     icon: BarChart3,
   },
   {
+    name: "Genius AI",
+    href: "/employee-dashboard/ai-chat",
+    icon: Bot,
+  },
+  {
     name: "Career Pathways",
     href: "/employee-dashboard/career-pathways",
     icon: TrendingUp,
@@ -65,11 +70,6 @@ const navigation = [
     name: "Security",
     href: "/employee-dashboard/change-password",
     icon: Lock,
-  },
-  {
-    name: "Genius AI",
-    href: "/employee-dashboard/ai-chat",
-    icon: Bot,
   },
   {
     name: "Community",
@@ -93,7 +93,10 @@ export function AppSidebar() {
   const isPaid = (session?.user as any)?.paid;
 
   const filteredNavigation = navigation.filter((item) => {
-    if (!isPaid && (item.name === "Career Pathways" || item.name === "Development")) {
+    if (
+      !isPaid &&
+      (item.name === "Career Pathways" || item.name === "Development")
+    ) {
       return false;
     }
     return true;
@@ -109,7 +112,7 @@ export function AppSidebar() {
     <div
       className={cn(
         "flex flex-col h-screen transition-all duration-300 sidebar-container relative border-r border-border",
-        isCollapsed ? "w-20" : "w-64"
+        isCollapsed ? "w-20" : "w-64",
       )}
     >
       {/* Sidebar background pattern */}
@@ -126,7 +129,9 @@ export function AppSidebar() {
               <h1 className="font-bold text-xl text-gradient-purple">
                 GeniusFactor
               </h1>
-              <p className="text-xs text-muted-foreground">Career Intelligence</p>
+              <p className="text-xs text-muted-foreground">
+                Career Intelligence
+              </p>
             </div>
           </div>
         ) : (
@@ -161,7 +166,7 @@ export function AppSidebar() {
                 isActive
                   ? "btn-purple shadow-md"
                   : "hover:bg-secondary text-secondary-foreground hover:text-foreground",
-                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3"
+                isCollapsed ? "p-3 justify-center" : "p-3 space-x-3",
               )}
             >
               <div
@@ -169,7 +174,7 @@ export function AppSidebar() {
                   "sidebar-nav-icon-wrapper p-2 rounded-md transition-colors duration-300",
                   isActive
                     ? "bg-primary-foreground/20"
-                    : "bg-secondary group-hover:bg-secondary-foreground/10"
+                    : "bg-secondary group-hover:bg-secondary-foreground/10",
                 )}
               >
                 <item.icon
@@ -177,7 +182,7 @@ export function AppSidebar() {
                     "w-4 h-4 transition-colors duration-300",
                     isActive
                       ? "text-primary-foreground"
-                      : "text-secondary-foreground group-hover:text-foreground"
+                      : "text-secondary-foreground group-hover:text-foreground",
                   )}
                 />
               </div>
@@ -188,7 +193,7 @@ export function AppSidebar() {
                       "font-medium text-sm transition-colors duration-300",
                       isActive
                         ? "text-primary-foreground"
-                        : "text-secondary-foreground group-hover:text-foreground"
+                        : "text-secondary-foreground group-hover:text-foreground",
                     )}
                   >
                     {item.name}
@@ -211,7 +216,7 @@ export function AppSidebar() {
             <div
               className={cn(
                 "sidebar-notification-wrapper flex items-center gap-2 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors duration-200",
-                isCollapsed ? "justify-center" : "justify-between"
+                isCollapsed ? "justify-center" : "justify-between",
               )}
               onClick={() => setShowNotifications(!showNotifications)}
             >
@@ -225,7 +230,9 @@ export function AppSidebar() {
                   )}
                 </div>
                 {!isCollapsed && (
-                  <span className="text-sm text-secondary-foreground">Notifications</span>
+                  <span className="text-sm text-secondary-foreground">
+                    Notifications
+                  </span>
                 )}
               </div>
               {!isCollapsed && (
@@ -233,9 +240,7 @@ export function AppSidebar() {
                   <div
                     className={cn(
                       "flex items-center gap-1 text-xs",
-                      isConnected
-                        ? "text-accent"
-                        : "text-warning"
+                      isConnected ? "text-accent" : "text-warning",
                     )}
                   >
                     <div
@@ -243,7 +248,7 @@ export function AppSidebar() {
                         "w-2 h-2 rounded-full animate-pulse",
                         isConnected
                           ? "bg-[image:var(--purple-gradient)]"
-                          : "bg-warning"
+                          : "bg-warning",
                       )}
                     />
                     {isConnected ? "Live" : "Connecting..."}
@@ -264,7 +269,7 @@ export function AppSidebar() {
                   "absolute z-50 bg-card border border-border rounded-lg shadow-lg overflow-hidden transition-all duration-200",
                   isCollapsed
                     ? "left-full bottom-0 ml-2 w-64"
-                    : "bottom-full left-0 right-0 mb-2"
+                    : "bottom-full left-0 right-0 mb-2",
                 )}
               >
                 {/* Popup Header */}
@@ -310,7 +315,7 @@ export function AppSidebar() {
                             "group p-2 rounded-md transition-colors duration-200 border",
                             !notification.read
                               ? "bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20 hover:from-primary/10 hover:to-primary/20"
-                              : "border-transparent hover:bg-secondary"
+                              : "border-transparent hover:bg-secondary",
                           )}
                         >
                           <div className="flex items-start gap-2">
@@ -319,7 +324,7 @@ export function AppSidebar() {
                                 "mt-0.5 p-1 rounded-full",
                                 !notification.read
                                   ? "bg-gradient-to-br from-primary/20 to-primary/30"
-                                  : "bg-secondary"
+                                  : "bg-secondary",
                               )}
                             >
                               {notification.type === "success" ? (
@@ -328,7 +333,7 @@ export function AppSidebar() {
                                     "w-3 h-3",
                                     !notification.read
                                       ? "text-primary"
-                                      : "text-secondary-foreground"
+                                      : "text-secondary-foreground",
                                   )}
                                 />
                               ) : (
@@ -337,7 +342,7 @@ export function AppSidebar() {
                                     "w-3 h-3",
                                     !notification.read
                                       ? "text-primary"
-                                      : "text-secondary-foreground"
+                                      : "text-secondary-foreground",
                                   )}
                                 />
                               )}
@@ -348,15 +353,16 @@ export function AppSidebar() {
                                   "text-xs leading-snug",
                                   !notification.read
                                     ? "text-foreground font-medium"
-                                    : "text-secondary-foreground"
+                                    : "text-secondary-foreground",
                                 )}
                               >
-                                {notification.data?.message || notification.message}
+                                {notification.data?.message ||
+                                  notification.message}
                               </p>
                               <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                                 <span>
                                   {new Date(
-                                    notification.timestamp
+                                    notification.timestamp,
                                   ).toLocaleTimeString([], {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -365,7 +371,7 @@ export function AppSidebar() {
                                 <span>•</span>
                                 <span>
                                   {new Date(
-                                    notification.timestamp
+                                    notification.timestamp,
                                   ).toLocaleDateString()}
                                 </span>
                               </p>
@@ -406,9 +412,7 @@ export function AppSidebar() {
           onClick={toggleTheme}
           className={cn(
             "w-full transition-all duration-300 hover:bg-secondary",
-            isCollapsed
-              ? "justify-center"
-              : "justify-start"
+            isCollapsed ? "justify-center" : "justify-start",
           )}
         >
           {theme === "dark" ? (
@@ -425,7 +429,9 @@ export function AppSidebar() {
               <div className="p-1.5 rounded-md bg-secondary">
                 <Moon className="w-3.5 h-3.5 text-secondary-foreground" />
               </div>
-              {!isCollapsed && <span className="text-secondary-foreground">Dark Mode</span>}
+              {!isCollapsed && (
+                <span className="text-secondary-foreground">Dark Mode</span>
+              )}
             </div>
           )}
         </Button>
@@ -437,9 +443,7 @@ export function AppSidebar() {
           onClick={() => signOut()}
           className={cn(
             "w-full transition-all duration-300 hover:bg-destructive/10 text-destructive hover:text-destructive",
-            isCollapsed
-              ? "justify-center"
-              : "justify-start"
+            isCollapsed ? "justify-center" : "justify-start",
           )}
         >
           <div className="flex items-center gap-2">
@@ -475,4 +479,4 @@ export function AppSidebar() {
       <div className="sidebar-decorative-bottom h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
     </div>
   );
-}  
+}
