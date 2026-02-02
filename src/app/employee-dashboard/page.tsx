@@ -30,10 +30,10 @@ import {
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
 import { useGetDashboardDataQuery } from "@/redux/employe-api";
+import { useGetEmployeeDashboardAnalyticsQuery } from "@/redux/employee-python-api/employee-python-api";
 import ReactMarkdown from "react-markdown";
 import Loader from "@/components/Loader";
 import { useSession } from "next-auth/react";
-import axios from "axios";
 
 // Define the DashboardData interface
 interface Assessment {
@@ -128,34 +128,11 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
   const { data: session } = useSession();
-  const [isFetching, setIsFetching] = useState(false);
-  const [apiData, setApiData] = useState<any>(null);
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      const fetchDashboardData = async () => {
-        setIsFetching(true);
-        try {
-          const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/employee_dashboard/dashboard-data`,
-            { employeeId: session.user.id },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${session.user.fastApiToken}`,
-              },
-            }
-          );
-          setApiData(res.data);
-        } catch (error) {
-          console.error("Error fetching dashboard data:", error);
-        } finally {
-          setIsFetching(false);
-        }
-      };
-      fetchDashboardData();
-    }
-  }, [session?.user?.id]);
+  const { data: apiData, isLoading: isAnalyticsLoading } = useGetEmployeeDashboardAnalyticsQuery(
+    session?.user?.id || "",
+    { skip: !session?.user?.id }
+  );
 
   useEffect(() => {
     if (apiData && !isLoading) {
@@ -189,7 +166,7 @@ export default function Dashboard() {
     day: "numeric",
   });
 
-  if (isLoading || isFetching) {
+  if (isLoading || isAnalyticsLoading) {
     return (
       <AppLayout>
         <Loader />

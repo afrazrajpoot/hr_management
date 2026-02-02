@@ -458,11 +458,12 @@ export default function ChatPage() {
 
                         <div
                           className={`max-w-[85%] rounded-2xl px-4 py-3 ${msg.role === "user"
-                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-sm"
-                            : "surface-matte border border-matte rounded-bl-sm"
+                            ? "bg-gradient-purple text-white rounded-br-sm shadow-md"
+                            : "bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-bl-sm shadow-sm"
                             } ${msg.isStreaming ? "animate-pulse-subtle" : ""}`}
                         >
-                          <div className="whitespace-pre-wrap break-words leading-relaxed text-sm text-on-matte">
+                          <div className={`whitespace-pre-wrap break-words leading-relaxed text-sm ${msg.role === "user" ? "text-white" : "text-on-matte"
+                            }`}>
                             {msg.content}
                             {msg.isStreaming && (
                               <span className="ml-1 inline-flex items-center gap-1">

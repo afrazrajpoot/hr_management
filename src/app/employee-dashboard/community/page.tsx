@@ -13,9 +13,13 @@ import {
 import { Users, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Loader from "@/components/Loader";
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default function CommunityPage() {
   const { data: session, status } = useSession();
+  const [isJoined, setIsJoined] = useState(false);
 
   if (status === "loading") {
     return (
@@ -117,23 +121,50 @@ export default function CommunityPage() {
               </div>
 
               <div className="flex flex-col items-center justify-center pt-6">
-                <Button
-                  size="lg"
-                  className="btn-purple px-8 py-6 text-lg rounded-xl shadow-prominent hover:scale-105 transition-all duration-300 group hover-lift"
-                  asChild
-                >
-                  <Link
-                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div className="flex items-center space-x-2 mb-6">
+                  <Checkbox
+                    id="community-joined"
+                    checked={isJoined}
+                    onCheckedChange={(checked) => setIsJoined(checked as boolean)}
+                    className="border-purple-accent data-[state=checked]:bg-purple-accent data-[state=checked]:text-white"
+                  />
+                  <Label
+                    htmlFor="community-joined"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-on-matte cursor-pointer"
                   >
-                    <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
-                    Join Our Free Community
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
+                    I have already joined the community
+                  </Label>
+                </div>
+
+                {isJoined ? (
+                  <Button
+                    size="lg"
+                    className="bg-gray-500/50 text-gray-300 px-8 py-6 text-lg rounded-xl shadow-none cursor-not-allowed border-2 border-gray-600/30"
+                    disabled
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Already Joined
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="btn-purple px-8 py-6 text-lg rounded-xl shadow-prominent hover:scale-105 transition-all duration-300 group hover-lift"
+                    asChild
+                  >
+                    <Link
+                      href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                      Join Our Free Community
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </Button>
+                )}
+
                 <p className="text-xs text-on-matte-subtle mt-4">
-                  Redirects to Skool.com
+                  {isJoined ? "You're all set!" : "Redirects to Skool.com"}
                 </p>
               </div>
             </CardContent>

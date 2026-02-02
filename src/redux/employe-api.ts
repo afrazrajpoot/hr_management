@@ -34,6 +34,7 @@ export const employeeApi = createApi({
     getEmployee: builder.query<void, void>({
       query: () => "/employe-profile",
       providesTags: ["Employee"],
+      keepUnusedDataFor: 3600, // Cache for 1 hour
     }),
     createOrUpdateEmployee: builder.mutation<void, void>({
       query: (employee) => ({
@@ -65,9 +66,11 @@ export const employeeApi = createApi({
     }),
     getDashboardData: builder.query<void, void>({
       query: () => "/employee-dashboard-data",
+      keepUnusedDataFor: 3600, // Cache data for 1 hour
     }),
     getAssessmentResults: builder.query<void, void>({
       query: () => "/assessment-results",
+      keepUnusedDataFor: 3600, // Cache data for 1 hour
     }),
   }),
 });

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import { Check, Shield, Loader2, CheckCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -110,6 +110,15 @@ const PricingPage: React.FC = () => {
     fetchSubscription();
   }, [session]);
 
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("payment_success") === "true") {
+      // Clear the query param and reload the page to ensure fresh subscription data
+      window.location.href = "/pricing";
+    }
+  }, [searchParams]);
+
   const handlePurchase = async (product: (typeof products)[0]) => {
     if (!session) {
       toast.error("Please sign in to continue");
@@ -147,8 +156,8 @@ const PricingPage: React.FC = () => {
       console.error("Payment error:", error);
       toast.error(
         error.response?.data?.error ||
-          error.message ||
-          "Payment initialization failed",
+        error.message ||
+        "Payment initialization failed",
       );
     } finally {
       setLoadingId(null);
@@ -173,11 +182,10 @@ const PricingPage: React.FC = () => {
             {products.map((product) => (
               <div
                 key={product.name}
-                className={`card-purple p-8 border-2 rounded-3xl shadow-prominent flex flex-col transition-all hover-lift ${
-                  product.highlight
-                    ? "border-purple-accent ring-4 ring-purple-accent/10"
-                    : "border-matte"
-                }`}
+                className={`card-purple p-8 border-2 rounded-3xl shadow-prominent flex flex-col transition-all hover-lift ${product.highlight
+                  ? "border-purple-accent ring-4 ring-purple-accent/10"
+                  : "border-matte"
+                  }`}
               >
                 {product.highlight && (
                   <div className="bg-gradient-purple text-primary-foreground text-xs font-bold px-3 py-1 rounded-full self-center mb-4 uppercase tracking-widest">
@@ -223,11 +231,10 @@ const PricingPage: React.FC = () => {
                   <button
                     onClick={() => handlePurchase(product)}
                     disabled={!!loadingId || isLoadingSubscription}
-                    className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover-lift ${
-                      product.highlight
-                        ? "btn-purple text-white"
-                        : "btn-purple-outline"
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`w-full py-4 px-6 font-bold rounded-xl flex items-center justify-center gap-2 transition-all hover-lift ${product.highlight
+                      ? "btn-purple text-white"
+                      : "btn-purple-outline"
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {loadingId === product.name ? (
                       <>

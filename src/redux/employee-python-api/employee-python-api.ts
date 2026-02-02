@@ -57,8 +57,20 @@ export const employeePythonApi = createApi({
         method: "GET",
       }),
       providesTags: ["EmployeeLearning"],
+      keepUnusedDataFor: 3600, // Cache data for 1 hour
+    }),
+    getEmployeeDashboardAnalytics: builder.query<any, string>({
+      query: (employeeId) => ({
+        url: "/employee_dashboard/dashboard-data",
+        method: "POST",
+        body: { employeeId },
+      }),
+      keepUnusedDataFor: 3600, // Cache for 1 hour
     }),
   }),
 });
 
-export const { useGetEmployeeLearningDashboardQuery } = employeePythonApi;
+export const {
+  useGetEmployeeLearningDashboardQuery,
+  useGetEmployeeDashboardAnalyticsQuery,
+} = employeePythonApi;

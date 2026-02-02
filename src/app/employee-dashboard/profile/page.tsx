@@ -75,8 +75,8 @@ const onboardingSteps = [
   },
 ];
 
-// LocalStorage key
-const ONBOARDING_STORAGE_KEY = "employeeProfileOnboarding";
+// LocalStorage key prefix
+const ONBOARDING_STORAGE_KEY_PREFIX = "employeeProfileOnboarding_";
 
 const EmployeeProfilePage: React.FC = () => {
   const { data: session, status } = useSession();
@@ -100,11 +100,15 @@ const EmployeeProfilePage: React.FC = () => {
     const forceTour = urlParams.get("tour") === "true";
     const forceSkipTour = urlParams.get("tour") === "false";
 
-    // Get onboarding status from localStorage
-    const onboardingStatus = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    // Get onboarding status from localStorage using email-specific key
+    const userEmail = session?.user?.email;
+    if (!userEmail) return;
+
+    const storageKey = `${ONBOARDING_STORAGE_KEY_PREFIX}${userEmail}`;
+    const onboardingStatus = localStorage.getItem(storageKey);
 
     // Show onboarding if:
-    // 1. localStorage is null (first time) OR has value "true"
+    // 1. localStorage is null (first time for this email) OR has value "true"
     // 2. AND not forcing skip via URL
     // 3. OR if explicitly forced via URL parameter
     const shouldShowOnboarding =
@@ -123,7 +127,7 @@ const EmployeeProfilePage: React.FC = () => {
 
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [session?.user?.email]);
 
   // Update active tab when onboarding step changes
   // Update active tab when onboarding step changes - DISABLED per user request
@@ -135,13 +139,21 @@ const EmployeeProfilePage: React.FC = () => {
 
   // Function to mark onboarding as completed (set to false in localStorage)
   const markOnboardingAsCompleted = useCallback(() => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, "false");
-  }, []);
+    const userEmail = session?.user?.email;
+    if (userEmail) {
+      const storageKey = `${ONBOARDING_STORAGE_KEY_PREFIX}${userEmail}`;
+      localStorage.setItem(storageKey, "false");
+    }
+  }, [session?.user?.email]);
 
   // Function to reset onboarding (set to true in localStorage)
   const resetOnboarding = useCallback(() => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
-  }, []);
+    const userEmail = session?.user?.email;
+    if (userEmail) {
+      const storageKey = `${ONBOARDING_STORAGE_KEY_PREFIX}${userEmail}`;
+      localStorage.setItem(storageKey, "true");
+    }
+  }, [session?.user?.email]);
 
   const handleNextOnboarding = useCallback(async () => {
     if (isAnimating) return;

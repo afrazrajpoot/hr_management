@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     // Build checkout URL with prefilled customer data
     const url = new URL(checkoutUrl);
-    
+
     // Add customer information as query parameters
     if (email) {
       url.searchParams.append("email", email);
@@ -34,7 +34,9 @@ export async function POST(req: Request) {
     }
 
     // Add redirect URL for post-purchase redirect
-    url.searchParams.append("redirect_url", "https://geniusfactor.ai/pricing");
+    // Add redirect URL for post-purchase redirect
+    const origin = req.headers.get("origin") || process.env.NEXTAUTH_URL || "http://localhost:3000";
+    url.searchParams.append("redirect_url", `${origin}/pricing?payment_success=true`);
 
     // Save to database for tracking
     const attempt = await prisma.subscriptionAttempt.create({
@@ -59,12 +61,12 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Payment initialization error:", error);
-    
+
     return NextResponse.json(
-      { 
+      {
         error: "Failed to initialize payment",
         message: error.message,
-      }, 
+      },
       { status: 500 }
     );
   }
