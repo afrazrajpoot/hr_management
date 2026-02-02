@@ -13,13 +13,35 @@ import {
 import { Users, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Loader from "@/components/Loader";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 export default function CommunityPage() {
   const { data: session, status } = useSession();
   const [isJoined, setIsJoined] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetch("/api/user/join-community")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.joinedCommunity) setIsJoined(true);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [status]);
+
+  const handleCheckboxChange = async (checked: boolean) => {
+    setIsJoined(checked);
+    if (checked) {
+      try {
+        await fetch("/api/user/join-community", { method: "POST" });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   if (status === "loading") {
     return (
@@ -125,7 +147,7 @@ export default function CommunityPage() {
                   <Checkbox
                     id="community-joined"
                     checked={isJoined}
-                    onCheckedChange={(checked) => setIsJoined(checked as boolean)}
+                    onCheckedChange={(checked) => handleCheckboxChange(checked as boolean)}
                     className="border-purple-accent data-[state=checked]:bg-purple-accent data-[state=checked]:text-white"
                   />
                   <Label

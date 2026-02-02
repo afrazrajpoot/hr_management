@@ -90,6 +90,14 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const { isConnected, notifications, clearNotifications } = useSocket();
   const { data: session } = useSession();
+  const isPaid = (session?.user as any)?.paid;
+
+  const filteredNavigation = navigation.filter((item) => {
+    if (!isPaid && (item.name === "Career Pathways" || item.name === "Development")) {
+      return false;
+    }
+    return true;
+  });
 
   const toggleTheme = (): void => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -142,7 +150,7 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="relative z-10 flex-1 p-4 space-y-1 overflow-y-auto">
-        {navigation.map((item) => {
+        {filteredNavigation.map((item) => {
           const isActive = location === item.href;
           return (
             <Link
