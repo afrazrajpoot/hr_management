@@ -203,6 +203,8 @@ const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
               if (
                 job[field] !== undefined &&
                 job[field] !== null &&
+                job[field] !== "" &&
+                (Array.isArray(job[field]) ? job[field].length > 0 : true) &&
                 field !== "description"
               ) {
                 const config = fieldConfig[field];

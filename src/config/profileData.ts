@@ -10,6 +10,7 @@ export const personalInfoFields: InputFieldConfig[] = [
   { label: "Phone", icon: Phone, field: "phone", type: "tel" },
   { label: "Date of Birth", icon: Calendar, field: "dateOfBirth", type: "date" },
   { label: "Address", icon: MapPin, field: "address" },
+  { label: "Nearby Area", icon: MapPin, field: "nearbyArea" },
   { label: "Bio", icon: User, field: "bio", isTextarea: true },
   { label: 'Password', icon: User, field: 'password', type: 'password' }
 ];

@@ -95,19 +95,19 @@ function extractExecutiveSummary(summary: string | null): string {
 /**
  * Format JSON data to match Pydantic model structure
  */
-function formatReportData(report: any) {
-  // Parse JSON fields if they're strings
-  const parseJsonField = (field: any) => {
-    if (!field) return null;
-    if (typeof field === 'string') {
-      try {
-        return JSON.parse(field);
-      } catch {
-        return field;
-      }
+const parseJsonField = (field: any) => {
+  if (!field) return null;
+  if (typeof field === "string") {
+    try {
+      return JSON.parse(field);
+    } catch {
+      return field;
     }
-    return field;
-  };
+  }
+  return field;
+};
+
+function formatReportData(report: any) {
 
   const geniusFactorProfileJson = parseJsonField(report.geniusFactorProfileJson);
   const currentRoleAlignmentAnalysisJson = parseJsonField(report.currentRoleAlignmentAnalysisJson);
@@ -154,12 +154,22 @@ function formatReportData(report: any) {
     },
 
     current_role_alignment_analysis: {
-      alignment_score: currentRoleAlignmentAnalysisJson?.alignment_score ||
-        currentRoleAlignmentAnalysisJson?.score || 50,
-      strengths_utilized: currentRoleAlignmentAnalysisJson?.strengths_utilized || [],
-      underutilized_talents: currentRoleAlignmentAnalysisJson?.underutilized_talents || [],
-      retention_risk_factors: currentRoleAlignmentAnalysisJson?.retention_risk_factors || [],
-      immediate_actions: currentRoleAlignmentAnalysisJson?.immediate_actions || []
+      alignment_score:
+        currentRoleAlignmentAnalysisJson?.alignment_score ||
+        currentRoleAlignmentAnalysisJson?.score ||
+        50,
+      retention_risk_level:
+        currentRoleAlignmentAnalysisJson?.retention_risk_level ||
+        riskAnalysis?.trends?.retention_trends ||
+        "",
+      strengths_utilized:
+        currentRoleAlignmentAnalysisJson?.strengths_utilized || [],
+      underutilized_talents:
+        currentRoleAlignmentAnalysisJson?.underutilized_talents || [],
+      retention_risk_factors:
+        currentRoleAlignmentAnalysisJson?.retention_risk_factors || [],
+      immediate_actions:
+        currentRoleAlignmentAnalysisJson?.immediate_actions || [],
     },
 
     internal_career_opportunities: {
@@ -260,8 +270,14 @@ export async function GET() {
     // 🔒 UNPAID USERS → LIMITED DATA (still formatted for Pydantic)
     if (!user?.paid) {
       const limitedData = assessmentResults.map((result) => {
-        const profileJson = result.geniusFactorProfileJson as any;
-        const roleAnalysis = result.currentRoleAlignmentAnalysisJson as any;
+        const profileJson = parseJsonField(result.geniusFactorProfileJson);
+        const roleAnalysis = parseJsonField(
+          result.currentRoleAlignmentAnalysisJson,
+        );
+        const internalCareerJson = parseJsonField(
+          result.internalCareerOpportunitiesJson,
+        );
+        const riskAnalysis = parseJsonField(result.risk_analysis);
 
         return {
           id: result.id,
@@ -271,10 +287,18 @@ export async function GET() {
           hrId: result.hrId,
           departement: result.departement,
 
-          // Core Scores (limited)
+          // Core Scores (NOW REAL SCORES EVEN IF UNPAID)
           genius_factor_score: result.geniusFactorScore,
-          retention_risk_score: roleAnalysis?.alignment_score || 50,
-          mobility_opportunity_score: 50, // Default for unpaid
+          retention_risk_score:
+            riskAnalysis?.scores?.retention_risk_score ||
+            (roleAnalysis?.retention_risk_score !== undefined
+              ? roleAnalysis.retention_risk_score
+              : roleAnalysis?.alignment_score || 50),
+          mobility_opportunity_score:
+            riskAnalysis?.scores?.mobility_opportunity_score ||
+            (internalCareerJson?.mobility_opportunity_score !== undefined
+              ? internalCareerJson.mobility_opportunity_score
+              : 50),
 
           // Limited profile data
           genius_factor_profile: {
@@ -289,10 +313,14 @@ export async function GET() {
           // Limited role alignment
           current_role_alignment_analysis: {
             alignment_score: roleAnalysis?.alignment_score || 50,
+            retention_risk_level:
+              roleAnalysis?.retention_risk_level ||
+              riskAnalysis?.trends?.retention_trends ||
+              "",
             strengths_utilized: [],
             underutilized_talents: [],
             retention_risk_factors: [],
-            immediate_actions: []
+            immediate_actions: [],
           },
 
           // Executive summary

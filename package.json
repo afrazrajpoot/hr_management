@@ -47,6 +47,7 @@
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.12",
     "googleapis": "^166.0.0",
+    "html-to-image": "^1.11.13",
     "http-proxy-agent": "^7.0.2",
     "https-proxy-agent": "^7.0.6",
     "jsonwebtoken": "^9.0.2",

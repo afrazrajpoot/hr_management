@@ -447,7 +447,7 @@ export default function Dashboard() {
                     <Link
                       key={assessment.id}
                       href={`/employee-dashboard/results?id=${assessment.id}`}
-                      className="group block p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-matte-gray-light transition-all duration-200 cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-matte-gray-subtle"
+                      className="group block p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all duration-300 cursor-pointer border border-transparent hover:border-purple-500/20 dark:hover:border-purple-500/30 hover:shadow-sm"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

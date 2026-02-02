@@ -619,7 +619,7 @@ export default function Assessment() {
       default:
         return (
           <Link
-            href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+            href="/pricing"
             className=""
           >
             <Button className="btn-purple text-white shadow-lg hover:shadow-xl transition-all duration-300">
@@ -987,8 +987,8 @@ export default function Assessment() {
                                   <div
                                     key={index}
                                     className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${isSelected
-                                        ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20"
-                                        : "border-gray-200 dark:border-gray-700 hover:border-purple-600/50 hover:bg-purple-50/50 dark:hover:bg-purple-900/10"
+                                      ? "border-purple-600 bg-purple-50 dark:bg-purple-900/20"
+                                      : "border-gray-200 dark:border-gray-700 hover:border-purple-600/50 hover:bg-purple-50/50 dark:hover:bg-purple-900/10"
                                       }`}
                                   >
                                     <RadioGroupItem
@@ -1002,8 +1002,8 @@ export default function Assessment() {
                                     >
                                       <span
                                         className={`font-bold mr-3 text-lg flex-shrink-0 ${isSelected
-                                            ? "text-purple-600 dark:text-purple-400"
-                                            : "text-gray-500 dark:text-gray-400"
+                                          ? "text-purple-600 dark:text-purple-400"
+                                          : "text-gray-500 dark:text-gray-400"
                                           }`}
                                       >
                                         {staticLetter}.
@@ -1105,12 +1105,12 @@ export default function Assessment() {
                                 <div
                                   key={index}
                                   className={`flex-1 h-2 rounded-full transition-all ${index === currentQuestionIndex
-                                      ? "bg-purple-600"
-                                      : index < currentQuestionIndex
-                                        ? "bg-green-600"
-                                        : answers[currentPartQuestions[index].id]
-                                          ? "bg-yellow-600"
-                                          : "bg-gray-200 dark:bg-gray-700"
+                                    ? "bg-purple-600"
+                                    : index < currentQuestionIndex
+                                      ? "bg-green-600"
+                                      : answers[currentPartQuestions[index].id]
+                                        ? "bg-yellow-600"
+                                        : "bg-gray-200 dark:bg-gray-700"
                                     }`}
                                 />
                               ))}

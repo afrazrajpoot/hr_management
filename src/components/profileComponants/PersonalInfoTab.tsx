@@ -62,7 +62,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   );
 
   const addressFields = personalInfoFields.filter((f) =>
-    ["address", "city", "state", "country", "zipCode"].includes(f.field)
+    ["address", "nearbyArea", "city", "state", "country", "zipCode"].includes(f.field)
   );
 
   const additionalFields = personalInfoFields.filter((f) =>

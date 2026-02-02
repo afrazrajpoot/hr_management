@@ -208,7 +208,8 @@ const EmployeeProfilePage: React.FC = () => {
 
   const {
     data: employeeData,
-    isLoading: isFetching,
+    isLoading,
+    isFetching,
     error: fetchError,
   } = useGetEmployeeQuery();
   const [
@@ -239,6 +240,7 @@ const EmployeeProfilePage: React.FC = () => {
       experience: [],
       resume: null,
       employer: "",
+      nearbyArea: "",
     }
   );
 
@@ -257,9 +259,13 @@ const EmployeeProfilePage: React.FC = () => {
           ...data,
           skills: data.skills || [],
         };
-        const updatedEmployee: any = await createOrUpdateEmployee(
+        const response: any = await createOrUpdateEmployee(
           saveData
         ).unwrap();
+
+        // The API returns { success: true, data: Employee } for POST, but Employee for GET
+        const updatedEmployee = response.data || response;
+
         setEmployee(updatedEmployee);
         setFormData(updatedEmployee);
         reset(updatedEmployee);
@@ -352,7 +358,7 @@ const EmployeeProfilePage: React.FC = () => {
     }
   }, [employeeData, fetchError, reset]);
 
-  if (status === "loading" || isFetching || isMutating) {
+  if (status === "loading" || isLoading) {
     return (
       <AppLayout>
         <Loader />
@@ -392,6 +398,7 @@ const EmployeeProfilePage: React.FC = () => {
       "email",
       "phone",
       "address",
+      "nearbyArea",
       "dateOfBirth",
       "bio",
     ];
@@ -524,7 +531,7 @@ const EmployeeProfilePage: React.FC = () => {
                           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-lg p-3 flex gap-3">
                             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
                             <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                              Inorder to access full platform please complete <span className="font-bold">90%</span> of the profile. add personal information, employment, skills
+                              In order to access the full platform, please complete <span className="font-bold">80%</span> of your profile. Add personal information, employment, and skills.
                             </p>
                           </div>
 

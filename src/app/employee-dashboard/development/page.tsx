@@ -261,34 +261,7 @@ export default function Development() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <Card className="card-purple hover:shadow-lg transition-all duration-200">
-              <CardContent className="p-6">
-                <h4 className="font-semibold text-on-matte mb-4">
-                  Quick Actions
-                </h4>
-                <div className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start btn-purple-outline"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Schedule Review
-                  </Button>
-                  <Button className="w-full justify-start btn-purple">
-                    <Target className="w-4 h-4 mr-2" />
-                    Set Goals
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start btn-purple-outline"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    View Analytics
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
 
           {/* Middle Column */}

@@ -1,13 +1,13 @@
 export const getWelcomeEmailHtml = (firstName: string, loginUrl: string, defaultPassword?: string) => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://geniusfactor.ai';
-  const fallbackUrl = appUrl ? `${appUrl}/dashboard` : 'https://geniusfactor.ai/dashboard';
-  const safeLoginUrl =
-    loginUrl && loginUrl !== 'undefined' && loginUrl !== 'null'
-      ? loginUrl
-      : fallbackUrl;
-  
-  // Default password section HTML (only shown if defaultPassword is provided)
-  const defaultPasswordSection = defaultPassword ? `
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://geniusfactor.ai';
+    const fallbackUrl = appUrl ? `${appUrl}/dashboard` : 'https://geniusfactor.ai/dashboard';
+    const safeLoginUrl =
+        loginUrl && loginUrl !== 'undefined' && loginUrl !== 'null'
+            ? loginUrl
+            : fallbackUrl;
+
+    // Default password section HTML (only shown if defaultPassword is provided)
+    const defaultPasswordSection = defaultPassword ? `
                             <!-- Default Password Section -->
                             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
                                 <tr>
@@ -53,7 +53,7 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string, default
                             </table>
   ` : '';
 
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -411,23 +411,13 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string, default
                                         <table border="0" cellpadding="0" cellspacing="0">
                                             <tr>
                                                 <td style="padding-right: 20px; padding-bottom: 10px;">
-                                                    <a href="mailto:onboarding@geniusfactorai.com" style="
+                                                    <a href="mailto:info@geniusfactoracademy.com" style="
                                                         color: #6366f1;
                                                         text-decoration: none;
                                                         font-size: 14px;
                                                         font-weight: 500;
                                                     ">
                                                         Onboarding Support
-                                                    </a>
-                                                </td>
-                                                <td style="padding-bottom: 10px;">
-                                                    <a href="https://help.geniusfactorai.com/getting-started" style="
-                                                        color: #6366f1;
-                                                        text-decoration: none;
-                                                        font-size: 14px;
-                                                        font-weight: 500;
-                                                    ">
-                                                        Getting Started Guide
                                                     </a>
                                                 </td>
                                             </tr>
@@ -519,14 +509,14 @@ export const getWelcomeEmailHtml = (firstName: string, loginUrl: string, default
 };
 
 export const welcomeEmailStyles = {
-  primaryColor: "#6366f1",
-  secondaryColor: "#8b5cf6",
-  backgroundColor: "#f8fafc",
-  successColor: "#10b981",
-  textDark: "#0f172a",
-  textMedium: "#475569",
-  textLight: "#64748b",
-  borderColor: "#e2e8f0",
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-  brandGradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
+    primaryColor: "#6366f1",
+    secondaryColor: "#8b5cf6",
+    backgroundColor: "#f8fafc",
+    successColor: "#10b981",
+    textDark: "#0f172a",
+    textMedium: "#475569",
+    textLight: "#64748b",
+    borderColor: "#e2e8f0",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    brandGradient: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
 };

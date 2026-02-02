@@ -362,7 +362,7 @@ export default function ChatPage() {
                 )}
                 {session?.user?.paid == false && (
                   <Link
-                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                    href="/pricing"
                   >
                     <Button className="btn-purple text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 text-sm h-9 hover-lift">
                       <Sparkles className="h-3.5 w-3.5 mr-1.5" />
@@ -458,8 +458,8 @@ export default function ChatPage() {
 
                         <div
                           className={`max-w-[85%] rounded-2xl px-4 py-3 ${msg.role === "user"
-                              ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-sm"
-                              : "surface-matte border border-matte rounded-bl-sm"
+                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-sm"
+                            : "surface-matte border border-matte rounded-bl-sm"
                             } ${msg.isStreaming ? "animate-pulse-subtle" : ""}`}
                         >
                           <div className="whitespace-pre-wrap break-words leading-relaxed text-sm text-on-matte">

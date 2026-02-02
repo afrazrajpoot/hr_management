@@ -48,6 +48,7 @@ export interface Employee {
   resume: ResumeFile | null;
   employer?: string;
   password: string;
+  nearbyArea: string;
 }
 
 export interface InputFieldConfig {

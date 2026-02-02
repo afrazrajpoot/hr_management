@@ -660,7 +660,7 @@ function ResultsContent() {
                     </div>
                   </div>
                   <Link
-                    href="https://www.skool.com/geniusfactoracademy/about?ref=9991102cdf9d4b378471534355a57fce"
+                    href="/pricing"
                     className=""
                   >
                     <Button className="btn-purple shadow-lg hover:shadow-xl transition-all duration-300">
@@ -687,8 +687,8 @@ function ResultsContent() {
               <p className="text-muted-foreground mt-2">
                 {selectedAssessment
                   ? `Assessment completed on ${new Date(
-                      selectedAssessment.createdAt,
-                    ).toLocaleDateString()}`
+                    selectedAssessment.createdAt,
+                  ).toLocaleDateString()}`
                   : "No assessments completed yet"}
               </p>
             </div>
@@ -717,7 +717,7 @@ function ResultsContent() {
           />
 
           {selectedAssessment ? (
-            <>
+            <div id="assessment-report-content" className="space-y-8">
               {/* Genius Score Hero Card */}
               <Card className="card-purple-gradient border-0">
                 <CardContent className="p-8">
@@ -739,15 +739,14 @@ function ResultsContent() {
                           </span>
                         </div>
                         <Badge
-                          className={`text-lg border-0 ${
-                            selectedAssessment.genius_factor_score >= 80
-                              ? "bg-emerald-500 text-white"
-                              : selectedAssessment.genius_factor_score >= 60
-                                ? "bg-purple-500 text-white"
-                                : selectedAssessment.genius_factor_score >= 40
-                                  ? "bg-amber-500 text-white"
-                                  : "bg-red-500 text-white"
-                          }`}
+                          className={`text-lg border-0 ${selectedAssessment.genius_factor_score >= 80
+                            ? "bg-emerald-500 text-white"
+                            : selectedAssessment.genius_factor_score >= 60
+                              ? "bg-purple-500 text-white"
+                              : selectedAssessment.genius_factor_score >= 40
+                                ? "bg-amber-500 text-white"
+                                : "bg-red-500 text-white"
+                            }`}
                         >
                           <Star className="w-4 h-4 mr-1" />
                           {selectedAssessment.genius_factor_score >= 80
@@ -807,10 +806,9 @@ function ResultsContent() {
                             stroke="white"
                             strokeWidth="10"
                             strokeLinecap="round"
-                            strokeDasharray={`${
-                              (selectedAssessment.genius_factor_score / 100) *
+                            strokeDasharray={`${(selectedAssessment.genius_factor_score / 100) *
                               283
-                            } 283`}
+                              } 283`}
                             transform="rotate(-90 50 50)"
                           />
                         </svg>
@@ -940,64 +938,64 @@ function ResultsContent() {
                   {/* Secondary Genius Factor */}
                   {selectedAssessment.genius_factor_profile
                     .secondary_genius_factor && (
-                    <Card className="card-purple hover:shadow-lg transition-all duration-200">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                            <TargetIcon className="w-5 h-5 text-purple-400" />
-                          </div>
-                          <div>
-                            <div className="text-lg font-semibold">
-                              Secondary Genius Factor
+                      <Card className="card-purple hover:shadow-lg transition-all duration-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                              <TargetIcon className="w-5 h-5 text-purple-400" />
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              Supporting talents
+                            <div>
+                              <div className="text-lg font-semibold">
+                                Secondary Genius Factor
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Supporting talents
+                              </div>
                             </div>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                              {selectedAssessment.genius_factor_profile
+                                .secondary_genius_factor || "Not identified"}
+                            </span>
+                            <Badge className="bg-purple-600 hover:bg-purple-700">
+                              <Zap className="w-3 h-3 mr-1" />
+                              Secondary
+                            </Badge>
                           </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
-                            {selectedAssessment.genius_factor_profile
-                              .secondary_genius_factor || "Not identified"}
-                          </span>
-                          <Badge className="bg-purple-600 hover:bg-purple-700">
-                            <Zap className="w-3 h-3 mr-1" />
-                            Secondary
-                          </Badge>
-                        </div>
 
-                        {selectedAssessment.genius_factor_profile
-                          .development_areas &&
-                          selectedAssessment.genius_factor_profile
-                            .development_areas.length > 0 && (
-                            <div className="mt-4">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Lightbulb className="w-4 h-4 text-warning" />
-                                <span className="text-sm font-medium">
-                                  Development Areas
-                                </span>
+                          {selectedAssessment.genius_factor_profile
+                            .development_areas &&
+                            selectedAssessment.genius_factor_profile
+                              .development_areas.length > 0 && (
+                              <div className="mt-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Lightbulb className="w-4 h-4 text-warning" />
+                                  <span className="text-sm font-medium">
+                                    Development Areas
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                  {safeArray(
+                                    selectedAssessment.genius_factor_profile
+                                      .development_areas,
+                                  ).map((area, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
+                                    >
+                                      <TrendingUp className="w-4 h-4 text-warning" />
+                                      <span className="text-sm">{area}</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                              <div className="grid grid-cols-1 gap-2">
-                                {safeArray(
-                                  selectedAssessment.genius_factor_profile
-                                    .development_areas,
-                                ).map((area, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center gap-2 p-2 rounded-lg bg-warning/5 border border-warning/20"
-                                  >
-                                    <TrendingUp className="w-4 h-4 text-warning" />
-                                    <span className="text-sm">{area}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                      </CardContent>
-                    </Card>
-                  )}
+                            )}
+                        </CardContent>
+                      </Card>
+                    )}
                 </div>
               )}
 
@@ -1267,26 +1265,26 @@ function ResultsContent() {
 
                       {selectedAssessment.internal_career_opportunities
                         .transition_strategy && (
-                        <div className="space-y-4">
-                          <h4 className="font-semibold flex items-center gap-2">
-                            <div className="icon-warning w-8 h-8 flex items-center justify-center p-0">
-                              <MapPin className="w-4 h-4" />
-                            </div>
-                            Transition Strategy
-                          </h4>
-                          <Card className="bg-status-warning dark:bg-yellow-900/10 border-yellow-100 dark:border-yellow-900/30">
-                            <CardContent className="p-4">
-                              <p className="text-sm leading-relaxed text-yellow-800 dark:text-yellow-200">
-                                {
-                                  selectedAssessment
-                                    .internal_career_opportunities
-                                    .transition_strategy
-                                }
-                              </p>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold flex items-center gap-2">
+                              <div className="icon-warning w-8 h-8 flex items-center justify-center p-0">
+                                <MapPin className="w-4 h-4" />
+                              </div>
+                              Transition Strategy
+                            </h4>
+                            <Card className="bg-status-warning dark:bg-yellow-900/10 border-yellow-100 dark:border-yellow-900/30">
+                              <CardContent className="p-4">
+                                <p className="text-sm leading-relaxed text-yellow-800 dark:text-yellow-200">
+                                  {
+                                    selectedAssessment
+                                      .internal_career_opportunities
+                                      .transition_strategy
+                                  }
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
                     </div>
                   }
                 />
@@ -1295,216 +1293,216 @@ function ResultsContent() {
               {/* Action Plan & Resources Grid - Only for paid users */}
               {(selectedAssessment.development_action_plan ||
                 selectedAssessment.personalized_resources) && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Development Action Plan */}
-                  {selectedAssessment.development_action_plan && (
-                    <PremiumSection
-                      title="Development Plan"
-                      icon={<Target className="w-5 h-5 text-success" />}
-                      description="Short-term to long-term goals"
-                      isPaid={isPaid}
-                      showAllContent={showAllContent}
-                      onTogglePreview={() => setShowAllContent(!showAllContent)}
-                      content={
-                        <div className="space-y-6">
-                          {selectedAssessment.development_action_plan
-                            .thirty_day_goals &&
-                            selectedAssessment.development_action_plan
-                              .thirty_day_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-primary" />
-                                  30-Day Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .thirty_day_goals,
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <CheckCircle className="w-3 h-3 text-primary" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Development Action Plan */}
+                    {selectedAssessment.development_action_plan && (
+                      <PremiumSection
+                        title="Development Plan"
+                        icon={<Target className="w-5 h-5 text-success" />}
+                        description="Short-term to long-term goals"
+                        isPaid={isPaid}
+                        showAllContent={showAllContent}
+                        onTogglePreview={() => setShowAllContent(!showAllContent)}
+                        content={
+                          <div className="space-y-6">
+                            {selectedAssessment.development_action_plan
+                              .thirty_day_goals &&
+                              selectedAssessment.development_action_plan
+                                .thirty_day_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                    30-Day Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .thirty_day_goals,
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <CheckCircle className="w-3 h-3 text-primary" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
-                          {selectedAssessment.development_action_plan
-                            .ninety_day_goals &&
-                            selectedAssessment.development_action_plan
-                              .ninety_day_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-warning" />
-                                  90-Day Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .ninety_day_goals,
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <Target className="w-3 h-3 text-warning" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+                            {selectedAssessment.development_action_plan
+                              .ninety_day_goals &&
+                              selectedAssessment.development_action_plan
+                                .ninety_day_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-warning" />
+                                    90-Day Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .ninety_day_goals,
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <Target className="w-3 h-3 text-warning" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
-                          {selectedAssessment.development_action_plan
-                            .six_month_goals &&
-                            selectedAssessment.development_action_plan
-                              .six_month_goals.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-success" />
-                                  6-Month Goals
-                                </h4>
-                                <ul className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.development_action_plan
-                                      .six_month_goals,
-                                  ).map((goal, index) => (
-                                    <li
-                                      key={index}
-                                      className="flex items-start gap-2 text-sm"
-                                    >
-                                      <div className="p-1 mt-0.5">
-                                        <Rocket className="w-3 h-3 text-success" />
-                                      </div>
-                                      <span>{goal}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                        </div>
-                      }
-                    />
-                  )}
+                            {selectedAssessment.development_action_plan
+                              .six_month_goals &&
+                              selectedAssessment.development_action_plan
+                                .six_month_goals.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-success" />
+                                    6-Month Goals
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.development_action_plan
+                                        .six_month_goals,
+                                    ).map((goal, index) => (
+                                      <li
+                                        key={index}
+                                        className="flex items-start gap-2 text-sm"
+                                      >
+                                        <div className="p-1 mt-0.5">
+                                          <Rocket className="w-3 h-3 text-success" />
+                                        </div>
+                                        <span>{goal}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                          </div>
+                        }
+                      />
+                    )}
 
-                  {/* Personalized Resources */}
-                  {selectedAssessment.personalized_resources && (
-                    <PremiumSection
-                      title="Personalized Resources"
-                      icon={<BookMarked className="w-5 h-5 text-accent" />}
-                      description="Tools for your growth journey"
-                      isPaid={isPaid}
-                      showAllContent={showAllContent}
-                      onTogglePreview={() => setShowAllContent(!showAllContent)}
-                      content={
-                        <div className="space-y-6">
-                          {selectedAssessment.personalized_resources
-                            .learning_resources &&
-                            selectedAssessment.personalized_resources
-                              .learning_resources.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Book className="w-4 h-4 text-success" />
-                                  Learning Resources
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .learning_resources,
-                                  ).map((resource, index) => (
-                                    <Card
-                                      key={index}
-                                      className="border-success/20"
-                                    >
-                                      <CardContent className="p-3">
-                                        <div className="flex items-start gap-3">
-                                          <BookOpen className="w-5 h-5 text-success mt-0.5" />
-                                          <div className="flex-1">
-                                            <div className="font-medium">
-                                              {resource.title}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              {resource.type} •{" "}
-                                              {resource.provider ||
-                                                resource.author ||
-                                                "Various"}
+                    {/* Personalized Resources */}
+                    {selectedAssessment.personalized_resources && (
+                      <PremiumSection
+                        title="Personalized Resources"
+                        icon={<BookMarked className="w-5 h-5 text-accent" />}
+                        description="Tools for your growth journey"
+                        isPaid={isPaid}
+                        showAllContent={showAllContent}
+                        onTogglePreview={() => setShowAllContent(!showAllContent)}
+                        content={
+                          <div className="space-y-6">
+                            {selectedAssessment.personalized_resources
+                              .learning_resources &&
+                              selectedAssessment.personalized_resources
+                                .learning_resources.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Book className="w-4 h-4 text-success" />
+                                    Learning Resources
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .learning_resources,
+                                    ).map((resource, index) => (
+                                      <Card
+                                        key={index}
+                                        className="border-success/20"
+                                      >
+                                        <CardContent className="p-3">
+                                          <div className="flex items-start gap-3">
+                                            <BookOpen className="w-5 h-5 text-success mt-0.5" />
+                                            <div className="flex-1">
+                                              <div className="font-medium">
+                                                {resource.title}
+                                              </div>
+                                              <div className="text-xs text-muted-foreground">
+                                                {resource.type} •{" "}
+                                                {resource.provider ||
+                                                  resource.author ||
+                                                  "Various"}
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  ))}
+                                        </CardContent>
+                                      </Card>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                          {selectedAssessment.personalized_resources
-                            .affirmations &&
-                            selectedAssessment.personalized_resources
-                              .affirmations.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Sparkles className="w-4 h-4 text-primary" />
-                                  Affirmations
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .affirmations,
-                                  ).map((affirmation, index) => (
-                                    <div
-                                      key={index}
-                                      className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
-                                    >
-                                      "{affirmation}"
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          {selectedAssessment.personalized_resources
-                            .mindfulness_practices &&
-                            selectedAssessment.personalized_resources
-                              .mindfulness_practices.length > 0 && (
-                              <div>
-                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                  <Heart className="w-4 h-4 text-warning" />
-                                  Mindfulness Practices
-                                </h4>
-                                <div className="space-y-2">
-                                  {safeArray(
-                                    selectedAssessment.personalized_resources
-                                      .mindfulness_practices,
-                                  ).map((practice, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-start gap-2 p-2 text-sm"
-                                    >
-                                      <div className="icon-wrapper-amber p-1 mt-0.5">
-                                        <Sparkles className="w-3 h-3 text-warning" />
+                            {selectedAssessment.personalized_resources
+                              .affirmations &&
+                              selectedAssessment.personalized_resources
+                                .affirmations.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                    Affirmations
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .affirmations,
+                                    ).map((affirmation, index) => (
+                                      <div
+                                        key={index}
+                                        className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm italic"
+                                      >
+                                        "{affirmation}"
                                       </div>
-                                      <span>{practice}</span>
-                                    </div>
-                                  ))}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                        </div>
-                      }
-                    />
-                  )}
-                </div>
-              )}
-            </>
+                              )}
+
+                            {selectedAssessment.personalized_resources
+                              .mindfulness_practices &&
+                              selectedAssessment.personalized_resources
+                                .mindfulness_practices.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Heart className="w-4 h-4 text-warning" />
+                                    Mindfulness Practices
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {safeArray(
+                                      selectedAssessment.personalized_resources
+                                        .mindfulness_practices,
+                                    ).map((practice, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-start gap-2 p-2 text-sm"
+                                      >
+                                        <div className="icon-wrapper-amber p-1 mt-0.5">
+                                          <Sparkles className="w-3 h-3 text-warning" />
+                                        </div>
+                                        <span>{practice}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        }
+                      />
+                    )}
+                  </div>
+                )}
+            </div>
           ) : (
             <Card className="card-purple">
               <CardContent className="pt-12 pb-12 text-center">
@@ -1550,22 +1548,20 @@ function ResultsContent() {
                   {paginatedAssessments.map((assessment) => (
                     <div
                       key={assessment.id}
-                      className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                        selectedAssessment?.id === assessment.id
-                          ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30"
-                          : "border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-900/20"
-                      }`}
+                      className={`group p-4 rounded-xl border cursor-pointer transition-all duration-300 ${selectedAssessment?.id === assessment.id
+                        ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30"
+                        : "border-gray-100 dark:border-gray-800 hover:border-purple-200 dark:hover:border-purple-800 hover:bg-purple-50/50 dark:hover:bg-purple-900/20"
+                        }`}
                       onClick={() => handleAssessmentClick(assessment)}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="space-y-2">
                           <div className="flex items-center gap-3">
                             <div
-                              className={`p-2 rounded-lg ${
-                                selectedAssessment?.id === assessment.id
-                                  ? "bg-purple-100 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300"
-                                  : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-                              }`}
+                              className={`p-2 rounded-lg ${selectedAssessment?.id === assessment.id
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-400/20 dark:text-purple-300"
+                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                }`}
                             >
                               <Brain className="w-5 h-5" />
                             </div>

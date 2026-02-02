@@ -15,6 +15,7 @@ interface EmployeeData {
   password?: string;
   phone?: string;
   address?: string;
+  nearbyArea?: string;
   dateOfBirth?: string;
   hireDate?: string;
   department?: string;
@@ -90,6 +91,7 @@ export async function GET(req: NextRequest) {
         email: user?.email || "",
         phone: user?.phoneNumber || "",
         address: "",
+        nearbyArea: "",
         dateOfBirth: "",
         hireDate: "",
         department: user?.department?.at(-1) || "",
@@ -115,6 +117,7 @@ export async function GET(req: NextRequest) {
       email: employee.user?.email || "",
       phone: employee.user?.phoneNumber || "",
       address: employee.address || "",
+      nearbyArea: employee.nearbyArea || "",
       dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
       hireDate: employee.hireDate?.toISOString().split("T")[0] || "",
       department: employee.user?.department?.at(-1) || "",
@@ -254,6 +257,7 @@ export async function POST(req: NextRequest) {
           firstName: data.firstName,
           lastName: data.lastName,
           address: data.address || null,
+          nearbyArea: data.nearbyArea || null,
           dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
           hireDate: data.hireDate ? new Date(data.hireDate) : null,
           manager: data.manager || null,
@@ -328,6 +332,7 @@ export async function POST(req: NextRequest) {
           email: user.email,
           phone: user.phoneNumber || "",
           address: employee.address || "",
+          nearbyArea: employee.nearbyArea || "",
           dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
           hireDate: employee.hireDate?.toISOString().split("T")[0] || "",
           department: user.department?.at(-1) || "",
