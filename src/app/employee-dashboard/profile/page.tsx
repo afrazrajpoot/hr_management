@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, ChangeEvent, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -113,7 +119,8 @@ const EmployeeProfilePage: React.FC = () => {
     // 3. OR if explicitly forced via URL parameter
     const shouldShowOnboarding =
       forceTour ||
-      ((onboardingStatus === null || onboardingStatus === "true") && !forceSkipTour);
+      ((onboardingStatus === null || onboardingStatus === "true") &&
+        !forceSkipTour);
 
     if (shouldShowOnboarding && !onboardingInitialized.current) {
       onboardingInitialized.current = true;
@@ -164,7 +171,7 @@ const EmployeeProfilePage: React.FC = () => {
       const nextStep = onboardingStep + 1;
 
       // Animate step transition
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       setOnboardingStep(nextStep);
     } else {
@@ -188,7 +195,7 @@ const EmployeeProfilePage: React.FC = () => {
     const prevStep = onboardingStep - 1;
 
     // Animate step transition
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     setOnboardingStep(prevStep);
 
@@ -253,7 +260,7 @@ const EmployeeProfilePage: React.FC = () => {
       resume: null,
       employer: "",
       nearbyArea: "",
-    }
+    },
   );
 
   const [formData, setFormData] = useState<Employee>({ ...employee });
@@ -271,9 +278,7 @@ const EmployeeProfilePage: React.FC = () => {
           ...data,
           skills: data.skills || [],
         };
-        const response: any = await createOrUpdateEmployee(
-          saveData
-        ).unwrap();
+        const response: any = await createOrUpdateEmployee(saveData).unwrap();
 
         // The API returns { success: true, data: Employee } for POST, but Employee for GET
         const updatedEmployee = response.data || response;
@@ -297,7 +302,7 @@ const EmployeeProfilePage: React.FC = () => {
         });
       }
     },
-    [createOrUpdateEmployee, formData, reset]
+    [createOrUpdateEmployee, formData, reset],
   );
 
   const handleCancel = useCallback((): void => {
@@ -330,7 +335,7 @@ const EmployeeProfilePage: React.FC = () => {
         reader.readAsDataURL(file);
       }
     },
-    [setValue]
+    [setValue],
   );
 
   const handleResumeUpload = useCallback(
@@ -351,7 +356,7 @@ const EmployeeProfilePage: React.FC = () => {
         });
       }
     },
-    [setValue]
+    [setValue],
   );
 
   useEffect(() => {
@@ -418,7 +423,7 @@ const EmployeeProfilePage: React.FC = () => {
       (field) =>
         employee &&
         employee[field as keyof Employee] &&
-        employee[field as keyof Employee]?.toString().trim() !== ""
+        employee[field as keyof Employee]?.toString().trim() !== "",
     );
 
     const employmentFieldList = [
@@ -439,7 +444,7 @@ const EmployeeProfilePage: React.FC = () => {
         (field) =>
           employee &&
           employee[field as keyof Employee] &&
-          employee[field as keyof Employee]?.toString().trim() !== ""
+          employee[field as keyof Employee]?.toString().trim() !== "",
       ) && hasSalary;
 
     const isSkillsComplete =
@@ -470,7 +475,8 @@ const EmployeeProfilePage: React.FC = () => {
     };
   };
 
-  const { percentage: profileCompletion, breakdown } = calculateProfileCompletion();
+  const { percentage: profileCompletion, breakdown } =
+    calculateProfileCompletion();
   const CurrentIcon = onboardingSteps[onboardingStep]?.icon || User;
 
   return (
@@ -517,7 +523,10 @@ const EmployeeProfilePage: React.FC = () => {
                 {/* Content */}
                 <div className="relative z-10">
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="p-3 rounded-xl flex-shrink-0" style={{ background: 'var(--purple-gradient)' }}>
+                    <div
+                      className="p-3 rounded-xl flex-shrink-0"
+                      style={{ background: "var(--purple-gradient)" }}
+                    >
                       <CurrentIcon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
@@ -543,7 +552,10 @@ const EmployeeProfilePage: React.FC = () => {
                           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 rounded-lg p-3 flex gap-3">
                             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
                             <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
-                              In order to access the full platform, please complete <span className="font-bold">80%</span> of your profile. Add personal information, employment, and skills.
+                              In order to access the full platform, please
+                              complete <span className="font-bold">90%</span> of
+                              your profile. Add personal information,
+                              employment, and skills.
                             </p>
                           </div>
 
@@ -552,10 +564,11 @@ const EmployeeProfilePage: React.FC = () => {
                               ([label, isComplete]) => (
                                 <div
                                   key={label}
-                                  className={`flex items-center gap-2 p-2 rounded-lg text-xs border ${isComplete
-                                    ? "bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-700 dark:text-green-300"
-                                    : "bg-gray-50 border-gray-100 dark:bg-white/5 dark:border-white/10 text-muted-foreground opacity-70"
-                                    }`}
+                                  className={`flex items-center gap-2 p-2 rounded-lg text-xs border ${
+                                    isComplete
+                                      ? "bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800 text-green-700 dark:text-green-300"
+                                      : "bg-gray-50 border-gray-100 dark:bg-white/5 dark:border-white/10 text-muted-foreground opacity-70"
+                                  }`}
                                 >
                                   {isComplete ? (
                                     <CheckCircle className="w-3.5 h-3.5" />
@@ -564,7 +577,7 @@ const EmployeeProfilePage: React.FC = () => {
                                   )}
                                   <span className="font-medium">{label}</span>
                                 </div>
-                              )
+                              ),
                             )}
                           </div>
 
@@ -615,7 +628,8 @@ const EmployeeProfilePage: React.FC = () => {
                                     <li className="text-xs text-muted-foreground flex items-start gap-2">
                                       <div className="mt-1.5 w-1 h-1 rounded-full bg-purple-500 shrink-0" />
                                       <span>
-                                        List <b>Experience</b> & Education history.
+                                        List <b>Experience</b> & Education
+                                        history.
                                       </span>
                                     </li>
                                   )}
@@ -638,12 +652,13 @@ const EmployeeProfilePage: React.FC = () => {
                       {onboardingSteps.map((_, idx) => (
                         <div
                           key={idx}
-                          className={`h-2 flex-1 rounded-full transition-all duration-300 ${idx === onboardingStep
-                            ? "bg-purple-600 dark:bg-purple-400"
-                            : idx < onboardingStep
-                              ? "bg-purple-400 dark:bg-purple-600"
-                              : "bg-purple-200 dark:bg-purple-800"
-                            }`}
+                          className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                            idx === onboardingStep
+                              ? "bg-purple-600 dark:bg-purple-400"
+                              : idx < onboardingStep
+                                ? "bg-purple-400 dark:bg-purple-600"
+                                : "bg-purple-200 dark:bg-purple-800"
+                          }`}
                         />
                       ))}
                     </div>
@@ -694,9 +709,15 @@ const EmployeeProfilePage: React.FC = () => {
                 {/* Current tab indicator */}
                 <div className="mt-4 pt-4 border-t border-border">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-xs text-muted-foreground">Now viewing:</span>
+                    <span className="text-xs text-muted-foreground">
+                      Now viewing:
+                    </span>
                     <span className="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 font-medium">
-                      {onboardingSteps[onboardingStep].tab.charAt(0).toUpperCase() + onboardingSteps[onboardingStep].tab.slice(1)} Tab
+                      {onboardingSteps[onboardingStep].tab
+                        .charAt(0)
+                        .toUpperCase() +
+                        onboardingSteps[onboardingStep].tab.slice(1)}{" "}
+                      Tab
                     </span>
                   </div>
                 </div>
@@ -713,13 +734,12 @@ const EmployeeProfilePage: React.FC = () => {
             <button
               onClick={handleRestartOnboarding}
               className="text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-              style={{ background: 'var(--purple-gradient)' }}
+              style={{ background: "var(--purple-gradient)" }}
               title="Restart Tour"
             >
               <Play className="w-5 h-5" fill="white" />
             </button>
           )}
-
         </div>
 
         <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
@@ -763,12 +783,13 @@ const EmployeeProfilePage: React.FC = () => {
                 </p>
                 <div className="w-full bg-gray-100 dark:bg-matte-gray-light rounded-full h-2">
                   <div
-                    className={`rounded-full h-2 transition-all duration-500 ${profileCompletion >= 80
-                      ? "bg-green-600"
-                      : profileCompletion >= 50
-                        ? "bg-yellow-600"
-                        : "bg-red-600"
-                      }`}
+                    className={`rounded-full h-2 transition-all duration-500 ${
+                      profileCompletion >= 80
+                        ? "bg-green-600"
+                        : profileCompletion >= 50
+                          ? "bg-yellow-600"
+                          : "bg-red-600"
+                    }`}
                     style={{ width: `${profileCompletion}%` }}
                   />
                 </div>

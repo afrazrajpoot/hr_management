@@ -37,6 +37,11 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
+    name: "Profile",
+    href: "/employee-dashboard/profile",
+    icon: User,
+  },
+  {
     name: "Assessment",
     href: "/employee-dashboard/assessment",
     icon: ClipboardList,
@@ -60,11 +65,6 @@ const navigation = [
     name: "Development",
     href: "/employee-dashboard/development",
     icon: BookOpen,
-  },
-  {
-    name: "Profile",
-    href: "/employee-dashboard/profile",
-    icon: User,
   },
   {
     name: "Security",
