@@ -26,7 +26,29 @@ import {
   Zap,
   LineChart,
   Award,
+  Play,
+  Video,
+  PlayCircle,
+  Info,
+  ChevronRight,
+  Share2,
+  Download,
+  Bookmark,
+  Maximize2,
+  X,
+  Search,
+  Filter,
+  ChevronLeft,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ProfessionalVideoPlayer } from "@/components/employee/ProfessionalVideoPlayer";
 import { AppLayout } from "@/components/employee/layout/AppLayout";
 import Link from "next/link";
 import { useGetDashboardDataQuery } from "@/redux/employe-api";
@@ -112,6 +134,29 @@ const mapJsonToDashboardData = (
   return result;
 };
 
+const mediaItems = [
+  {
+    id: "1",
+    title: "Leadership & Team Growth",
+    description: "Our comprehensive corporate training series on leadership development and team building strategies.",
+    thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53815d1e?w=800&q=80", // Using a high-quality placeholder for now as I can't serve local generated images directly from here
+    duration: "15:45",
+    category: "Leadership",
+    status: "Completed",
+    src: "/api/videos/video1.mp4",
+  },
+  {
+    id: "2",
+    title: "Workplace Compliance: Policy Essentials",
+    description: "Essential training on workplace security, policy compliance, and professional standards.",
+    thumbnail: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80",
+    duration: "22:15",
+    category: "Compliance",
+    status: "In Progress",
+    src: "/api/videos/video2.mp4",
+  }
+];
+
 export default function Dashboard() {
   const { data: assessmentData, isLoading } = useGetDashboardDataQuery<any>();
 
@@ -128,6 +173,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const assessmentsPerPage = 5;
   const { data: session } = useSession();
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
 
   const { data: apiData, isLoading: isAnalyticsLoading } = useGetEmployeeDashboardAnalyticsQuery(
     session?.user?.id || "",
@@ -555,6 +601,140 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Training Videos Section - Premium Streaming UI */}
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-matte-gray-medium rounded-2xl shadow-lg border border-gray-200 dark:border-matte-gray-subtle overflow-hidden">
+              <div className="px-8 py-6 border-b border-gray-100 dark:border-matte-gray-subtle flex items-center justify-between bg-gray-50/50 dark:bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <Video className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                      Training Library
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Expert-led courses for professional growth
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-purple-600 hover:bg-purple-700 text-white border-0 px-3 py-1">
+                  {mediaItems.length} Available
+                </Badge>
+              </div>
+
+              <div className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                  {mediaItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="group relative cursor-pointer pt-2 px-1 pb-1"
+                      onClick={() => setSelectedVideo(item)}
+                    >
+                      <div className="relative bg-white dark:bg-matte-gray-dark border border-gray-200 dark:border-matte-gray-subtle rounded-2xl overflow-hidden transition-all duration-500 ease-out group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] dark:group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] backface-hidden">
+                        {/* Video Recap (Autoplay Preview) */}
+                        <div className="relative aspect-video overflow-hidden bg-black flex items-center justify-center">
+                          <video
+                            src={item.src}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+                          />
+
+
+                          {/* Hover Overlay with Play Icon */}
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+                            <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/40 transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                              <Play className="w-8 h-8 text-white fill-current" />
+                            </div>
+                          </div>
+
+                          {/* Badges Overlay */}
+                          <div className="absolute top-4 left-4 z-30">
+                            <Badge className="bg-black/60 backdrop-blur-md border border-white/10 text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
+                              {item.category}
+                            </Badge>
+                          </div>
+
+                          <div className="absolute bottom-4 right-4 z-30">
+                            <div className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded border border-white/5 uppercase tracking-wider">
+                              {item.duration}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Info Area */}
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                              {item.title}
+                            </h4>
+                          </div>
+
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-6">
+                            {item.description}
+                          </p>
+
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-matte-gray-subtle">
+                            <div className="flex items-center gap-2">
+                              {item.status === "In Progress" ? (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="flex h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                                  <span className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-widest">In Progress</span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{item.status}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center text-purple-600 dark:text-purple-400 font-bold text-xs group-hover:underline">
+                              Watch Course <ArrowRight className="w-3.5 h-3.5 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <Dialog open={!!selectedVideo} onOpenChange={(open) => !open && setSelectedVideo(null)}>
+            <DialogContent className="sm:max-w-5xl p-0 overflow-hidden bg-black border-0">
+              {selectedVideo && (
+                <div className="flex flex-col h-full max-h-[90vh]">
+                  <div className="relative w-full">
+                    <ProfessionalVideoPlayer
+                      src={selectedVideo.src}
+                    />
+                  </div>
+                  <div className="p-8 bg-white dark:bg-matte-gray-dark border-t border-gray-100 dark:border-matte-gray-subtle">
+                    <DialogHeader className="border-0 mb-6 pb-0 text-left">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-0">
+                          {selectedVideo.category}
+                        </Badge>
+                        <span className="text-muted-foreground text-sm">{selectedVideo.duration}</span>
+                      </div>
+                      <DialogTitle className="text-3xl font-bold mb-2">
+                        {selectedVideo.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-base text-muted-foreground">
+                        {selectedVideo.description}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center gap-4 py-4 border-t border-gray-100 dark:border-matte-gray-subtle mt-4">
+                      <Button className="ml-auto btn-purple px-8">
+                        Done
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
           {/* Quick Actions */}
           <div className="card-purple border-dashed border-2 border-purple-300 dark:border-purple-700 overflow-hidden hover-lift">
             <div className="p-6">
@@ -636,7 +816,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </AppLayout>
+      </AppLayout >
     </>
   );
 }
