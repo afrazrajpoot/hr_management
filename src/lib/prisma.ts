@@ -55,29 +55,36 @@ const createPrismaClient = () => {
 };
 
 // Global instance with connection pooling
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+const basePrisma = globalForPrisma.prisma ?? createPrismaClient();
+
+// Add query logging extension (replaces deprecated $use middleware)
+export const prisma = basePrisma.$extends({
+  name: 'queryLogger',
+  query: {
+    $allModels: {
+      async $allOperations({ operation, model, args, query }) {
+        const start = Date.now();
+        const result = await query(args);
+        const duration = Date.now() - start;
+        
+        // Log slow queries (adjust threshold as needed)
+        if (duration > 5000) {
+          console.warn(`[PRISMA] Slow query (${duration}ms):`, {
+            model,
+            operation,
+            duration: `${duration}ms`,
+          });
+        }
+        
+        return result;
+      },
+    },
+  },
+});
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = basePrisma;
 }
-
-// Optional: Add middleware for logging and monitoring
-prisma.$use(async (params, next) => {
-  const start = Date.now();
-  const result = await next(params);
-  const duration = Date.now() - start;
-  
-  // Log slow queries (adjust threshold as needed)
-  if (duration > 5000) {
-    console.warn(`[PRISMA] Slow query (${duration}ms):`, {
-      model: params.model,
-      action: params.action,
-      duration: `${duration}ms`,
-    });
-  }
-  
-  return result;
-});
 
 /**
  * Check database connection health

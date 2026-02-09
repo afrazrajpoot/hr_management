@@ -504,7 +504,7 @@ const EmployeeProfilePage: React.FC = () => {
                 stiffness: 400,
                 damping: 30,
               }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-xl"
             >
               <div className="relative card-purple rounded-2xl shadow-prominent p-6 overflow-hidden border border-purple-200 dark:border-purple-800 mx-4">
                 {/* Animated background */}
@@ -513,15 +513,15 @@ const EmployeeProfilePage: React.FC = () => {
 
                 {/* Close button */}
                 <button
-                  className="absolute top-3 right-3 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors p-1 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                  className="absolute cursor-pointer bg-purple-900 top-3 right-3 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors p-1 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/30"
                   onClick={handleCloseOnboarding}
                   aria-label="Close onboarding"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </button>
 
                 {/* Content */}
-                <div className="relative z-10">
+                <div className="relative mt-[2vw] z-10">
                   <div className="flex items-start gap-3 mb-4">
                     <div
                       className="p-3 rounded-xl flex-shrink-0"
